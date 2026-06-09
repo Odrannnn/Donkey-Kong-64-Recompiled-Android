@@ -7,6 +7,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <cinttypes>
+#include <chrono>
 
 #include "nfd.h"
 
@@ -52,6 +53,96 @@
 #include "../../patches/input.h"
 #include "../../patches/sound.h"
 #include "../../patches/misc_funcs.h"
+
+namespace {
+using GfxPaceClock = std::chrono::high_resolution_clock;
+static GfxPaceClock::time_point next_gfx_completion_time = GfxPaceClock::now();
+
+void pace_gfx_completion() {
+    const double completion_rate = 29.97;
+    if (completion_rate <= 0.0) {
+        return;
+    }
+
+    const GfxPaceClock::duration frame_duration = std::chrono::duration_cast<GfxPaceClock::duration>(
+        std::chrono::duration<double>(1.0 / completion_rate)
+    );
+    if (frame_duration <= GfxPaceClock::duration::zero()) {
+        return;
+    }
+
+    const GfxPaceClock::time_point now = GfxPaceClock::now();
+    if (now > next_gfx_completion_time + frame_duration * 4) {
+        next_gfx_completion_time = now;
+    }
+
+    const GfxPaceClock::time_point target_time = next_gfx_completion_time;
+    if (now < target_time) {
+        ultramodern::sleep_until(target_time);
+    }
+
+    const GfxPaceClock::time_point after_sleep = GfxPaceClock::now();
+    next_gfx_completion_time = target_time + frame_duration;
+    if (next_gfx_completion_time < after_sleep) {
+        next_gfx_completion_time = after_sleep + frame_duration;
+    }
+}
+
+class PacingRendererContext final : public ultramodern::renderer::RendererContext {
+public:
+    explicit PacingRendererContext(std::unique_ptr<ultramodern::renderer::RendererContext> inner_context)
+        : inner(std::move(inner_context)) {
+        setup_result = inner->get_setup_result();
+        chosen_api = inner->get_chosen_api();
+    }
+
+    bool valid() override {
+        return inner->valid();
+    }
+
+    bool update_config(const ultramodern::renderer::GraphicsConfig& old_config, const ultramodern::renderer::GraphicsConfig& new_config) override {
+        return inner->update_config(old_config, new_config);
+    }
+
+    void enable_instant_present() override {
+        inner->enable_instant_present();
+    }
+
+    void send_dl(const OSTask* task) override {
+        inner->send_dl(task);
+        pace_gfx_completion();
+    }
+
+    void send_dummy_workload(uint32_t fb_address) override {
+        inner->send_dummy_workload(fb_address);
+    }
+
+    void update_screen() override {
+        inner->update_screen();
+    }
+
+    void shutdown() override {
+        inner->shutdown();
+    }
+
+    uint32_t get_display_framerate() const override {
+        return inner->get_display_framerate();
+    }
+
+    float get_resolution_scale() const override {
+        return inner->get_resolution_scale();
+    }
+
+private:
+    std::unique_ptr<ultramodern::renderer::RendererContext> inner;
+};
+
+std::unique_ptr<ultramodern::renderer::RendererContext> create_pacing_render_context(uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
+    auto presentation_mode = ultramodern::renderer::PresentationMode::PresentEarly;
+    auto render_context = recompui::renderer::create_render_context(rdram, window_handle, presentation_mode, developer_mode);
+    return std::make_unique<PacingRendererContext>(std::move(render_context));
+}
+}
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -752,10 +843,7 @@ int main(int argc, char** argv) {
     };
 
     ultramodern::renderer::callbacks_t renderer_callbacks{
-        .create_render_context = [](uint8_t* rdram, ultramodern::renderer::WindowHandle window_handle, bool developer_mode) {
-            auto presentation_mode = ultramodern::renderer::PresentationMode::PresentEarly;
-            return recompui::renderer::create_render_context(rdram, window_handle, presentation_mode, developer_mode);
-        },
+        .create_render_context = create_pacing_render_context,
     };
 
     ultramodern::gfx_callbacks_t gfx_callbacks{
