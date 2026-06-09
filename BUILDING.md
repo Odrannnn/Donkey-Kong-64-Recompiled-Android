@@ -4,7 +4,7 @@ This guide will help you build the project on your local machine. The process wi
 
 These steps cover: decompressing the ROM, running the recompiler and finally building the project.
 
-## 1. Clone the BanjoRecomp Repository
+## 1. Clone the DonkeyKong64Recompiled Repository
 This project makes use of submodules so you will need to clone the repository with the `--recurse-submodules` flag.
 
 ```bash
@@ -36,21 +36,21 @@ choco install make
 ```
 
 ## 3. Decompressing the target ROM
-You will need to decompress the NTSC-U 1.0 N64 Banjo-Kazooie ROM (sha1: d6133ace5afaa0882cf214cf88daba39e266c078) before running the recompiler.
+You will need to decompress the NTSC-U 1.0 N64 Donkey Kong 64 ROM (sha1: cf806ff2603640a748fca5026ded28802f1f4a50) before running the recompiler.
 
-The most straightforward way to do this is to set up the [Banjo-Kazooie decompilation](https://gitlab.com/banjo.decomp/banjo-kazooie), which will decompress the ROM when building. Alternatively, you can run the [bk_rom_compressor tool](https://github.com/MittenzHugg/bk_rom_compressor) directly, which is what the decompilation uses to decompress the ROM.
+The most straightforward way to do this is to set up the [Donkey Kong 64 decompilation](https://gitlab.com/dk64_decomp/dk64), which will decompress the ROM when building. Alternatively, you can run the [Donkey Kong 64 ROM Decompressor Python Script](https://gitlab.com/dk64_decomp/dk64/-/blob/main/tools/generate_decompressed_rom.py) directly, which is what the decompilation uses to decompress the ROM.
 
-Regardless of which method you use, copy the decompressed ROM to the root of the BanjoRecomp repository with this filename:
-- `banjo.us.v10.decompressed.z64`
+Regardless of which method you use, copy the decompressed ROM to the root of the DonkeyKong64Recompiled repository with this filename:
+- `donkeykong64.decompressed.us.z64`
 
 ## 4. Generating the C code
 
-Now that you have the required files, you must build [N64Recomp](https://github.com/N64Recomp/N64Recomp) and run it to generate the C code to be compiled. The building instructions can be found [here](https://github.com/N64Recomp/N64Recomp?tab=readme-ov-file#building). That will build the executables: `N64Recomp` and `RSPRecomp` which you should copy to the root of the BanjoRecomp repository.
+Now that you have the required files, you must build [N64Recomp](https://github.com/N64Recomp/N64Recomp) and run it to generate the C code to be compiled. The building instructions can be found [here](https://github.com/N64Recomp/N64Recomp?tab=readme-ov-file#building). That will build the executables: `N64Recomp` and `RSPRecomp` which you should copy to the root of the DonkeyKong64Recompiled repository.
 
 After that, go back to the repository root, and run the following commands:
 ```bash
-./N64Recomp banjo.us.rev0.toml
-./RSPRecomp n_aspMain.us.rev0.toml
+./N64Recomp us.toml
+./RSPRecomp n_aspMain.toml
 ```
 
 ## 5. Building the Project
@@ -63,12 +63,12 @@ If you prefer the command line or you're on a Unix platform you can build the pr
 
 ```bash
 cmake -S . -B build-cmake -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -G Ninja -DCMAKE_BUILD_TYPE=Release # or Debug if you want to debug
-cmake --build build-cmake --target BanjoRecompiled -j$(nproc) --config Release # or Debug
+cmake --build build-cmake --target DonkeyKong64Recompiled -j$(nproc) --config Release # or Debug
 ```
 
 ## 6. Success
 
-Voilà! You should now have a `BanjoRecompiled` executable in the build directory! If you used Visual Studio this will be `out/build/x64-[Configuration]` and if you used the provided CMake commands then this will be `build-cmake`. You will need to run the executable out of the root folder of this project or copy the assets folder to the build folder to run it.
+Voilà! You should now have a `DonkeyKong64Recompiled` executable in the build directory! If you used Visual Studio this will be `out/build/x64-[Configuration]` and if you used the provided CMake commands then this will be `build-cmake`. You will need to run the executable out of the root folder of this project or copy the assets folder to the build folder to run it.
 
 > [!IMPORTANT]
 > In the game itself, you should be using a standard ROM, not the decompressed one.
