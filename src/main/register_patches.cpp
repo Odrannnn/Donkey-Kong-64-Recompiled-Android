@@ -9,7 +9,7 @@ extern "C" {
     extern const size_t bk_patches_bin_size;
 }
 
-void banjo::register_bk_patches() {
+void dk64::register_bk_patches() {
     recomp::overlays::register_patches(bk_patches_bin, bk_patches_bin_size, section_table, ARRLEN(section_table));
     recomp::overlays::register_base_exports(export_table);
     recomp::overlays::register_base_events(event_names);

@@ -1,7 +1,7 @@
 #ifndef __OVL_PATCHES_HPP__
 #define __OVL_PATCHES_HPP__
 
-namespace banjo {
+namespace dk64 {
     void register_bk_overlays();
     void register_bk_patches();
 }

@@ -170,7 +170,7 @@ const float jiggy_shine_length = 0.8f;
 
 const float animation_skip_time = 10.0f;
 
-void banjo::launcher_animation_setup(recompui::LauncherMenu *menu) {
+void dk64::launcher_animation_setup(recompui::LauncherMenu *menu) {
     auto context = recompui::get_current_context();
     recompui::Element *background_container = menu->get_background_container();
     background_container->set_background_color({ 0x1F, 0x63, 0xC2, 0xFF });
@@ -367,7 +367,7 @@ void banjo::launcher_animation_setup(recompui::LauncherMenu *menu) {
     SDL_AddEventWatch(&launcher_event_watch, nullptr);
 }
 
-void banjo::launcher_animation_update(recompui::LauncherMenu *menu) {
+void dk64::launcher_animation_update(recompui::LauncherMenu *menu) {
     std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
     float delta_time = launcher_context.started ? std::chrono::duration_cast<std::chrono::milliseconds>(now - launcher_context.last_update_time).count() / 1000.0f : 0.0f;
     if (launcher_context.skip_animation_next_update) {

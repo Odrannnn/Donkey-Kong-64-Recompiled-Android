@@ -7,9 +7,9 @@
 
 #include "json/json.hpp"
 
-namespace banjo {
-    inline const std::u8string program_id = u8"BanjoRecompiled";
-    inline const std::string program_name = "Banjo: Recompiled";
+namespace dk64 {
+    inline const std::u8string program_id = u8"DK64Recompiled";
+    inline const std::string program_name = "DK64: Recompiled";
 
     namespace configkeys {
         namespace general {
@@ -55,9 +55,9 @@ namespace banjo {
         OptionCount
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(banjo::AnalogCamMode, {
-        {banjo::AnalogCamMode::On, "On"},
-        {banjo::AnalogCamMode::Off, "Off"}
+    NLOHMANN_JSON_SERIALIZE_ENUM(dk64::AnalogCamMode, {
+        {dk64::AnalogCamMode::On, "On"},
+        {dk64::AnalogCamMode::Off, "Off"}
     });
 
     AnalogCamMode get_analog_cam_mode();
@@ -70,9 +70,9 @@ namespace banjo {
         OptionCount
     };
 
-    NLOHMANN_JSON_SERIALIZE_ENUM(banjo::NoteSavingMode, {
-        {banjo::NoteSavingMode::On, "On"},
-        {banjo::NoteSavingMode::Off, "Off"}
+    NLOHMANN_JSON_SERIALIZE_ENUM(dk64::NoteSavingMode, {
+        {dk64::NoteSavingMode::On, "On"},
+        {dk64::NoteSavingMode::Off, "Off"}
     });
 
     NoteSavingMode get_note_saving_mode();

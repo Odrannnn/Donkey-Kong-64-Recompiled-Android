@@ -257,7 +257,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     flags |= SDL_WINDOW_VULKAN;
 #endif
 
-    window = SDL_CreateWindow("Banjo: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900,  flags);
+    window = SDL_CreateWindow("DK64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 900,  flags);
 
     if (window == nullptr) {
         exit_error("Failed to create window: %s\n", SDL_GetError());
@@ -268,7 +268,6 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     SDL_GetWindowWMInfo(window, &wmInfo);
 
 #if defined(_WIN32)
-    // There's a 50/50 chance to choose the icon where the smallest variant is either Banjo or Kazooie alone.
     bool choose_kazooie_icon = (rand() % 2 == 0);
     HICON new_icon = LoadIcon(GetModuleHandle(NULL), choose_kazooie_icon ? MAKEINTRESOURCE(APP_ICON_K) : MAKEINTRESOURCE(APP_ICON_B));
     SendMessage(wmInfo.info.win.window, WM_SETICON, ICON_SMALL2, (LPARAM)(new_icon));
@@ -473,16 +472,16 @@ std::vector<recomp::GameEntry> supported_games = {
         .save_type = recomp::SaveType::Eep16k,
         .thumbnail_bytes = std::span<const char>(icon_bytes),
         .is_enabled = false,
-        .decompression_routine = banjo::decompress_dk,
+        .decompression_routine = dk64::decompress_dk,
         .has_compressed_code = true,
         .entrypoint_address = get_entrypoint_address(),
         .entrypoint = recomp_entrypoint,
-        .on_init_callback = banjo::dk_on_init,
+        .on_init_callback = dk64::dk_on_init,
     },
 };
 
 // TODO: move somewhere else
-namespace banjo {
+namespace dk64 {
     std::string get_game_thread_name(const OSThread* t) {
         std::string name = "[Game] ";
 
@@ -689,19 +688,19 @@ void on_launcher_init(recompui::LauncherMenu *menu) {
     recompui::Element *menu_container = menu->get_menu_container();
     menu_container->set_width(1440);
     menu_container->unset_left();
-    menu_container->set_top(banjo::launcher_options_top_offset);
-    menu_container->set_bottom(-banjo::launcher_options_top_offset);
+    menu_container->set_top(dk64::launcher_options_top_offset);
+    menu_container->set_bottom(-dk64::launcher_options_top_offset);
     menu_container->set_right(50, recompui::Unit::Percent);
     menu_container->set_translate_2D(50.0f, 0.0f, recompui::Unit::Percent);
 
     game_options_menu->unset_left();
     game_options_menu->set_bottom(50.0f, recompui::Unit::Percent);
     game_options_menu->set_translate_2D(0.0f, 50.0f, recompui::Unit::Percent);
-    game_options_menu->set_right(banjo::launcher_options_right_position_start);
+    game_options_menu->set_right(dk64::launcher_options_right_position_start);
 
     menu->remove_default_title();
 
-    banjo::launcher_animation_setup(menu);
+    dk64::launcher_animation_setup(menu);
 }
 
 #define REGISTER_FUNC(name) recomp::overlays::register_base_export(#name, name)
@@ -780,8 +779,8 @@ int main(int argc, char** argv) {
     NFD_Init();
 
     // Initialize program settings.
-    recompui::programconfig::set_program_name(banjo::program_name);
-    recompui::programconfig::set_program_id(banjo::program_id);
+    recompui::programconfig::set_program_name(dk64::program_name);
+    recompui::programconfig::set_program_id(dk64::program_id);
     
     // Initialize SDL audio and set the output frequency.
     SDL_InitSubSystem(SDL_INIT_AUDIO);
@@ -825,18 +824,18 @@ int main(int argc, char** argv) {
     recomputil::register_data_api_exports();
     recomptheme::set_custom_theme();
 
-    banjo::register_bk_overlays();
-    banjo::register_bk_patches();
+    dk64::register_bk_overlays();
+    dk64::register_bk_patches();
 
     // Register extensions for two types: Props and ActorMarkers.
     recomputil::init_extended_object_data(2);
 
     recompinput::players::set_single_player_mode(true);
 
-    banjo::init_config();
+    dk64::init_config();
 
     recompui::register_launcher_init_callback(on_launcher_init);
-    recompui::register_launcher_update_callback(banjo::launcher_animation_update);
+    recompui::register_launcher_update_callback(dk64::launcher_animation_update);
 
     recomp::rsp::callbacks_t rsp_callbacks{
         .get_rsp_microcode = get_rsp_microcode,
@@ -875,7 +874,7 @@ int main(int argc, char** argv) {
     };
 
     ultramodern::threads::callbacks_t threads_callbacks{
-        .get_game_thread_name = banjo::get_game_thread_name,
+        .get_game_thread_name = dk64::get_game_thread_name,
     };
 
     // Register the texture pack content type with rt64.json as its content file.

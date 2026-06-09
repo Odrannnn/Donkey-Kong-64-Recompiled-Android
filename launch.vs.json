@@ -5,8 +5,8 @@
     {
       "type": "default",
       "project": "CMakeLists.txt",
-      "projectTarget": "BanjoRecompiled.exe",
-      "name": "BanjoRecompiled.exe",
+      "projectTarget": "DK64Recompiled.exe",
+      "name": "DK64Recompiled.exe",
       "currentDir": "${workspaceRoot}",
       "args": ["--show-console"]
     }

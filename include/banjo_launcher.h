@@ -3,7 +3,7 @@
 
 #include "recompui/recompui.h"
 
-namespace banjo {
+namespace dk64 {
     void launcher_animation_setup(recompui::LauncherMenu *menu);
     void launcher_animation_update(recompui::LauncherMenu *menu);
 

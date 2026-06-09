@@ -1,5 +1,3 @@
-# Config file for recompiling patches for the Banjo-Kazooie NTSC 1.0 Recompilation.
-
 [input]
 # Paths are relative to the location of this config file.
 elf_path = "patches/patches.elf"

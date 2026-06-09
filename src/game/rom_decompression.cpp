@@ -48,7 +48,7 @@ size_t decompress_bkzip(mz_stream* stream, std::span<const uint8_t> compressed_r
 // For other recomps using this repo as an example, you can omit the decompression routine and
 // set the corresponding fields in the GameEntry if the game doesn't have compressed code,
 // even if it does have compressed data.
-std::vector<uint8_t> banjo::decompress_dk(std::span<const uint8_t> compressed_rom) {
+std::vector<uint8_t> dk64::decompress_dk(std::span<const uint8_t> compressed_rom) {
     // Sanity check the rom size and header. These should already be correct from the runtime's check,
     // but it should prevent this file from accidentally being copied to another recomp.
     if (compressed_rom.size() != 0x2000000) {
@@ -66,7 +66,7 @@ std::vector<uint8_t> banjo::decompress_dk(std::span<const uint8_t> compressed_ro
     return ret;
 }
 
-void banjo::dk_on_init(uint8_t* rdram, recomp_context* ctx) {
+void dk64::dk_on_init(uint8_t* rdram, recomp_context* ctx) {
     MEM_W(0, 0xFFFFFFFF802FE1C0) = 0xAD170014; //write to 0x802FE1C0
     MEM_W(0, 0xFFFFFFFF802FE1C4) = 0x3C09A600; //write to 0x802FE1C4
 

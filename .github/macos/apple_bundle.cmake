@@ -2,10 +2,10 @@
 set(ENTITLEMENTS_FILE ${CMAKE_SOURCE_DIR}/.github/macos/entitlements.plist)
 
 # Set bundle properties
-set_target_properties(BanjoRecompiled PROPERTIES
+set_target_properties(DK64Recompiled PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_BUNDLE_NAME "BanjoRecompiled"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.Banjorecompiled"
+        MACOSX_BUNDLE_BUNDLE_NAME "DK64Recompiled"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.dk64recompiled"
         MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
         MACOSX_BUNDLE_ICON_FILE "AppIcon.icns"
@@ -46,16 +46,16 @@ set_source_files_properties(${ICNS_FILE} PROPERTIES
 )
 
 # Add the icns file to the executable target
-target_sources(BanjoRecompiled PRIVATE ${ICNS_FILE})
+target_sources(DK64Recompiled PRIVATE ${ICNS_FILE})
 
-# Ensure BanjoRecompiled depends on create_icns
-add_dependencies(BanjoRecompiled create_icns)
+# Ensure DK64Recompiled depends on create_icns
+add_dependencies(DK64Recompiled create_icns)
 
 # Configure Info.plist
 configure_file(${CMAKE_SOURCE_DIR}/.github/macos/Info.plist.in ${CMAKE_BINARY_DIR}/Info.plist @ONLY)
 
 # Install the app bundle
-install(TARGETS BanjoRecompiled BUNDLE DESTINATION .)
+install(TARGETS DK64Recompiled BUNDLE DESTINATION .)
 
 # Ensure the entitlements file exists
 if(NOT EXISTS ${ENTITLEMENTS_FILE})
@@ -63,24 +63,24 @@ if(NOT EXISTS ${ENTITLEMENTS_FILE})
 endif()
 
 # Post-build steps for macOS bundle
-add_custom_command(TARGET BanjoRecompiled POST_BUILD
+add_custom_command(TARGET DK64Recompiled POST_BUILD
     # Copy and fix frameworks first
     COMMAND ${CMAKE_COMMAND} -D CMAKE_BUILD_TYPE=$<CONFIG> -D CMAKE_GENERATOR=${CMAKE_GENERATOR} -P ${CMAKE_SOURCE_DIR}/.github/macos/fixup_bundle.cmake
 
     # Copy all resources
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets ${CMAKE_BINARY_DIR}/temp_assets
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/temp_assets/scss
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/temp_assets $<TARGET_BUNDLE_DIR:BanjoRecompiled>/Contents/Resources/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/temp_assets $<TARGET_BUNDLE_DIR:DK64Recompiled>/Contents/Resources/assets
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/temp_assets
 
     # Copy controller database
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/recompcontrollerdb.txt $<TARGET_BUNDLE_DIR:BanjoRecompiled>/Contents/Resources/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/recompcontrollerdb.txt $<TARGET_BUNDLE_DIR:DK64Recompiled>/Contents/Resources/
 
     # Set RPATH
-    COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks/" $<TARGET_BUNDLE_DIR:BanjoRecompiled>/Contents/MacOS/BanjoRecompiled
+    COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks/" $<TARGET_BUNDLE_DIR:DK64Recompiled>/Contents/MacOS/DK64Recompiled
 
     # Sign the bundle
-    COMMAND codesign --verbose=4 --options=runtime --no-strict --sign - --entitlements ${ENTITLEMENTS_FILE} --deep --force $<TARGET_BUNDLE_DIR:BanjoRecompiled>
+    COMMAND codesign --verbose=4 --options=runtime --no-strict --sign - --entitlements ${ENTITLEMENTS_FILE} --deep --force $<TARGET_BUNDLE_DIR:DK64Recompiled>
 
     COMMENT "Performing post-build steps for macOS bundle"
     VERBATIM
