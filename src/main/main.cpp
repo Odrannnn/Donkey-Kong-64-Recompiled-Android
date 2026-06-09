@@ -373,20 +373,20 @@ gpr get_entrypoint_address();
 // array of supported GameEntry objects
 std::vector<recomp::GameEntry> supported_games = {
     {
-        .rom_hash = 0x1B67585D56E07F8CULL,
-        .internal_name = "Banjo-Kazooie",
-        .display_name = "Banjo-Kazooie",
-        .game_id = u8"bk.n64.us.1.0",
-        .mod_game_id = "bk",
+        .rom_hash = 0x4d876060f09b3fc5ULL,
+        .internal_name = "DONKEY KONG 64",
+        .display_name = "Donkey Kong 64",
+        .game_id = u8"DK64",
+        .mod_game_id = "dk",
         // Eep16k instead of Eep4k to have room for extra save file data.
         .save_type = recomp::SaveType::Eep16k,
         .thumbnail_bytes = std::span<const char>(icon_bytes),
         .is_enabled = false,
-        .decompression_routine = banjo::decompress_bk,
+        .decompression_routine = banjo::decompress_dk,
         .has_compressed_code = true,
         .entrypoint_address = get_entrypoint_address(),
         .entrypoint = recomp_entrypoint,
-        .on_init_callback = banjo::bk_on_init,
+        .on_init_callback = banjo::dk_on_init,
     },
 };
 

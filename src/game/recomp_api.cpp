@@ -275,3 +275,105 @@ extern "C" void recomp_xxh3(uint8_t* rdram, recomp_context* ctx) {
     ctx->r2 = (int32_t)(ret >> 32);
     ctx->r3 = (int32_t)(ret >> 0);
 }
+
+//map compressed rom address -> decompressed rom address, then load the overlay
+extern "C" void load_dk64_overlay(uint32_t compressed_rom, int32_t ram_addr, uint32_t size) {
+    uint32_t decompressed_rom = 0;
+    switch (compressed_rom) {
+        case 0x113F0: //global_asm
+            decompressed_rom = 0x2000000;
+            ram_addr = 0x805FB300;
+            size = 0x165D50;
+            break;
+        case 0xCBE70: //menu
+            decompressed_rom = 0x2165D50;
+            ram_addr = 0x80024000;
+            size = 0xFF10;
+            break;
+        case 0xD4B00: //multiplayer
+            decompressed_rom = 0x2175C60;
+            ram_addr = 0x80024000;
+            size = 0x3100;
+            break;
+        case 0xD6B00: //minecart
+            decompressed_rom = 0x2178D60;
+            ram_addr = 0x80024000;
+            size = 0x4E10;
+            break;
+        case 0xD9A40: //bonus
+            decompressed_rom = 0x217DB70;
+            ram_addr = 0x80024000;
+            size = 0x9EF0;
+            break;
+        case 0xDF600: //race
+            decompressed_rom = 0x2187A60;
+            ram_addr = 0x80024000;
+            size = 0xC160;
+            break;
+        case 0xE6780: //critter
+            decompressed_rom = 0x2193BC0;
+            ram_addr = 0x80024000;
+            size = 0x61B0;
+            break;
+        case 0xEA0B0: //boss
+            decompressed_rom = 0x2199D70;
+            ram_addr = 0x80024000;
+            size = 0x12DC0;
+            break;
+        case 0xF41A0: //arcade
+            decompressed_rom = 0x21ACB30;
+            ram_addr = 0x80024000;
+            size = 0x26C00;
+            break;
+        case 0xFD2F0: //jetpac
+            decompressed_rom = 0x21D3730;
+            ram_addr = 0x80024000;
+            size = 0xAC30;
+            break;
+    }
+    if (decompressed_rom != 0) {
+        load_overlays(decompressed_rom, ram_addr, size);
+    }
+}
+
+extern "C" void boot_osPiRawStartDma(uint8_t* rdram, recomp_context* ctx) {
+    uint32_t direction = ctx->r4;
+    uint32_t device_address = ctx->r5;
+    gpr rdram_address = ctx->r6;
+    uint32_t size = ctx->r7;
+
+    assert(direction == 0); // Only reads
+
+    printf("boot_osPiRawStartDma: Rom %08X, Ram %08X, Size: %08X\n", device_address, rdram_address, size);
+
+    // Complete the DMA synchronously (the game immediately waits until it's done anyways)
+    recomp::do_rom_read(rdram, rdram_address, device_address + recomp::rom_base, size);
+}
+
+extern "C" void __f_to_ull_recomp(uint8_t * rdram, recomp_context * ctx) {
+    uint64_t ret = (uint64_t)ctx->f12.fl;
+    ctx->r2 = (int32_t)(ret >> 32);
+    ctx->r3 = (int32_t)(ret >> 0);
+}
+
+extern "C" void __osSpSetStatus_recomp(RDRAM_ARG recomp_context * ctx) {
+    //assert(false && "SRAM ReadIo unimplemented");
+}
+
+extern "C" void osViGetCurrentMode_recomp(uint8_t* rdram, recomp_context* ctx) {
+    constexpr gpr os_vi_curr_ptr_addr = 0xFFFFFFFF80010190ull;
+    const gpr vi_curr_ctx = (gpr)(int32_t)MEM_W(0, os_vi_curr_ptr_addr);
+
+    if (vi_curr_ctx == 0) {
+        ctx->r2 = 0;
+        return;
+    }
+
+    const gpr modep = (gpr)(int32_t)MEM_W(0x8, vi_curr_ctx);
+    if (modep == 0) {
+        ctx->r2 = 0;
+        return;
+    }
+
+    ctx->r2 = MEM_BU(0x3, modep);
+}

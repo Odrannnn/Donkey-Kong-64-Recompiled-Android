@@ -1,6 +1,3 @@
-#pragma GCC diagnostic ignored "-Wpointer-sign"
-#pragma GCC diagnostic ignored "-Wunused-value"
-
 #include "patches.h"
 #include "string.h"
 #include "stdarg.h"
@@ -51,62 +48,79 @@ static char zeroes[] = "00000000000000000000000000000000";
 
 void _Putfld(_Pft *px, va_list *pap, char code, char *ac);
 
-int _Printf(void* pfn(void*,const char*,size_t), void *arg, const char *fmt, va_list ap) {
+int _Printf(void* pfn(void*, const char*, size_t), void *arg, const char *fmt, va_list ap) {
     _Pft x;
-    
     x.nchar = 0;
 
     while (1) {
         const char *s;
         char c;
-        const char *t;
         static const char fchar[] = {' ', '+', '-', '#', '0', '\0'};
         static const unsigned int fbit[] = {FLAGS_SPACE, FLAGS_PLUS, FLAGS_MINUS, FLAGS_HASH, FLAGS_ZERO, 0};
         char ac[32];
         s = fmt;
 
+        // Advance s until we hit '%' or end-of-string.
         for (c = *s; c != 0 && c != '%';) {
             c = *++s;
         }
-        
+
         PUT(fmt, s - fmt);
-        
+
         if (c == 0) {
             return x.nchar;
         }
-        
+
         fmt = ++s;
-        
-        for (x.flags = 0; (t = strchr(fchar, *s)) != NULL; s++) {
-            x.flags |= fbit[t - fchar];
+
+        // Instead of using strchr, do a manual search in fchar.
+        x.flags = 0;
+        while (1) {
+            int found = 0;
+            for (int i = 0; fchar[i] != '\0'; i++) {
+                if (fchar[i] == *s) {
+                    x.flags |= fbit[i];
+                    found = 1;
+                    break;
+                }
+            }
+            if (!found)
+                break;
+            s++;
         }
 
+        // Process width.
         if (*s == '*') {
             x.width = va_arg(ap, int);
-
             if (x.width < 0) {
                 x.width = -x.width;
                 x.flags |= FLAGS_MINUS;
             }
             s++;
-        } else 
+        } else {
             ATOI(x.width, s);
+        }
 
-
+        // Process precision.
         if (*s != '.') {
             x.prec = -1;
         } else if (*++s == '*') {
             x.prec = va_arg(ap, int);
             ++s;
-        } else 
-            for (x.prec = 0; isdigit(*s); s++) { 
-                if (x.prec < 999) 
-                    x.prec = x.prec * 10 + *s - '0'; 
+        } else {
+            for (x.prec = 0; isdigit(*s); s++) {
+                if (x.prec < 999)
+                    x.prec = x.prec * 10 + *s - '0';
             }
+        }
 
+        // Instead of strchr("hlL", *s), manually check the qualifiers.
+        if (*s == 'h' || *s == 'l' || *s == 'L') {
+            x.qual = *s++;
+        } else {
+            x.qual = '\0';
+        }
 
-        x.qual = strchr("hlL", *s) ? *s++ : '\0';
-        
         if (x.qual == 'l' && *s == 'l') {
             x.qual = 'L';
             ++s;
@@ -115,27 +129,23 @@ int _Printf(void* pfn(void*,const char*,size_t), void *arg, const char *fmt, va_
         _Putfld(&x, &ap, *s, ac);
         x.width -= x.n0 + x.nz0 + x.n1 + x.nz1 + x.n2 + x.nz2;
 
-       {
-
+        {
+            // Left padding if needed.
             if (!(x.flags & FLAGS_MINUS)) {
                 int i, j;
-                if (0 < (x.width))
-                {
-                    i, j = x.width;
-                    for (; 0 < j; j -= i)
-                    {
-                        i = MAX_PAD < (unsigned int)j ? (int)MAX_PAD : j;
+                if (x.width > 0) {
+                    i = j = x.width;
+                    for (; j > 0; j -= i) {
+                        i = (MAX_PAD < (unsigned int)j) ? (int)MAX_PAD : j;
                         PUT(spaces, i);
                     }
                 }
             }
 
             PUT(ac, x.n0);
-            PAD(zeroes, x.nz0)
-
+            PAD(zeroes, x.nz0);
             PUT(x.s, x.n1);
             PAD(zeroes, x.nz1);
-
             PUT(x.s + x.n1, x.n2);
             PAD(zeroes, x.nz2);
 
@@ -148,7 +158,10 @@ int _Printf(void* pfn(void*,const char*,size_t), void *arg, const char *fmt, va_
     return 0;
 }
 
+
 void _Putfld(_Pft *px, va_list *pap, char code, char *ac) {
+    int strLen = 0;
+
     px->n0 = px->nz0 = px->n1 = px->nz1 = px->n2 =
         px->nz2 = 0;
 
@@ -248,7 +261,8 @@ void _Putfld(_Pft *px, va_list *pap, char code, char *ac) {
             break;
         case 's':
             px->s = va_arg(*pap, char *);
-            px->n1 = strlen(px->s);
+            for (strLen = 0; px->s[strLen] != 0; strLen++) {}
+            px->n1 = strLen;
             
             if (px->prec >= 0 && px->prec < px->n1) {
                 px->n1 = px->prec;

@@ -3,11 +3,10 @@ TARGET = patches.elf
 CC      ?= clang
 LD      ?= ld.lld
 
-GBI_DEFINE := -DF3DEX_GBI
-CFLAGS   := -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -mno-odd-spreg -mno-check-zero-division \
-			-fomit-frame-pointer -ffast-math -fno-unsafe-math-optimizations -fno-builtin-memset -funsigned-char -fno-builtin-sinf -fno-builtin-cosf \
-			-Wall -Wextra -Wno-incompatible-library-redeclaration -Wno-unused-parameter -Wno-unknown-pragmas -Wno-unused-variable -Wno-missing-braces -Wno-unsupported-floating-point-opt -Wno-cast-function-type-mismatch -Werror=pointer-bool-conversion
-CPPFLAGS := -nostdinc -D_LANGUAGE_C -DMIPS -I ../lib/bk-decomp/include -I ../lib/bk-decomp/include/2.0L -I ../lib/bk-decomp/include/2.0L/PR -I../lib/rt64/include -I../lib/N64ModernRuntime/ultramodern/include $(GBI_DEFINE)
+CFLAGS   := -D_LANGUAGE_C -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -DF3DEX_GBI_2 -mno-odd-spreg -mno-check-zero-division \
+			-fomit-frame-pointer -ffast-math -fno-unsafe-math-optimizations -fno-builtin-memset \
+			-Wall -Wextra -Wno-incompatible-library-redeclaration -Wno-unused-parameter -Wno-unknown-pragmas -Wno-unused-variable -Wno-missing-braces -Wno-unsupported-floating-point-opt
+CPPFLAGS := -DF3DEX_GBI_2x -nostdinc -D_LANGUAGE_C -DMIPS -I dummy_headers -I ../lib/dk64_decomp/include -I ../lib/dk64_decomp/include/2.0L/PR -I ../lib/dk64_decomp/include/2.0L -I ../lib/dk64_decomp/include/libc -I ../lib/dk64_decomp/src -I../lib/rt64/include
 LDFLAGS  := -nostdlib -T patches.ld -T syms.ld -Map patches.map --unresolved-symbols=ignore-all --emit-relocs
 
 C_SRCS := $(wildcard *.c)

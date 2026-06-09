@@ -13,3 +13,6 @@
 [submodule "lib/RecompFrontend"]
 	path = lib/RecompFrontend
 	url = https://github.com/N64Recomp/RecompFrontend
+[submodule "lib/dk64_decomp"]
+	path = lib/dk64_decomp
+	url = https://gitlab.com/dk64_decomp/dk64

@@ -48,84 +48,43 @@ size_t decompress_bkzip(mz_stream* stream, std::span<const uint8_t> compressed_r
 // For other recomps using this repo as an example, you can omit the decompression routine and
 // set the corresponding fields in the GameEntry if the game doesn't have compressed code,
 // even if it does have compressed data.
-std::vector<uint8_t> banjo::decompress_bk(std::span<const uint8_t> compressed_rom) {
+std::vector<uint8_t> banjo::decompress_dk(std::span<const uint8_t> compressed_rom) {
     // Sanity check the rom size and header. These should already be correct from the runtime's check,
     // but it should prevent this file from accidentally being copied to another recomp.
-    if (compressed_rom.size() != 0x1000000) {
+    if (compressed_rom.size() != 0x2000000) {
         assert(false);
         return {};
     }
 
-    if (compressed_rom[0x3B] != 'N' || compressed_rom[0x3C] != 'B' || compressed_rom[0x3D] != 'K' || compressed_rom[0x3E] != 'E') {
-        assert(false);
-        return {};
-    }
-
-    struct Overlay {
-        uint32_t text_start;
-        uint32_t data_start;
-    };
-
-    Overlay overlays[] = {
-        { .text_start = 0xF19250, .data_start = 0xF19250 + 0x1D09B}, 
-        { .text_start = 0xF37F90, .data_start = 0xF37F90 + 0x64B50}, 
-        { .text_start = 0xFA3FD0, .data_start = 0xFA3FD0 + 0x1DC6},
-        { .text_start = 0xFA5F50, .data_start = 0xFA5F50 + 0x2D96},
-        { .text_start = 0xFA9150, .data_start = 0xFA9150 + 0x512E},
-        { .text_start = 0xFAE860, .data_start = 0xFAE860 + 0x328B},
-        { .text_start = 0xFB24A0, .data_start = 0xFB24A0 + 0x1E39},
-        { .text_start = 0xFB44E0, .data_start = 0xFB44E0 + 0x5130},
-        { .text_start = 0xFB9A30, .data_start = 0xFB9A30 + 0x4BB2},
-        { .text_start = 0xFBEBE0, .data_start = 0xFBEBE0 + 0x540F},
-        { .text_start = 0xFC4810, .data_start = 0xFC4810 + 0x23FF},
-        { .text_start = 0xFC6F20, .data_start = 0xFC6F20 + 0x1BDC},
-        { .text_start = 0xFC9150, .data_start = 0xFC9150 + 0x6548},
-        { .text_start = 0xFD0420, .data_start = 0xFD0420 + 0x5640},
-        { .text_start = 0xFD6190, .data_start = 0xFD6190 + 0x416F},
-        { .text_start = 0xFDAA10, .data_start = 0xFDAA10 + 0xE},
-    };
-    const uint32_t overlays_end = 0xFDAA30;
-
-    // Swap the overlay order from the compressed ROM to match the decompressed ROM order.
-    std::swap(overlays[3], overlays[4]);
-
-    mz_stream stream{};
-    stream.zalloc = Z_NULL;
-    stream.zfree = Z_NULL;
-    stream.opaque = Z_NULL;
-    stream.avail_in = 0;
-    stream.next_in = Z_NULL;
-    mz_inflateInit2(&stream, -MAX_WBITS);
-
+    //TODO: implement
     std::vector<uint8_t> ret{};
 
     // Copy everything from the original ROM up until the first overlay into the decompressed ROM.
     ret.reserve(0x2000000);
-    ret.assign(compressed_rom.begin(), compressed_rom.begin() + overlays[0].text_start);
-
-    size_t cur_size = overlays[0].text_start;
-
-    for (size_t overlay_index = 0; overlay_index < std::size(overlays); overlay_index++) {
-        uint32_t text_start = overlays[overlay_index].text_start;
-        uint32_t data_start = overlays[overlay_index].data_start;
-        uint32_t text_end = data_start;
-        uint32_t data_end = overlay_index == (std::size(overlays) - 1) ? overlays_end : overlays[overlay_index + 1].text_start;
-
-        // Decompress .text
-        cur_size += decompress_bkzip(&stream, compressed_rom, text_start, text_end, ret, cur_size);
-        cur_size = (cur_size + 15ULL) & ~15ULL;
-
-        // Decompress .data and .rodata
-        cur_size += decompress_bkzip(&stream, compressed_rom, data_start, data_end, ret, cur_size);
-        cur_size = (cur_size + 15ULL) & ~15ULL;
-    }
-
-    mz_inflateReset(&stream);
+    ret.assign(compressed_rom.begin(), compressed_rom.begin() + 0x2000000);
 
     return ret;
 }
 
-void banjo::bk_on_init(uint8_t* rdram, recomp_context* ctx) {
-    MEM_W(0, (int32_t)0x80000310) = 6103;
-    recomp::do_rom_read(rdram, (int32_t)0x80000000, 0x100004C0, 0x2A4);
+void banjo::dk_on_init(uint8_t* rdram, recomp_context* ctx) {
+    MEM_W(0, 0xFFFFFFFF802FE1C0) = 0xAD170014; //write to 0x802FE1C0
+    MEM_W(0, 0xFFFFFFFF802FE1C4) = 0x3C09A600; //write to 0x802FE1C4
+
+    //recomp::do_rom_read(rdram, (int32_t)0x80000004, 0x10000554, 0x334);
+    recomp::do_rom_read(rdram, (int32_t)0x80000008, 0x10000558, 0x330);
+
+    // Initialize variables normally set by IPL3
+    constexpr int32_t osTvType = 0x80000300;
+    //constexpr int32_t osRomType = 0x80000304;
+    constexpr int32_t osRomBase = 0x80000308;
+    constexpr int32_t osResetType = 0x8000030c;
+    constexpr int32_t osCicId = 0x80000310;
+    //constexpr int32_t osVersion = 0x80000314;
+    constexpr int32_t osMemSize = 0x80000318;
+    //constexpr int32_t osAppNMIBuffer = 0x8000031c;
+    MEM_W(osTvType, 0) = 1; // NTSC
+    MEM_W(osRomBase, 0) = 0xB0000000u; // standard rom base
+    MEM_W(osResetType, 0) = 0; // cold reset
+    MEM_W(osMemSize, 0) = 8 * 1024 * 1024; // 8MB
+    MEM_W(osCicId, 0) = 6105; // set CIC to 6105
 }

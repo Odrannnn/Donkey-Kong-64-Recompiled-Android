@@ -1,9 +1,19 @@
-#pragma GCC diagnostic ignored "-Wpointer-sign"
-#pragma GCC diagnostic ignored "-Wlogical-op-parentheses"
-
 #include "patches.h"
 #include "string.h"
 #include "xstdio.h"
+
+inline void *my_memcpy(void *dest, const void *src, size_t n) {
+    // Cast the void pointers to char pointers for byte-wise copying
+    char *d = (char *)dest;
+    const char *s = (const char *)src;
+
+    // Copy n bytes from src to dest
+    for (size_t i = 0; i < n; i++) {
+        d[i] = s[i];
+    }
+
+    return dest;  // Return the destination pointer
+}
 
 typedef	struct LDIV_T {
 	long quot;
@@ -58,7 +68,7 @@ static const ldouble pows[] = {10e0L, 10e1L, 10e3L, 10e7L, 10e15L, 10e31L, 10e63
 #define _D2 2
 #define _D3 3
 
-// #define ALIGN(s, align) (((unsigned int)(s) + ((align)-1)) & ~((align)-1))
+#define ALIGN(s, align) (((unsigned int)(s) + ((align)-1)) & ~((align)-1))
 
 void _Ldtob(_Pft* px, char code) {
     char buff[BUFF_LEN];
@@ -79,7 +89,7 @@ void _Ldtob(_Pft* px, char code) {
 
     err = _Ldunscale(&xexp, &px->v.ld);
     if (err > 0) {
-        memcpy(px->s, err == 2 ? "NaN" : "Inf", px->n1 = 3);
+        my_memcpy(px->s, err == 2 ? "NaN" : "Inf", px->n1 = 3);
         return;
     } else if (err == 0) {
         nsig = 0;
@@ -234,10 +244,10 @@ void _Genld(_Pft* px, char code, unsigned char* p, short nsig, short xexp) {
                 nsig = px->prec;
             }
 
-            memcpy(&px->s[px->n1], p, px->n2 = nsig);
+            my_memcpy(&px->s[px->n1], p, px->n2 = nsig);
             px->nz2 = px->prec - nsig;
         } else if (nsig < xexp) {
-            memcpy(&px->s[px->n1], p, nsig);
+            my_memcpy(&px->s[px->n1], p, nsig);
             px->n1 += nsig;
             px->nz1 = xexp - nsig;
             if (px->prec > 0 || (px->flags & 8)) {
@@ -247,7 +257,7 @@ void _Genld(_Pft* px, char code, unsigned char* p, short nsig, short xexp) {
 
             px->nz2 = px->prec;
         } else {
-            memcpy(&px->s[px->n1], p, xexp);
+            my_memcpy(&px->s[px->n1], p, xexp);
             px->n1 += xexp;
             nsig -= xexp;
 
@@ -259,7 +269,7 @@ void _Genld(_Pft* px, char code, unsigned char* p, short nsig, short xexp) {
                 nsig = px->prec;
             }
 
-            memcpy(&px->s[px->n1], &p[xexp], nsig);
+            my_memcpy(&px->s[px->n1], &p[xexp], nsig);
             px->n1 += nsig;
             px->nz1 = px->prec - nsig;
         }
@@ -287,7 +297,7 @@ void _Genld(_Pft* px, char code, unsigned char* p, short nsig, short xexp) {
                 nsig = px->prec;
             }
 
-            memcpy(&px->s[px->n1], p, nsig);
+            my_memcpy(&px->s[px->n1], p, nsig);
             px->n1 += nsig;
             px->nz1 = px->prec - nsig;
         }

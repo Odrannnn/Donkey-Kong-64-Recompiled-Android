@@ -4,46 +4,39 @@
 #define RECOMP_EXPORT __attribute__((section(".recomp_export")))
 #define RECOMP_PATCH __attribute__((section(".recomp_patch")))
 #define RECOMP_FORCE_PATCH __attribute__((section(".recomp_force_patch")))
-#define RECOMP_DECLARE_EVENT(func) \
-    _Pragma("GCC diagnostic push") \
-    _Pragma("GCC diagnostic ignored \"-Wunused-parameter\"") \
-    __attribute__((noinline, weak, used, section(".recomp_event"))) void func {} \
-    _Pragma("GCC diagnostic pop")
 
-#define osInvalDCache osInvalDCache_recomp
-#define osInvalICache osInvalICache_recomp
-#define osWritebackDCache osWritebackDCache_recomp
-#define osWriteBackDCacheAll osWritebackDCacheAll_recomp
-#define osSendMesg osSendMesg_recomp
-#define osRecvMesg osRecvMesg_recomp
-#define osGetCount osGetCount_recomp
+// TODO fix renaming symbols in patch recompilation
 #define osCreateMesgQueue osCreateMesgQueue_recomp
-void osWriteBackDCacheAll(void);
-#define bzero bzero_recomp
-#define bcopy bcopy_recomp
-#define osDpSetStatus osDpSetStatus_recomp
-#define malloc malloc_recomp
-#define free free_recomp
-#define realloc realloc_recomp
-#define memcpy memcpy_recomp
-#define strchr strchr_recomp
-#define strlen strlen_recomp
-#define osVirtualToPhysical osVirtualToPhysical_recomp
-#define osPiStartDma osPiStartDma_recomp
-#define sinf sinf_recomp
-#define cosf __cosf_recomp
+#define osRecvMesg osRecvMesg_recomp
+#define osSendMesg osSendMesg_recomp
+#define osViGetCurrentFramebuffer osViGetCurrentFramebuffer_recomp
+#define osFlashWriteArray osFlashWriteArray_recomp
+#define osFlashWriteBuffer osFlashWriteBuffer_recomp
+#define osWritebackDCache osWritebackDCache_recomp
+#define osInvalICache osInvalICache_recomp
+#define osGetTime osGetTime_recomp
+#define osPiGetStatus osPiGetStatus_recomp
+#define osInvalDCache osInvalDCache_recomp
+
+#define osContStartReadData osContStartReadData_recomp
 #define osContGetReadData osContGetReadData_recomp
+#define osContStartQuery osContStartQuery_recomp
+#define osContGetQuery osContGetQuery_recomp
+#define osViSetSpecialFeatures osViSetSpecialFeatures_recomp
+#define osViBlack osViBlack_recomp
+#define osStopThread osStopThread_recomp
+#define osSetThreadPri osSetThreadPri_recomp
+#define __osSpSetStatus __osSpSetStatus_recomp
 
-#include "ultra64.h"
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wvisibility"
-#include "structs.h"
-#pragma GCC diagnostic pop
+
+
+#define sinf __sinf_recomp
+#define cosf __cosf_recomp
+#define bzero bzero_recomp
+#define gRandFloat sRandFloat
+// #include "global.h"
+#include "PR/ultratypes.h"
 #include "rt64_extended_gbi.h"
-
-#ifndef ARRLEN
-#   define ARRLEN(x) ((s32)(sizeof(x) / sizeof(x[0])))
-#endif
 
 #ifndef gEXFillRectangle
 #define gEXFillRectangle(cmd, lorigin, rorigin, ulx, uly, lrx, lry) \
@@ -56,53 +49,45 @@ void osWriteBackDCacheAll(void);
     )
 #endif
 
-#define gEXMatrixGroupSkipAll(cmd, id, push, proj, edit) \
-    gEXMatrixGroup(cmd, id, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_ORDER_LINEAR, edit, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP)
+#define gEXMatrixGroupNoInterpolation(cmd, push, proj, edit) \
+    gEXMatrixGroup(cmd, G_EX_ID_IGNORE, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_ORDER_LINEAR, edit)
 
-#define gEXMatrixGroupSkipAllAspect(cmd, id, push, proj, edit, aspect) \
-    gEXMatrixGroup(cmd, id, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_ORDER_LINEAR, edit, aspect, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP)
-
-#define gEXMatrixGroupSimpleNormal(cmd, id, push, proj, edit) \
-    gEXMatrixGroup(cmd, id, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO)
-    
-#define gEXMatrixGroupSimpleVerts(cmd, id, push, proj, edit) \
-    gEXMatrixGroup(cmd, id, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_ASPECT_AUTO, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_AUTO)
-
-#define gEXMatrixGroupSimpleVertsSkipRot(cmd, id, push, proj, edit) \
-    gEXMatrixGroup(cmd, id, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_ASPECT_AUTO, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_AUTO)
+#define gEXMatrixGroupInterpolateOnlyTiles(cmd, push, proj, edit) \
+    gEXMatrixGroup(cmd, G_EX_ID_IGNORE, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit)
 
 #define gEXMatrixGroupDecomposedNormal(cmd, id, push, proj, edit) \
-    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO)
-
-#define gEXMatrixGroupDecomposedNormalTcs(cmd, id, push, proj, edit) \
-    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_AUTO)
+    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit)
 
 #define gEXMatrixGroupDecomposedSkipRot(cmd, id, push, proj, edit) \
-    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO)
+    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit)
 
 #define gEXMatrixGroupDecomposedSkipPosRot(cmd, id, push, proj, edit) \
-    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO)
+    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit)
+
+#define gEXMatrixGroupDecomposedSkipAll(cmd, id, push, proj, edit) \
+    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit)
 
 #define gEXMatrixGroupDecomposedVerts(cmd, id, push, proj, edit) \
-    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_AUTO)
-
-#define gEXMatrixGroupDecomposedVertsSkipRot(cmd, id, push, proj, edit) \
-    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_AUTO)
+    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit)
 
 #define gEXMatrixGroupDecomposedVertsOrderAuto(cmd, id, push, proj, edit) \
-    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_AUTO, edit, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_AUTO)
+    gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_AUTO, edit)
 
-typedef int bool;
 
-typedef unsigned size_t;
-void memcpy(void * dst, void *src, int size);
-char* strchr(const char* s, int c);
 int recomp_printf(const char* fmt, ...);
 
-void set_additional_model_scale(f32 x, f32 y, f32 z);
-void set_frustum_checks_enabled(int enabled);
-void set_all_interpolation_skipped(bool skipped);
-bool all_interpolation_skipped();
-bool perspective_interpolation_skipped();
+#define INCBIN(identifier, filename)          \
+    asm(".pushsection .rodata\n"              \
+        "\t.local " #identifier "\n"          \
+        "\t.type " #identifier ", @object\n"  \
+        "\t.balign 8\n"                       \
+        #identifier ":\n"                     \
+        "\t.incbin \"" filename "\"\n\n"      \
+                                              \
+        "\t.balign 8\n"                       \
+        "\t.popsection\n");                   \
+    extern u8 identifier[]
+
+void recomp_crash(const char* err);
 
 #endif
