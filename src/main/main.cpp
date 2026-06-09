@@ -467,7 +467,7 @@ std::vector<recomp::GameEntry> supported_games = {
         .internal_name = "DONKEY KONG 64",
         .display_name = "Donkey Kong 64",
         .game_id = u8"DK64",
-        .mod_game_id = "dk",
+        .mod_game_id = "dk64",
         // Eep16k instead of Eep4k to have room for extra save file data.
         .save_type = recomp::SaveType::Eep16k,
         .thumbnail_bytes = std::span<const char>(icon_bytes),
