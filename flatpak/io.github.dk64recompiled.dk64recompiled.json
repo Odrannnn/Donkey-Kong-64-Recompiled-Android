@@ -26,7 +26,7 @@
         "cp lib/N64Recomp/cmake-build/N64Recomp N64Recomp",
         "cp lib/N64Recomp/cmake-build/RSPRecomp RSPRecomp",
         "./N64Recomp us.toml",
-        "./RSPRecomp n_aspMain.us.toml",
+        "./RSPRecomp n_aspMain.toml",
         "cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang -DCMAKE_MAKE_PROGRAM=ninja -DPATCHES_C_COMPILER=clang -DPATCHES_LD=ld.lld -DRECOMP_FLATPAK=ON -G Ninja -S . -B cmake-build",
         "cmake --build cmake-build --config Release --target DK64Recompiled --parallel",
         "rm -rf assets/scss",
