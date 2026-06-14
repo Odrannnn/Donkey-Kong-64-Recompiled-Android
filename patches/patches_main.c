@@ -4,6 +4,7 @@
 #include "PR/os_exception.h"
 #include "PR/rcp.h"
 #include "misc_funcs.h"
+#include "debug_config.h"
 
 #ifndef MAX
 #define MAX(a,b) (((a)>(b))?(a):(b))
@@ -109,6 +110,22 @@ void func_global_asm_80700BF4(void);
 void raiseException(u8 arg0, s32 arg1, s32 arg2, s32 arg3);
 void cFuncLoop(void);
 
+#define OPTIONS_SCREEN_SIZE 0
+#define OPTIONS_STORY_SKIP 1
+#define OPTIONS_RESET_HISCORES 2
+#define OPTIONS_CHIMPY_CAM 3
+#define OPTIONS_SCREEN_SIZE_2 4
+
+void func_global_asm_806003EC(s16 arg0);
+s32 func_global_asm_8060042C(s16 arg0);
+void func_global_asm_805FB7E4(void);
+extern s16 D_global_asm_8076A0AA;
+extern Maps current_map;
+extern s32 current_exit;
+extern Maps next_map;
+extern u8 is_cutscene_active;
+extern s32 D_global_asm_807FBB64;
+
 typedef struct {
     OSMesgQueue queue;
     u8 unk18[0x260 - 0x18];
@@ -191,6 +208,9 @@ RECOMP_PATCH void func_global_asm_80611730(void) {
     } while (entry < &D_global_asm_807F0A58[count]);
 }
 
+void menuMain(void);
+void setFlags(void);
+
 RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     s32 phi_s4;
     OSMesg* sp38;
@@ -204,7 +224,7 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     osViSetSpecialFeatures(VI_CTRL_TYPE_16 | VI_CTRL_SERRATE_ON);
     func_global_asm_805FBE04();
     D_global_asm_8076A070 = D_global_asm_80767CC0 - 2;
-    osRecvMesg(&D_global_asm_8076A110, &sp38, 1);
+    osRecvMesg(&D_global_asm_8076A110, (void*) &sp38, 1);
     while (TRUE) {
         D_global_asm_8074682C = 0xC8;
 
@@ -224,14 +244,19 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
             break;
         case 3:
             func_arcade_80024000();
+            func_arcade_80024000();
             break;
         case 4:
+            func_jetpac_80024000();
             func_jetpac_80024000();
             break;
         case 5:
             break;
         default:
             cFuncLoop();
+#ifdef DEBUG_WARP
+            menuMain();
+#endif
             func_global_asm_805FC2B0();
             break;
         }
@@ -375,4 +400,114 @@ RECOMP_PATCH void func_global_asm_805FB5C4(OSMesgQueue* arg0, s32 arg1) {
 
     func_global_asm_8060E930();
     while (TRUE) {}
+}
+
+
+void func_global_asm_80610350(u8, u8, s32);
+
+extern OSViMode osViModeTable[];
+extern s16 D_global_asm_80744494;
+extern s16 D_global_asm_80744498;
+extern s16 D_global_asm_8074449C;
+extern s16 D_global_asm_807444A0;
+extern s16 D_global_asm_807444A4;
+extern s16 D_global_asm_807444A8;
+extern s16 D_global_asm_807444AC;
+extern s16 D_global_asm_807444B0;
+extern s16 D_global_asm_807444B4;
+extern u8 D_global_asm_8074450C;
+extern u8 D_global_asm_80744510;
+extern s32 D_global_asm_80744588[];
+extern s8 D_global_asm_807445A0;
+extern s8 D_global_asm_807445A4;
+extern s16 D_global_asm_80744490;
+
+//s32 D_global_asm_80744588[] = {
+//    OS_VI_PAL_LPF1, OS_VI_PAL_HAF1,
+//    OS_VI_NTSC_LAN1, OS_VI_NTSC_HAN1,
+//    OS_VI_MPAL_LAN1, OS_VI_MPAL_HAN1
+//};
+
+RECOMP_PATCH void func_global_asm_805FB944(u8 arg0) {
+    u8 var_a1 = 1;
+    s32 var_a2;
+    u32 temp;
+
+    var_a2 = 0;
+    func_global_asm_806003EC(D_global_asm_8076A0AA);
+    temp = 0;
+    //@recomp Don't patch screen_divisor to 2 on nintendo logo boot intro
+    if (current_map == MAP_NINTENDO_LOGO) {
+        D_global_asm_8074450C = 1;
+    }
+    else {
+        D_global_asm_8074450C = 1;
+    }
+    switch (is_cutscene_active) {
+    case 4:
+        var_a1 = 9;
+        if (var_a1 == 1) {
+            var_a1 = 0xA;
+        }
+        D_global_asm_80744498 = 0;
+        D_global_asm_8074449C = 0;
+        D_global_asm_807444A0 = (D_global_asm_8074450C * 320) - 1;
+        D_global_asm_807444A4 = (D_global_asm_8074450C * 240) - 1;
+        break;
+    default:
+        var_a2 = func_global_asm_8060042C(current_map);
+        var_a1 = 1;
+        if (D_global_asm_807FBB64 & 1) {
+            var_a1 = 7;
+        }
+        else if (D_global_asm_807FBB64 & 0x1000) {
+            var_a1 = 6;
+        }
+        else if (D_global_asm_807FBB64 & 0x104000) {
+            var_a1 = 8;
+        }
+        else if (D_global_asm_807FBB64 & 0x80000) {
+            var_a1 = 4;
+        }
+        else if (D_global_asm_807FBB64 & 0x2000) {
+            var_a1 = 5;
+        }
+        else if (D_global_asm_807FBB64 & 0x04000000) {
+            var_a1 = 3;
+        }
+        else if (D_global_asm_807FBB64 & 0x40000000) {
+            var_a1 = 2;
+        }
+        D_global_asm_80744498 = D_global_asm_8074450C * 0xA;
+        D_global_asm_8074449C = D_global_asm_8074450C * 0xA;
+        D_global_asm_807444A0 = (D_global_asm_8074450C * 310) - 1;
+        D_global_asm_807444A4 = (D_global_asm_8074450C * 230) - 1;
+        break;
+    }
+    func_global_asm_80610350(arg0, var_a1, var_a2);
+    if (D_global_asm_807445A4 == 0) {
+        osViSetMode(&osViModeTable[D_global_asm_80744588[osTvType + osTvType + D_global_asm_8074450C - 1]]);
+        if (D_global_asm_807445A0 == 0) {
+            osViBlack(1U);
+        }
+        D_global_asm_80744510 = 0;
+        D_global_asm_807445A0 = 0;
+    }
+    else {
+        D_global_asm_80744510 = 1;
+        D_global_asm_807445A0 = 1;
+        D_global_asm_807445A4 = temp;
+        func_global_asm_805FB7E4();
+    }
+    osViSetSpecialFeatures(VI_CTRL_TYPE_16 | VI_CTRL_SERRATE_ON);
+    //@recomp Patch to be 320x240 regardless of divisor
+    D_global_asm_80744490 = D_global_asm_8074450C * 320;
+    D_global_asm_80744494 = D_global_asm_8074450C * 240;
+
+    //D_global_asm_80744490 = D_global_asm_8074450C * 320;
+    //D_global_asm_80744494 = D_global_asm_8074450C * 240;
+    D_global_asm_807444AC = D_global_asm_8074449C + (D_global_asm_8074450C * 0x1E);
+    D_global_asm_807444B0 = D_global_asm_807444A4 - (D_global_asm_8074450C * 0x1E);
+    D_global_asm_807444A8 = D_global_asm_8074449C;
+    D_global_asm_807444B4 = D_global_asm_807444A4;
 }

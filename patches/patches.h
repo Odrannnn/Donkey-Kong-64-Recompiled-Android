@@ -27,7 +27,9 @@
 #define osStopThread osStopThread_recomp
 #define osSetThreadPri osSetThreadPri_recomp
 #define __osSpSetStatus __osSpSetStatus_recomp
-
+#define strlen strlen_recomp
+#define osViSetMode osViSetMode_recomp
+#define osSetTimer osSetTimer_recomp
 
 
 #define sinf __sinf_recomp

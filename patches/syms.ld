@@ -45,3 +45,6 @@ osViBlack_recomp = 0x8F0000E4;
 osStopThread_recomp = 0x8F0000EC;
 osSetThreadPri_recomp = 0x8F0000F0;
 __osSpSetStatus_recomp = 0x8F0000F4;
+strlen_recomp = 0x8F0000F8;
+osViSetMode_recomp = 0x8F0000FC;
+osSetTimer_recomp = 0x8F000100;
