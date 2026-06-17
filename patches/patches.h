@@ -30,6 +30,7 @@
 #define strlen strlen_recomp
 #define osViSetMode osViSetMode_recomp
 #define osSetTimer osSetTimer_recomp
+#define osDpSetStatus osDpSetStatus_recomp
 
 
 #define sinf __sinf_recomp

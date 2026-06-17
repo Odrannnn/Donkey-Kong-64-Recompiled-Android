@@ -50,3 +50,8 @@ func = "func_global_asm_80601EE4"
 vram = 0x80601F0C
 value = 0x00000000 #NOP osAiGetLength that is done without a function call
 
+[[patches.instruction]]
+func = "func_global_asm_805FBC5C"
+vram = 0x805FBDEC
+value = 0x00000000 #NOP original playSound for "OK" (it's moved elsewhere)
+
