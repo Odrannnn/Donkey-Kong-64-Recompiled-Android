@@ -143,7 +143,10 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
 RECOMP_PATCH void func_dk64_boot_800009D0(void) {
     u32* tmp_a0;
     osInitialize();
-    tmp_a0 = (void*)0x802FE1C0; //@recomp: patch to cached read
+
+    //@recomp: patch to cached read
+    tmp_a0 = (void*)0x802FE1C0; 
+
     while (0xAD170014 != *tmp_a0);
     *tmp_a0 = 0xF0F0F0F0;
     func_dk64_boot_80000980();
@@ -182,100 +185,6 @@ RECOMP_PATCH void func_dk64_boot_800009D0(void) {
 //    func_global_asm_8060E930();
 //    while (TRUE) {}
 //}
-
-RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
-    s32 phi_s4;
-    OSMesg* sp38;
-    recomp_printf("func_global_asm_805FBFF4 Started:\n");
-
-    phi_s4 = 1;
-    if (osTvType == OS_TV_PAL) {
-        D_global_asm_807444BC = 1.25f;
-    }
-
-    func_global_asm_805FBC5C();
-    osViSetSpecialFeatures(VI_CTRL_TYPE_16 | VI_CTRL_SERRATE_ON);
-    func_global_asm_805FBE04();
-    D_global_asm_8076A070 = D_global_asm_80767CC0 - 2;
-    osRecvMesg(&D_global_asm_8076A110, (void*)&sp38, 1);
-
-    OSTimer timer;
-    OSMesgQueue mq;
-    OSMesg mq_buf;
-
-    osCreateMesgQueue(&mq, &mq_buf, 1);
-    osSetTimer(&timer, OS_USEC_TO_CYCLES(500000), 0, &mq, NULL);
-    osRecvMesg(&mq, NULL, OS_MESG_BLOCK);
-
-    playSound(0x23C, 0x7FFF, 63.0f, 1.0f, 0, 0);
-
-    osCreateMesgQueue(&mq, &mq_buf, 1);
-    osSetTimer(&timer, OS_USEC_TO_CYCLES(1300000), 0, &mq, NULL);
-    osRecvMesg(&mq, NULL, OS_MESG_BLOCK);
-
-    while (TRUE) {
-        D_global_asm_8074682C = 0xC8;
-
-        while (D_global_asm_80744460) {}
-
-        if (D_global_asm_8076A0B1 & 1 && !D_global_asm_8076A0B2) {
-            func_global_asm_805FE7FC();
-            if (D_global_asm_807444F8 == 2) {
-                global_properties_bitfield |= 0x200;
-                D_global_asm_80744504 = 8;
-            }
-        }
-        //gEXEnable(); // @recomp
-
-        switch (is_cutscene_active) {
-        case 6:
-            //gEXSetRefreshRate(, 60 / 2);
-            func_global_asm_8070A934(next_map, next_exit);
-            break;
-        case 3:
-            //gEXSetRefreshRate(, 60);
-            func_arcade_80024000();
-            break;
-        case 4:
-            //gEXSetRefreshRate(, 60);
-            func_jetpac_80024000();
-            break;
-        case 5:
-            break;
-        default:
-            //gEXSetRefreshRate(, 60 / 2);
-#ifdef DEBUG_WARP
-            menuMain();
-#endif
-            func_global_asm_805FC2B0();
-            break;
-        }
-
-        func_global_asm_80600B10();
-        func_global_asm_8066AF40();
-        func_global_asm_80610268(0x4D2);
-        if (D_global_asm_807F059C[0]) {
-            func_global_asm_80610268(0x929);
-        }
-        func_global_asm_80600674(); // calculateLagBoost()
-        if ((is_cutscene_active == 0) || (is_cutscene_active == 1) || (is_cutscene_active == 7)) {
-            func_global_asm_80658CCC();
-            func_global_asm_80700BF4();
-        }
-        func_global_asm_80611730();
-        if (gStackCanary != 0x12345678) {
-            raiseException(2, 0, 0, 0);
-        }
-        if (phi_s4) {
-            osSendMesg((void*)D_global_asm_807655E0, (void*)0x309, OS_MESG_BLOCK);
-            phi_s4 = 0;
-        }
-        if (D_global_asm_8076A0B1 & 1 && D_global_asm_807FD888 == 31.0f) {
-            D_global_asm_8076A0B2--;
-        }
-        D_global_asm_807444F0 = is_cutscene_active;
-    }
-}
 
 RECOMP_PATCH void func_global_asm_805FB944(u8 arg0) {
     u8 var_a1 = 1;
@@ -381,53 +290,8 @@ RECOMP_PATCH void func_global_asm_805FBC5C(void) {
     func_global_asm_8073239C();
     mq = (void*)&D_global_asm_8076A110;
     osCreateMesgQueue((void*)mq, &D_global_asm_8076A108, 2);
-    osSetTimer(&D_global_asm_8076A130, 0xD693A4, 0, (void*)mq, mq->msgs[0]);
+    //@recomp: patch this timer to be significantly faster; we dont need to wait long
+    osSetTimer(&D_global_asm_8076A130, OS_USEC_TO_CYCLES(100000), 0, (void*)mq, mq->msgs[0]); //wait 0.1 seconds
     //@recomp move playsound to a bit later
     //playSound(0x23C, 0x7FFF, 63.0f, 1.0f, 0, 0);
-}
-
-RECOMP_PATCH void func_global_asm_805FB7E4(void) {
-    Gfx* dl = D_global_asm_8076A050[D_global_asm_807444FC];
-    s32 empty;
-    s32 sp58;
-    s32* temp_s0;
-    u16* var_v1; // 50
-    u16* sp4C;
-    s32 sp48;
-    s32 sp44;
-    s32 sp40;
-    s32 sp3C;
-    u32 sp38;
-    u16* end;
-    s32 y, x;
-
-    var_v1 = D_global_asm_80744470[0];
-    end = &var_v1[0x12C00];
-    while (var_v1 < end) {
-        *var_v1++ = 1;
-    }
-    //osWritebackDCacheAll();
-    temp_s0 = (s32*) & D_global_asm_80744470[1][0x6400];
-    func_global_asm_805FB750(0x38, 0x10, temp_s0);
-    func_global_asm_805FB750(temp_s0[0] + 0x178, 0x10, temp_s0);
-    func_global_asm_805FB750(temp_s0[0], temp_s0[1] - temp_s0[0], temp_s0);
-    sp3C = (s32)temp_s0;
-    sp38 = (u32)D_global_asm_80744470[1]; //framebuffer pointer
-    sp4C = (u16*)D_global_asm_80744470[1];
-    func_dk64_boot_800024E0((void*) & sp3C, &sp38, &D_global_asm_80744470[1][0xAF00]); //dump red nintendo logo to framebuffer
-    //TODO: add f3dex2 commands here to draw the red nintendo logo (how do we make sure the task is submitted (aka, how to get DL pointer?))
-
-    var_v1 = &D_global_asm_80744470[0][0x7840];
-    for (y = 0; y < 0x30; y++) {
-        for (x = 0; x < 0xC0; x++) {
-            *var_v1++ = *sp4C++;
-        }
-        var_v1 += 0x80;
-    }
-    var_v1 = D_global_asm_80744470[1];
-    end = &var_v1[0x12C00];
-    while (var_v1 < end) {
-        *var_v1++ = 1;
-    }
-    //osWritebackDCacheAll();
 }

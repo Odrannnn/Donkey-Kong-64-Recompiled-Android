@@ -85,37 +85,9 @@ extern u8 D_global_asm_807444F8;
 extern OSMesgQueue D_global_asm_8076A110;
 extern u8  D_global_asm_8076A0B1;
 extern u8  D_global_asm_8076A0B2;
-void func_global_asm_805FB750(s32 arg0, s32 arg1, void* arg2);
-void func_dk64_boot_800024E0(u8** arg0, s32* arg1, void* arg2);
 extern u16* D_global_asm_80744470[2];
 extern Gfx* D_global_asm_8076A050[];
 extern u8 D_global_asm_807444FC;
-
-void func_global_asm_80601CF0(s32 arg0);
-void func_global_asm_8060E930(void);
-void func_global_asm_80611724(u32, u32);
-void func_global_asm_80611408(s32);
-void boot_osPiRawStartDma(s32, s32, void*, s32);
-void func_global_asm_805FBC5C(void);
-void osViSetSpecialFeatures(u32);
-void func_global_asm_805FBE04(void);
-void func_global_asm_805FE7FC(void);
-void func_global_asm_8070A934(s32 nextMap, s32 nextExit);
-void yield_self(void);
-void func_dk64_boot_80000980(void);
-void load_dk64_overlay(s32, void*, s32);
-void osInitialize(void);
-void func_arcade_80024000(void);
-void func_jetpac_80024000(void);
-void func_global_asm_805FC2B0(void);
-void func_global_asm_80600B10(void);
-void func_global_asm_8066AF40(void);
-void func_global_asm_80610268(u32 arg0);
-void func_global_asm_80600674(void); //calculate lag boost?
-void func_global_asm_80658CCC(void);
-void func_global_asm_80700BF4(void);
-void raiseException(u8 arg0, s32 arg1, s32 arg2, s32 arg3);
-void cFuncLoop(void);
 
 typedef struct {
     OSMesgQueue queue;
@@ -134,11 +106,8 @@ extern u8 D_global_asm_80745290;
 extern u32 D_global_asm_80744478;
 extern u32 object_timer;
 extern s32 D_global_asm_807FBB64; // shadow_display_bitfield, shockwave_bitfield, long_distance_actor_spawn
-void func_global_asm_805FB7E4(void);
 
 
-void func_global_asm_80610350(u8, u8, s32);
-s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
 extern OSViMode osViModeTable[];
 extern s16 D_global_asm_80744494;
 extern s16 D_global_asm_80744498;
@@ -156,9 +125,6 @@ extern s8 D_global_asm_807445A0;
 extern s8 D_global_asm_807445A4;
 extern s16 D_global_asm_80744490;
 extern s16 D_global_asm_8076A0AA;
-
-void func_global_asm_806003EC(s16);
-s32 func_global_asm_8060042C(s16 arg0);
 
 typedef struct Unk {
     char unk_00[4];
@@ -226,9 +192,18 @@ typedef struct {
 extern s32 D_global_asm_8076A084;
 extern UnkMQStruct D_global_asm_807655F0;
 extern UnkMQStruct D_global_asm_807656D0;
+
+extern UnkMQStruct D_global_asm_807659E8;
+
+extern OSMesg D_global_asm_8076A108;
+extern OSTimer D_global_asm_8076A130;
+
+void func_global_asm_805FB750(s32 arg0, s32 arg1, void* arg2);
+void func_dk64_boot_800024E0(u8** arg0, s32* arg1, void* arg2);
+void func_global_asm_806003EC(s16);
+s32 func_global_asm_8060042C(s16 arg0);
 void func_global_asm_8060EC80(OSMesgQueue* arg0, void* arg1, s32 arg2, u8 arg3, u8 arg4);
 extern s32 D_global_asm_807655E0;
-extern UnkMQStruct D_global_asm_807659E8;
 extern s32 D_global_asm_80767CD8;
 void func_global_asm_8060FFF0(void);
 void func_global_asm_8060A900(void);
@@ -238,5 +213,33 @@ extern s32 D_global_asm_8076A070;
 extern s32 D_global_asm_8076A07C;
 void setIntroStoryPlaying(u8 arg0);
 void func_global_asm_8073239C(void);
-extern OSMesg D_global_asm_8076A108;
-extern OSTimer D_global_asm_8076A130;
+void func_global_asm_805FE544(u8 arg0);
+void func_global_asm_805FB7E4(void);
+void func_global_asm_80610350(u8, u8, s32);
+s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
+void func_global_asm_80601CF0(s32 arg0);
+void func_global_asm_8060E930(void);
+void func_global_asm_80611724(u32, u32);
+void func_global_asm_80611408(s32);
+void boot_osPiRawStartDma(s32, s32, void*, s32);
+void func_global_asm_805FBC5C(void);
+void osViSetSpecialFeatures(u32);
+void func_global_asm_805FBE04(void);
+void func_global_asm_805FE7FC(void);
+void func_global_asm_8070A934(s32 nextMap, s32 nextExit);
+void yield_self(void);
+void func_dk64_boot_80000980(void);
+void load_dk64_overlay(s32, void*, s32);
+void osInitialize(void);
+void func_arcade_80024000(void);
+void func_jetpac_80024000(void);
+void func_global_asm_805FC2B0(void);
+void func_global_asm_80600B10(void);
+void func_global_asm_8066AF40(void);
+void func_global_asm_80610268(u32 arg0);
+void func_global_asm_80600674(void); //calculate lag boost?
+void func_global_asm_80658CCC(void);
+void func_global_asm_80700BF4(void);
+void raiseException(u8 arg0, s32 arg1, s32 arg2, s32 arg3);
+void cFuncLoop(void);
+void func_global_asm_80610044(void* arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5);
