@@ -198,9 +198,13 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     osRecvMesg(&mq, NULL, OS_MESG_BLOCK);
 
     //@recomp: draw red nintendo logo with proper display list instead of just writing to the framebuffer directly
+    //TODO: is waiting like this OK for linux? check this
     gDPPipeSync(gfxPos++);
+    gEXEnable(gfxPos++);
+    gEXSetRectAspect(gfxPos++, G_EX_ASPECT_ADJUST);
     gDPSetColorImage(gfxPos++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, 0x80034000);
-    gfxPos = gfx_draw_textured_rect(gfxPos, 64, 96, 320, 240, (void*)redNintendoLogoTexture);
+    gDPSetScissor(gfxPos++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
+    gfxPos = gfx_draw_textured_rect(gfxPos, 0, 0, 320, 240, (void*)redNintendoLogoTexture);
     gDPFullSync(gfxPos++);
     gSPEndDisplayList(gfxPos++);
     func_global_asm_80610044(&gfxArena, ((u32)gfxPos - (u32)gfxArena) / sizeof(Gfx), 3, 1, 0x4D2, 1);
@@ -322,7 +326,7 @@ RECOMP_PATCH void func_global_asm_805FB7E4(void) {
 
     //@recomp copy nintendo logo out of framebuffer to another buffer to be displayed
     {
-        u8* src = (u8*)&D_global_asm_80744470[0][0x7840];
+        u8* src = (u8*)&D_global_asm_80744470[0][0];
         for (y = 0; y < 320 * 240 * 2; y++) {
             redNintendoLogoTexture[y] = src[y];
         }
