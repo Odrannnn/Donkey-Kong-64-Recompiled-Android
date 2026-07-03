@@ -325,8 +325,6 @@ RECOMP_PATCH void func_global_asm_805FB7E4(void) {
     u16* end;
     s32 y, x;
 
-    recomp_printf("dl is %08X\n", dl);
-
     var_v1 = D_global_asm_80744470[0];
     end = &var_v1[0x12C00];
     while (var_v1 < end) {
