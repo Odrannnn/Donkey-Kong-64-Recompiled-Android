@@ -31,6 +31,9 @@
 #define osViSetMode osViSetMode_recomp
 #define osSetTimer osSetTimer_recomp
 #define osDpSetStatus osDpSetStatus_recomp
+#define osVirtualToPhysical osVirtualToPhysical_recomp
+#define memcpy memcpy_recomp
+
 
 
 #define sinf __sinf_recomp

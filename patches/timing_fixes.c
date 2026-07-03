@@ -1,6 +1,6 @@
 #include "patches.h"
 #include "PR/os_message.h"
-#include "maps.h"
+#include "enums.h"
 #include "PR/os_exception.h"
 #include "PR/rcp.h"
 #include "misc_funcs.h"

@@ -49,3 +49,5 @@ strlen_recomp = 0x8F0000F8;
 osViSetMode_recomp = 0x8F0000FC;
 osSetTimer_recomp = 0x8F000100;
 osDpSetStatus_recomp = 0x8F000104;
+osVirtualToPhysical_recomp = 0x8F000108;
+memcpy_recomp = 0x8F00010C;

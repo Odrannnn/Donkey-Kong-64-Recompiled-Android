@@ -1,6 +1,6 @@
 #include "patches.h"
 #include "PR/os_message.h"
-#include "maps.h"
+#include "enums.h"
 #include "PR/os_exception.h"
 #include "PR/rcp.h"
 #include "misc_funcs.h"
@@ -169,6 +169,16 @@ Gfx* gfx_draw_textured_rect(Gfx* gfx, int x, int y, int width, int height, u8* t
 #undef TILE_HEIGHT
 }
 
+typedef struct {
+    /* 0x00 */ u8 unk0;
+    /* 0x01 */ u8 unk1;
+    /* 0x02 */ u8 unk2;
+    /* 0x03 */ u8 unk3;
+    /* 0x04 */ s16 unk4_arr[4];
+} Struct80750948; //sizeof 0xC
+extern Struct80750948 D_global_asm_80750948[];
+
+
 RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     s32 phi_s4;
     OSMesg* sp38;
@@ -221,6 +231,22 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     osRecvMesg(&mq, NULL, OS_MESG_BLOCK);
 
     while (TRUE) {
+        //@recomp patch viewports for widescreen (they get reloaded sometimes so patching each frame is easiest before it's used)
+        for (int i = 0; i < 30; i++) {
+            Struct80750948* x = &D_global_asm_80750948[i];
+            if (x->unk4_arr[0] <= 12) {
+                x->unk4_arr[0] = 0;
+            }
+            if (x->unk4_arr[1] <= 12) {
+                x->unk4_arr[1] = 0;
+            }
+            if (x->unk4_arr[2] >= 307) {
+                x->unk4_arr[2] = 320;
+            }
+            if (x->unk4_arr[3] >= 227) {
+                x->unk4_arr[3] = 240;
+            }
+        }
         D_global_asm_8074682C = 0xC8;
 
         while (D_global_asm_80744460) {}
