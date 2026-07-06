@@ -12,6 +12,7 @@ SECTIONS {
     .text          : { *(.text*)                                 } >extram AT >rom
     .recomp_patch  : { *(.recomp_patch*) *(.recomp_force_patch*) } >extram AT >rom
     .recomp_export : { *(.recomp_export*)                        } >extram AT >rom
+    .recomp_event  : { *(.recomp_event*)                         } >extram AT >rom
     .rodata        : { *(.rodata*)                               } >extram AT >rom
     .data          : { *(.data*)                                 } >extram AT >rom
     .bss  (NOLOAD) : { *(.bss*)  *(COMMON)                       } >extram
