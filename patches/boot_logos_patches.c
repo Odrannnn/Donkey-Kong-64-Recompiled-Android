@@ -22,7 +22,7 @@ s32 getCenterOfString(s16 renderStyle, u8* string);
 Gfx* printText(Gfx* dl, s16 x, s16 y, f32 scale, u8* string);
 extern u8 D_global_asm_8074450C;
 extern u8 D_menu_800339D0_02175720;
-
+RECOMP_DECLARE_EVENT(recomp_on_init());
 #define TEXT_SCALE 0.25f
 #define ORIGINAL_TEXT_SCALE 0.5f
 
@@ -229,6 +229,9 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     //@recomp: leave red nintendo logo on screen for 1.4 seconds, then continue
     osSetTimer(&timer, OS_USEC_TO_CYCLES(1400000), 0, &mq, NULL);
     osRecvMesg(&mq, NULL, OS_MESG_BLOCK);
+
+    // @recomp Register actor extension data and call the init event.
+    recomp_on_init();
 
     while (TRUE) {
         //@recomp patch viewports for widescreen (they get reloaded sometimes so patching each frame is easiest before it's used)
