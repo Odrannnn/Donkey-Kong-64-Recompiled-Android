@@ -86,6 +86,9 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
     Struct80767A40* osdata;
 
     //@recomp: patch to always greater than 1 (on console, default is 2. if zero, it will divide by zero and crash)
+    AlterVolumes();
+
+    //@recomp: patch to always greater than 1 (on console, default is 2. if zero, it will divide by zero and crash)
     if (D_global_asm_80744478 <= 1) {
         D_global_asm_80744478 = 2;
     }
@@ -193,6 +196,11 @@ RECOMP_PATCH void func_dk64_boot_800009D0(void) {
 //    while (TRUE) {}
 //}
 
+#define SCREEN_HEIGHT 240 // Normally 240
+#define SCREEN_WIDTH 427 // Normally 320
+#define OVERSCAN_SIZE 0  // Normally 10
+#define CUTSCENE_BORDERING 0 // Normally 30
+
 RECOMP_PATCH void func_global_asm_805FB944(u8 arg0) {
     u8 var_a1 = 1;
     s32 var_a2;
@@ -215,8 +223,8 @@ RECOMP_PATCH void func_global_asm_805FB944(u8 arg0) {
         }
         gScissorUpLX = 0;
         gScissorUpLY = 0;
-        gScissorLowerRightX = (D_global_asm_8074450C * 320) - 1;
-        gScissorLowerRightY = (D_global_asm_8074450C * 240) - 1;
+        gScissorLowerRightX = (D_global_asm_8074450C * 320);
+        gScissorLowerRightY = (D_global_asm_8074450C * 240);
         break;
     default:
         var_a2 = func_global_asm_8060042C(current_map);
@@ -242,10 +250,10 @@ RECOMP_PATCH void func_global_asm_805FB944(u8 arg0) {
         else if (D_global_asm_807FBB64 & 0x40000000) {
             var_a1 = 2;
         }
-        gScissorUpLX = D_global_asm_8074450C * 0;
-        gScissorUpLY = D_global_asm_8074450C * 0;
-        gScissorLowerRightX = ((D_global_asm_8074450C * 320) - 1);
-        gScissorLowerRightY = ((D_global_asm_8074450C * 240) - 1);
+        gScissorUpLX = D_global_asm_8074450C * OVERSCAN_SIZE;
+        gScissorUpLY = D_global_asm_8074450C * OVERSCAN_SIZE;
+        gScissorLowerRightX = (D_global_asm_8074450C * (320 - OVERSCAN_SIZE));
+        gScissorLowerRightY = (D_global_asm_8074450C * (240 - OVERSCAN_SIZE));
         break;
     }
     func_global_asm_80610350(arg0, var_a1, var_a2);
@@ -266,8 +274,17 @@ RECOMP_PATCH void func_global_asm_805FB944(u8 arg0) {
     osViSetSpecialFeatures(VI_CTRL_TYPE_16 | VI_CTRL_SERRATE_ON);
     gScissor2LowerRightX = D_global_asm_8074450C * 320; //width
     gScissor2LowerRightY = D_global_asm_8074450C * 240; //height
-    D_global_asm_807444AC = gScissorUpLY + (D_global_asm_8074450C * 30); //overscan
-    D_global_asm_807444B0 = gScissorLowerRightY - (D_global_asm_8074450C * 30); //overscan
+    // Force cutscene borders to be on for the level intros where you have K. Rool's speech as text
+    // TODO: Tie to the options
+    s32 cutscene_border_size = CUTSCENE_BORDERING;
+    if (current_map == MAP_HELM_LEVEL_INTROS_GAME_OVER) {
+        if (D_global_asm_80755338 && ((D_global_asm_8075533C >= 15) && (D_global_asm_8075533C <= 22))) {
+            // Is level intro
+            cutscene_border_size = 40;
+        }
+    }
+    D_global_asm_807444AC = gScissorUpLY + (D_global_asm_8074450C * cutscene_border_size);
+    D_global_asm_807444B0 = gScissorLowerRightY - (D_global_asm_8074450C * cutscene_border_size);
     D_global_asm_807444A8 = gScissorUpLY;
     D_global_asm_807444B4 = gScissorLowerRightY;
 }
@@ -330,7 +347,6 @@ void func_global_asm_8062AD28(f32 arg0, f32 arg1, f32 arg2, void* arg3, f32* arg
 void func_global_asm_8062D620(s32, s32, s32, f32, f32, f32, s32, s32, s32); //first and second arg here was s32, now void*
 Gfx* func_global_asm_80722294(Gfx*, Actor*, s16);
 void func_global_asm_8062C99C(CharacterChange250*, s32, s32, s32, s32);
-void func_global_asm_80658E58(u16 arg0, u16 arg1, u16 arg2, u16 arg3);
 Gfx* func_global_asm_8065919C(Gfx* dl);
 Gfx* func_global_asm_8070835C(Gfx*, u8);
 extern Mtx D_2000180;
@@ -375,3 +391,149 @@ Gfx* func_global_asm_8062CA70(Gfx* dl, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f
 //    gDPPipeSync(dl++);
 //    return dl;
 //}
+
+//@recomp: Seems to be used for the culling of many objects, including actors and props
+RECOMP_PATCH void func_global_asm_80658E58(s16 arg0, s16 arg1, s16 arg2, s16 arg3) {
+    D_global_asm_807F7358 = -0x7FFF;
+    D_global_asm_807F735A = -0x7FFF;
+    D_global_asm_807F735C = 0x7FFF;
+    D_global_asm_807F735E = 0x7FFF;
+}
+
+//@recomp: Sprite culling. Also used for the scissor of the sprite itself
+RECOMP_PATCH void func_global_asm_80714A68(s16 arg0, s16 arg1, s16 arg2, s16 arg3) {
+    D_global_asm_807FDB3C = OVERSCAN_SIZE;
+    D_global_asm_807FDB3E = OVERSCAN_SIZE;
+    D_global_asm_807FDB40 = (320 - OVERSCAN_SIZE);
+    D_global_asm_807FDB42 = (240 - OVERSCAN_SIZE);
+}
+
+//@recomp: Used for a bunch of display list initialization
+RECOMP_PATCH Gfx *func_global_asm_807132DC(Gfx *dl) {
+    dl = func_global_asm_805FD030(dl);
+    gSPDisplayList(dl++, &D_1000118);
+    gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gDPPipeSync(dl++);
+    gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, OVERSCAN_SIZE, OVERSCAN_SIZE, 320 - OVERSCAN_SIZE, 240 - OVERSCAN_SIZE);
+    return dl;
+}
+
+//@recomp: Sprite reset function. Adjust scissor variables to not be tied to the original screen dimensions
+RECOMP_PATCH void func_global_asm_80714A9C(void) {
+    D_global_asm_807FDB0F = 0;
+    D_global_asm_807FDB10 = 1;
+    D_global_asm_807FDB14 = 0;
+    D_global_asm_807FDB18 = 0;
+    D_global_asm_807FDB1C = 1;
+    D_global_asm_807FDB1A = 0;
+    D_global_asm_807FDB1D = 0;
+    D_global_asm_807FDB28 = 0;
+    D_global_asm_807FDB2C = 0;
+    D_global_asm_807FDB30 = 0;
+    D_global_asm_807FDB36 = 0;
+    D_global_asm_807FDB38 = -1;
+    D_global_asm_807FDB3C = D_global_asm_8074450C * OVERSCAN_SIZE;
+    D_global_asm_807FDB3E = D_global_asm_8074450C * OVERSCAN_SIZE;
+    D_global_asm_807FDB40 = D_global_asm_8074450C * ((320 - OVERSCAN_SIZE));
+    D_global_asm_807FDB42 = D_global_asm_8074450C * ((240 - OVERSCAN_SIZE));
+    D_global_asm_807FDB3A = 0x258;
+}
+
+#define D_global_asm_807463AC (*(volatile s16*)0x807463AC)
+#define D_global_asm_807463B0 (*(volatile s16*)0x807463B0)
+#define D_global_asm_807463B4 (*(volatile u16*)0x807463B4)
+#define DK_DKTV_LAG_START 215
+#define DK_DKTV_LAG_END 325
+#define DK_DKTV_LAG_START2 420
+
+
+void getDKTVAttrs(s32 *numerator, s32 *denominator, s32 *scaled_frame) {
+    // Correction code for DK's DK TV Demo where lag desyncs the inputs from the intended sequence of events
+    // Rather than inducing lag, we change how frequently it'll change to the next input set.
+    *numerator = 2;
+    *denominator = 2;
+    *scaled_frame = D_global_asm_807463AC;
+    if (current_map == MAP_JAPES) {
+        if (D_global_asm_807463AC > DK_DKTV_LAG_START) {
+            if (D_global_asm_807463AC < DK_DKTV_LAG_END) {
+                *numerator = 3;
+                *scaled_frame = DK_DKTV_LAG_START + (((D_global_asm_807463AC - DK_DKTV_LAG_START) * 2) / 3);
+            } else if (D_global_asm_807463AC > DK_DKTV_LAG_START2) {
+                *numerator = 3;
+                *scaled_frame = DK_DKTV_LAG_START2 + (((D_global_asm_807463AC - DK_DKTV_LAG_START2) * 2) / 3);
+            }
+        }
+    }
+}
+
+//@recomp: Slow down the rate of the DK64 Buttons being parsed for DK's demo
+RECOMP_PATCH void func_global_asm_8060B55C(u16 *arg0) {
+    s32 numerator;
+    s32 denominator;
+    s32 scaled_frame;
+    getDKTVAttrs(&numerator, &denominator, &scaled_frame);
+    if (scaled_frame < (D_global_asm_807463B0 - 1)) {
+        *arg0 = D_global_asm_807ECE98->button & 0x7FFF;
+        if ((D_global_asm_807463AC % numerator) != denominator) {
+            D_global_asm_807ECE98++;
+        } else {
+            // Correct the demo fadeout timer counter so it doesn't fade out early
+            if (D_global_asm_8075531C > 0) {
+                D_global_asm_8075531C++;
+            }
+        }
+        D_global_asm_807463AC++;
+        return;
+    }
+    is_autowalking = 0;
+}
+
+//@recomp: Slow down the rate of the stick inputs being parsed for DK's demo
+RECOMP_PATCH void func_global_asm_8060B4D4(OSContPad *arg0) {
+    s32 numerator;
+    s32 denominator;
+    s32 scaled_frame;
+    getDKTVAttrs(&numerator, &denominator, &scaled_frame);
+    if (scaled_frame < (D_global_asm_807463B0 - 1)) {
+        arg0->stick_x = D_global_asm_807ECE98->stick_x;
+        arg0->stick_y = D_global_asm_807ECE98->stick_y;
+        if (D_global_asm_807ECE98->button & 0x8000) {
+            if ((D_global_asm_807463AC % numerator) != denominator) {
+                D_global_asm_807463B4 = D_global_asm_807ECE94[0];
+                D_global_asm_807ECE94++;
+            }
+        }
+        arg0->button = D_global_asm_807463B4 & 0xEFFF;
+    }
+}
+
+//@recomp: Adjust the vertices for the fade transition square. Currently have this tied to SCREEN_WIDTH and SCREEN_HEIGHT
+RECOMP_PATCH Gfx *func_global_asm_80703AB0(Gfx *dl, u8 arg1) {
+    gSPDisplayList(dl++, &D_1000118);
+    gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPLoadGeometryMode(dl++, 0);
+    gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
+    gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF);
+    gDPPipeSync(dl++);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    gDPSetTexturePersp(dl++, G_TP_NONE);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(dl++, G_CC_SHADE, G_CC_SHADE);
+
+    D_global_asm_80754C48[D_global_asm_807444FC][0].v.cn[3] = MIN(0xFF, arg1 * 2);
+    D_global_asm_80754C48[D_global_asm_807444FC][1].v.cn[3] = arg1;
+    D_global_asm_80754C48[D_global_asm_807444FC][2].v.cn[3] = MIN(0xFF, arg1 * 2);
+    D_global_asm_80754C48[D_global_asm_807444FC][3].v.cn[3] = arg1;
+    D_global_asm_80754C48[D_global_asm_807444FC][1].v.ob[0] = SCREEN_WIDTH;
+    D_global_asm_80754C48[D_global_asm_807444FC][2].v.ob[0] = SCREEN_WIDTH;
+    D_global_asm_80754C48[D_global_asm_807444FC][2].v.ob[1] = SCREEN_HEIGHT;
+    D_global_asm_80754C48[D_global_asm_807444FC][3].v.ob[1] = SCREEN_HEIGHT;
+    gSPVertex(dl++, osVirtualToPhysical(&D_global_asm_80754C48[D_global_asm_807444FC][0]), 4, 0);
+    gSP2Triangles(dl++, 0, 1, 2, 0, 0, 2, 3, 0);
+    gDPPipeSync(dl++);
+    return dl;
+}

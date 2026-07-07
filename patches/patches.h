@@ -31,8 +31,11 @@
 #define osViSetMode osViSetMode_recomp
 #define osSetTimer osSetTimer_recomp
 #define osDpSetStatus osDpSetStatus_recomp
+#define osViSwapBuffer osViSwapBuffer_recomp
 #define osVirtualToPhysical osVirtualToPhysical_recomp
 #define memcpy memcpy_recomp
+#define osDpGetStatus osDpGetStatus_recomp
+#define osViGetNextFramebuffer osViGetNextFramebuffer_recomp
 
 
 
@@ -95,5 +98,6 @@ int recomp_printf(const char* fmt, ...);
     extern u8 identifier[]
 
 void recomp_crash(const char* err);
+extern void AlterVolumes(void);
 
 #endif

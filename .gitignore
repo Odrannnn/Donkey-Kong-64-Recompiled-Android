@@ -66,3 +66,7 @@ RSPRecomp
 
 # Controller mappings file
 gamecontrollerdb.txt
+
+# Just linux things
+build.log
+DK64Recompiled

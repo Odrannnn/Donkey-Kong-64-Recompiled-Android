@@ -1,8 +1,8 @@
-#include "banjo_config.h"
+#include "donk_config.h"
 #include "recompui/recompui.h"
 #include "recompui/config.h"
 #include "recompinput/recompinput.h"
-#include "banjo_sound.h"
+#include "donk_sound.h"
 #include "banjo_support.h"
 #include "ultramodern/config.hpp"
 #include "librecomp/files.hpp"
@@ -24,39 +24,6 @@
 static void add_general_options(recomp::config::Config &config) {
     using EnumOptionVector = const std::vector<recomp::config::ConfigOptionEnumOption>;
 
-    static EnumOptionVector note_saving_mode_options = {
-        {dk64::NoteSavingMode::Off, "Off", "Off"},
-        {dk64::NoteSavingMode::On, "On", "On"},
-    };
-    config.add_enum_option(
-        dk64::configkeys::general::note_saving_mode,
-        "Note Saving",
-        "Saves collected notes so that you don't need to collect them again when revisiting a level. <recomp-color primary>On</recomp-color> is the default, while <recomp-color primary>off</recomp-color> matches the original game.",
-        note_saving_mode_options,
-        dk64::NoteSavingMode::On
-    );
-    static EnumOptionVector analog_cam_mode_options = {
-        {dk64::AnalogCamMode::Off, "Off", "Off"},
-        {dk64::AnalogCamMode::On, "On", "On"},
-    };
-    config.add_enum_option(
-        dk64::configkeys::general::analog_cam_mode,
-        "Analog Camera",
-        "Enables the analog camera.",
-        analog_cam_mode_options,
-        dk64::AnalogCamMode::Off
-    );
-    config.add_number_option(
-        dk64::configkeys::general::analog_camera_sensitivity,
-        "Analog Camera Sensitivity",
-        "Sets the sensitivity of the right stick analog camera, if enabled.",
-        1, 10, 1, 0, false, 3
-    );
-    config.add_option_hidden_dependency(
-        dk64::configkeys::general::analog_camera_sensitivity,
-        dk64::configkeys::general::analog_cam_mode,
-        dk64::AnalogCamMode::Off
-    );
     static EnumOptionVector camera_invert_mode_options = {
         {dk64::CameraInvertMode::InvertNone, "InvertNone", "None"},
         {dk64::CameraInvertMode::InvertX, "InvertX", "Invert X"},
@@ -96,6 +63,32 @@ static void add_general_options(recomp::config::Config &config) {
         flying_and_swimming_invert_options,
         dk64::CameraInvertMode::InvertY
     );
+    // Story Skip
+    static EnumOptionVector story_skip_options = {
+        {dk64::StorySkipMode::Off, "Off", "None"},
+        {dk64::StorySkipMode::IntroStory, "IntroStory", "Intro Story Only"},
+        {dk64::StorySkipMode::VanillaOn, "VanillaOn", "On"}
+    };
+    config.add_enum_option(
+        dk64::configkeys::general::story_skip,
+        "Story Skip",
+        "Skips some story cutscenes.",
+        story_skip_options,
+        dk64::StorySkipMode::Off
+    );
+    // Camera Type
+    static EnumOptionVector camera_type_options = {
+        {dk64::CameraTypeMode::Free, "Free", "Free Cam"},
+        {dk64::CameraTypeMode::Follow, "Follow", "Follow Cam"},
+        {dk64::CameraTypeMode::BetterFree, "BetterFree", "Better Free Cam"}
+    };
+    config.add_enum_option(
+        dk64::configkeys::general::camera_type,
+        "Camera Type",
+        "Changes the camera behavior.",
+        camera_type_options,
+        dk64::CameraTypeMode::Free
+    );
 }
 
 template <typename T = uint32_t>
@@ -106,10 +99,6 @@ T get_general_config_enum_value(const std::string& option_id) {
 template <typename T = uint32_t>
 T get_general_config_number_value(const std::string& option_id) {
     return static_cast<T>(std::get<double>(recompui::config::get_general_config().get_option_value(option_id)));
-}
-
-dk64::NoteSavingMode dk64::get_note_saving_mode() {
-    return get_general_config_enum_value<dk64::NoteSavingMode>(dk64::configkeys::general::note_saving_mode);
 }
 
 dk64::CameraInvertMode dk64::get_camera_invert_mode() {
@@ -124,12 +113,16 @@ dk64::CameraInvertMode dk64::get_flying_and_swimming_invert_mode() {
     return get_general_config_enum_value<dk64::CameraInvertMode>(dk64::configkeys::general::flying_and_swimming_invert_mode);
 }
 
-dk64::CameraInvertMode dk64::get_first_person_invert_mode() {
-    return get_general_config_enum_value<dk64::CameraInvertMode>(dk64::configkeys::general::first_person_invert_mode);
+dk64::StorySkipMode dk64::get_story_skip() {
+    return get_general_config_enum_value<dk64::StorySkipMode>(dk64::configkeys::general::story_skip);
 }
 
-dk64::AnalogCamMode dk64::get_analog_cam_mode() {
-    return get_general_config_enum_value<dk64::AnalogCamMode>(dk64::configkeys::general::analog_cam_mode);
+dk64::CameraTypeMode dk64::get_camera_type() {
+    return get_general_config_enum_value<dk64::CameraTypeMode>(dk64::configkeys::general::camera_type);
+}
+
+dk64::CameraInvertMode dk64::get_first_person_invert_mode() {
+    return get_general_config_enum_value<dk64::CameraInvertMode>(dk64::configkeys::general::first_person_invert_mode);
 }
 
 uint32_t dk64::get_analog_cam_sensitivity() {
@@ -148,6 +141,12 @@ static void add_sound_options(recomp::config::Config &config) {
         "Controls the overall volume of background music.",
         100.0f
     );
+    config.add_percent_number_option(
+        dk64::configkeys::sound::sfx_volume,
+        "SFX Volume",
+        "Controls the overall volume of sound effects.",
+        100.0f
+    );
 }
 template <typename T = uint32_t>
 T get_sound_config_number_value(const std::string& option_id) {
@@ -156,6 +155,10 @@ T get_sound_config_number_value(const std::string& option_id) {
 
 int dk64::get_bgm_volume() {
     return get_sound_config_number_value<int>(dk64::configkeys::sound::bgm_volume);
+}
+
+int dk64::get_sfx_volume() {
+    return get_sound_config_number_value<int>(dk64::configkeys::sound::sfx_volume);
 }
 
 static void add_graphics_options(recomp::config::Config &config) {

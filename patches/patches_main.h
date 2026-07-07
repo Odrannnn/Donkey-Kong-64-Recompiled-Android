@@ -1640,3 +1640,49 @@ typedef struct {
     u8      unk2EE;
     u8      unk2EF;
 } CharacterChange;
+
+typedef struct {
+    s16     button;
+    s8      stick_x;        /* -80 <= stick_x <= 80 */
+    s8      stick_y;        /* -80 <= stick_y <= 80 */
+} DKTV_OSContPad;
+
+extern s32 D_global_asm_80755338; // cutscene_will_play_next_map
+extern s32 D_global_asm_8075533C; // cutscene_to_play_next_map
+extern Vtx D_global_asm_80754C48[2][4];
+extern u16 *D_global_asm_807ECE94;
+extern DKTV_OSContPad *D_global_asm_807ECE98;
+extern u8 is_autowalking;
+extern u16 D_global_asm_8075531C; // Demo Fadeout Timer
+extern Gfx *func_global_asm_805FD030(Gfx *dl);
+
+extern Gfx **D_1000118;
+extern Mtx D_2000080;
+extern Mtx D_20000C0;
+extern Mtx D_2000180;
+
+extern u8 D_global_asm_807FDB0F; // alpha
+extern s32 D_global_asm_807FDB10;
+extern void *D_global_asm_807FDB14; // TODO: Function pointer
+extern u8 D_global_asm_807FDB18;
+extern s16 D_global_asm_807FDB1A;
+extern u8 D_global_asm_807FDB1C;
+extern u8 D_global_asm_807FDB1D;
+extern u8 D_global_asm_807FDB28;
+extern s32 D_global_asm_807FDB2C;
+extern s32 D_global_asm_807FDB30;
+extern u16 D_global_asm_807FDB36;
+extern s16 D_global_asm_807FDB38;
+extern s16 D_global_asm_807FDB3A;
+extern s16 D_global_asm_807FDB3C;
+extern s16 D_global_asm_807FDB3E;
+extern s16 D_global_asm_807FDB40;
+extern s16 D_global_asm_807FDB42;
+extern s16 D_global_asm_807F7358;
+extern s16 D_global_asm_807F735A;
+extern s16 D_global_asm_807F735C;
+extern s16 D_global_asm_807F735E;
+extern s16 D_global_asm_807FDB3C;
+extern s16 D_global_asm_807FDB3E;
+extern s16 D_global_asm_807FDB40;
+extern s16 D_global_asm_807FDB42;

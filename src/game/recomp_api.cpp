@@ -3,15 +3,16 @@
 #include "recomp.h"
 #include "librecomp/overlays.hpp"
 #include "librecomp/addresses.hpp"
-#include "banjo_config.h"
+#include "donk_config.h"
 #include "recompinput/recompinput.h"
 #include "recompui/recompui.h"
 #include "recompui/renderer.h"
-#include "banjo_sound.h"
+#include "donk_sound.h"
 #include "librecomp/helpers.hpp"
 #include "../patches/input.h"
 #include "../patches/graphics.h"
 #include "../patches/sound.h"
+#include "../patches/options.h"
 #include "ultramodern/ultramodern.hpp"
 #include "ultramodern/config.hpp"
 #include "../lib/N64ModernRuntime/thirdparty/xxHash/xxh3.h"
@@ -122,7 +123,39 @@ extern "C" void recomp_get_cutscene_aspect_ratio(uint8_t *rdram, recomp_context 
 }
 
 extern "C" void recomp_get_bgm_volume(uint8_t* rdram, recomp_context* ctx) {
-    _return(ctx, dk64::get_bgm_volume() / 100.0f);
+    _return(ctx, dk64::get_bgm_volume() / 2.5f);
+}
+
+extern "C" void recomp_get_sfx_volume(uint8_t* rdram, recomp_context* ctx) {
+    _return(ctx, dk64::get_sfx_volume() / 2.5f);
+}
+
+extern "C" void recomp_get_story_skip(uint8_t* rdram, recomp_context* ctx) {
+    switch (dk64::get_story_skip()) {
+        case dk64::StorySkipMode::Off:
+            _return(ctx, 0);
+            return;
+        case dk64::StorySkipMode::IntroStory:
+            _return(ctx, 1);
+            return;
+        case dk64::StorySkipMode::VanillaOn:
+            _return(ctx, 2);
+            return;
+    }
+}
+
+extern "C" void recomp_get_camera_type(uint8_t* rdram, recomp_context* ctx) {
+    switch (dk64::get_camera_type()) {
+        case dk64::CameraTypeMode::Free:
+            _return(ctx, 0);
+            return;
+        case dk64::CameraTypeMode::Follow:
+            _return(ctx, 1);
+            return;
+        case dk64::CameraTypeMode::BetterFree:
+            _return(ctx, 2);
+            return;
+    }
 }
 
 extern "C" void recomp_get_analog_cam_sensitivity(uint8_t* rdram, recomp_context* ctx) {
@@ -188,14 +221,6 @@ extern "C" void recomp_get_first_person_inverted_axes(uint8_t* rdram, recomp_con
 
     *x_out = (mode == dk64::CameraInvertMode::InvertX || mode == dk64::CameraInvertMode::InvertBoth);
     *y_out = (mode == dk64::CameraInvertMode::InvertY || mode == dk64::CameraInvertMode::InvertBoth);
-}
-
-extern "C" void recomp_get_analog_cam_enabled(uint8_t* rdram, recomp_context* ctx) {
-    _return<s32>(ctx, dk64::get_analog_cam_mode() == dk64::AnalogCamMode::On);
-}
-
-extern "C" void recomp_get_note_saving_enabled(uint8_t* rdram, recomp_context* ctx) {
-    _return<s32>(ctx, dk64::get_note_saving_mode() == dk64::NoteSavingMode::On);
 }
 
 extern "C" void recomp_get_right_analog_inputs(uint8_t* rdram, recomp_context* ctx) {

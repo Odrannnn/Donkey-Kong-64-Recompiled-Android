@@ -4,5 +4,6 @@
 #include "patch_helpers.h"
 
 DECLARE_FUNC(float, recomp_get_bgm_volume);
+DECLARE_FUNC(float, recomp_get_sfx_volume);
 
 #endif

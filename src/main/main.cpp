@@ -37,8 +37,8 @@
 #include "recompinput/input_events.h"
 #include "recompinput/recompinput.h"
 #include "recompinput/profiles.h"
-#include "banjo_config.h"
-#include "banjo_sound.h"
+#include "donk_config.h"
+#include "donk_sound.h"
 #include "banjo_support.h"
 #include "banjo_game.h"
 #include "banjo_launcher.h"
@@ -52,41 +52,10 @@
 #include "../../patches/graphics.h"
 #include "../../patches/input.h"
 #include "../../patches/sound.h"
+#include "../../patches/options.h"
 #include "../../patches/misc_funcs.h"
 
 namespace {
-using GfxPaceClock = std::chrono::high_resolution_clock;
-static GfxPaceClock::time_point next_gfx_completion_time = GfxPaceClock::now();
-
-void pace_gfx_completion() {
-    const double completion_rate = 29.97;
-    if (completion_rate <= 0.0) {
-        return;
-    }
-
-    const GfxPaceClock::duration frame_duration = std::chrono::duration_cast<GfxPaceClock::duration>(
-        std::chrono::duration<double>(1.0 / completion_rate)
-    );
-    if (frame_duration <= GfxPaceClock::duration::zero()) {
-        return;
-    }
-
-    const GfxPaceClock::time_point now = GfxPaceClock::now();
-    if (now > next_gfx_completion_time + frame_duration * 4) {
-        next_gfx_completion_time = now;
-    }
-
-    const GfxPaceClock::time_point target_time = next_gfx_completion_time;
-    if (now < target_time) {
-        ultramodern::sleep_until(target_time);
-    }
-
-    const GfxPaceClock::time_point after_sleep = GfxPaceClock::now();
-    next_gfx_completion_time = target_time + frame_duration;
-    if (next_gfx_completion_time < after_sleep) {
-        next_gfx_completion_time = after_sleep + frame_duration;
-    }
-}
 
 class PacingRendererContext final : public ultramodern::renderer::RendererContext {
 public:
@@ -110,7 +79,6 @@ public:
 
     void send_dl(const OSTask* task) override {
         inner->send_dl(task);
-        pace_gfx_completion();
     }
 
     void send_dummy_workload(uint32_t fb_address) override {
@@ -813,9 +781,11 @@ int main(int argc, char** argv) {
     REGISTER_FUNC(recomp_get_target_aspect_ratio);
     REGISTER_FUNC(recomp_get_target_framerate);
     REGISTER_FUNC(recomp_get_cutscene_aspect_ratio);
-    REGISTER_FUNC(recomp_get_analog_cam_enabled);
     REGISTER_FUNC(recomp_get_right_analog_inputs);
     REGISTER_FUNC(recomp_get_bgm_volume);
+    REGISTER_FUNC(recomp_get_sfx_volume);
+    REGISTER_FUNC(recomp_get_story_skip);
+    REGISTER_FUNC(recomp_get_camera_type);
     // REGISTER_FUNC(recomp_get_gyro_deltas);
     // REGISTER_FUNC(recomp_get_mouse_deltas);
     REGISTER_FUNC(recomp_get_inverted_axes);

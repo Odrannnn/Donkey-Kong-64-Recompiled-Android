@@ -1,5 +1,5 @@
-#ifndef __BANJO_CONFIG_H__
-#define __BANJO_CONFIG_H__
+#ifndef __DONK_CONFIG_H__
+#define __DONK_CONFIG_H__
 
 #include <filesystem>
 #include <string>
@@ -13,17 +13,19 @@ namespace dk64 {
 
     namespace configkeys {
         namespace general {
-            inline const std::string note_saving_mode = "note_saving_mode";
             inline const std::string camera_invert_mode = "camera_invert_mode";
             inline const std::string analog_cam_mode = "analog_cam_mode";
             inline const std::string third_person_camera_invert_mode = "third_person_camera_invert_mode";
             inline const std::string flying_and_swimming_invert_mode = "flying_and_swimming_invert_mode";
             inline const std::string first_person_invert_mode = "first_person_invert_mode";
             inline const std::string analog_camera_sensitivity = "analog_camera_sensitivity";
+            inline const std::string story_skip = "story_skip";
+            inline const std::string camera_type = "camera_type";
         }
 
         namespace sound {
             inline const std::string bgm_volume = "bgm_volume";
+            inline const std::string sfx_volume = "sfx_volume";
         }
 
         namespace graphics {
@@ -49,33 +51,7 @@ namespace dk64 {
 
     CameraInvertMode get_first_person_invert_mode();
 
-    enum class AnalogCamMode {
-        On,
-        Off,
-        OptionCount
-    };
-
-    NLOHMANN_JSON_SERIALIZE_ENUM(dk64::AnalogCamMode, {
-        {dk64::AnalogCamMode::On, "On"},
-        {dk64::AnalogCamMode::Off, "Off"}
-    });
-
-    AnalogCamMode get_analog_cam_mode();
-
     uint32_t get_analog_cam_sensitivity();
-
-    enum class NoteSavingMode {
-        On,
-        Off,
-        OptionCount
-    };
-
-    NLOHMANN_JSON_SERIALIZE_ENUM(dk64::NoteSavingMode, {
-        {dk64::NoteSavingMode::On, "On"},
-        {dk64::NoteSavingMode::Off, "Off"}
-    });
-
-    NoteSavingMode get_note_saving_mode();
 
     enum class CutsceneAspectRatioMode {
         Original,
@@ -85,6 +61,22 @@ namespace dk64 {
     };
 
     CutsceneAspectRatioMode get_cutscene_aspect_ratio_mode();
+
+    enum class StorySkipMode {
+        Off,
+        IntroStory,
+        VanillaOn
+    };
+
+    StorySkipMode get_story_skip();
+
+    enum class CameraTypeMode {
+        Free,
+        Follow,
+        BetterFree
+    };
+
+    CameraTypeMode get_camera_type();
 
     void open_quit_game_prompt();
 };
