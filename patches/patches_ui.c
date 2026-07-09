@@ -305,7 +305,34 @@ extern u8 func_global_asm_80651B64(s16 arg0);
 extern Gfx *func_global_asm_805FD030(Gfx *dl);
 extern u8 cc_player_index;
 
+Gfx *alignHUD(Gfx * dl, u8 is_left_aligned, u8 is_right_aligned) {
+    s32 margin_reduction = 8;
+    gEXPushScissor(dl++);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
+    if (is_right_aligned) {
+        // Right align
+        gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
+            -(D_global_asm_80744490 - margin_reduction) * 4, 0,
+            -(D_global_asm_80744490 - margin_reduction) * 4, 0);
+        gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, -(D_global_asm_80744490 - margin_reduction) * 4, 0);
+    } else if (is_left_aligned) {
+        gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, -margin_reduction * 4, 0, -margin_reduction * 4);
+        gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
+    }
+    return dl;
+}
+
+Gfx *popHUD(Gfx *dl) {
+    gEXPopScissor(dl++);
+    // Clear gEX
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
+    gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
+    gEXSetScissorAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
+    return dl;
+}
+
 #define BORDER_SPRITE_TOLERANCE 60
+// Draw sprites
 RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16 arg2) {
     s32 i;
     u8 sp15B;
@@ -342,18 +369,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     temp_s0 = sprite->unk0[sprite->unk21++].unk0[D_global_asm_807444FC];
     gSPDisplayList(dl++, osVirtualToPhysical(temp_s0));
     if (sprite->unk36F) {
-        s32 margin_reduction = 8;
-        gEXSetScissor(temp_s0++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
-        if (sprite->unk340 > ((320 - BORDER_SPRITE_TOLERANCE) * 4)) {
-            // Right align
-            gEXSetRectAlign(temp_s0++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
-                -(D_global_asm_80744490 - margin_reduction) * 4, margin_reduction * 4,
-                -(D_global_asm_80744490 - margin_reduction) * 4, margin_reduction * 4);
-            gEXSetViewportAlign(temp_s0++, G_EX_ORIGIN_RIGHT, -(D_global_asm_80744490 - margin_reduction) * 4, margin_reduction * 4);
-        } else if (sprite->unk340 < (BORDER_SPRITE_TOLERANCE * 4)) {
-            gEXSetRectAlign(temp_s0++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, -margin_reduction * 4, 0, -margin_reduction * 4);
-            gEXSetViewportAlign(temp_s0++, G_EX_ORIGIN_LEFT, 0, -margin_reduction * 4);
-        }
+        temp_s0 = alignHUD(temp_s0, sprite->unk340 < (BORDER_SPRITE_TOLERANCE * 4), sprite->unk340 > ((320 - BORDER_SPRITE_TOLERANCE) * 4));
     }
     gDPPipeSync(temp_s0++);
     gDPSetCycleType(temp_s0++, G_CYC_1CYCLE);
@@ -459,15 +475,150 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
                 D_global_asm_80744494
             );
         }
+        temp_s0 = popHUD(temp_s0);
     }
-    // Clear gEX
-    gEXSetRectAlign(temp_s0++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
-    gEXSetViewportAlign(temp_s0++, G_EX_ORIGIN_NONE, 0, 0);
-    gEXSetScissorAlign(temp_s0++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
-    // 
     gDPPipeSync(temp_s0++);
     gSPEndDisplayList(temp_s0++);
     D_global_asm_807F6009 = 5;
+    return dl;
+}
+
+typedef struct {
+    s32 unk0; // screen x
+    s32 unk4; // screen y
+    Mtx unk8[2];
+} Struct806F9D8C_arg14;
+
+typedef struct {
+    s32 unk0;
+    f32 unk4;
+    f32 unk8;
+    s32 unkC;
+    s16 unk10;
+    s16 unk12;
+    void *unk14;
+} Struct806FA504_arg1;
+
+typedef struct HUDDisplay {
+	/* 0x000 */ u16* actual_count_pointer;
+	/* 0x004 */	u16 hud_count;
+	/* 0x006 */	u8 freeze_timer;
+	/* 0x007 */	u8 counter_timer;
+	/* 0x008 */	s32 screen_x;
+	/* 0x00C */	s32 screen_y;
+	/* 0x010 */ f32 unk_10;
+    /* 0x014 */ f32 unk_14;
+    /* 0x018 */ f32 unk_18;
+    /* 0x01C */ u8 unk_1c;
+    /* 0x01D */ u8 unk_1d;
+    /* 0x01E */ u8 unk_1e;
+    /* 0x01F */ u8 unk_1f;
+	/* 0x020 */ u32 hud_state; // 0 = invisible, 1 = appearing, 2 = visible, 3 = disappearing
+	/* 0x024 */ s32 unk_24;
+	/* 0x028 */	void* counter_pointer;
+	/* 0x02C */ u8 unk_2c; // Infinites?
+    /* 0x02D */ u8 unk_2d; // Infinites?
+    /* 0x02E */ u8 unk_2e;
+    /* 0x02F */ u8 unk_2f;
+} HUDDisplay;
+
+typedef struct {
+    // TODO: Union with friendly field names?
+    // TODO: Enum with indexes?
+    // 0 = Coloured Banana
+    // 1 = Banana Coin
+    // 2 = ???
+    // 3 = ???
+    // 4 = ???
+    // 5 = Crystal Coconut
+    // 6 = ???
+    // 7 = ???
+    // 8 = GB Count (Character)
+    // 9 = ???
+    // 10 = Banana Medal
+    // 11 = ???
+    // 12 = Blueprint
+    // 13 = Coloured Banana?
+    // 14 = Banana Coin?
+    HUDDisplay hud_item[15];
+} PlayerHUD;
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    union {
+        struct {
+            s16 unk4;
+            s16 unk6;
+            s16 unk8;
+            s16 unkA;
+        };
+        s16 unk4_arr[4];
+    };
+} Struct80750948;
+extern u8 D_global_asm_807FD7E4;
+extern f32 func_global_asm_80612794(s16 arg0);
+extern int _sprintf(char *s, const char *fmt, ...);
+extern f32 func_global_asm_80612E40(f32 arg0);
+extern s32 getCenterOfString(s16 renderStyle, u8 *string);
+extern Struct80750948 *func_global_asm_806C7C94(u8 arg0);
+extern Mtx D_2000080;
+extern Gfx **D_1000118;
+extern u8 D_global_asm_807444FC;
+extern Gfx *printStyledText(Gfx *dl, s16 style, s16 x, s16 y, u8 *string, u32 extraBitfield);
+extern PlayerHUD *D_global_asm_80754280;
+extern s16 D_global_asm_80744490;
+
+RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, Gfx *dl) {
+    Struct806F9D8C_arg14 *sp74;
+    Struct80750948 *temp_v0_3;
+    u8 sp6C[4];
+    u8 sp6B;
+    f32 temp_f0;
+    s32 var_a2;
+    s32 sp5C;
+
+    sp74 = arg1->unk14;
+    temp_f0 = func_global_asm_80612794(arg1->unk10);
+    sp6B = temp_f0 * 255.0;
+    sp5C = 0;
+    dl = alignHUD(dl, arg1->unk4 < 0, arg1->unk4 > 0);
+    gSPMatrix(dl++, &D_2000080, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
+    guTranslate(&sp74->unk8[D_global_asm_807444FC], arg1->unk4 * (1.0f - temp_f0), arg1->unk8 * (1.0f - temp_f0), 0.0f);
+
+    switch (D_global_asm_80754280->hud_item[arg0].unk_2c) {
+        case 1:
+            _sprintf(sp6C, "o");
+            break;
+        case 2:
+            _sprintf(sp6C, "NA");
+            break;
+        default:
+            if (arg0 == 5) {
+                var_a2 = func_global_asm_80612E40(D_global_asm_80754280->hud_item[arg0].hud_count * 0.006666667f);
+            } else {
+                var_a2 = D_global_asm_80754280->hud_item[arg0].hud_count;
+            }
+            _sprintf(sp6C, "%d", var_a2);
+            break;
+    }
+    gSPMatrix(dl++, &sp74->unk8[D_global_asm_807444FC], G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0, 0, 0, sp6B);
+    D_global_asm_807FD7E4 = sp6B;
+    gSPDisplayList(dl++, &D_1000118);
+    gDPSetCombineLERP(dl++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
+    temp_v0_3 = func_global_asm_806C7C94(0U);
+    // gDPSetScissor(dl++, G_SC_NON_INTERLACE, temp_v0_3->unk4, temp_v0_3->unk6, temp_v0_3->unk8, temp_v0_3->unkA);
+    if ((D_global_asm_80744490 * 0.5) < D_global_asm_80754280->hud_item[arg0].screen_x) {
+        sp5C = getCenterOfString(0x81, sp6C);
+    }
+    dl = printStyledText(dl, 0x81, (sp74->unk0 - sp5C) * 4, sp74->unk4 * 4, sp6C, 0U);
+    dl = popHUD(dl);
+    gSPPopMatrix(dl++, G_MTX_MODELVIEW);
+    gDPPipeSync(dl++);
     return dl;
 }
 
@@ -672,111 +823,4 @@ typedef struct {
     s16 unk12;
     void *unk14;
 } Struct806FA504_arg1;
-*/
-typedef struct HUDDisplay {
-	/* 0x000 */ u16* actual_count_pointer;
-	/* 0x004 */	u16 hud_count;
-	/* 0x006 */	u8 freeze_timer;
-	/* 0x007 */	u8 counter_timer;
-	/* 0x008 */	s32 screen_x;
-	/* 0x00C */	s32 screen_y;
-	/* 0x010 */ f32 unk_10;
-    /* 0x014 */ f32 unk_14;
-    /* 0x018 */ f32 unk_18;
-    /* 0x01C */ u8 unk_1c;
-    /* 0x01D */ u8 unk_1d;
-    /* 0x01E */ u8 unk_1e;
-    /* 0x01F */ u8 unk_1f;
-	/* 0x020 */ u32 hud_state; // 0 = invisible, 1 = appearing, 2 = visible, 3 = disappearing
-	/* 0x024 */ s32 unk_24;
-	/* 0x028 */	void* counter_pointer;
-	/* 0x02C */ u8 unk_2c; // Infinites?
-    /* 0x02D */ u8 unk_2d; // Infinites?
-    /* 0x02E */ u8 unk_2e;
-    /* 0x02F */ u8 unk_2f;
-} HUDDisplay;
-/*
-typedef struct {
-    // TODO: Union with friendly field names?
-    // TODO: Enum with indexes?
-    // 0 = Coloured Banana
-    // 1 = Banana Coin
-    // 2 = ???
-    // 3 = ???
-    // 4 = ???
-    // 5 = Crystal Coconut
-    // 6 = ???
-    // 7 = ???
-    // 8 = GB Count (Character)
-    // 9 = ???
-    // 10 = Banana Medal
-    // 11 = ???
-    // 12 = Blueprint
-    // 13 = Coloured Banana?
-    // 14 = Banana Coin?
-    HUDDisplay hud_item[15];
-} PlayerHUD;
-
-extern u8 D_global_asm_807FD7E4;
-extern f32 func_global_asm_80612794(s16 arg0);
-extern int _sprintf(char *s, const char *fmt, ...);
-extern f32 func_global_asm_80612E40(f32 arg0);
-extern s32 getCenterOfString(s16 renderStyle, u8 *string);
-extern Struct80750948 *func_global_asm_806C7C94(u8 arg0);
-extern Mtx D_2000080;
-extern Gfx **D_1000118;
-extern u8 D_global_asm_807444FC;
-extern Gfx *printStyledText(Gfx *dl, s16 style, s16 x, s16 y, u8 *string, u32 extraBitfield);
-extern PlayerHUD *D_global_asm_80754280;
-extern s16 D_global_asm_80744490;
-
-RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, Gfx *dl) {
-    Struct806F9D8C_arg14 *sp74;
-    Struct80750948 *temp_v0_3;
-    char sp6C[4];
-    u8 sp6B;
-    f32 temp_f0;
-    s32 var_a2;
-    s32 sp5C;
-
-    sp74 = arg1->unk14;
-    temp_f0 = func_global_asm_80612794(arg1->unk10);
-    sp6B = temp_f0 * 255.0;
-    sp5C = 0;
-    gSPMatrix(dl++, &D_2000080, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
-    guTranslate(&sp74->unk8[D_global_asm_807444FC], arg1->unk4 * (1.0f - temp_f0), arg1->unk8 * (1.0f - temp_f0), 0.0f);
-
-    switch (D_global_asm_80754280->hud_item[arg0].unk_2c) {
-        case 1:
-            _sprintf(sp6C, "o");
-            break;
-        case 2:
-            _sprintf(sp6C, "NA");
-            break;
-        default:
-            if (arg0 == 5) {
-                var_a2 = func_global_asm_80612E40(D_global_asm_80754280->hud_item[arg0].hud_count * 0.006666667f);
-            } else {
-                var_a2 = D_global_asm_80754280->hud_item[arg0].hud_count;
-            }
-            _sprintf(sp6C, "%d", var_a2);
-            break;
-    }
-    gSPMatrix(dl++, &sp74->unk8[D_global_asm_807444FC], G_MTX_MODELVIEW | G_MTX_MUL | G_MTX_PUSH);
-    gDPPipeSync(dl++);
-    gDPSetPrimColor(dl++, 0, 0, 0, 0, 0, sp6B);
-    D_global_asm_807FD7E4 = sp6B;
-    gSPDisplayList(dl++, D_1000118);
-    gDPSetCombineLERP(dl++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
-    temp_v0_3 = func_global_asm_806C7C94(0U);
-    gDPSetScissor(dl++, G_SC_NON_INTERLACE, temp_v0_3->unk4, temp_v0_3->unk6, temp_v0_3->unk8, temp_v0_3->unkA);
-
-    if ((D_global_asm_80744490 * 0.5) < D_global_asm_80754280->hud_item[arg0].screen_x) {
-        sp5C = getCenterOfString(0x81, (u8*)sp6C);
-    }
-    dl = printStyledText(dl, 0x81, (s16) ((sp74->unk0 - sp5C) * 4), (s16) (sp74->unk4 * 4), (u8 *) sp6C, 0U);
-    gSPPopMatrix(dl++, G_MTX_MODELVIEW);
-    gDPPipeSync(dl++);
-    return dl;
-}
 */
