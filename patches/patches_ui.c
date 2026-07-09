@@ -22,7 +22,7 @@ typedef struct tuple_f {
 } tuple_f;
 
 typedef struct {
-    void **unk0[2];
+    Gfx *unk0[2];
 } Struct80717D84_unk0;
 
 typedef struct {
@@ -43,7 +43,7 @@ struct Struct80717D84 {
     u8 unk20;
     u8 unk21;
     u8 unk22[0x28 - 0x22];
-    Vtx unk28[4][4];
+    Vtx unk28[4 * 4];
     float unk128[4][2][4][4];
     void *unk328;
     u8 unk32C;
@@ -305,6 +305,7 @@ extern u8 func_global_asm_80651B64(s16 arg0);
 extern Gfx *func_global_asm_805FD030(Gfx *dl);
 extern u8 cc_player_index;
 
+#define BORDER_SPRITE_TOLERANCE 60
 RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16 arg2) {
     s32 i;
     u8 sp15B;
@@ -313,7 +314,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     f32 sp154;
     f32 sp150;
     f32 sp14C;
-    void* temp_s0;
+    Gfx* temp_s0;
     
     sp154 = 1.0f;
     sp150 = 1.0f;
@@ -329,9 +330,9 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     }
     if (sprite->unk388 != -1) {
         if (sprite->unk36F != 0) {
-            if (!func_global_asm_806522CC(sprite->unk340 * 0.25, sprite->unk344 * 0.25, sprite->unk388)) {
-                return dl;
-            }
+            // if (!func_global_asm_806522CC(sprite->unk340 * 0.25, sprite->unk344 * 0.25, sprite->unk388)) {
+            //     return dl;
+            // }
         } else {
             if (arg2 != sprite->unk388) {
                 return dl;
@@ -340,46 +341,66 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     }
     temp_s0 = sprite->unk0[sprite->unk21++].unk0[D_global_asm_807444FC];
     gSPDisplayList(dl++, osVirtualToPhysical(temp_s0));
-    gDPPipeSync(dl++);
-    gDPSetCycleType(dl++, G_CYC_1CYCLE);
-    gSPLoadGeometryMode(dl++, 0);
-    gDPSetColorDither(dl++, G_CD_DISABLE);
-    if (sprite->unk36E != 0) {
-        gSPSetGeometryMode(dl++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
-        gDPSetRenderMode(dl++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
-    } else {
-        gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
-        gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    if (sprite->unk36F) {
+        s32 margin_reduction = 8;
+        gEXSetScissor(temp_s0++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
+        if (sprite->unk340 > ((320 - BORDER_SPRITE_TOLERANCE) * 4)) {
+            // Right align
+            gEXSetRectAlign(temp_s0++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
+                -(D_global_asm_80744490 - margin_reduction) * 4, margin_reduction * 4,
+                -(D_global_asm_80744490 - margin_reduction) * 4, margin_reduction * 4);
+            gEXSetViewportAlign(temp_s0++, G_EX_ORIGIN_RIGHT, -(D_global_asm_80744490 - margin_reduction) * 4, margin_reduction * 4);
+        } else if (sprite->unk340 < (BORDER_SPRITE_TOLERANCE * 4)) {
+            gEXSetRectAlign(temp_s0++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, -margin_reduction * 4, 0, -margin_reduction * 4);
+            gEXSetViewportAlign(temp_s0++, G_EX_ORIGIN_LEFT, 0, -margin_reduction * 4);
+        }
     }
-    gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
-    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPPipeSync(temp_s0++);
+    gDPSetCycleType(temp_s0++, G_CYC_1CYCLE);
+    gSPLoadGeometryMode(temp_s0++, 0);
+    gDPSetColorDither(temp_s0++, G_CD_DISABLE);
+    if (sprite->unk36E != 0) {
+        gSPSetGeometryMode(temp_s0++, G_ZBUFFER | G_SHADE | G_SHADING_SMOOTH);
+        gDPSetRenderMode(temp_s0++, G_RM_ZB_CLD_SURF, G_RM_ZB_CLD_SURF2);
+    } else {
+        gSPSetGeometryMode(temp_s0++, G_SHADE | G_SHADING_SMOOTH);
+        gDPSetRenderMode(temp_s0++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    }
+    gSPTexture(temp_s0++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetCombineMode(temp_s0++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     if ((sprite->unk330->unk14 == 0) && (func_global_asm_80651B64(arg2) != 0)) {
         func_global_asm_8065C334(sprite->unk340, sprite->unk344, sprite->unk348, 0, &sp15B, &sp15A, &sp159, arg2);
         sp154 = (sp15B / 255.0);
         sp150 = (sp15A / 255.0);
         sp14C = (sp159 / 255.0);
     }
-    gDPSetPrimColor(dl++, 0, 0, sprite->unk36A * sp154, sprite->unk36B * sp150, sprite->unk36C * sp14C, sprite->unk36D);
+    gDPSetPrimColor(temp_s0++, 0, 0, sprite->unk36A * sp154, sprite->unk36B * sp150, sprite->unk36C * sp14C, sprite->unk36D);
     if (sprite->unk36F != 0) {
-        gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-        dl = func_global_asm_805FD030(dl);
-        if (sprite->unk388 == -1) {
-            gDPSetScissor(dl++, G_SC_NON_INTERLACE,
-                sprite->unk38E,
-                sprite->unk390,
-                sprite->unk392,
-                sprite->unk394
-            );
-        }
+        gSPMatrix(temp_s0++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(temp_s0++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        temp_s0 = func_global_asm_805FD030(temp_s0);
+        // gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
+        //     0,
+        //     0,
+        //     D_global_asm_80744490,
+        //     D_global_asm_80744494
+        // );
+        // if (sprite->unk388 == -1) {
+        //     gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
+        //         sprite->unk38E,
+        //         sprite->unk390,
+        //         sprite->unk392,
+        //         sprite->unk394
+        //     );
+        // }
     }
-    gSPMatrix(dl++, osVirtualToPhysical(&sprite->unk128[cc_player_index][D_global_asm_807444FC]), G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    gSPMatrix(temp_s0++, osVirtualToPhysical(sprite->unk128[cc_player_index][D_global_asm_807444FC]), G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     for (i = 0; i < sprite->unk380; i++) {
         if ((D_global_asm_807F6009 != 5) || (D_global_asm_807F600C != sprite->unk370[i])) {
-            gDPPipeSync(dl++);
+            gDPPipeSync(temp_s0++);
             switch (sprite->unk330->unkB) {
                 case 0:
-                    gDPLoadTextureBlock_4b(dl++, sprite->unk370[i],
+                    gDPLoadTextureBlock_4b(temp_s0++, sprite->unk370[i],
                         sprite->unk330->unkA,
                         sprite->unk330->unkC, sprite->unk330->unkE,
     		            0,
@@ -389,7 +410,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
                     );
                     break;
                 case 1:
-                    gDPLoadTextureBlock(dl++, sprite->unk370[i],
+                    gDPLoadTextureBlock(temp_s0++, sprite->unk370[i],
                         sprite->unk330->unkA, G_IM_SIZ_8b,
                         sprite->unk330->unkC, sprite->unk330->unkE,
     		            0,
@@ -399,7 +420,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
                     );
                     break;
                 case 2:
-                    gDPLoadTextureBlock(dl++, sprite->unk370[i],
+                    gDPLoadTextureBlock(temp_s0++, sprite->unk370[i],
                         sprite->unk330->unkA, G_IM_SIZ_16b,
                         sprite->unk330->unkC, sprite->unk330->unkE,
     		            0,
@@ -409,7 +430,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
                     );
                     break;
                 case 3:
-                    gDPLoadTextureBlock(dl++, sprite->unk370[i],
+                    gDPLoadTextureBlock(temp_s0++, sprite->unk370[i],
                         sprite->unk330->unkA, G_IM_SIZ_32b,
                         sprite->unk330->unkC, sprite->unk330->unkE,
     		            0,
@@ -421,17 +442,17 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
             }
             D_global_asm_807F600C = sprite->unk370[i];
         }
-        gSPVertex(dl++, osVirtualToPhysical(&sprite->unk28[i]), 4, 0);
-        gSP2Triangles(dl++, 0, 1, 3, 0, 0, 2, 3, 0);
+        gSPVertex(temp_s0++, osVirtualToPhysical(sprite->unk28 + (i << 2)), 4, 0);
+        gSP2Triangles(temp_s0++, 0, 1, 3, 0, 0, 2, 3, 0);
     }
-    gSPPopMatrix(dl++, G_MTX_MODELVIEW);
-    gDPPipeSync(dl++);
-    gDPSetColorDither(dl++, G_CD_MAGICSQ);
+    gSPPopMatrix(temp_s0++, G_MTX_MODELVIEW);
+    gDPPipeSync(temp_s0++);
+    gDPSetColorDither(temp_s0++, G_CD_MAGICSQ);
     if (sprite->unk36F != 0) {
-        gSPMatrix(dl++, &D_2000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-        gSPMatrix(dl++, &D_2000200, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
+        gSPMatrix(temp_s0++, &D_2000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(temp_s0++, &D_2000200, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
         if (sprite->unk388 == -1) {
-            gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+            gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
                 0,
                 0,
                 D_global_asm_80744490,
@@ -439,8 +460,11 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
             );
         }
     }
-    gDPPipeSync(dl++);
-    gSPEndDisplayList(dl++);
+    gEXSetRectAlign(temp_s0++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
+    gEXSetViewportAlign(temp_s0++, G_EX_ORIGIN_NONE, 0, 0);
+    gEXSetScissorAlign(temp_s0++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
+    gDPPipeSync(temp_s0++);
+    gSPEndDisplayList(temp_s0++);
     D_global_asm_807F6009 = 5;
     return dl;
 }
