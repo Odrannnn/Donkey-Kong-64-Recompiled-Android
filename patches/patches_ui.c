@@ -460,9 +460,11 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
             );
         }
     }
+    // Clear gEX
     gEXSetRectAlign(temp_s0++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
     gEXSetViewportAlign(temp_s0++, G_EX_ORIGIN_NONE, 0, 0);
     gEXSetScissorAlign(temp_s0++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
+    // 
     gDPPipeSync(temp_s0++);
     gSPEndDisplayList(temp_s0++);
     D_global_asm_807F6009 = 5;
