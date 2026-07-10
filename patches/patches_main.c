@@ -537,3 +537,260 @@ RECOMP_PATCH Gfx *func_global_asm_80703AB0(Gfx *dl, u8 arg1) {
     gDPPipeSync(dl++);
     return dl;
 }
+
+Gfx* func_global_asm_8062CEA8(Gfx*, void*, u8);      /* extern */
+Gfx* func_global_asm_8063A968(Gfx*, s32);           /* extern */
+void* func_global_asm_80656B98(Gfx*, s32, s32);       /* extern */
+Gfx* func_global_asm_8065D994(Gfx*, s16);           /* extern */
+void* func_global_asm_8065FD88(Gfx*, s32, s32);       /* extern */
+
+typedef struct Struct807F6C0C {
+    s32 unk0;
+    s32 unk4;
+    void *unk8;
+    void *unkC;
+} Struct807F6C0C;
+
+typedef struct {
+    u8 loaded;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    u8 unk4;
+    u8 visible;
+    u8 unk6;
+    u8 unk7;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    void *unk14;
+    void *unk18;
+    void *unk1C;
+    void *unk20;
+    s32 unk24;
+    u8 pad28[0x2C - 0x28];
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    s32 unk38;
+    u8 pad3C[0x4C - 0x3C];
+    void *unk4C;
+    s32 unk50;
+    u8 pad54[0x58 - 0x54];
+    void *unk58;
+    u8 pad5C[0x60 - 0x5C];
+    s32 unk60[1];
+    s32 unk64;
+    s32 deload1;
+    s32 deload2;
+    s32 deload3;
+    s32 deload4;
+    void *unk78;
+    void *unk7C;
+    s16 unk80;
+    s16 unk82;
+    s16 unk84;
+    s16 unk86;
+    u8 pad2[0x1C8 - 0x88];
+} Chunk;
+
+typedef struct Struct80630B70 Struct80630B70;
+struct Struct80630B70 {
+    Actor *unk0;
+    s32 unk4;
+    s32 unk8;
+    f32 unkC;
+    u8 pad10[0x14-0x10];
+    Struct80630B70 *unk14;
+    u8 pad18[0x24 - 0x18];
+    u8 unk24;
+};
+
+extern void* D_global_asm_807F5DE8;
+extern void* D_global_asm_807F5DEC;
+extern u8 D_global_asm_807F5FEC;
+extern Struct80630B70* D_global_asm_807F5FFC;
+extern u8 D_global_asm_807F6009;
+extern s32 D_global_asm_807F600C;
+extern s16 D_global_asm_807F6BF0[];
+extern u8 D_global_asm_807F6C08;
+extern Struct807F6C0C* D_global_asm_807F6C0C;
+extern s16 D_global_asm_807F6C58[];
+extern s32 D_global_asm_807F6C80;
+extern void* D_global_asm_807F7074;
+extern Chunk *chunk_array_pointer;
+extern void func_global_asm_8062EE48(u8 arg0);
+extern Gfx *func_critter_80027034(Gfx *dl);
+extern Gfx *func_global_asm_806634A4(Gfx *dl);
+extern Gfx *func_global_asm_80630B70(Gfx*, void *, f32, f32, f32, s32, s16, u8);
+extern Gfx *func_global_asm_806592B4(Gfx *dl);
+extern Gfx *func_global_asm_8062EDA8(Gfx *dl, u8 arg1);
+
+typedef struct Struct80655DD0_arg1 {
+    s32 unk0;
+    s32 unk4;
+    void *unk8;
+} Struct80655DD0_arg1;
+
+// @recomp: Chunk bounds fix
+RECOMP_PATCH Gfx *func_global_asm_80655DD0(Gfx * dl, Struct80655DD0_arg1 * arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
+    s32 i;
+    s32 var_s6;
+    void *var_a1;
+    s32 sp60;
+
+    var_s6 = 0;
+    sp60 = D_global_asm_807F5FEC && character_change_array[cc_player_index].fov_y == 45.0;
+    gDPPipeSync(dl++);
+    if (arg5 & 0x10) {
+        gSPMatrix(dl++, osVirtualToPhysical(D_global_asm_807F7074), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPSegment(dl++, 0x06, osVirtualToPhysical(D_global_asm_807F5DE8));
+        gSPSegment(dl++, 0x07, osVirtualToPhysical(D_global_asm_807F5DEC));
+        dl = func_global_asm_8062CEA8(dl, arg1, 1);
+        if (arg1->unk8 != (void*)-1) {
+            gDPPipeSync(dl++);
+            gSPDisplayList(dl++, osVirtualToPhysical(arg1->unk8));
+        }
+        dl = func_global_asm_8065FD88(dl, 0, 0);
+        for (i = 0; i < D_global_asm_807F6C08; i++) {
+            if (D_global_asm_807F6C0C[D_global_asm_807F6BF0[i]].unk8 != (void*)-1) {
+                gDPPipeSync(dl++);
+                gSPDisplayList(dl++, osVirtualToPhysical(D_global_asm_807F6C0C[D_global_asm_807F6BF0[i]].unk8));
+            }
+            if (D_global_asm_807F6C0C[D_global_asm_807F6BF0[i]].unkC != (void*)-1) {
+                gDPPipeSync(dl++);
+                gSPDisplayList(dl++, osVirtualToPhysical(D_global_asm_807F6C0C[D_global_asm_807F6BF0[i]].unkC));
+            }
+        }
+        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    }
+    for (i = D_global_asm_807F6C80 - 1; i >= 0; i--) {
+        var_s6 = D_global_asm_807F6C58[i];
+        if (chunk_array_pointer[var_s6].loaded == 1) {
+            if (chunk_array_pointer[var_s6].unk2 != 0) {
+                func_global_asm_8062EE48(var_s6);
+                chunk_array_pointer[var_s6].unk2 = 0;
+            }
+            gDPPipeSync(dl++);
+            gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+                0,
+                0,
+                D_global_asm_80744490,
+                D_global_asm_80744494);
+            func_global_asm_80658E58(
+                0,
+                0,
+                D_global_asm_80744490,
+                D_global_asm_80744494);
+            dl = func_global_asm_806592B4(dl);
+            if (arg5 & 0x10) {
+                dl = func_global_asm_8062EDA8(dl, var_s6);
+                if (chunk_array_pointer[var_s6].unk2C != -1) {
+                    gSPMatrix(dl++, osVirtualToPhysical(D_global_asm_807F7074), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                    gSPSegment(dl++, 0x06, osVirtualToPhysical(chunk_array_pointer[var_s6].unk58));
+                    gSPSegment(dl++, 0x07, osVirtualToPhysical(D_global_asm_807F5DEC));
+                    dl = func_global_asm_80656B98(dl, var_s6, 0);
+                    gDPPipeSync(dl++);
+                    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                }
+                if (chunk_array_pointer[var_s6].unk34 != -1) {
+                    gSPMatrix(dl++, osVirtualToPhysical(D_global_asm_807F7074), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                    gSPSegment(dl++, 0x06, osVirtualToPhysical(chunk_array_pointer[var_s6].unk58));
+                    gSPSegment(dl++, 0x07, osVirtualToPhysical(D_global_asm_807F5DEC));
+                    dl = func_global_asm_80656B98(dl, var_s6, 2);
+                    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                }
+            }
+            gDPPipeSync(dl++);
+            if (!(D_global_asm_807FBB64 & 0x01000000)) {
+                dl = func_global_asm_8065D994(dl, var_s6);
+            }
+            dl = func_global_asm_8063A968(dl, chunk_array_pointer[var_s6].unk24);
+            D_global_asm_807F6009 = 0xFF;
+            var_a1 = ((u8)sp60) ? chunk_array_pointer[var_s6].unk18 : chunk_array_pointer[var_s6].unk14;
+            dl = func_global_asm_80630B70(dl, var_a1, arg2, arg3, arg4, arg5, var_s6, sp60);
+            if (arg5 & 0x10) {
+                gSPLoadGeometryMode(dl++, 0);
+                gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
+                dl = func_global_asm_806592B4(dl);
+                dl = func_global_asm_8062EDA8(dl, var_s6);
+                if (chunk_array_pointer[var_s6].unk30 != -1) {
+                    gSPMatrix(dl++, osVirtualToPhysical(D_global_asm_807F7074), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                    gSPSegment(dl++, 0x06, osVirtualToPhysical(chunk_array_pointer[var_s6].unk58));
+                    gSPSegment(dl++, 0x07, osVirtualToPhysical(D_global_asm_807F5DEC));
+                    dl = func_global_asm_80656B98(dl, var_s6, 1);
+                    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                    gDPPipeSync(dl++);
+                }
+                if (chunk_array_pointer[var_s6].unk38 != -1) {
+                    gSPMatrix(dl++, osVirtualToPhysical(D_global_asm_807F7074), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                    gSPSegment(dl++, 0x06, osVirtualToPhysical(chunk_array_pointer[var_s6].unk58));
+                    gSPSegment(dl++, 0x07, osVirtualToPhysical(D_global_asm_807F5DEC));
+                    dl = func_global_asm_80656B98(dl, var_s6, 3);
+                    gDPPipeSync(dl++);
+                    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                }
+            }
+        }
+    }
+    if (arg5 & 0x10) {
+        gSPMatrix(dl++, osVirtualToPhysical(D_global_asm_807F7074), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPSegment(dl++, 0x06, osVirtualToPhysical(D_global_asm_807F5DE8));
+        gSPSegment(dl++, 0x07, osVirtualToPhysical(D_global_asm_807F5DEC));
+        dl = func_global_asm_8062CEA8(dl, arg1, 2);
+        if (D_global_asm_807FBB64 & 0x1000) {
+            gDPPipeSync(dl++);
+            dl = func_critter_80027034(dl);
+            gSPMatrix(dl++, osVirtualToPhysical(D_global_asm_807F7074), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        }
+        dl = func_global_asm_8065FD88(dl, var_s6, 1);
+        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gDPPipeSync(dl++);
+        dl = func_global_asm_806634A4(dl);
+    }
+    for (i = D_global_asm_807F6C80 - 1; i >= 0; i--) {
+        var_s6 = D_global_asm_807F6C58[i];
+        if (chunk_array_pointer[var_s6].loaded == 1) {
+            gDPPipeSync(dl++);
+            gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+                0,
+                0,
+                D_global_asm_80744490,
+                D_global_asm_80744494);
+            func_global_asm_80658E58(
+                0,
+                0,
+                D_global_asm_80744490,
+                D_global_asm_80744494);
+            D_global_asm_807F6009 = 0xFF;
+            var_a1 = ((u8)sp60) ? chunk_array_pointer[var_s6].unk20 : chunk_array_pointer[var_s6].unk1C;
+            dl = func_global_asm_80630B70(dl, var_a1, arg2, arg3, arg4, arg5, var_s6, sp60);
+            if (D_global_asm_807FBB64 & 0x01000000) {
+                dl = func_global_asm_8065D994(dl, var_s6);
+            }
+        }
+    }
+    if (arg5 & 0x10) {
+        gSPMatrix(dl++, osVirtualToPhysical(D_global_asm_807F7074), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPSegment(dl++, 0x06, osVirtualToPhysical(D_global_asm_807F5DE8));
+        gSPSegment(dl++, 0x07, osVirtualToPhysical(D_global_asm_807F5DEC));
+        dl = func_global_asm_8062CEA8(dl, arg1, 3);
+        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gDPPipeSync(dl++);
+    }
+    gDPPipeSync(dl++);
+    gDPSetScissorFrac(dl++, G_SC_NON_INTERLACE,
+        character_change_array[cc_player_index].unk270[0] * 4.0f,
+        character_change_array[cc_player_index].unk270[1] * 4.0f,
+        character_change_array[cc_player_index].unk270[2] * 4.0f,
+        character_change_array[cc_player_index].unk270[3] * 4.0f);
+    func_global_asm_80658E58(
+        character_change_array[cc_player_index].unk270[0],
+        character_change_array[cc_player_index].unk270[1],
+        character_change_array[cc_player_index].unk270[2],
+        character_change_array[cc_player_index].unk270[3]);
+    D_global_asm_807F600C = 0;
+    dl = func_global_asm_80630B70(dl, D_global_asm_807F5FFC, arg2, arg3, arg4, arg5, -1, 0U);
+    dl = func_global_asm_8065D994(dl, -1);
+    return dl;
+}
