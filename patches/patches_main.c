@@ -508,34 +508,6 @@ RECOMP_PATCH void func_global_asm_8060B4D4(OSContPad *arg0) {
     }
 }
 
-//@recomp: Adjust the vertices for the fade transition square. Currently have this tied to SCREEN_WIDTH and SCREEN_HEIGHT
-RECOMP_PATCH Gfx *func_global_asm_80703AB0(Gfx *dl, u8 arg1) {
-    gSPDisplayList(dl++, &D_1000118);
-    gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-    gSPLoadGeometryMode(dl++, 0);
-    gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
-    gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF);
-    gDPPipeSync(dl++);
-    gDPSetCycleType(dl++, G_CYC_1CYCLE);
-    gDPSetTexturePersp(dl++, G_TP_NONE);
-    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-    gDPSetCombineMode(dl++, G_CC_SHADE, G_CC_SHADE);
-
-    D_global_asm_80754C48[D_global_asm_807444FC][0].v.cn[3] = MIN(0xFF, arg1 * 2);
-    D_global_asm_80754C48[D_global_asm_807444FC][1].v.cn[3] = arg1;
-    D_global_asm_80754C48[D_global_asm_807444FC][2].v.cn[3] = MIN(0xFF, arg1 * 2);
-    D_global_asm_80754C48[D_global_asm_807444FC][3].v.cn[3] = arg1;
-    D_global_asm_80754C48[D_global_asm_807444FC][1].v.ob[0] = SCREEN_WIDTH;
-    D_global_asm_80754C48[D_global_asm_807444FC][2].v.ob[0] = SCREEN_WIDTH;
-    D_global_asm_80754C48[D_global_asm_807444FC][2].v.ob[1] = SCREEN_HEIGHT;
-    D_global_asm_80754C48[D_global_asm_807444FC][3].v.ob[1] = SCREEN_HEIGHT;
-    gSPVertex(dl++, osVirtualToPhysical(&D_global_asm_80754C48[D_global_asm_807444FC][0]), 4, 0);
-    gSP2Triangles(dl++, 0, 1, 2, 0, 0, 2, 3, 0);
-    gDPPipeSync(dl++);
-    return dl;
-}
-
 Gfx* func_global_asm_8062CEA8(Gfx*, void*, u8);      /* extern */
 Gfx* func_global_asm_8063A968(Gfx*, s32);           /* extern */
 void* func_global_asm_80656B98(Gfx*, s32, s32);       /* extern */
@@ -835,10 +807,10 @@ RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
                         gDPPipeSync(dl++);
                         dl = func_global_asm_805FCFD8(dl);
                         gDPSetScissor(dl++, G_SC_NON_INTERLACE,
-                            D_global_asm_80744498,
-                            D_global_asm_8074449C,
-                            D_global_asm_807444A0,
-                            D_global_asm_807444A4);
+                            gScissorUpLX,
+                            gScissorUpLY,
+                            gScissorLowerRightX,
+                            gScissorLowerRightY);
                         gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
                         gDPSetCombineMode(dl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
                         var_f2 = character_change_array[i].unk24C - character_change_array[i].unk220;
@@ -951,5 +923,22 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
     if (D_global_asm_8075022C < 0.0) {
         D_global_asm_8075022C = 255.0f;
     }
+    return dl;
+}
+
+//@recomp: Patch "wrong cutscene" fade transition to match func_global_asm_80703374 (roughly)
+RECOMP_PATCH Gfx *func_global_asm_80703AB0(Gfx *dl, u8 arg1) {
+    if (arg1 != 0) {
+        gSPClearGeometryMode(dl++, G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH | G_CLIPPING | 0x0040F9FA);
+        gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
+        gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF);
+        gDPPipeSync(dl++);
+        gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, arg1);
+        gDPSetCycleType(dl++, G_CYC_1CYCLE);
+        gDPSetCombineMode(dl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gDPFillRectangle(dl++, gScissorUpLX, gScissorUpLY, gScissorLowerRightX, gScissorLowerRightY);
+    }
+    gDPPipeSync(dl++);
     return dl;
 }
