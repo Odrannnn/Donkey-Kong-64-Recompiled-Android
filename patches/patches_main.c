@@ -795,12 +795,6 @@ RECOMP_PATCH Gfx *func_global_asm_80655DD0(Gfx * dl, Struct80655DD0_arg1 * arg1,
     return dl;
 }
 
-extern s16 D_global_asm_80744498;
-extern s16 D_global_asm_8074449C;
-extern s16 D_global_asm_807444A0;
-extern s16 D_global_asm_807444A4;
-extern u8 D_global_asm_807FD890;
-
 RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
     CameraPaad* camera_paad;
     PlayerAdditionalActorData* player_aad;

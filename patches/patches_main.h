@@ -136,6 +136,7 @@ extern s8 D_global_asm_807445A0;
 extern s8 D_global_asm_807445A4;
 extern s16 D_global_asm_80744490;
 extern s16 D_global_asm_8076A0AA;
+extern u8 D_global_asm_807FD890;
 
 typedef struct Unk {
     char unk_00[4];
