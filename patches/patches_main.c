@@ -794,3 +794,104 @@ RECOMP_PATCH Gfx *func_global_asm_80655DD0(Gfx * dl, Struct80655DD0_arg1 * arg1,
     dl = func_global_asm_8065D994(dl, -1);
     return dl;
 }
+
+RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
+    CameraPaad* camera_paad;
+    PlayerAdditionalActorData* player_aad;
+    f32 var_f2;
+    u8 spC3;
+    u8 var_fp;
+    s8 spBA;
+    u8 i;
+    Mtx* sp6C;
+    Mtx* sp68;
+
+    spC3 = FALSE;
+    var_fp = 0x64;
+    spBA = FALSE;
+    switch (current_map) {
+        case MAP_GALLEON_MERMAID:
+            spBA = TRUE;
+            goto block_12;
+        case MAP_GALLEON_SUBMARINE:
+        case MAP_GALLEON_SHIPWRECK_DIDDY_LANKY_CHUNKY:
+        case MAP_GALLEON_SHIPWRECK_DK_TINY:
+        case MAP_GALLEON_SHIPWRECK_LANKY_TINY:
+            return dl;
+        case MAP_GALLEON:
+            if (((character_change_array->chunk == 9) || (character_change_array->chunk == 0xA)) && (isFlagSet(0x9C, 0U))) {
+                return dl;
+            }
+        default:
+    block_12:
+            for (i = 0; i < cc_number_of_players; i++) {
+                if (character_change_array[i].does_player_exist) {
+                    player_aad = character_change_array[i].playerPointer->PaaD;
+                    camera_paad = player_aad->unk104->CaaD;
+                    if (spBA || (
+                        character_change_array[i].unk2E8 && 
+                        (character_change_array[i].unk220 < (character_change_array[i].unk24C + 3.0f))
+                    )) {
+                        spC3 = TRUE;
+                        gDPPipeSync(dl++);
+                        dl = func_global_asm_805FCFD8(dl);
+                        gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+                            D_global_asm_80744498,
+                            D_global_asm_8074449C,
+                            D_global_asm_807444A0,
+                            D_global_asm_807444A4);
+                        gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+                        gDPSetCombineMode(dl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+                        var_f2 = character_change_array[i].unk24C - character_change_array[i].unk220;
+                        switch (current_map) {
+                            case MAP_GALLEON:
+                                var_f2 *= 0.07;
+                                break;
+                            case MAP_GALLEON_TREASURE_CHEST:
+                                var_fp = 50;
+                                var_f2 *= 0.07;
+                                break;
+                            case MAP_GALLEON_PUFFTOSS:
+                                var_fp = 50;
+                            default:
+                                var_f2 *= 0.4;
+                                break;
+                        }
+                        if (var_f2 > 80.0f) {
+                            var_f2 = 80.0f;
+                        }
+                        if (D_global_asm_807FD890) {
+                            player_aad->unk1E8 = var_f2;
+                        } else {
+                            player_aad->unk1E8 += ((var_f2 - player_aad->unk1E8) * 0.05);
+                            var_f2 = (u8) player_aad->unk1E8;
+                        }
+                        gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x3C, (u8)(var_fp + var_f2));
+                        gDPSetCycleType(dl++, G_CYC_1CYCLE);\
+                        gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+                        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                        //@recomp: Used to be a verts-based draw, now is just fillrect
+                        gDPFillRectangle(dl++,
+                            character_change_array[i].unk270[0],
+                            character_change_array[i].unk270[1],
+                            character_change_array[i].unk270[2],
+                            character_change_array[i].unk270[3]
+                        );
+                        gDPPipeSync(dl++);
+                    }
+                    character_change_array[i].unk2E8 = camera_paad->unkFA;
+                    character_change_array[i].unk24C = camera_paad->unk90;
+                }
+            }
+            if (spC3) {
+                gSPMatrix(dl++, &D_2000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+                gSPMatrix(dl++, &D_2000200, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
+                gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                D_global_asm_807FD890 = 0;
+            } else {
+                D_global_asm_807FD890 = 1;
+            }
+            break;
+    }
+    return dl;
+}
