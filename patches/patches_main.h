@@ -1694,3 +1694,8 @@ extern u8 cc_number_of_players;
 extern Gfx *func_global_asm_805FCFD8(Gfx *dl);
 extern void func_global_asm_8061134C(void *);
 extern u8 isFlagSet(s16 flagIndex, u8 flagType);
+
+extern void *getPointerTableFile(enum pointertable_e pointerTableIndex, s32 fileIndex, u8 arg2, u8 arg3);
+extern void func_global_asm_8066B434(void *arg0, s32 arg1, s32 arg2);
+extern f32 D_global_asm_80750228;
+extern f32 D_global_asm_8075022C;
