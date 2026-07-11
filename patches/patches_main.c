@@ -942,3 +942,32 @@ RECOMP_PATCH Gfx *func_global_asm_80703AB0(Gfx *dl, u8 arg1) {
     gDPPipeSync(dl++);
     return dl;
 }
+
+//@recomp: rand() causes some issues with stdlib and collisions there. For now, just have this, which is what rand() does
+#define RANDNUM() (func_global_asm_806119A0() & 0x7FFFFFFF)
+
+// @recomp: Patch the static effect in the Rap to fill the full bounds
+RECOMP_PATCH Gfx *func_global_asm_807035C4(Gfx *dl, Actor *arg1) {
+    s16 var_s1;
+    s16 temp_s2;
+    s16 temp_t2;
+
+    gDPPipeSync(dl++);
+    gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF);
+    gDPSetPrimColor(dl++, 0, 0, 0xC8, 0xC8, 0xC8, 0x80);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    gDPSetCombineLERP(dl++, NOISE, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE, NOISE, 0, PRIMITIVE, 0, 0, 0, 0, PRIMITIVE);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, character_change_array->unk270[0], character_change_array->unk270[1], character_change_array->unk270[2], character_change_array->unk270[3]);
+    gDPFillRectangle(dl++, character_change_array->unk270[0], character_change_array->unk270[1], character_change_array->unk270[2], character_change_array->unk270[3]);
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
+    gDPSetCombineMode(dl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+    for (var_s1 = 0; var_s1 < 10; var_s1++) {
+        temp_s2 = (RANDNUM() >> 0xF) % (character_change_array->unk270[3] - character_change_array->unk270[1]) + character_change_array->unk270[1];
+        temp_t2 = ((RANDNUM() >> 0xF) % 10) + 2;
+        gDPFillRectangle(dl++, character_change_array->unk270[0], temp_s2, character_change_array->unk270[2], temp_s2 + temp_t2);
+    }
+    gDPPipeSync(dl++);
+    return dl;
+}
