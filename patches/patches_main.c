@@ -926,19 +926,17 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
         gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 35.0f * cooldown);
     }
     gDPLoadTextureBlock(dl++, (s32)temp_v0 + 0x80000000, G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
-    // gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    // gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     gDPTextureRectangle(
         dl++,
-        character_change_array->unk270[0] * 4,  // ulx
-        character_change_array->unk270[1] * 4,  // uly
-        character_change_array->unk270[2] * 4,  // lrx
-        character_change_array->unk270[3] * 4,  // lry
-        G_TX_RENDERTILE,                            // tile
-        (s32)D_global_asm_80750228, // s
-        (s32)D_global_asm_8075022C, // t
-        1024,                         // dsdx (0x0400)
-        -1024                         // dtdy (0xFC00)
+        character_change_array->unk270[0] * 4,
+        character_change_array->unk270[1] * 4,
+        character_change_array->unk270[2] * 4,
+        character_change_array->unk270[3] * 4,
+        G_TX_RENDERTILE,
+        (s32)D_global_asm_80750228,
+        (s32)D_global_asm_8075022C,
+        1024,
+        -1024
     );
     gDPPipeSync(dl++);
 
