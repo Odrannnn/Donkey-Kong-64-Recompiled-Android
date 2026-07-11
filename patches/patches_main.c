@@ -393,12 +393,10 @@ Gfx* func_global_asm_8062CA70(Gfx* dl, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f
 //}
 
 //@recomp: Seems to be used for the culling of many objects, including actors and props
-RECOMP_PATCH void func_global_asm_80658E58(s16 arg0, s16 arg1, s16 arg2, s16 arg3) {
-    D_global_asm_807F7358 = -0x7FFF;
-    D_global_asm_807F735A = -0x7FFF;
-    D_global_asm_807F735C = 0x7FFF;
-    D_global_asm_807F735E = 0x7FFF;
+RECOMP_PATCH s32 func_global_asm_80658E8C(f32 arg0, f32 arg1, f32 arg2, u8 arg3, u8 arg4) {
+    return 0;
 }
+
 
 //@recomp: Sprite culling. Also used for the scissor of the sprite itself
 RECOMP_PATCH void func_global_asm_80714A68(s16 arg0, s16 arg1, s16 arg2, s16 arg3) {

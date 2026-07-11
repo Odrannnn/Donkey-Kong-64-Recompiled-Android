@@ -21,6 +21,7 @@
 #define	OS_CPU_COUNTER		(OS_CLOCK_RATE*3/4)
 #define OS_NSEC_TO_CYCLES(n)	(((u64)(n)*(OS_CPU_COUNTER/15625000LL))/(1000000000LL/15625000LL))
 #define BUFFER_TIME OS_NSEC_TO_CYCLES(48484843)
+#define SQ(x) ((x) * (x))
 
 extern void osWritebackDCache(void*, s32);
 extern u32  osPiGetStatus(void);
@@ -1699,3 +1700,6 @@ extern void *getPointerTableFile(enum pointertable_e pointerTableIndex, s32 file
 extern void func_global_asm_8066B434(void *arg0, s32 arg1, s32 arg2);
 extern f32 D_global_asm_80750228;
 extern f32 D_global_asm_8075022C;
+
+extern void func_global_asm_80658E58(s16 arg0, s16 arg1, s16 arg2, s16 arg3);
+extern s32 func_global_asm_80626F8C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, f32 arg6, s32 arg7);
