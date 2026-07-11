@@ -795,6 +795,7 @@ RECOMP_PATCH Gfx *func_global_asm_80655DD0(Gfx * dl, Struct80655DD0_arg1 * arg1,
     return dl;
 }
 
+//@recomp: Water Screen Overlay
 RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
     CameraPaad* camera_paad;
     PlayerAdditionalActorData* player_aad;
@@ -892,6 +893,67 @@ RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
                 D_global_asm_807FD890 = 1;
             }
             break;
+    }
+    return dl;
+}
+
+//@recomp: Sandstorm screen overlay
+RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
+    void* temp_v0;
+    f32 cooldown;
+    f32 half_lag;
+
+    cooldown = *cooldown_timer;
+    half_lag = D_global_asm_80744478 * 0.5;
+    temp_v0 = getPointerTableFile(TABLE_25_TEXTURES_GEOMETRY, 0x173C, 1U, 0U);
+    func_global_asm_8066B434(temp_v0, 0x1B2, 0x46);
+    gDPPipeSync(dl++);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, \
+        character_change_array->unk270[0], \
+        character_change_array->unk270[1], \
+        character_change_array->unk270[2], \
+        character_change_array->unk270[3]);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    gDPSetTextureLOD(dl++, G_TL_LOD);
+    gSPLoadGeometryMode(dl++, 0);
+    gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
+    gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    if (current_map == MAP_AZTEC) {
+        gDPSetPrimColor(dl++, 0, 0, 0x8A, 0x52, 0x16, 200.0f * cooldown);
+    } else {
+        gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 35.0f * cooldown);
+    }
+    gDPLoadTextureBlock(dl++, (s32)temp_v0 + 0x80000000, G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+    // gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    // gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gDPTextureRectangle(
+        dl++,
+        character_change_array->unk270[0] * 4,  // ulx
+        character_change_array->unk270[1] * 4,  // uly
+        character_change_array->unk270[2] * 4,  // lrx
+        character_change_array->unk270[3] * 4,  // lry
+        G_TX_RENDERTILE,                            // tile
+        (s32)D_global_asm_80750228, // s
+        (s32)D_global_asm_8075022C, // t
+        1024,                         // dsdx (0x0400)
+        -1024                         // dtdy (0xFC00)
+    );
+    gDPPipeSync(dl++);
+
+    if (current_map == MAP_AZTEC) {
+        D_global_asm_80750228 -= (2.0 * half_lag);
+        D_global_asm_8075022C -= (14.0 * half_lag);
+    } else {
+        D_global_asm_80750228 -= (f64)half_lag;
+        D_global_asm_8075022C -= (0.5 * half_lag);
+    }
+    if (D_global_asm_80750228 < 0.0) {
+        D_global_asm_80750228 = 255.0f;
+    }
+    if (D_global_asm_8075022C < 0.0) {
+        D_global_asm_8075022C = 255.0f;
     }
     return dl;
 }
