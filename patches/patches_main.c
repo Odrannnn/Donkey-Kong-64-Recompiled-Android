@@ -801,11 +801,8 @@ extern s16 D_global_asm_807444A0;
 extern s16 D_global_asm_807444A4;
 extern u8 D_global_asm_807FD890;
 
-Vtx water_overlay_verts[4];
-
 RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
     CameraPaad* camera_paad;
-    Vtx *water_overlay_verts;
     PlayerAdditionalActorData* player_aad;
     f32 var_f2;
     u8 spC3;
@@ -817,24 +814,24 @@ RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
 
     spC3 = FALSE;
     var_fp = 0x64;
-    spBA = 0;
+    spBA = FALSE;
     switch (current_map) {
         case MAP_GALLEON_MERMAID:
-            spBA = 1;
+            spBA = TRUE;
             goto block_12;
+        case MAP_GALLEON_SUBMARINE:
         case MAP_GALLEON_SHIPWRECK_DIDDY_LANKY_CHUNKY:
         case MAP_GALLEON_SHIPWRECK_DK_TINY:
         case MAP_GALLEON_SHIPWRECK_LANKY_TINY:
-        case MAP_GALLEON_SUBMARINE:
-            break;
+            return dl;
         case MAP_GALLEON:
             if (((character_change_array->chunk == 9) || (character_change_array->chunk == 0xA)) && (isFlagSet(0x9C, 0U))) {
-                break;
+                return dl;
             }
         default:
     block_12:
             for (i = 0; i < cc_number_of_players; i++) {
-                if (character_change_array[i].does_player_exist != 0) {
+                if (character_change_array[i].does_player_exist) {
                     player_aad = character_change_array[i].playerPointer->PaaD;
                     camera_paad = player_aad->unk104->CaaD;
                     if (spBA || (
@@ -842,21 +839,6 @@ RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
                         (character_change_array[i].unk220 < (character_change_array[i].unk24C + 3.0f))
                     )) {
                         spC3 = TRUE;
-                        // @recomp: Temp - Don't use malloc until heap is fixed
-                        // water_overlay_verts = malloc(sizeof(Vtx) * 4);
-                        func_global_asm_8061134C(water_overlay_verts);
-                        water_overlay_verts[0].v.ob[0] = (s16) character_change_array[i].unk270[0];
-                        water_overlay_verts[0].v.ob[1] = (s16) character_change_array[i].unk270[1];
-                        water_overlay_verts[0].v.ob[2] = -0xA;
-                        water_overlay_verts[1].v.ob[0] = (s16) character_change_array[i].unk270[2];
-                        water_overlay_verts[1].v.ob[1] = (s16) character_change_array[i].unk270[1];
-                        water_overlay_verts[1].v.ob[2] = -0xA;
-                        water_overlay_verts[2].v.ob[0] = (s16) character_change_array[i].unk270[2];
-                        water_overlay_verts[2].v.ob[1] = (s16) character_change_array[i].unk270[3];
-                        water_overlay_verts[2].v.ob[2] = -0xA;
-                        water_overlay_verts[3].v.ob[0] = (s16) character_change_array[i].unk270[0];
-                        water_overlay_verts[3].v.ob[1] = (s16) character_change_array[i].unk270[3];
-                        water_overlay_verts[3].v.ob[2] = -0xA;
                         gDPPipeSync(dl++);
                         dl = func_global_asm_805FCFD8(dl);
                         gDPSetScissor(dl++, G_SC_NON_INTERLACE,
@@ -868,9 +850,6 @@ RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
                         gDPSetCombineMode(dl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
                         var_f2 = character_change_array[i].unk24C - character_change_array[i].unk220;
                         switch (current_map) {
-                            default:
-                                var_f2 *= 0.4;
-                                break;
                             case MAP_GALLEON:
                                 var_f2 *= 0.07;
                                 break;
@@ -880,6 +859,7 @@ RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
                                 break;
                             case MAP_GALLEON_PUFFTOSS:
                                 var_fp = 50;
+                            default:
                                 var_f2 *= 0.4;
                                 break;
                         }
@@ -893,11 +873,16 @@ RECOMP_PATCH Gfx *func_global_asm_80701CA0(Gfx *dl) {
                             var_f2 = (u8) player_aad->unk1E8;
                         }
                         gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x3C, (u8)(var_fp + var_f2));
-                        gDPSetCycleType(dl++, G_CYC_1CYCLE);
+                        gDPSetCycleType(dl++, G_CYC_1CYCLE);\
                         gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
                         gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-                        gSPVertex(dl++, osVirtualToPhysical(water_overlay_verts), 4, 0);
-                        gSP2Triangles(dl++, 0, 1, 2, 0, 0, 2, 3, 0);
+                        //@recomp: Used to be a verts-based draw, now is just fillrect
+                        gDPFillRectangle(dl++,
+                            character_change_array[i].unk270[0],
+                            character_change_array[i].unk270[1],
+                            character_change_array[i].unk270[2],
+                            character_change_array[i].unk270[3]
+                        );
                         gDPPipeSync(dl++);
                     }
                     character_change_array[i].unk2E8 = camera_paad->unkFA;
