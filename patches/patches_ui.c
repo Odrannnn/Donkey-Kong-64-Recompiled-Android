@@ -967,3 +967,22 @@ RECOMP_PATCH Gfx *func_global_asm_8071338C(Gfx *dl) {
     dl = popHUD(dl);
     return dl;
 }
+
+extern u32 object_timer;
+RECOMP_PATCH Gfx *func_global_asm_8068D8C8(Gfx *dl, s32 arg1) {
+    gSPDisplayList(dl++, &D_1000118);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xA0);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    dl = alignHUD(dl, 0, 1);
+    dl = displayImage_simple(dl,
+        D_global_asm_80744490 - 50, D_global_asm_80744494 - 40,
+        32, 32,
+        ((((u32)object_timer >> 1) & 0xF) + 0x8F),
+        G_IM_FMT_RGBA, 2,
+        1.0f, 1.0f,
+        0, 0);
+    dl = popHUD(dl);
+    return dl;
+}
