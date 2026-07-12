@@ -21,6 +21,7 @@
 #define	OS_CPU_COUNTER		(OS_CLOCK_RATE*3/4)
 #define OS_NSEC_TO_CYCLES(n)	(((u64)(n)*(OS_CPU_COUNTER/15625000LL))/(1000000000LL/15625000LL))
 #define BUFFER_TIME OS_NSEC_TO_CYCLES(48484843)
+#define SQ(x) ((x) * (x))
 
 extern void osWritebackDCache(void*, s32);
 extern u32  osPiGetStatus(void);
@@ -136,6 +137,7 @@ extern s8 D_global_asm_807445A0;
 extern s8 D_global_asm_807445A4;
 extern s16 D_global_asm_80744490;
 extern s16 D_global_asm_8076A0AA;
+extern u8 D_global_asm_807FD890;
 
 typedef struct Unk {
     char unk_00[4];
@@ -614,7 +616,7 @@ typedef struct player_additional_actor_data {
     f32 unk1DC; // Used
     f32 unk1E0; // Used
     s32 unk1E4;
-    s32 unk1E8;
+    f32 unk1E8;
     u8 unk1EC;
     u8 unk1ED;
     s16 unk1EE; // Used
@@ -1591,7 +1593,7 @@ typedef struct {
     f32     look_at_up_x; // 0x240 maybe an array?
     f32     look_at_up_y; // 0x244
     f32     look_at_up_z; // 0x248;
-    s32     unk24C;
+    f32     unk24C;
     CharacterChange250 unk250[2];
     s16     unk270[4];
     union {
@@ -1657,9 +1659,11 @@ extern u16 D_global_asm_8075531C; // Demo Fadeout Timer
 extern Gfx *func_global_asm_805FD030(Gfx *dl);
 
 extern Gfx **D_1000118;
+extern Mtx D_2000000;
 extern Mtx D_2000080;
 extern Mtx D_20000C0;
 extern Mtx D_2000180;
+extern Mtx D_2000200;
 
 extern u8 D_global_asm_807FDB0F; // alpha
 extern s32 D_global_asm_807FDB10;
@@ -1686,3 +1690,17 @@ extern s16 D_global_asm_807FDB3C;
 extern s16 D_global_asm_807FDB3E;
 extern s16 D_global_asm_807FDB40;
 extern s16 D_global_asm_807FDB42;
+
+extern u8 cc_number_of_players;
+extern Gfx *func_global_asm_805FCFD8(Gfx *dl);
+extern void func_global_asm_8061134C(void *);
+extern u8 isFlagSet(s16 flagIndex, u8 flagType);
+
+extern void *getPointerTableFile(enum pointertable_e pointerTableIndex, s32 fileIndex, u8 arg2, u8 arg3);
+extern void func_global_asm_8066B434(void *arg0, s32 arg1, s32 arg2);
+extern f32 D_global_asm_80750228;
+extern f32 D_global_asm_8075022C;
+
+extern void func_global_asm_80658E58(s16 arg0, s16 arg1, s16 arg2, s16 arg3);
+extern s32 func_global_asm_80626F8C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, f32 arg6, s32 arg7);
+extern s32 func_global_asm_806119A0(void);
