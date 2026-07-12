@@ -308,6 +308,7 @@ extern u8 cc_player_index;
 Gfx *alignHUD(Gfx * dl, u8 is_left_aligned, u8 is_right_aligned) {
     s32 margin_reduction = 8;
     gEXPushScissor(dl++);
+    gEXPushViewport(dl++);
     gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
     if (is_right_aligned) {
         // Right align
@@ -324,10 +325,10 @@ Gfx *alignHUD(Gfx * dl, u8 is_left_aligned, u8 is_right_aligned) {
 
 Gfx *popHUD(Gfx *dl) {
     gEXPopScissor(dl++);
+    gEXPopViewport(dl++);
     // Clear gEX
     gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
     gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
-    gEXSetScissorAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
     return dl;
 }
 
@@ -824,3 +825,145 @@ typedef struct {
     void *unk14;
 } Struct806FA504_arg1;
 */
+
+extern void *func_global_asm_8068C12C(u16 tex);
+
+Gfx* displayImage_simple(Gfx* dl, s32 x, s32 y, s32 width, s32 height, s16 texture_index, s32 fmt, s32 size, f32 xScale, f32 yScale, u8 xflip, u8 yflip) {
+    void *texture = func_global_asm_8068C12C(texture_index);
+    gDPPipeSync(dl++);
+    switch (size) {
+        case 0:
+            gDPLoadTextureTile(dl++, texture, fmt, G_IM_SIZ_4b,
+                width, height,
+                0, 0, width - 1, height - 1,
+                0,
+                G_TX_CLAMP, G_TX_CLAMP,
+                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            break;
+        case 1:
+            gDPLoadTextureTile(dl++, texture, fmt, G_IM_SIZ_8b,
+                width, height,
+                0, 0, width - 1, height - 1,
+                0,
+                G_TX_CLAMP, G_TX_CLAMP,
+                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            break;
+        case 2:
+            gDPLoadTextureTile(dl++, texture, fmt, G_IM_SIZ_16b,
+                width, height,
+                0, 0, width - 1, height - 1,
+                0,
+                G_TX_CLAMP, G_TX_CLAMP,
+                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            break;
+        case 3:
+            gDPLoadTextureTile(dl++, texture, fmt, G_IM_SIZ_32b,
+                width, height,
+                0, 0, width - 1, height - 1,
+                0,
+                G_TX_CLAMP, G_TX_CLAMP,
+                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
+            break;
+    }
+
+    s32 dsdx = (s32)((1 << 10) / xScale);
+    s32 dtdy = (s32)((1 << 10) / yScale);
+    s32 s_start = 0;
+    s32 t_start = 0;
+    s32 x0, x1, y0, y1;
+
+    if (xflip) {
+        s_start = (width - 1) << 5;
+        dsdx = -dsdx;
+        x1 = x;
+        x0 = x1 - (s32)(width * xScale);
+    } else {
+        x0 = x;
+        x1 = x + (s32)(width * xScale);
+    }
+
+    if (yflip) {
+        t_start = (height - 1) << 5;
+        dtdy = -dtdy;
+        y1 = y;
+        y0 = y1 - (s32)(height * yScale);
+    } else {
+        y0 = y;
+        y1 = y + (s32)(height * yScale);
+    }
+
+    gSPTextureRectangle(dl++,
+        x0 << 2, y0 << 2,
+        x1 << 2, y1 << 2,
+        G_TX_RENDERTILE,
+        s_start, t_start, dsdx, dtdy);
+
+    gDPPipeSync(dl++);
+    return dl;
+}
+
+#define DKTV_OFFSET 0
+
+RECOMP_PATCH Gfx *func_global_asm_806FF144(Gfx *dl) {
+    gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gEXPushScissor(dl++);
+    gEXPushViewport(dl++);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
+    gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
+    dl = displayImage_simple(dl,
+        0, 0,
+        0x40, 0x40,
+        0x3A, G_IM_FMT_IA, 1,
+        2.0f, 2.0f,
+        0, 0);
+    dl = displayImage_simple(dl,
+        0, D_global_asm_80744494,
+        0x40, 0x40,
+        0x3A, G_IM_FMT_IA, 1,
+        2.0f, 2.0f,
+        0, 1);
+    gEXPopViewport(dl++);
+    gEXPopViewport(dl++);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 0);
+    gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, 0, 0);
+    dl = alignHUD(dl, 0, 1);
+    dl = displayImage_simple(dl,
+        D_global_asm_80744490, 0,
+        0x40, 0x40,
+        0x3A, G_IM_FMT_IA, 1,
+        2.0f, 2.0f,
+        1, 0);
+    dl = displayImage_simple(dl,
+        D_global_asm_80744490, D_global_asm_80744494,
+        0x40, 0x40,
+        0x3A, G_IM_FMT_IA, 1,
+        2.0f, 2.0f,
+        1, 1);
+    gEXPopScissor(dl++);
+    gEXPopViewport(dl++);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
+    gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
+    return dl;
+}
+
+extern u8 *getTextString(u8 fileIndex, s32 stringIndex, s32 arg2);
+extern Mtx D_global_asm_807FDAC0;
+RECOMP_PATCH Gfx *func_global_asm_8071338C(Gfx *dl) {
+    u8 *string;
+    f32 temp;
+
+    string = getTextString(0xC, 0, 1);
+    gDPSetCombineMode(dl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gSPMatrix(dl++, &D_global_asm_807FDAC0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    temp = 20.0f;
+    temp *= 2.0f;
+    temp *= 4.0f;
+    dl = alignHUD(dl, 1, 0);
+    dl = printStyledText(dl, 1, 0x118, temp, string, 4);
+    dl = popHUD(dl);
+    return dl;
+}
