@@ -41,7 +41,6 @@ Gfx *handle_interpolation(Gfx * dl) {
         interpolation_disable_timer--;
     }
     if (INTERP_ID != 0) {
-        // Force the projection to not adjust itself for a wider aspect ratio when it's being rendered for the Bottles' bonus puzzle or the Mumbo photo.
         if (skip_interpolation) {
             gEXMatrixGroupSkipAllAspect(dl++, INTERP_ID, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO);
         }
