@@ -8,7 +8,7 @@
 #include "patches_main.h"
 #include "patches_interpolation.h"
 
-#define INTERPOLATION_DEBUG 1
+#define INTERPOLATION_DEBUG 0
 
 s32 interpolation_disable_timer = 0;
 #if INTERPOLATION_DEBUG
