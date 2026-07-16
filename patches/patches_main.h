@@ -1712,3 +1712,54 @@ typedef struct Struct8062DBDC {
 f32 func_global_asm_8062E040(s16, s16, s16, s16, s16, s16, f32, f32, f32);
 s32 func_global_asm_8062E1F8(s32, s16, s16, s16, s16, s16, s16, void *);
 extern f32 D_global_asm_807F5E50[];
+
+extern u8 D_805FB000;
+extern u8 D_805FB0D0;
+extern u32 D_A4500004;
+extern u8 D_global_asm_80741310;
+extern u32 D_global_asm_807452C8;
+extern u8 D_global_asm_80760590;
+extern s32 D_global_asm_80770558;
+
+void func_global_asm_80602314(void);
+
+typedef struct {
+    void *unk0;
+    s16 unk4;
+    u8 pad6[2];
+    s32 unk8;
+    u8 padC[4];
+    s32 unk10;
+    u8 pad14[4];
+    s32 unk18;
+    s32 unk1C;
+    void *unk20;
+    s32 unk24;
+    void *unk28;
+    u8 pad2C[4];
+    void *unk30;
+    s32 unk34;
+    u8 pad38[0x10];
+    Acmd *unk48;
+    s32 unk4C;
+    s32 unk50;
+    s32 unk54;
+    void *unk58;
+    void *unk5C;
+    void *unk60;
+    u8 pad64[4];
+    s16 unk68;
+    u8 pad6A[2];
+    void *unk6C;
+} Struct8076D708;
+typedef struct {
+    Struct8076D708* unk0[1];
+} Struct8076D4D0;
+extern void func_global_asm_80602314(void);
+extern s32 D_global_asm_8076D4C0;
+extern OSMesgQueue D_global_asm_8076D6D0;
+extern s32 D_global_asm_80770194;
+extern s32 D_global_asm_8077019C;
+extern Struct8076D4D0 D_global_asm_8076D4D0;
+extern Acmd *n_alAudioFrame(Acmd *cmdList, s32 *cmdLen, s16 *outBuf, s32 outLen);
+extern s32 func_global_asm_8060EE58(s32 arg0);

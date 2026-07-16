@@ -57,3 +57,6 @@ memcpy_recomp = 0x8F00010C;
 osViSwapBuffer_recomp = 0x8F000110;
 osDpGetStatus_recomp = 0x8F000114;
 osViGetNextFramebuffer_recomp = 0x8F000118;
+osAiGetLength_recomp = 0x8F00011C;
+osWritebackDCacheAll_recomp = 0x8F000120;
+osAiSetNextBuffer_recomp = 0x8F000124;

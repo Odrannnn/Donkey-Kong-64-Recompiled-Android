@@ -41,7 +41,9 @@
 #define memcpy memcpy_recomp
 #define osDpGetStatus osDpGetStatus_recomp
 #define osViGetNextFramebuffer osViGetNextFramebuffer_recomp
-
+#define osAiGetLength osAiGetLength_recomp
+#define osWritebackDCacheAll osWritebackDCacheAll_recomp
+#define osAiSetNextBuffer osAiSetNextBuffer_recomp
 
 
 #define sinf __sinf_recomp

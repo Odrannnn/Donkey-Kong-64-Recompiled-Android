@@ -1128,3 +1128,74 @@ RECOMP_PATCH s32 func_global_asm_8062DBDC(s16 arg0, s16 arg1, s16 arg2, s16 arg3
     }
     return TRUE;  // @recomp: Was false
 }
+
+//@recomp: Audio buffer get
+RECOMP_PATCH s32 func_global_asm_80601EE4(Struct8076D708 *arg0, Struct8076D708 *lastInfo) {
+    s16 *audioPtr;
+    s32 var_v1; // samples left?
+    s32 sp34;
+    s32 *new_var;
+    Acmd *temp_v1; // cmdp
+    s32 temp;
+
+    audioPtr = (s16 *) osVirtualToPhysical(arg0->unk0); // audioPtr = (s16 *) osVirtualToPhysical(info->data);
+
+    new_var = &D_global_asm_80770558;
+    func_global_asm_80602314();
+    var_v1 = osAiGetLength() >> 2;
+    if (lastInfo) {
+        s32 frameSamples = lastInfo->unk4 << 2;
+        osAiSetNextBuffer(lastInfo->unk0, frameSamples); // outputDataPointer, frameSamples
+    }
+    if ((var_v1 < 0x5C) && (*new_var == 0)) {
+        arg0->unk4 = D_global_asm_8077019C;
+        D_global_asm_80770558 = 2;
+    } else {
+        temp = *new_var;
+        if ((var_v1 >= 0x115) && (temp == 0)) {
+            arg0->unk4 = D_global_asm_80770194;
+            D_global_asm_80770558 = 2;
+        } else {
+            arg0->unk4 = 0x2E0;
+            if (temp != 0) {
+                temp -= 1;
+                D_global_asm_80770558 = temp;
+            }
+        }
+    }
+
+    temp_v1 = n_alAudioFrame((Acmd *) (&D_global_asm_8076D4D0)[D_global_asm_807452C8].unk0[0], &sp34, audioPtr, (s32) arg0->unk4);
+
+    if (sp34 == 0) {
+        return 0;
+    }
+    
+    arg0->unk8 = 0; //  next
+    arg0->unk5C = &D_global_asm_8076D6D0; // msgQ
+    arg0->unk60 = (OSMesg) (&arg0->unk68); // msg
+    arg0->unk10 = 1;
+    arg0->unk58 = &D_global_asm_8076D4C0;
+    arg0->unk48 = (Acmd *) (&D_global_asm_8076D4D0)[D_global_asm_807452C8].unk0[0];
+    arg0->unk4C = (temp_v1 - ((Acmd *) (&D_global_asm_8076D4D0)[D_global_asm_807452C8].unk0[0])) * sizeof(Acmd); // t->list.t.data_size
+    arg0->unk18 = 2; // t->list.t.flags = OS_TASK_DP_WAIT;
+    arg0->unk20 = &D_805FB000;
+    arg0->unk24 = (&D_805FB0D0) - (&D_805FB000); // t->list.t.ucode_boot_size = (s32) ((s32) rspbootTextEnd - (s32) rspbootTextStart);
+    arg0->unk1C = 0;
+    arg0->unk28 = &D_global_asm_80741310;
+    arg0->unk30 = &D_global_asm_80760590;
+    arg0->unk34 = SP_UCODE_DATA_SIZE; // t->list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
+    arg0->unk50 = 0;
+    arg0->unk54 = 0x400;
+
+    osWritebackDCacheAll();
+
+    osSendMesg(
+        (OSMesgQueue *) func_global_asm_8060EE58((s32) (&D_global_asm_80767A40)), // OSMesgQueue*
+        &arg0->unk8, // OsMesg*
+        0 // flags
+    );
+
+    D_global_asm_807452C8 ^= 1; // swap which acmd list you use each frame
+
+    return 1;
+}

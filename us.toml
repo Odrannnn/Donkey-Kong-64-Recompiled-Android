@@ -38,18 +38,6 @@ func = "func_global_asm_8060B140"
 text = "load_dk64_overlay(ctx->r4, 0, 0);"
 before_vram = 0x8060B140
 
-
-[[patches.hook]]
-func = "func_global_asm_80601EE4"
-text = """osAiGetLength_recomp(rdram, ctx);
-	ctx->r3 = ctx->r2;"""
-before_vram = 0x80601F08
-
-[[patches.instruction]]
-func = "func_global_asm_80601EE4"
-vram = 0x80601F0C
-value = 0x00000000 #NOP osAiGetLength that is done without a function call
-
 #allocate 4 extra bytes per actor
 #[[patches.hook]]
 #func = "func_global_asm_80678050"
