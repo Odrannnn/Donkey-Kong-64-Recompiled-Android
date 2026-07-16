@@ -57,6 +57,7 @@ Gfx *handle_interpolation(Gfx * dl) {
     return dl;
 }
 
+/*
 RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f32* arg3, f32* arg4, f32* arg5, f32* arg6, f32* arg7, f32* arg8, f32* arg9) {
     CameraPaad* AAD;
     OSTime temp_v0_9;
@@ -170,7 +171,7 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
                 }
             }
             break;
-        case 1:                                         /* switch 1 */
+        case 1:
             temp_v0_9 = osGetTime();
             D_global_asm_807476C8 = temp_v0_9 - D_global_asm_807476D0;
             D_global_asm_807476D0 = temp_v0_9;
@@ -304,12 +305,12 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
                     if (D_global_asm_807F5CEC > 0) {
                         D_global_asm_807F5CEC--;
                     }
-                    switch (D_global_asm_807476FC->function_bank[D_global_asm_807F5CF2].command) {               /* switch 3; irregular */
-                        case 8:                             /* switch 3 */
-                        case 12:                            /* switch 3 */
+                    switch (D_global_asm_807476FC->function_bank[D_global_asm_807F5CF2].command) {
+                        case 8:
+                        case 12:
                             break;
-                        case 4:                             /* switch 3 */
-                        case 5:                             /* switch 3 */
+                        case 4:
+                        case 5:
                             D_global_asm_807F5D0C->position.f[0] = D_global_asm_807F5CE8->position.f[0];
                             D_global_asm_807F5D0C->position.f[1] = D_global_asm_807F5CE8->position.f[1];
                             D_global_asm_807F5D0C->position.f[2] = D_global_asm_807F5CE8->position.f[2];
@@ -320,7 +321,7 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
                             *arg5 = AAD->unk7C;
                             *arg6 = AAD->unk80;
                             break;
-                        default:                            /* switch 3 */
+                        default:
                             D_global_asm_807476A4 = 0.3f;
                             func_global_asm_80622B24(arg0, arg1, arg2, arg3, &AAD->unk78, &AAD->unk7C, &AAD->unk80, D_global_asm_807F5CE8);
     
@@ -372,3 +373,4 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
     AAD->unkCC.y = temp_v0->position.f[1];
     AAD->unkCC.z = temp_v0->position.f[2];
 }
+*/
