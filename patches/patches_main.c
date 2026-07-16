@@ -1073,3 +1073,66 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     return dl;
 }
 */
+
+typedef struct Struct8062DBDC {
+    f64 unk0[8];
+} Struct8062DBDC;
+ 
+f32 func_global_asm_8062E040(s16, s16, s16, s16, s16, s16, f32, f32, f32);
+s32 func_global_asm_8062E1F8(s32, s16, s16, s16, s16, s16, s16, void *);
+extern f32 D_global_asm_807F5E50[];
+
+#define macro_8062DBDC_IF(a0, a1, a2) ((a0 * D_global_asm_807F5E50[0]) + (a1 * D_global_asm_807F5E50[1]) + (a2 * D_global_asm_807F5E50[2])) + D_global_asm_807F5E50[3]
+
+//@recomp: Culling patch for maps
+RECOMP_PATCH s32 func_global_asm_8062DBDC(s16 arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, Struct8062DBDC *arg10) {
+    s32 var_a0;
+    s32 var_a1;
+    s32 var_a2;
+    s32 i;
+    s32 pad[3];
+ 
+    if (macro_8062DBDC_IF(arg0, arg1, arg2) < 0.0) {
+        if (macro_8062DBDC_IF(arg0, arg1, arg5) < 0.0) {
+            if (macro_8062DBDC_IF(arg0, arg4, arg2) < 0.0) {
+                if (macro_8062DBDC_IF(arg0, arg4, arg5) < 0.0) {
+                    if (macro_8062DBDC_IF(arg3, arg1, arg2) < 0.0) {
+                        if (macro_8062DBDC_IF(arg3, arg1, arg5) < 0.0) {
+                            if (macro_8062DBDC_IF(arg3, arg4, arg2) < 0.0) {
+                                if (macro_8062DBDC_IF(arg3, arg4, arg5) < 0.0) {
+                                    return TRUE;  //@recomp: Was false
+                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    var_a0 = FALSE;
+    var_a1 = FALSE;
+    var_a2 = FALSE;
+    if ((arg0 <= arg6) && (arg6 <= arg3) && (arg1 <= arg7) && (arg7 <= arg4) && (arg2 <= arg8) && (arg8 <= arg5)) {
+        return TRUE;
+    }
+    for (i = 0; (i < 5) && (!var_a2); i++) {
+        if ((arg10[i].unk0[7] + (((arg10[i].unk0[4] * arg0) + (arg10[i].unk0[5] * arg1)) + (arg10[i].unk0[6] * arg2))) < 0) {
+            var_a0 = TRUE;
+        }
+        if ((arg10[i].unk0[7] + (((arg10[i].unk0[4] * arg0) + (arg10[i].unk0[5] * arg4)) + (arg10[i].unk0[6] * arg2))) < 0) {
+            var_a1 = TRUE;
+        }
+        if ((var_a0) && (var_a1)) {
+            var_a2 = TRUE;
+        }
+    }
+    if ((!var_a2) && (func_global_asm_8062E040(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) < arg9)) {
+        return TRUE;
+    }
+    for (i = 0; i < 5; i++) {
+        if (func_global_asm_8062E1F8(i, arg0, arg1, arg2, arg3, arg4, arg5, arg10)) {
+            return TRUE;
+        }
+    }
+    return TRUE;  // @recomp: Was false
+}

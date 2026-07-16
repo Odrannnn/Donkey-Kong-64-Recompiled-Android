@@ -1704,3 +1704,11 @@ extern f32 D_global_asm_8075022C;
 extern void func_global_asm_80658E58(s16 arg0, s16 arg1, s16 arg2, s16 arg3);
 extern s32 func_global_asm_80626F8C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, f32 arg6, s32 arg7);
 extern s32 func_global_asm_806119A0(void);
+
+typedef struct Struct8062DBDC {
+    f64 unk0[8];
+} Struct8062DBDC;
+ 
+f32 func_global_asm_8062E040(s16, s16, s16, s16, s16, s16, f32, f32, f32);
+s32 func_global_asm_8062E1F8(s32, s16, s16, s16, s16, s16, s16, void *);
+extern f32 D_global_asm_807F5E50[];

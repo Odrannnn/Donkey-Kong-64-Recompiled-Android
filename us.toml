@@ -55,14 +55,3 @@ value = 0x00000000 #NOP osAiGetLength that is done without a function call
 #func = "func_global_asm_80678050"
 #text = """ctx->r6 = ADD32(ctx->r6, 0x4);"""
 #before_vram = 0x806780D4
-
-# Map Culling
-[[patches.instruction]]
-func = "func_global_asm_8062DBDC"
-vram = 0x8062E004
-value = 0x24020001 #OR v0, r0, r0 -> ADDIU v0, r0, 1 #return true
-
-[[patches.instruction]]
-func = "func_global_asm_8062DBDC"
-vram = 0x8062DDC8
-value = 0x24020001 #OR v0, r0, r0 -> ADDIU v0, r0, 1 #return true
