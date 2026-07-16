@@ -6,6 +6,8 @@
 #include "misc_funcs.h"
 #include "debug_config.h"
 
+extern Gfx* handle_interpolation(Gfx * dl);
+
 typedef struct OSScTask_s {
     struct OSScTask_s   *next;          /* note: this must be first */
     u32                 state;
@@ -339,14 +341,17 @@ extern s16 D_global_asm_80744490;
 
 RECOMP_PATCH Gfx *func_global_asm_805FE4D4(Gfx *dl) {
     gEXEnable(dl++);
+    // Frame delta
     int delta = getFrameDelta();
     if (delta == 0) {
         delta = 1;
     }
     gEXSetRefreshRate(dl++, 60 / delta);
+    // Interpolation
+    dl = handle_interpolation(dl);
+    // 
     gEXSetNearClipping(dl++, FALSE);
     gEXSetTexcoordWrapPoint(dl++, 256 * 4, 256 * 4);
-    // set_all_interpolation_skipped(FALSE);
     gDPSetColorImage(dl++, 0, 2, D_global_asm_80744490, osVirtualToPhysical(D_global_asm_80744470[D_global_asm_807444FC]));
     return dl;
 }

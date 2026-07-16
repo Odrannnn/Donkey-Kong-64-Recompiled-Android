@@ -44,6 +44,7 @@
 #define osAiGetLength osAiGetLength_recomp
 #define osWritebackDCacheAll osWritebackDCacheAll_recomp
 #define osAiSetNextBuffer osAiSetNextBuffer_recomp
+#define sqrtf sqrtf_recomp
 
 
 #define sinf __sinf_recomp
@@ -89,6 +90,11 @@
 #define gEXMatrixGroupDecomposedVertsOrderAuto(cmd, id, push, proj, edit) \
     gEXMatrixGroupDecomposed(cmd, id, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_AUTO, edit)
 
+#define gEXMatrixGroupSkipAllAspect(cmd, id, push, proj, edit, aspect) \
+    gEXMatrixGroup(cmd, id, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP, G_EX_ORDER_LINEAR, edit, aspect, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_SKIP)
+
+#define gEXMatrixGroupSimpleNormal(cmd, id, push, proj, edit) \
+    gEXMatrixGroup(cmd, id, G_EX_INTERPOLATE_SIMPLE, push, proj, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, edit, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO)
 
 int recomp_printf(const char* fmt, ...);
 
