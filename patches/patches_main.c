@@ -1074,14 +1074,6 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
 }
 */
 
-typedef struct Struct8062DBDC {
-    f64 unk0[8];
-} Struct8062DBDC;
- 
-f32 func_global_asm_8062E040(s16, s16, s16, s16, s16, s16, f32, f32, f32);
-s32 func_global_asm_8062E1F8(s32, s16, s16, s16, s16, s16, s16, void *);
-extern f32 D_global_asm_807F5E50[];
-
 #define macro_8062DBDC_IF(a0, a1, a2) ((a0 * D_global_asm_807F5E50[0]) + (a1 * D_global_asm_807F5E50[1]) + (a2 * D_global_asm_807F5E50[2])) + D_global_asm_807F5E50[3]
 
 //@recomp: Culling patch for maps
