@@ -73,6 +73,16 @@ RECOMP_PATCH void func_global_asm_80611730(void) {
     } while (entry < &D_global_asm_807F0A58[count]);
 }
 
+void updateLag(s32 value) {
+    if ((is_cutscene_active != 3) && (is_cutscene_active != 4)) {
+        return;
+    }
+    if (value < 1) {
+        value = 1;
+    }
+    D_global_asm_80744478 = value;
+}
+
 RECOMP_PATCH void func_global_asm_80600674(void) {
     s32 max_boost = 1;
     s32 min_boost = 20;
@@ -89,6 +99,7 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
     AlterVolumes();
 
     //@recomp: patch to always greater than 1 (on console, default is 2. if zero, it will divide by zero and crash)
+
     if (D_global_asm_80744478 <= 1) {
         D_global_asm_80744478 = 2;
     }
@@ -129,7 +140,7 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
         }
         if (updateLagBoost) {
             //@recomp: dont update; stays at 2
-            //D_global_asm_80744478 = newBoost;
+            updateLag(newBoost);
         }
         if (object_timer > 10) {
             while (D_global_asm_8076AF10 + D_global_asm_80744478 > osdata->frame_count) {
@@ -143,7 +154,7 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
     osdata = &D_global_asm_80767A40;
 
     //@recomp: dont update; stays at 2
-    //D_global_asm_80744478 = osdata->frame_count - D_global_asm_8076AF10;
+    updateLag(osdata->frame_count - D_global_asm_8076AF10);
 
     D_global_asm_8076AF10 = osdata->frame_count;
     //recomp_printf("D_global_asm_80744478 is %d:\n", D_global_asm_80744478);
@@ -1199,3 +1210,31 @@ RECOMP_PATCH s32 func_global_asm_80601EE4(Struct8076D708 *arg0, Struct8076D708 *
 
     return 1;
 }
+
+/*
+//Use for quickly getting to a certain map
+
+extern u8 D_global_asm_80755328;
+extern u8 D_global_asm_8075532C;
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u16 unk2;
+} Struct8075E5C0;
+extern const Struct8075E5C0 D_global_asm_8075E5C0[];
+extern void func_global_asm_8060B750(s32 fileIndex);
+extern void func_global_asm_8060B7D0(Maps *mapPointer, s32 *exitPointer);
+extern void func_global_asm_805FF158(u8 arg0);
+void func_global_asm_80712490(Maps newMap, s32 newExit, u8 newGameMode);
+
+RECOMP_PATCH void func_global_asm_807131BC(void) {
+    Maps map;
+    s32 exit;
+
+    D_global_asm_8075532C = 0;
+    func_global_asm_8060B750(D_global_asm_8075E5C0[D_global_asm_80755328].unk0);
+    func_global_asm_8060B7D0(&map, &exit);
+    func_global_asm_805FF158(1);
+    func_global_asm_80712490(2, 0, GAME_MODE_ADVENTURE);
+}
+*/

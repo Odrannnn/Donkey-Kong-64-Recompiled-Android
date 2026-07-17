@@ -40,6 +40,10 @@ Gfx *handle_interpolation(Gfx * dl) {
         #endif
         interpolation_disable_timer--;
     }
+    if ((is_cutscene_active == 3) || (is_cutscene_active == 4)) {
+        // Skip interpolation for Arcade/Jetpac
+        skip_interpolation = TRUE;
+    }
     if (INTERP_ID != 0) {
         if (skip_interpolation) {
             gEXMatrixGroupSkipAllAspect(dl++, INTERP_ID, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO);
