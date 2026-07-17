@@ -38,31 +38,8 @@ func = "func_global_asm_8060B140"
 text = "load_dk64_overlay(ctx->r4, 0, 0);"
 before_vram = 0x8060B140
 
-
-[[patches.hook]]
-func = "func_global_asm_80601EE4"
-text = """osAiGetLength_recomp(rdram, ctx);
-	ctx->r3 = ctx->r2;"""
-before_vram = 0x80601F08
-
-[[patches.instruction]]
-func = "func_global_asm_80601EE4"
-vram = 0x80601F0C
-value = 0x00000000 #NOP osAiGetLength that is done without a function call
-
 #allocate 4 extra bytes per actor
 #[[patches.hook]]
 #func = "func_global_asm_80678050"
 #text = """ctx->r6 = ADD32(ctx->r6, 0x4);"""
 #before_vram = 0x806780D4
-
-# Map Culling
-[[patches.instruction]]
-func = "func_global_asm_8062DBDC"
-vram = 0x8062E004
-value = 0x24020001 #OR v0, r0, r0 -> ADDIU v0, r0, 1 #return true
-
-[[patches.instruction]]
-func = "func_global_asm_8062DBDC"
-vram = 0x8062DDC8
-value = 0x24020001 #OR v0, r0, r0 -> ADDIU v0, r0, 1 #return true
