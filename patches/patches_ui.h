@@ -459,7 +459,154 @@ extern void func_global_asm_806F94AC(Struct80717D84 *arg0, s32 arg1);
 extern void func_global_asm_8071BE04(Struct80717D84 *arg0, s32 arg1);
 
 extern void *func_global_asm_8068C12C(u16 tex);
+extern f32 func_global_asm_80612D10(f32 arg0);
+extern f32 func_global_asm_80612D1C(f32 arg0);
 
 extern u8 *getTextString(u8 fileIndex, s32 stringIndex, s32 arg2);
 extern Mtx D_global_asm_807FDAC0;
 extern u32 object_timer;
+
+typedef struct {
+    s32 id;
+    u8 images_per_frame_horizontal;
+    u8 images_per_frame_vertical;
+    u8 unk6;
+    u8 codec;
+    u8 unk8;
+    u8 unk9;
+    u8 unkA;
+    u8 unkB;
+    u8 unkC;
+    u8 table;
+    s16 width;
+    s16 height;
+    s16 image_count;
+    s16 images[1]; // TODO: How many elements? m2c doesn't support VLAs
+} SpriteData;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+    s32 unk1C;
+    s32 unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+} CharacterChange8Array;
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+} CharacterChange250;
+
+typedef struct {
+    f32 unk0;
+    u16 unk4;
+    u16 unk6;
+    u8 unk8;
+    u8 unk9;
+    u8 unkA;
+    u8 unkB;
+} CharacterChange2DC;
+
+typedef struct {
+    u8      does_player_exist; // bitfield? 0x00
+    u8      unk1;
+    u8      unk2;
+    u8      unk3;
+    void* playerPointer;    // 0x04
+    Mtx     unk8[2];
+    Mtx     unk88[2];
+    u8      pad108[0x188 - 0x108];
+    u16     unk188;
+    u8      pad18A[0x190 - 0x18A];
+    LookAt  unk190[2];
+    Hilite  unk1D0[2];
+    Hilite  unk1F0[2]; // Unsure on struct. Is a 0x10-sized struct
+    union {
+        struct {
+            f32     look_at_eye_x; // 0x210 maybe an array?
+            f32     look_at_eye_y; // 0x214
+            f32     look_at_eye_z; // 0x218
+        };
+        f32 look_at_eye[3];
+    };
+    f32     unk21C; // Used
+    f32     unk220; // Used
+    f32     unk224; // Used
+    f32     look_at_at_x; // 0x228 maybe an array?
+    f32     look_at_at_y; // 0x22C
+    f32     look_at_at_z; // 0x230
+    f32     unk234; // Used
+    f32     unk238; // Used
+    f32     unk23C; // Used
+    f32     look_at_up_x; // 0x240 maybe an array?
+    f32     look_at_up_y; // 0x244
+    f32     look_at_up_z; // 0x248;
+    f32     unk24C;
+    CharacterChange250 unk250[2];
+    s16     unk270[4];
+    union {
+        struct {
+            s16     unk278;
+            s16     unk27A;
+        };
+        s16 unk278_arr[2];
+    };
+    f32     fov_y; // 0x27C
+    f32     unk280;
+    f32     near; // 0x284
+    f32     far; // 0x288
+    f32     unk28C;
+    s16     chunk; // 0x290
+    s16     unk292;
+    OSContPad* unk294; // Used
+    OSContPad* new_controller_inputs; // bitfield 0x298
+    s16     action_initiated; // 0x29C
+    s16     unk29E;
+    void* unk2A0;
+    s32     unk2A4;
+    s32     unk2A8; // Used
+    s32     unk2AC;
+    s32     unk2B0; // Used
+    tuple_f unk2B4;
+    u8      unk2C0; // Used
+    u8      unk2C1; // Used
+    u8      unk2C2; // Used
+    u8      unk2C3; // Used
+    f32     unk2C4; // Used
+    s16     unk2C8; // Used
+    s16     unk2CA;
+    s16     unk2CC;
+    s16     unk2CE;
+    f32     unk2D0;
+    f32     unk2D4;
+    f32     unk2D8;
+    CharacterChange2DC      unk2DC;
+    u8      unk2E8;
+    u8      unk2E9;
+    u8      unk2EA;
+    u8      unk2EB;
+    u8      unk2EC;
+    u8      unk2ED;
+    u8      unk2EE;
+    u8      unk2EF;
+} CharacterChange;
+
+
+extern CharacterChange* character_change_array;

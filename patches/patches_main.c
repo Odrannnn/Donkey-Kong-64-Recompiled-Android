@@ -1238,3 +1238,8 @@ RECOMP_PATCH void func_global_asm_807131BC(void) {
     func_global_asm_80712490(2, 0, GAME_MODE_ADVENTURE);
 }
 */
+
+// @recomp: (Prevent the ) draw of borders for overscan
+RECOMP_PATCH Gfx *func_global_asm_80704960(Gfx *dl) {
+    return dl;
+}

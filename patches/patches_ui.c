@@ -31,6 +31,24 @@ Gfx *alignHUD(Gfx * dl, enumSpriteAlignment alignment) {
     return dl;
 }
 
+Gfx *alignHUDTopBottom(Gfx * dl, enumSpriteAlignment alignment, s32 top, s32 bottom) {
+    s32 margin_reduction = 8;
+    gEXPushScissor(dl++);
+    gEXPushViewport(dl++);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, top, 0, bottom);
+    if (alignment == ALIGN_RIGHT) {
+        // Right align
+        gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
+            -(D_global_asm_80744490 - margin_reduction) * 4, 0,
+            -(D_global_asm_80744490 - margin_reduction) * 4, 0);
+        gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, -(D_global_asm_80744490 - margin_reduction) * 4, 0);
+    } else if (alignment == ALIGN_LEFT) {
+        gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, -margin_reduction * 4, 0, -margin_reduction * 4);
+        gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
+    }
+    return dl;
+}
+
 Gfx *popHUD(Gfx *dl) {
     gEXPopScissor(dl++);
     gEXPopViewport(dl++);
@@ -191,6 +209,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     return dl;
 }
 
+//@recomp: Draw HUD Numbers
 RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, Gfx *dl) {
     Struct806F9D8C_arg14 *sp74;
     Struct80750948 *temp_v0_3;
@@ -206,9 +225,9 @@ RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, 
     sp6B = temp_f0 * 255.0;
     sp5C = 0;
     alignment = ALIGN_UNALIGNED;
-    if (arg1->unk4 < 0) {
+    if (D_global_asm_80754280->hud_item[arg0].screen_x < 80) {
         alignment = ALIGN_LEFT;
-    } else if (arg1->unk4 > 0) {
+    } else if (D_global_asm_80754280->hud_item[arg0].screen_x > 240) {
         alignment = ALIGN_RIGHT;
     }
     dl = alignHUD(dl, alignment);
@@ -348,14 +367,22 @@ RECOMP_PATCH void func_menu_80030894(MenuAdditionalActorData *arg0, void *sprite
     D_menu_80033F38 = 1;
 }
 
+// @recomp: Draw HUD Item
 RECOMP_PATCH void func_global_asm_806F9744(Struct806F9744_arg0 *arg0, s32 arg1, f32 x, f32 y, s32 arg4) {
     s32 temp[2]; // TODO: Hmm
     s32 sp2C;
     Struct806F9744_arg0_unk14 *temp_s0;
+    enumSpriteAlignment alignment;
 
     temp_s0 = arg0->unk14;
     sp2C = 2;
-    func_global_asm_8071495C();
+    alignment = ALIGN_UNALIGNED;
+    if (x < 80) {
+        alignment = ALIGN_LEFT;
+    } else if (x > 240) {
+        alignment = ALIGN_RIGHT;
+    }
+    setSpriteAlignment(alignment);
     func_global_asm_807149FC(-1);
     if (arg1 == 0xE) {
         sp2C = 1;
@@ -368,9 +395,7 @@ RECOMP_PATCH void func_global_asm_806F9744(Struct806F9744_arg0 *arg0, s32 arg1, 
     if (arg1 == 3) {
         changeActorColor(0xFF, 0, 0, 0xFF);
     }
-    s32 new_x, new_y;
-    recomp_get_ui_position(x, y, &new_x, &new_y);
-    temp_s0->unk8 = drawSpriteAtPosition(func_global_asm_806FACE8(arg1), 1.0f, new_x, new_y, -10.0f);
+    temp_s0->unk8 = drawSpriteAtPosition(func_global_asm_806FACE8(arg1), 1.0f, x, y, -10.0f);
     temp_s0->unk2 = 0;
     if (arg1 == 7) {
         temp_s0->unk4 = 1;
@@ -537,6 +562,376 @@ RECOMP_PATCH Gfx *func_global_asm_8068D8C8(Gfx *dl, s32 arg1) {
     dl = popHUD(dl);
     return dl;
 }
+
+typedef struct global_asm_struct_71 GlobalASMStruct71;
+
+struct global_asm_struct_71 {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8; // Used
+    s32 unkC;
+    s16 unk10;
+    s16 unk12;
+    GlobalASMStruct71 *unk14; // Used, prev?
+    GlobalASMStruct71 *unk18; // Next?
+};
+
+typedef struct {
+    u8 unk0[0x340 - 0x0];
+    f32 unk340;
+    f32 unk344;
+    u8 unk348[0x35E - 0x348];
+    s16 unk35E;
+    f32 unk360;
+    f32 unk364;
+} Struct806F9AF0_arg0;
+
+extern void *D_global_asm_80750518;
+extern f32 D_global_asm_807FD7A0[];
+extern void func_global_asm_806F9AF0(GlobalASMStruct71 *arg0, s8 *arg1);
+extern void func_global_asm_806F966C(GlobalASMStruct71 **arg0);
+extern void func_global_asm_806F96CC(GlobalASMStruct71 *arg0, u32 arg1);
+
+// @recomp: Draw GB Acquisition HUD
+RECOMP_PATCH void func_global_asm_806F9B64(s32 arg0) {
+    GlobalASMStruct71 **counter;
+    GlobalASMStruct71 *previousCounter;
+    s32 i;
+    void **var_s2;
+
+    // Below is equivalent to &D_global_asm_80754280->hud_item[arg0].counter_pointer
+    // but need to change the syntax to fix regalloc.
+    counter = (GlobalASMStruct71**)&D_global_asm_80754280->hud_item[arg0].counter_pointer;
+    func_global_asm_806F966C(counter);
+    func_global_asm_806F96CC(*counter, 0);
+    (*counter)->unk10 = 0;
+    previousCounter = (*counter)->unk14;
+    previousCounter->unk0 = D_global_asm_80754280->hud_item[arg0].screen_x + 20;
+    previousCounter->unk4 = D_global_asm_80754280->hud_item[arg0].screen_y - 20;
+    var_s2 = &D_global_asm_80750518;
+    for (i = 0; i < 5; i++) {
+        setSpriteAlignment(ALIGN_LEFT);
+        func_global_asm_807149FC(-1);
+        func_global_asm_8071498C(func_global_asm_806F9AF0);
+        func_global_asm_80714950(i);
+        D_global_asm_807FD7A0[i] = -100.0f;
+        drawSpriteAtPosition(var_s2[i], 1.0f, -200.0f, 0.0f, -10.0f);
+    }
+}
+
+typedef struct {
+    s32 unk0;
+    void *unk4[1];
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s8 unk18[1];
+} Struct8002733C;
+void func_global_asm_80715908(Struct80717D84 *arg0);
+void func_global_asm_8071A038(Struct80717D84 *arg0, s32 arg1);
+extern SpriteData D_global_asm_8071FFD4; 
+s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
+
+//@recomp: Display remaining menus in various minigames
+RECOMP_PATCH void func_bonus_8002733C(Struct8002733C *arg0) {
+    s16 i;
+    s16 x;
+
+    x = 280;
+    for (i = 0; i < 5; i++) {
+        if (arg0->unk4[i] != NULL) {
+            func_global_asm_80715908(arg0->unk4[i]);
+        }
+        arg0->unk18[i] = 0;
+        setSpriteAlignment(ALIGN_RIGHT);
+        func_global_asm_807149FC(-1);
+        func_global_asm_80714998(2);
+        func_global_asm_80714944(i * 3);
+        func_global_asm_8071498C(func_global_asm_8071A038);
+        func_global_asm_80714950((s32)&arg0->unk18[i]);
+        arg0->unk4[i] = drawSpriteAtPosition(&D_global_asm_8071FFD4, 1.0f, x, 210.0f, -10.0f);
+        x -= 30;
+    }
+    playSound(0x3E4, 0x7FFF, 63.0f, 1.0f, 5, 0);
+}
+
+typedef struct {
+    OSTime unk0;
+    u32 unk8;
+    s32 unkC;
+    u8 unk10;
+} AAD_global_asm_806A2A10;
+typedef struct Struct80754AD0 Struct80754AD0;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+} Struct806FD9FC;
+
+struct Struct80754AD0 {
+    Struct80754AD0 *next;
+    u8 *unk4;
+    Struct806FD9FC *unk8;
+    u8 unkC;
+    u8 unkD;
+    u8 padE[0x10 - 0x0E];
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s16 unk1C;
+};
+
+extern SpriteData D_global_asm_8071FC58;
+extern u8 func_global_asm_805FCA64(void);
+extern Gfx *func_global_asm_8070068C(Gfx *dl);
+extern Struct80754AD0 *func_global_asm_806FD9B4(s16 arg0);
+extern Gfx *func_global_asm_806FE078(Gfx *dl, s16 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
+extern Mtx D_2000100;
+
+// @recomp: some scissor/viewport alignment code. Only trigger this when we want
+RECOMP_PATCH Gfx *func_global_asm_8070068C(Gfx *dl) {
+    gSPMatrix(dl++, &D_2000100, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPViewport(dl++, osVirtualToPhysical(&character_change_array->unk250[D_global_asm_807444FC]));
+    if ((D_global_asm_807FDB1D == ALIGN_NOT_2D) || (D_global_asm_807FDB1D == ALIGN_UNALIGNED)) {
+        gDPSetScissor(
+            dl++,
+            G_SC_NON_INTERLACE,
+            character_change_array[0].unk270[0],
+            character_change_array[0].unk270[1],
+            character_change_array[0].unk270[2],
+            character_change_array[0].unk270[3]
+        );
+    }
+    return dl;
+}
+
+//@recomp: Display minigame timer - Currently has some weird 4:3 cutoff here that I don't understand
+RECOMP_PATCH Gfx *func_global_asm_806A2B90(Gfx *dl, Actor *arg1) {
+    AAD_global_asm_806A2A10 *sp5C;
+    s32 sp58;
+    s32 sp54;
+    s32 sp50;
+    s32 sp4C;
+    s32 var_v0; // 48
+    Struct80754AD0 *temp; // 44
+    f32 sp40;
+    s32 sp3C;
+    f32 sp38;
+    f32 sp34;
+    s32 sp30;
+
+    sp5C = arg1->AAD_as_array[0];
+    if (func_global_asm_805FCA64()) {
+        gSPDisplayList(dl++, &D_1000118);
+        gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, arg1->shadow_opacity);
+        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        sp30 = arg1->unk15F;
+        if (sp30 == 0xB) {
+            dl = func_global_asm_8070068C(dl);
+            temp = func_global_asm_806FD9B4(sp5C->unk10);
+            dl = printStyledText(dl, 0x86, 
+                arg1->x_position * 4.0f,
+                ((character_change_array->unk270[3] * 4) - 0x3C),
+                temp->unk4, 1U);
+        } else {
+            var_v0 = 8;
+            sp40 = 6.2831854820251465 - (2.0 * arg1->unk160);
+            if (arg1->unk168 == 3) {
+                var_v0 = -7;
+            }
+            dl = alignHUD(dl, ALIGN_RIGHT);
+            setSpriteAlignment(ALIGN_RIGHT);
+            dl = func_global_asm_806FE078(dl, 
+                sp5C->unk10, sp30, 
+                arg1->x_position + var_v0, 
+                arg1->y_position + 5.0f, 0.0f, 1.0f);
+            setSpriteAlignment(ALIGN_NOT_2D);
+            dl = popHUD(dl);
+            if (arg1->control_state == 2) {
+                dl = func_global_asm_8070068C(dl);
+                setSpriteAlignment(ALIGN_RIGHT);
+                sp34 = func_global_asm_80612D1C(sp40);
+                sp38 = func_global_asm_80612D10(sp40);
+                drawSpriteAtPosition(&D_global_asm_8071FC58, 0.5f,
+                    (sp34 * 40.0) + (40.0f + arg1->x_position), 
+                    (sp38 * 25.0) + arg1->y_position,
+                    0.0f);
+            }
+        }
+    }
+    return dl;
+}
+
+#define MATH_HALF_PI_D 1.5707963705062866
+
+//@recomp: Displays any counter text, with setting the scissor
+RECOMP_PATCH Gfx* func_global_asm_8068DC54(Gfx* dl, s16 arg1, s16 arg2, s16* arg3, s16 arg4, u8* arg5) {
+    f32 sp74;
+    s16 temp_s0;
+    u8 sp70[2];
+    s16 temp_v1;
+    u8 sp6C[2];
+    s16 var_s0;
+    u8 sp68[2];
+    s16 temp_f6;
+    u8 sp64[2];
+    s8 sp60[4];
+    s16 sp5E;
+    s16 var_v1;
+    s32 var_v1_2;
+    s16 temp_f18;
+    u8 temp;
+
+    sp5E = arg4 < *arg3 ? -1 : 1;
+    if (arg4 != *arg3) {
+        if (*arg5 != 0) {
+            temp = *arg5 - 1;
+            *arg5 = temp;
+            if (!(*arg5 & 0xFF)) {
+                *arg3 += sp5E;
+                if (arg4 != *arg3) {
+                    *arg5 = 0xC;
+                }
+            }
+        } else {
+            *arg5 = 0xC;
+        }
+    }
+    dl = func_global_asm_805FD030(dl);
+    var_s0 = 0;
+    //@recomp: Set scissor x bounds to be the edges of the screen
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+        character_change_array->unk270[0],
+        arg2,
+        character_change_array->unk270[2],
+        arg2 + 0x1B);
+    if ((D_global_asm_807FDB1D != ALIGN_NOT_2D) && (D_global_asm_807FDB1D != ALIGN_UNALIGNED)) {
+        dl = alignHUDTopBottom(dl, D_global_asm_807FDB1D, arg2, arg2 + 0x1B);
+    }
+    for (var_v1 = *arg3; var_v1 >= 0x64; var_v1 -= 0x64) {
+        var_s0++;
+    }
+    if (var_v1 == 0x63) {
+        var_s0++;
+    }
+    sp70[0] = (var_v1 / 10) + 0x30;
+    sp70[1] = 0;
+    sp6C[0] = (var_v1 % 10) + 0x30;
+    sp6C[1] = 0;
+    sp68[0] = ((var_v1 + sp5E) / 10) + 0x30;
+    sp68[1] = 0;
+    sp64[0] = ((var_v1 + sp5E) % 10) + 0x30;
+    sp64[1] = 0;
+    sp74 = func_global_asm_80612D1C((((*arg5 / 12.0) * MATH_HALF_PI_D) + MATH_HALF_PI_D)) * 96.0;
+    if (arg4 == *arg3) {
+        dl = printStyledText(dl, 3, arg1 * 4, arg2 * 4, (u8*)&sp70, 1U);
+        dl = printStyledText(dl, 3, (s16) ((arg1 * 4) + 0x50), (s16) arg2 * 4, (u8*)&sp6C, 1U);
+    } else if (sp70[0] != sp68[0]) {
+        temp_f6 = ((arg2 * 4) - 0x60) + sp74;
+        temp_f18 = ((arg2 * 4) + 4) + sp74;
+        dl = printStyledText(dl, 3, arg1 * 4, temp_f6, (u8*)&sp68, 1U);
+        dl = printStyledText(dl, 3, arg1 * 4, temp_f18, (u8*)&sp70, 1U);
+        dl = printStyledText(dl, 3, (arg1 * 4) + 0x50, temp_f6, (u8*)&sp64, 1U);
+        dl = printStyledText(dl, 3, (arg1 * 4) + 0x50, temp_f18, (u8*)&sp6C, 1U);
+    } else {
+        dl = printStyledText(dl, 3, arg1 * 4, arg2 * 4, (u8*)&sp70, 1U);
+        dl = printStyledText(dl, 3, (arg1 * 4) + 0x50, ((arg2 * 4) - 0x60) + sp74, (u8*)&sp64, 1U);
+        dl = printStyledText(dl, 3, (arg1 * 4) + 0x50, ((arg2 * 4) + 4) + sp74, (u8*)&sp6C, 1U);
+    }
+    if ((D_global_asm_807FDB1D != ALIGN_NOT_2D) && (D_global_asm_807FDB1D != ALIGN_UNALIGNED)) {
+        dl = popHUD(dl);
+    }
+    var_v1_2 = arg1 - 0x14;
+    if ((*arg3 + sp5E) >= 0x64) {
+        if (var_v1_2 < 0) {
+            var_v1_2 = 0;
+        }
+        //@recomp: Set scissor x bounds to be the edges of the screen
+        gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+            character_change_array->unk270[0],
+            arg2,
+            character_change_array->unk270[2],
+            arg2 + 0x1B
+        );
+        if ((D_global_asm_807FDB1D != ALIGN_NOT_2D) && (D_global_asm_807FDB1D != ALIGN_UNALIGNED)) {
+            dl = alignHUDTopBottom(dl, D_global_asm_807FDB1D, arg2, arg2 + 0x1B);
+        }
+        _sprintf(sp60, "%d", var_s0);
+        if ((*arg3 >= 0x64) && (*arg3 != 0xC7)) {
+            dl = printStyledText(dl, 3, ((arg1 * 4) - 0x50), (arg2 * 4), (u8*)&sp60, 1U);
+        } else if ((*arg3 == 0x63) || (*arg3 == 0xC7)) {
+            temp_s0 = (arg1 * 4) - 0x50;
+            dl = printStyledText(dl, 3, temp_s0, ((arg2 * 4) - 0x60) + sp74, (u8*)&sp60, 1U);
+            if (*arg3 == 0xC7) {
+                dl = printStyledText(dl, 3, temp_s0, ((arg2 * 4) + 4) + sp74, (u8*)"1", 1U);
+            }
+        }
+        if ((D_global_asm_807FDB1D != ALIGN_NOT_2D) && (D_global_asm_807FDB1D != ALIGN_UNALIGNED)) {
+            dl = popHUD(dl);
+        }
+    }
+    gDPPipeSync(dl++);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+        character_change_array->unk270[0],
+        character_change_array->unk270[1],
+        character_change_array->unk270[2],
+        character_change_array->unk270[3]
+    );
+    return dl;
+}
+
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    s16 unk2;
+    s16 unk4;
+    u8 unk6;
+    u8 unk7;
+    u8 unk8;
+    u8 unk9;
+} A178_80024000;
+
+//@recomp: Render the "GET" HUD
+RECOMP_PATCH Gfx *func_bonus_80024000(Gfx *dl, Actor *arg1) {
+    A178_80024000 *a178;
+    a178 = arg1->AAD_as_array[1];
+    if (func_global_asm_805FCA64()) {
+        gSPDisplayList(dl++, &D_1000118);
+        dl = func_global_asm_8070068C(dl);
+        gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        // Header
+        dl = alignHUD(dl, ALIGN_LEFT);
+        setSpriteAlignment(ALIGN_LEFT);
+        dl = func_global_asm_806FE078(dl, a178->unk9, 8, 30.0f, 36.0f, 0.0f, 1.5f);
+        setSpriteAlignment(ALIGN_NOT_2D);
+        dl = popHUD(dl);
+        // Counter
+        setSpriteAlignment(ALIGN_LEFT);
+        dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &a178->unk2, a178->unk4, &a178->unk8);
+        setSpriteAlignment(ALIGN_NOT_2D);
+    }
+    return dl;
+}
+
+
+
 
 // This requires mallocs to be resolved
 /*
