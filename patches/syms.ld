@@ -61,4 +61,4 @@ osViGetNextFramebuffer_recomp = 0x8F000118;
 osAiGetLength_recomp = 0x8F00011C;
 osWritebackDCacheAll_recomp = 0x8F000120;
 osAiSetNextBuffer_recomp = 0x8F000124;
-sqrtf_recomp = 0x8F000128;
+sqrtf_recomp = 0x8F00012C;
