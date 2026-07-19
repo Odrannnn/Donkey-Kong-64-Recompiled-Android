@@ -907,7 +907,7 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
         gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 35.0f * cooldown);
     }
     gDPLoadTextureBlock(dl++, (s32)temp_v0 + 0x80000000, G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
-    gDPTextureRectangle(
+    gSPTextureRectangle(
         dl++,
         character_change_array->unk270[0] * 4,
         character_change_array->unk270[1] * 4,
@@ -1238,3 +1238,8 @@ RECOMP_PATCH void func_global_asm_807131BC(void) {
     func_global_asm_80712490(2, 0, GAME_MODE_ADVENTURE);
 }
 */
+
+// @recomp: (Prevent the ) draw of borders for overscan
+RECOMP_PATCH Gfx *func_global_asm_80704960(Gfx *dl) {
+    return dl;
+}

@@ -61,7 +61,6 @@ Gfx *handle_interpolation(Gfx * dl) {
     return dl;
 }
 
-/*
 RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f32* arg3, f32* arg4, f32* arg5, f32* arg6, f32* arg7, f32* arg8, f32* arg9) {
     CameraPaad* AAD;
     OSTime temp_v0_9;
@@ -86,7 +85,7 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
         AAD->unkD8.y = temp_v0->position.f[1];
         AAD->unkD8.z = temp_v0->position.f[2];
     }
-    temp_f0 = sqrtf(
+    temp_f0 = _sqrtf(
         SQ(temp_v0->position.f[0] - AAD->unkCC.x) +
         SQ(temp_v0->position.f[1] - AAD->unkCC.y) +
         SQ(temp_v0->position.f[2] - AAD->unkCC.z) 
@@ -139,7 +138,7 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
             if (AAD->unkAC & 0x80000000) {
                 func_global_asm_8061C39C(arg0);
             } else {
-                func_global_asm_80622B24(arg0, arg0->position.f, &arg0->position.f[1], &arg0->position.f[2], AAD + 0x78, AAD + 0x7C, AAD + 0x80, temp_v0);
+                func_global_asm_80622B24(arg0, arg0->position.f, &arg0->position.f[1], &arg0->position.f[2], &AAD->unk78, &AAD->unk7C, &AAD->unk80, temp_v0);
                 if ((global_properties_bitfield & 0x2000) || (AAD->unkAC & 0x100000)) {
                     if (AAD->unkAC & 0x100000) {
                         temp_f0 = AAD->unk38;
@@ -232,7 +231,7 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
                                         temp_f14_5 = gPlayerPointer->position.f[1];
                                         AAD->unk70 = temp_f14_5;
                                         AAD->unk6C = temp_f14_5;
-                                        AAD->unkA0 = sqrtf(SQ(*arg3 - gPlayerPointer->position.f[2]) + SQ(*arg1 - gPlayerPointer->position.f[0]));
+                                        AAD->unkA0 = _sqrtf(SQ(*arg3 - gPlayerPointer->position.f[2]) + SQ(*arg1 - gPlayerPointer->position.f[0]));
                                         AAD->unkA4 = AAD->unkA0;
                                         AAD->unkB2 = func_global_asm_80665DE0(gPlayerPointer->position.f[0], gPlayerPointer->position.f[2], *arg1, *arg3);
                                         temp_f14_5 = *arg2 - gPlayerPointer->position.f[1];
@@ -377,4 +376,3 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
     AAD->unkCC.y = temp_v0->position.f[1];
     AAD->unkCC.z = temp_v0->position.f[2];
 }
-*/
