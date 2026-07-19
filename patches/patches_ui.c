@@ -13,26 +13,11 @@ void setSpriteAlignment(enumSpriteAlignment alignment) {
     D_global_asm_807FDB1D = alignment;
 }
 
-Gfx *alignHUD(Gfx * dl, enumSpriteAlignment alignment) {
-    s32 margin_reduction = 8;
-    gEXPushScissor(dl++);
-    gEXPushViewport(dl++);
-    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
-    if (alignment == ALIGN_RIGHT) {
-        // Right align
-        gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
-            -(D_global_asm_80744490 - margin_reduction) * 4, 0,
-            -(D_global_asm_80744490 - margin_reduction) * 4, 0);
-        gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, -(D_global_asm_80744490 - margin_reduction) * 4, 0);
-    } else if (alignment == ALIGN_LEFT) {
-        gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, -margin_reduction * 4, 0, -margin_reduction * 4);
-        gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
-    }
-    return dl;
-}
-
 Gfx *alignHUDTopBottom(Gfx * dl, enumSpriteAlignment alignment, s32 top, s32 bottom) {
     s32 margin_reduction = 8;
+    if (alignment == ALIGN_UNALIGNED) {
+        return dl;
+    }
     gEXPushScissor(dl++);
     gEXPushViewport(dl++);
     gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, top, 0, bottom);
@@ -47,6 +32,10 @@ Gfx *alignHUDTopBottom(Gfx * dl, enumSpriteAlignment alignment, s32 top, s32 bot
         gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
     }
     return dl;
+}
+
+Gfx *alignHUD(Gfx * dl, enumSpriteAlignment alignment) {
+    return alignHUDTopBottom(dl, alignment, 0, D_global_asm_80744494);
 }
 
 Gfx *popHUD(Gfx *dl) {
@@ -83,20 +72,21 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     }
     if (sprite->unk388 != -1) {
         if (sprite->unk36F != 0) {
-            // if (!func_global_asm_806522CC(sprite->unk340 * 0.25, sprite->unk344 * 0.25, sprite->unk388)) {
-            //     return dl;
-            // }
+            // @recomp: disable sprite culling
+            if (!func_global_asm_806522CC(sprite->unk340 * 0.25, sprite->unk344 * 0.25, sprite->unk388)) {
+                return dl;
+            }
         } else {
             if (arg2 != sprite->unk388) {
                 return dl;
             }
         }
     }
+    if (sprite->unk36F) {
+        dl = alignHUD(dl, sprite->unk36F);
+    }
     temp_s0 = sprite->unk0[sprite->unk21++].unk0[D_global_asm_807444FC];
     gSPDisplayList(dl++, osVirtualToPhysical(temp_s0));
-    if (sprite->unk36F) {
-        temp_s0 = alignHUD(temp_s0, sprite->unk36F);
-    }
     gDPPipeSync(temp_s0++);
     gDPSetCycleType(temp_s0++, G_CYC_1CYCLE);
     gSPLoadGeometryMode(temp_s0++, 0);
@@ -121,20 +111,16 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
         gSPMatrix(temp_s0++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
         gSPMatrix(temp_s0++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         temp_s0 = func_global_asm_805FD030(temp_s0);
-        // gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
-        //     0,
-        //     0,
-        //     D_global_asm_80744490,
-        //     D_global_asm_80744494
-        // );
-        // if (sprite->unk388 == -1) {
-        //     gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
-        //         sprite->unk38E,
-        //         sprite->unk390,
-        //         sprite->unk392,
-        //         sprite->unk394
-        //     );
-        // }
+        if (sprite->unk36F == ALIGN_UNALIGNED) {
+            if (sprite->unk388 == -1) {
+                gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
+                    sprite->unk38E,
+                    sprite->unk390,
+                    sprite->unk392,
+                    sprite->unk394
+                );
+            }
+        }
     }
     gSPMatrix(temp_s0++, osVirtualToPhysical(sprite->unk128[cc_player_index][D_global_asm_807444FC]), G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     for (i = 0; i < sprite->unk380; i++) {
@@ -193,24 +179,27 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     if (sprite->unk36F != 0) {
         gSPMatrix(temp_s0++, &D_2000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
         gSPMatrix(temp_s0++, &D_2000200, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
-        // if (sprite->unk388 == -1) {
-        //     gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
-        //         0,
-        //         0,
-        //         D_global_asm_80744490,
-        //         D_global_asm_80744494
-        //     );
-        // }
-        temp_s0 = popHUD(temp_s0);
+        if (sprite->unk36F == ALIGN_UNALIGNED) {
+            if (sprite->unk388 == -1) {
+                gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
+                    0,
+                    0,
+                    D_global_asm_80744490,
+                    D_global_asm_80744494
+                );
+            }
+        }
     }
     gDPPipeSync(temp_s0++);
     gSPEndDisplayList(temp_s0++);
+    if ((sprite->unk36F != ALIGN_NOT_2D) && (sprite->unk36F != ALIGN_UNALIGNED)) {
+        dl = popHUD(dl);
+    }
     D_global_asm_807F6009 = 5;
     return dl;
 }
 
 //@recomp: Draw HUD Numbers
-#if HUD_CHANGE
 RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, Gfx *dl) {
     Struct806F9D8C_arg14 *sp74;
     Struct80750948 *temp_v0_3;
