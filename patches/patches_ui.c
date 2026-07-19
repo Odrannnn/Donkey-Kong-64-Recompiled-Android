@@ -553,35 +553,6 @@ RECOMP_PATCH Gfx *func_global_asm_8068D8C8(Gfx *dl, s32 arg1) {
     return dl;
 }
 
-typedef struct global_asm_struct_71 GlobalASMStruct71;
-
-struct global_asm_struct_71 {
-    s32 unk0;
-    s32 unk4;
-    s32 unk8; // Used
-    s32 unkC;
-    s16 unk10;
-    s16 unk12;
-    GlobalASMStruct71 *unk14; // Used, prev?
-    GlobalASMStruct71 *unk18; // Next?
-};
-
-typedef struct {
-    u8 unk0[0x340 - 0x0];
-    f32 unk340;
-    f32 unk344;
-    u8 unk348[0x35E - 0x348];
-    s16 unk35E;
-    f32 unk360;
-    f32 unk364;
-} Struct806F9AF0_arg0;
-
-extern void *D_global_asm_80750518;
-extern f32 D_global_asm_807FD7A0[];
-extern void func_global_asm_806F9AF0(GlobalASMStruct71 *arg0, s8 *arg1);
-extern void func_global_asm_806F966C(GlobalASMStruct71 **arg0);
-extern void func_global_asm_806F96CC(GlobalASMStruct71 *arg0, u32 arg1);
-
 // @recomp: Draw GB Acquisition HUD
 RECOMP_PATCH void func_global_asm_806F9B64(s32 arg0) {
     GlobalASMStruct71 **counter;
@@ -609,20 +580,6 @@ RECOMP_PATCH void func_global_asm_806F9B64(s32 arg0) {
     }
 }
 
-typedef struct {
-    s32 unk0;
-    void *unk4[1];
-    s32 unk8;
-    s32 unkC;
-    s32 unk10;
-    s32 unk14;
-    s8 unk18[1];
-} Struct8002733C;
-void func_global_asm_80715908(Struct80717D84 *arg0);
-void func_global_asm_8071A038(Struct80717D84 *arg0, s32 arg1);
-extern SpriteData D_global_asm_8071FFD4; 
-s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
-
 //@recomp: Display remaining menus in various minigames
 RECOMP_PATCH void func_bonus_8002733C(Struct8002733C *arg0) {
     s16 i;
@@ -645,51 +602,6 @@ RECOMP_PATCH void func_bonus_8002733C(Struct8002733C *arg0) {
     }
     playSound(0x3E4, 0x7FFF, 63.0f, 1.0f, 5, 0);
 }
-
-typedef struct {
-    OSTime unk0;
-    u32 unk8;
-    s32 unkC;
-    u8 unk10;
-} AAD_global_asm_806A2A10;
-typedef struct Struct80754AD0 Struct80754AD0;
-
-typedef struct {
-    f32 unk0;
-    f32 unk4;
-    f32 unk8;
-    f32 unkC;
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    f32 unk1C;
-    f32 unk20;
-    f32 unk24;
-    f32 unk28;
-    f32 unk2C;
-    f32 unk30;
-    f32 unk34;
-} Struct806FD9FC;
-
-struct Struct80754AD0 {
-    Struct80754AD0 *next;
-    u8 *unk4;
-    Struct806FD9FC *unk8;
-    u8 unkC;
-    u8 unkD;
-    u8 padE[0x10 - 0x0E];
-    f32 unk10;
-    f32 unk14;
-    f32 unk18;
-    s16 unk1C;
-};
-
-extern SpriteData D_global_asm_8071FC58;
-extern u8 func_global_asm_805FCA64(void);
-extern Gfx *func_global_asm_8070068C(Gfx *dl);
-extern Struct80754AD0 *func_global_asm_806FD9B4(s16 arg0);
-extern Gfx *func_global_asm_806FE078(Gfx *dl, s16 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6);
-extern Mtx D_2000100;
 
 // @recomp: some scissor/viewport alignment code. Only trigger this when we want
 RECOMP_PATCH Gfx *func_global_asm_8070068C(Gfx *dl) {
@@ -766,8 +678,6 @@ RECOMP_PATCH Gfx *func_global_asm_806A2B90(Gfx *dl, Actor *arg1) {
     }
     return dl;
 }
-
-#define MATH_HALF_PI_D 1.5707963705062866
 
 //@recomp: Displays any counter text, with setting the scissor
 RECOMP_PATCH Gfx* func_global_asm_8068DC54(Gfx* dl, s16 arg1, s16 arg2, s16* arg3, s16 arg4, u8* arg5) {
@@ -885,17 +795,6 @@ RECOMP_PATCH Gfx* func_global_asm_8068DC54(Gfx* dl, s16 arg1, s16 arg2, s16* arg
     return dl;
 }
 
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    s16 unk2;
-    s16 unk4;
-    u8 unk6;
-    u8 unk7;
-    u8 unk8;
-    u8 unk9;
-} A178_80024000;
-
 //@recomp: Render the "GET" HUD (various minigames)
 RECOMP_PATCH Gfx *func_bonus_80024000(Gfx *dl, Actor *arg1) {
     A178_80024000 *a178;
@@ -920,14 +819,6 @@ RECOMP_PATCH Gfx *func_bonus_80024000(Gfx *dl, Actor *arg1) {
     return dl;
 }
 
-typedef struct {
-    u8 unk0[0x14 - 0x0];
-    s16 unk14;
-    s16 unk16;
-    u8 unk18;
-    u8 unk19;
-} AAD_bonus_800252A0;
-
 //@recomp: Render the "GET" HUD (Batty BB)
 RECOMP_PATCH Gfx *func_bonus_800252A0(Gfx *dl, Actor *arg1) {
     AAD_bonus_800252A0 *aaD;
@@ -951,35 +842,6 @@ RECOMP_PATCH Gfx *func_bonus_800252A0(Gfx *dl, Actor *arg1) {
     setSpriteAlignment(ALIGN_NOT_2D);
     return dl;
 }
-
-typedef struct KremlingKoshAAD {
-    void* sprite[5];
-    u8 unk14[0x1E - 0x14];
-    s16 x;
-    s16 y;
-    u8 unk22;
-    u8 timer;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-} KremlingKoshAAD;
-
-typedef struct KremlingKoshInit {
-    Actor* slots[8];
-    s16 hit_requirement;
-    s16 hit_requirement_hud;
-    u8 unk24;
-    u8 unk25;
-    u8 unk26;
-    u8 no_spawn_percent;
-    u8 green_chance;
-    u8 time_limit;
-    u8 unk2A[2];
-    f32 unk2C;
-} KremlingKoshInit;
-
-extern Gfx *func_bonus_80026690(Gfx *dl, Actor *arg1);
-extern u8 func_global_asm_806FD894(s16 arg0);
 
 //@recomp: Kremling Kosh Counter
 RECOMP_PATCH Gfx *func_bonus_80026940(Gfx *dl, Actor *KoshController) {
@@ -1066,33 +928,6 @@ RECOMP_PATCH Gfx *func_bonus_80026940(Gfx *dl, Actor *KoshController) {
     return dl;
 }
 
-Gfx* func_global_asm_8068DC54(Gfx* dl, s16 arg1, s16 arg2, s16* arg3, s16 arg4, u8* arg5);
-
-typedef struct KrazyKKAAD {
-    u8 pad0[0x25];
-    u8 unk25;
-    u8 unk26;
-    u8 unk27;
-    s16 unk28;
-    s16 unk2A;
-} KrazyKKAAD;
-
-typedef struct KrazyKKAAD178 {
-    u8 pad0[0x3];
-    u8 unk3;
-    u8 pad4[0x6 - 0x4];
-    u8 unk6;
-    u8 unk7;
-    s16 unk8;
-    s16 unkA;
-    u8 padC[0x11 - 0xC];
-    u8 unk11;
-    u8 unk12;
-    u8 unk13;
-    s16 unk14;
-    s16 unk16;
-} KrazyKKAAD178;
-
 //@recomp: Krazy KK/PPPanic/BBBash counter code
 RECOMP_PATCH Gfx* func_bonus_80029B9C(Gfx* dl, Actor* arg1) {
     s32 pad;
@@ -1166,19 +1001,6 @@ RECOMP_PATCH Gfx* func_bonus_80029B9C(Gfx* dl, Actor* arg1) {
     return dl;
 }
 
-typedef struct {
-    u8 unk0[0x23];
-    u8 unk23;
-    u8 unk24;
-    u8 unk25;
-    s16 unk26;
-    s16 unk28;
-} AAD_8002CC08;
-
-extern Gfx *displayImage(Gfx *dl, u16 textureIndex, s32 arg3, u32 codec, s32 width, s32 height, s16 x, s16 y, f32 xScale, f32 yScale, s32 arg11, f32 arg12);
-extern s32 func_global_asm_80626F8C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, f32 arg6, s32 arg7);
-extern f32 D_bonus_8002DEB4;
-
 //@recomp: Searchlight Seek counter
 RECOMP_PATCH Gfx *func_bonus_8002CC08(Gfx *dl, Actor *arg1) {
     AAD_8002CC08 *aaD;
@@ -1224,25 +1046,6 @@ RECOMP_PATCH Gfx *func_bonus_8002CC08(Gfx *dl, Actor *arg1) {
     }
     return dl;
 }
-
-typedef struct {
-    s8 unk0;
-    s8 unk1;
-    s8 unk2;
-    u8 unk3;
-    s8 unk4;
-    s8 unk5;
-    u8 unk6;
-    s8 unk7;
-    s16 unk8;
-    s16 unkA;
-    u8 unkC;
-    u8 unkD;
-} AAD_8002D010;
-
-extern Maps current_map;
-extern s8 D_bonus_8002DEF0[];
-#define D_bonus_8002D92C (*(volatile s8 *)0x8002D92C)
 
 //@recomp: Rambi/Enguarde Arena counter
 RECOMP_PATCH Gfx *func_bonus_8002D010(Gfx *dl, Actor *arg1) {
@@ -1298,6 +1101,23 @@ RECOMP_PATCH Gfx *func_bonus_8002D010(Gfx *dl, Actor *arg1) {
             }
         }
     }
+    return dl;
+}
+
+// @recomp: Display K Rool Round
+RECOMP_PATCH Gfx *func_boss_800286B8(Gfx *dl, Actor *arg1) {
+    u8 sp3C[13];
+
+    gSPDisplayList(dl++, &D_1000118);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    _sprintf(sp3C, "ROUND %d", D_global_asm_80750AD4);
+    dl = alignHUD(dl, ALIGN_LEFT);
+    dl = printText(dl, 50 * 4, (character_change_array->unk270[3] - 15) * 4, 0.6f, sp3C);
+    dl = popHUD(dl);
     return dl;
 }
 
