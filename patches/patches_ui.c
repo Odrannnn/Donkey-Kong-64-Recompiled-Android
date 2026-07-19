@@ -193,14 +193,14 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     if (sprite->unk36F != 0) {
         gSPMatrix(temp_s0++, &D_2000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
         gSPMatrix(temp_s0++, &D_2000200, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
-        if (sprite->unk388 == -1) {
-            gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
-                0,
-                0,
-                D_global_asm_80744490,
-                D_global_asm_80744494
-            );
-        }
+        // if (sprite->unk388 == -1) {
+        //     gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
+        //         0,
+        //         0,
+        //         D_global_asm_80744490,
+        //         D_global_asm_80744494
+        //     );
+        // }
         temp_s0 = popHUD(temp_s0);
     }
     gDPPipeSync(temp_s0++);
@@ -210,6 +210,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
 }
 
 //@recomp: Draw HUD Numbers
+#if HUD_CHANGE
 RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, Gfx *dl) {
     Struct806F9D8C_arg14 *sp74;
     Struct80750948 *temp_v0_3;
@@ -906,7 +907,7 @@ typedef struct {
     u8 unk9;
 } A178_80024000;
 
-//@recomp: Render the "GET" HUD
+//@recomp: Render the "GET" HUD (various minigames)
 RECOMP_PATCH Gfx *func_bonus_80024000(Gfx *dl, Actor *arg1) {
     A178_80024000 *a178;
     a178 = arg1->AAD_as_array[1];
@@ -930,8 +931,386 @@ RECOMP_PATCH Gfx *func_bonus_80024000(Gfx *dl, Actor *arg1) {
     return dl;
 }
 
+typedef struct {
+    u8 unk0[0x14 - 0x0];
+    s16 unk14;
+    s16 unk16;
+    u8 unk18;
+    u8 unk19;
+} AAD_bonus_800252A0;
 
+//@recomp: Render the "GET" HUD (Batty BB)
+RECOMP_PATCH Gfx *func_bonus_800252A0(Gfx *dl, Actor *arg1) {
+    AAD_bonus_800252A0 *aaD;
+    aaD = arg1->AAD_as_array[0];
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0xC8, 0xC8, 0xC8, 0xFF);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPDisplayList(dl++, &D_1000118);
+    gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    // Header
+    dl = alignHUD(dl, ALIGN_LEFT);
+    setSpriteAlignment(ALIGN_LEFT);
+    dl = func_global_asm_806FE078(dl, aaD->unk19, 8, 30.0f, 36.0f, 0.0f, 1.5f);
+    setSpriteAlignment(ALIGN_NOT_2D);
+    dl = popHUD(dl);
+    // Counter
+    setSpriteAlignment(ALIGN_LEFT);
+    dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aaD->unk14, aaD->unk16, &aaD->unk18);
+    setSpriteAlignment(ALIGN_NOT_2D);
+    return dl;
+}
 
+typedef struct KremlingKoshAAD {
+    void* sprite[5];
+    u8 unk14[0x1E - 0x14];
+    s16 x;
+    s16 y;
+    u8 unk22;
+    u8 timer;
+    u8 unk24;
+    u8 unk25;
+    u8 unk26;
+} KremlingKoshAAD;
+
+typedef struct KremlingKoshInit {
+    Actor* slots[8];
+    s16 hit_requirement;
+    s16 hit_requirement_hud;
+    u8 unk24;
+    u8 unk25;
+    u8 unk26;
+    u8 no_spawn_percent;
+    u8 green_chance;
+    u8 time_limit;
+    u8 unk2A[2];
+    f32 unk2C;
+} KremlingKoshInit;
+
+extern Gfx *func_bonus_80026690(Gfx *dl, Actor *arg1);
+extern u8 func_global_asm_806FD894(s16 arg0);
+
+//@recomp: Kremling Kosh Counter
+RECOMP_PATCH Gfx *func_bonus_80026940(Gfx *dl, Actor *KoshController) {
+    s32 pad7C;
+    KremlingKoshInit *init;
+    s32 pad74;
+    s32 pad70;
+    s32 pad68;
+    s32 pad68_0;
+    u8 *text_str;
+    s32 pad[0x6];
+    s32 x;
+    KremlingKoshAAD *aad;
+    s8 *sp64;
+    s32 style_height_0;
+    s32 style_height_1;
+    s32 x_0;
+    s32 pad30;
+    s32 pad2C;
+    
+
+    aad = KoshController->AAD_as_array[0];
+    init = KoshController->AAD_as_array[1];
+    if ((KoshController->control_state == 0) && (aad->unk26 != 0)) {
+        dl = func_bonus_80026690(dl, KoshController);
+    }
+    gSPDisplayList(dl++, &D_1000118);
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0xC8, 0xC8, 0xC8, 0xFF);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPSetRenderMode(dl++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    if (KoshController->control_state != 1) {
+        // Header
+        dl = alignHUD(dl, ALIGN_LEFT);
+        setSpriteAlignment(ALIGN_LEFT);
+        dl = func_global_asm_806FE078(dl, init->unk25, 8, 30.0f, 36.0f, 0.0f, 1.5f);
+        setSpriteAlignment(ALIGN_NOT_2D);
+        dl = popHUD(dl);
+        // Counter
+        setSpriteAlignment(ALIGN_LEFT);
+        dl = func_global_asm_8068DC54(
+            dl,
+            0x26,
+            0x32,
+            &init->hit_requirement,
+            init->hit_requirement_hud,
+            &init->unk24);
+        setSpriteAlignment(ALIGN_NOT_2D);
+    }
+    if (aad->unk25 != 0) {
+        x = D_global_asm_80744490 >> 1;
+        text_str = getTextString(0x1AU, 6, 1);
+        gDPPipeSync(dl++);
+        gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, aad->unk25);
+        gDPSetCombineLERP(dl++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
+        x -= (getCenterOfString(1, text_str) >> 1);
+        style_height_0 = func_global_asm_806FD894(1);
+        dl = printStyledText(
+            dl, 1,
+            x * 4,
+            ((D_global_asm_80744494 - style_height_0) * 2),
+            text_str,
+            1U);
+        aad->unk25 -= MIN(aad->unk25, 8);
+    }
+    if (aad->unk24 != 0) {
+        x_0 = D_global_asm_80744490 >> 1;
+        text_str = getTextString(0x1AU, 8, 1);
+        gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, aad->unk24);
+        gDPSetCombineLERP(dl++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
+        x_0 -= getCenterOfString(1, text_str) >> 1;
+        dl = printStyledText(
+            dl,
+            1,
+            x_0 * 4,
+            ((func_global_asm_806FD894(1) + D_global_asm_80744494) * 2),
+            text_str,
+            1U);
+        aad->unk24 -= MIN(aad->unk24, 8);
+    }
+    return dl;
+}
+
+Gfx* func_global_asm_8068DC54(Gfx* dl, s16 arg1, s16 arg2, s16* arg3, s16 arg4, u8* arg5);
+
+typedef struct KrazyKKAAD {
+    u8 pad0[0x25];
+    u8 unk25;
+    u8 unk26;
+    u8 unk27;
+    s16 unk28;
+    s16 unk2A;
+} KrazyKKAAD;
+
+typedef struct KrazyKKAAD178 {
+    u8 pad0[0x3];
+    u8 unk3;
+    u8 pad4[0x6 - 0x4];
+    u8 unk6;
+    u8 unk7;
+    s16 unk8;
+    s16 unkA;
+    u8 padC[0x11 - 0xC];
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+    s16 unk14;
+    s16 unk16;
+} KrazyKKAAD178;
+
+//@recomp: Krazy KK/PPPanic/BBBash counter code
+RECOMP_PATCH Gfx* func_bonus_80029B9C(Gfx* dl, Actor* arg1) {
+    s32 pad;
+    KrazyKKAAD178* aad178_copy;
+    KrazyKKAAD178* aad178;
+    KrazyKKAAD* aad;
+
+    aad178_copy = arg1->AAD_as_array[1];
+    aad178 = arg1->AAD_as_array[1];
+    aad = arg1->AAD_as_array[0];
+    if ((arg1->unk58 != ACTOR_FLYSWATTER) && (arg1->control_state == 0) && (aad->unk26)) {
+        dl = func_bonus_80026690(dl, arg1);
+    }
+    gSPDisplayList(dl++, &D_1000118);
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0xC8, 0xC8, 0xC8, 0xFF);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPSetRenderMode(dl++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    switch (arg1->unk58) {
+        case ACTOR_BARRELGUN_KRAZYKONGKLAMOUR:
+            if (arg1->control_state != 3) {
+                // Header
+                dl = alignHUD(dl, ALIGN_LEFT);
+                setSpriteAlignment(ALIGN_LEFT);
+                dl = func_global_asm_806FE078(dl, aad178_copy->unk11, 8, 30.0f, 36.0f, 0.0f, 1.5f);
+                setSpriteAlignment(ALIGN_NOT_2D);
+                dl = popHUD(dl);
+                // Counter
+                setSpriteAlignment(ALIGN_LEFT);
+                dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aad178_copy->unk14, aad178_copy->unk16, &aad178_copy->unk12);
+                setSpriteAlignment(ALIGN_NOT_2D);
+            }
+            break;
+        case ACTOR_BARRELGUN_PERILPATHPANIC:
+            if (arg1->control_state != 3) {
+                // Header
+                dl = alignHUD(dl, ALIGN_LEFT);
+                setSpriteAlignment(ALIGN_LEFT);
+                dl = func_global_asm_806FE078(dl, aad178->unk3, 8, 30.0f, 36.0f, 0.0f, 1.5f);
+                setSpriteAlignment(ALIGN_NOT_2D);
+                dl = popHUD(dl);
+                // Counter
+                setSpriteAlignment(ALIGN_LEFT);
+                dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aad178->unk8, aad178->unkA, &aad178->unk6);
+                setSpriteAlignment(ALIGN_NOT_2D);
+                break;
+            }
+            break;
+        case ACTOR_FLYSWATTER:
+            switch (arg1->control_state) {
+                case 7:
+                    break;
+                case 0:
+                case 1:
+                case 2:
+                    // Header
+                    dl = alignHUD(dl, ALIGN_LEFT);
+                    setSpriteAlignment(ALIGN_LEFT);
+                    dl = func_global_asm_806FE078(dl, aad->unk25, 8, 30.0f, 36.0f, 0.0f, 1.5f);
+                    setSpriteAlignment(ALIGN_NOT_2D);
+                    dl = popHUD(dl);
+                    // Counter
+                    setSpriteAlignment(ALIGN_LEFT);
+                    dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aad->unk28, aad->unk2A, &aad->unk26);
+                    setSpriteAlignment(ALIGN_NOT_2D);
+                    break;
+            }
+            break;
+        }
+    return dl;
+}
+
+typedef struct {
+    u8 unk0[0x23];
+    u8 unk23;
+    u8 unk24;
+    u8 unk25;
+    s16 unk26;
+    s16 unk28;
+} AAD_8002CC08;
+
+extern Gfx *displayImage(Gfx *dl, u16 textureIndex, s32 arg3, u32 codec, s32 width, s32 height, s16 x, s16 y, f32 xScale, f32 yScale, s32 arg11, f32 arg12);
+extern s32 func_global_asm_80626F8C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, f32 arg6, s32 arg7);
+extern f32 D_bonus_8002DEB4;
+
+//@recomp: Searchlight Seek counter
+RECOMP_PATCH Gfx *func_bonus_8002CC08(Gfx *dl, Actor *arg1) {
+    AAD_8002CC08 *aaD;
+    f32 sp80;
+    f32 sp7C;
+    f32 temp_f20;
+    s16 temp_f18;
+    s16 temp_f16;
+
+    aaD = arg1->AAD_as_array[0];
+    func_global_asm_80626F8C(arg1->x_position, arg1->y_position, arg1->z_position, &sp80, &sp7C, 0, 1.0f, cc_player_index);
+    temp_f18 = (f32)(sp80 * 4.0);
+    temp_f16 = (f32)(sp7C * 4.0);
+    gDPPipeSync(dl++);
+    gDPSetCombineMode(dl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gSPDisplayList(dl++, &D_1000118);
+    gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    if ((arg1->control_state == 0) || (arg1->control_state == 1)) {
+        temp_f20 = D_bonus_8002DEB4;
+        dl = displayImage(dl, (((object_timer >> 1) % 12) + 0x83), 0, 2, 0x20, 0x10, (temp_f18 - 0x34), (temp_f16 - 0x34), temp_f20, temp_f20, 0xE1, 0.0f);
+        dl = displayImage(dl, (((object_timer >> 1) % 12) + 0x83), 0, 2, 0x20, 0x10, (temp_f18 + 0x34), (temp_f16 - 0x34), temp_f20, temp_f20, 0x13B, 0.0f);
+        dl = displayImage(dl, (((object_timer >> 1) % 12) + 0x83), 0, 2, 0x20, 0x10, (temp_f18 + 0x34), (temp_f16 + 0x34), temp_f20, temp_f20, 0x2D, 0.0f);
+        dl = displayImage(dl, (((object_timer >> 1) % 12) + 0x83), 0, 2, 0x20, 0x10, (temp_f18 - 0x34), (temp_f16 + 0x34), temp_f20, temp_f20, 0x87, 0.0f);
+    }
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    switch (arg1->control_state) {
+        case 7:
+            break;
+        case 0:
+        case 1:
+            // Header
+            dl = alignHUD(dl, ALIGN_LEFT);
+            setSpriteAlignment(ALIGN_LEFT);
+            dl = func_global_asm_806FE078(dl, aaD->unk23, 8, 30.0f, 36.0f, 0.0f, 1.5f);
+            setSpriteAlignment(ALIGN_NOT_2D);
+            dl = popHUD(dl);
+            // Counter
+            setSpriteAlignment(ALIGN_LEFT);
+            dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aaD->unk26, aaD->unk28, &aaD->unk24);
+            setSpriteAlignment(ALIGN_NOT_2D);
+            break;
+    }
+    return dl;
+}
+
+typedef struct {
+    s8 unk0;
+    s8 unk1;
+    s8 unk2;
+    u8 unk3;
+    s8 unk4;
+    s8 unk5;
+    u8 unk6;
+    s8 unk7;
+    s16 unk8;
+    s16 unkA;
+    u8 unkC;
+    u8 unkD;
+} AAD_8002D010;
+
+extern Maps current_map;
+extern s8 D_bonus_8002DEF0[];
+#define D_bonus_8002D92C (*(volatile s8 *)0x8002D92C)
+
+//@recomp: Rambi/Enguarde Arena counter
+RECOMP_PATCH Gfx *func_bonus_8002D010(Gfx *dl, Actor *arg1) {
+    s16 pad;
+    s16 i;
+    s16 y;
+    AAD_8002D010 *aaD;
+    u8 sp70[17];
+
+    aaD = arg1->AAD_as_array[0];
+
+    gSPDisplayList(dl++, &D_1000118);
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0xC8, 0xC8, 0xC8, 0xFF);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPSetRenderMode(dl++, G_RM_TEX_EDGE, G_RM_TEX_EDGE2);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+
+    // Header
+    dl = alignHUD(dl, ALIGN_LEFT);
+    setSpriteAlignment(ALIGN_LEFT);
+    dl = func_global_asm_806FE078(dl, aaD->unk3, 8, 30.0f, 36.0f, 0.0f, 1.0f);
+    setSpriteAlignment(ALIGN_NOT_2D);
+    dl = popHUD(dl);
+    // Counter
+    setSpriteAlignment(ALIGN_LEFT);
+    dl = func_global_asm_8068DC54(dl, 0x26, 0x2D, &aaD->unk8, aaD->unkA, &aaD->unk6);
+    setSpriteAlignment(ALIGN_NOT_2D);
+
+    if (aaD->unk6 > 0) {
+        aaD->unk6 -= 2;
+    }
+    if (current_map != MAP_ENGUARDE_ARENA) {
+        if ((current_map == MAP_RAMBI_ARENA) && (arg1->control_state == 2)) {
+            y = 480 - (u16)(D_bonus_8002D92C * 48);
+            for (i = -1; i < D_bonus_8002D92C; i++) {
+                if (i >= 0) {
+                    _sprintf(sp70, "HIT %d", D_bonus_8002DEF0[i]);
+                } else if (D_bonus_8002D92C >= 2) {
+                    _sprintf(sp70, "COMBO x2");
+                } else {
+                    sp70[0] = '\0';
+                }
+                dl = printStyledText(dl, 6, 640 - (getCenterOfString(6, sp70) * 2), y, sp70, 1);
+                y += 48;
+            }
+        }
+    } else {
+        if (aaD->unkC != 0) {
+            aaD->unkC--;
+            if ((aaD->unkC & 0x1F) < 0x14) {
+                dl = func_global_asm_806FE078(dl, aaD->unkD, 8, 100.0f, 100.0f, 0.0f, 1.0f);
+            }
+        }
+    }
+    return dl;
+}
 
 // This requires mallocs to be resolved
 /*
