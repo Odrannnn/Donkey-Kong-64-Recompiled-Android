@@ -1,4 +1,9 @@
 #define MATH_HALF_PI_D 1.5707963705062866
+#define gScissorUpLX D_global_asm_80744498
+#define gScissorUpLY D_global_asm_8074449C
+#define gScissorLowerRightX D_global_asm_807444A0
+#define gScissorLowerRightY D_global_asm_807444A4
+
 typedef struct Struct80717D84 Struct80717D84;
 typedef struct actor Actor;
 
@@ -283,6 +288,10 @@ struct actor {
 extern u8 D_global_asm_807444FC;
 extern s16 D_global_asm_80744490;
 extern s16 D_global_asm_80744494;
+extern s16 D_global_asm_80744498;
+extern s16 D_global_asm_8074449C;
+extern s16 D_global_asm_807444A0;
+extern s16 D_global_asm_807444A4;
 extern u8 D_global_asm_807F6009;
 extern u32 D_global_asm_807F600C;
 extern u32 global_properties_bitfield;

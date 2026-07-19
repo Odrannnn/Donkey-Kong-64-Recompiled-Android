@@ -471,6 +471,7 @@ Gfx* displayImage_simple(Gfx* dl, s32 x, s32 y, s32 width, s32 height, s16 textu
 }
 
 //@recomp: Demo tv corner borders
+#define FAKE_OVERSCAN_THICKNESS 3
 RECOMP_PATCH Gfx *func_global_asm_806FF144(Gfx *dl) {
     gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
@@ -481,6 +482,7 @@ RECOMP_PATCH Gfx *func_global_asm_806FF144(Gfx *dl) {
     gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
     gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
     gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
+    gDPFillRectangle(dl++, gScissorUpLX, gScissorUpLY, gScissorUpLX + FAKE_OVERSCAN_THICKNESS, gScissorLowerRightY);
     dl = displayImage_simple(dl,
         0, 0,
         0x40, 0x40,
@@ -498,6 +500,7 @@ RECOMP_PATCH Gfx *func_global_asm_806FF144(Gfx *dl) {
     gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 0);
     gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, 0, 0);
     dl = alignHUD(dl, ALIGN_RIGHT);
+    gDPFillRectangle(dl++, gScissorLowerRightX - FAKE_OVERSCAN_THICKNESS, gScissorUpLY, gScissorLowerRightX, gScissorLowerRightY);
     dl = displayImage_simple(dl,
         D_global_asm_80744490, 0,
         0x40, 0x40,
@@ -514,6 +517,9 @@ RECOMP_PATCH Gfx *func_global_asm_806FF144(Gfx *dl) {
     gEXPopViewport(dl++);
     gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
     gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
+    
+    gDPFillRectangle(dl++, gScissorUpLX, gScissorUpLY, gScissorLowerRightX, gScissorUpLY + FAKE_OVERSCAN_THICKNESS);
+    gDPFillRectangle(dl++, gScissorUpLX, gScissorLowerRightY - FAKE_OVERSCAN_THICKNESS, gScissorLowerRightX, gScissorLowerRightY);
     return dl;
 }
 
