@@ -38,7 +38,7 @@
 #define osDpSetStatus osDpSetStatus_recomp
 #define osViSwapBuffer osViSwapBuffer_recomp
 #define osVirtualToPhysical osVirtualToPhysical_recomp
-#define memcpy memcpy_recomp
+#define _memcpy memcpy_recomp
 #define osDpGetStatus osDpGetStatus_recomp
 #define osViGetNextFramebuffer osViGetNextFramebuffer_recomp
 #define osAiGetLength osAiGetLength_recomp

@@ -158,34 +158,17 @@ extern "C" void recomp_get_camera_type(uint8_t* rdram, recomp_context* ctx) {
     }
 }
 
-extern "C" void recomp_get_ui_position(uint8_t* rdram, recomp_context* ctx) {
+extern "C" void recomp_get_ui_bounds(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::renderer::GraphicsConfig graphics_config = ultramodern::renderer::get_graphics_config();
     int width, height;
     recompui::get_window_size(width, height);
     width = (width * 240) / height;
 
-    s32 x_in = _arg<0, s32>(rdram, ctx);
-    s32 y_in = _arg<1, s32>(rdram, ctx);
-    s32* x_out = _arg<2, s32*>(rdram, ctx);
-    s32* y_out = _arg<3, s32*>(rdram, ctx);
-    // reference half-dimensions are stated as 150 and 110 to account for lack of overscan
-    // In theory, it should be 140 and 100, but it looks... weird.
-    // So I went with a slightly higher number to allow for more space
-    if (x_in < 160) {
-        *x_out = 160 - (((160 - x_in) * (width / 2)) / 150);
-    } else if (x_in > 160) {
-        *x_out = 160 + (((x_in - 160) * (width / 2)) / 150);
-    } else {
-        *x_out = 160;
-    }
+    s32* x_out = _arg<0, s32*>(rdram, ctx);
+    s32* y_out = _arg<1, s32*>(rdram, ctx);
 
-    if (y_in < 120) {
-        *y_out = 120 - (((120 - y_in) * (240 / 2)) / 110);
-    } else if (y_in > 120) {
-        *y_out = 120 + (((y_in - 120) * (240 / 2)) / 110);
-    } else {
-        *y_out = 120;
-    }
+    *x_out = width;
+    *y_out = 240;
     return;
 }
 
