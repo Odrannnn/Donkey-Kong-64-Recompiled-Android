@@ -74,11 +74,12 @@ RECOMP_PATCH void func_global_asm_80611730(void) {
 }
 
 void updateLag(s32 value) {
+    s32 limit = 1;
     if ((is_cutscene_active != 3) && (is_cutscene_active != 4)) {
-        return;
+        limit = 2;
     }
-    if (value < 1) {
-        value = 1;
+    if (value < limit) {
+        value = limit;
     }
     D_global_asm_80744478 = value;
 }
@@ -906,7 +907,7 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
     } else {
         gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 35.0f * cooldown);
     }
-    gDPLoadTextureBlock(dl++, (s32)temp_v0 + 0x80000000, G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+    gDPLoadTextureBlock(dl++, OS_PHYSICAL_TO_K0(temp_v0), G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
     gSPTextureRectangle(
         dl++,
         character_change_array->unk270[0] * 4,
@@ -914,8 +915,8 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
         character_change_array->unk270[2] * 4,
         character_change_array->unk270[3] * 4,
         G_TX_RENDERTILE,
-        (s32)D_global_asm_80750228,
-        (s32)D_global_asm_8075022C,
+        (s32)D_global_asm_80750228 * 8.0f,
+        (s32)D_global_asm_8075022C * 8.0f,
         1024,
         -1024
     );
@@ -929,10 +930,10 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
         D_global_asm_8075022C -= (0.5 * half_lag);
     }
     if (D_global_asm_80750228 < 0.0) {
-        D_global_asm_80750228 = 255.0f;
+        D_global_asm_80750228 += 255.0f;
     }
     if (D_global_asm_8075022C < 0.0) {
-        D_global_asm_8075022C = 255.0f;
+        D_global_asm_8075022C += 255.0f;
     }
     return dl;
 }
