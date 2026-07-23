@@ -1305,22 +1305,82 @@ RECOMP_PATCH s32 func_global_asm_80658134(s32 arg0, s32 arg1, s32 arg2, s32 arg3
     D_global_asm_807F6CB0.unk0 = temp_v0->unk1C;
     D_global_asm_807F6CB0.unk4 = temp_v0->unk2C;
 
-    // @recomp: Disable X/Y Viewport checks with depth buffer checking
-    _memcpy(&D_global_asm_807F6E68, &D_global_asm_807F6C88, sizeof(tuple_f) * 4);
-    sp28 = 4;
+    // @recomp: Disable X Viewport checks with depth buffer checking
+    func_global_asm_806582F8((Struct807F6D78 *)&D_global_asm_807F6C88, &D_global_asm_807F6E68, 4, &sp28, 0);
+    if (sp28 == 0) return 0;
     _memcpy(&D_global_asm_807F6F58, &D_global_asm_807F6E68, sizeof(tuple_f) * sp28);
     sp24 = sp28;
-    _memcpy(&D_global_asm_807F6E68, &D_global_asm_807F6F58, sizeof(tuple_f) * sp24);
-    sp28 = sp24;
+    func_global_asm_806582F8(&D_global_asm_807F6F58, &D_global_asm_807F6E68, sp24, &sp28, 2);
+    if (sp28 == 0) return 0;
     _memcpy(&D_global_asm_807F6F58, &D_global_asm_807F6E68, sizeof(tuple_f) * sp28);
     sp24 = sp28;
-
     func_global_asm_806582F8(&D_global_asm_807F6F58, D_global_asm_807F6D78, sp24, &sp28, 4);
     var_a2 = sp28;
     if (var_a2 < 3) {
         var_a2 = 0;
     }
     return var_a2;
+}
+
+extern void func_global_asm_80627388(Mtx *arg0, f32 arg1, f32 arg2, f32 arg3, s32 unused, f32 *arg5, f32 *arg6, f32 *arg7, f32 *arg8);
+s32 getScreenPosition(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, f32 arg6, s32 arg7) {
+    CharacterChange *cc;
+    f32 sp44;
+    f32 scale;
+    f32 productX;
+    f32 productY;
+    f32 absVal;
+    s32 sign;
+    s32 right;
+    s32 bottom;
+
+    sp44 = 1.0f;
+    if (arg5 != 0) {
+        func_global_asm_80627388((Mtx *) arg5, arg0, arg1, arg2, 1.0f, &arg0, &arg1, &arg2, &sp44);
+    }
+    func_global_asm_80627388(&character_change_array[(u8) arg7].unk8[D_global_asm_807444FC], arg0, arg1, arg2, sp44, &arg0, &arg1, &arg2, &sp44);
+    if ((f64) arg2 >= 0.0) {
+        *arg3 = 16384.0f;
+        *arg4 = 16384.0f;
+        return 1;
+    }
+    func_global_asm_80627388(&character_change_array[(u8) arg7].unk88[D_global_asm_807444FC], arg0, arg1, arg2, sp44, &arg0, &arg1, &arg2, &sp44);
+    cc = &character_change_array[(u8) arg7];
+    scale = (f32) ((f64) cc->unk188 / 65535.0);
+    arg0 *= scale;
+    arg1 *= scale;
+    sp44 *= scale;
+    arg0 /= sp44;
+    arg1 /= sp44;
+
+    recomp_get_ui_bounds(&right, &bottom);
+
+    productX = (f32) ((f64) right * 0.5 * (f64) arg0);
+    productY = (f32) ((f64) bottom * 0.5 * (f64) arg1);
+    arg0 = (f32) (((f64) right * 0.5) + (f64) productX);
+    arg1 = (f32) (((f64) bottom * 0.5) + (f64) productY);
+
+    arg1 = bottom - arg1;
+
+    absVal = (arg0 > 0.0f) ? arg0 : -arg0;
+    if (absVal >= 16384.0f) {
+        sign = -1;
+        if (arg0 >= 0.0f) {
+            sign = 1;
+        }
+        arg0 = (f32) (sign << 0xE);
+    }
+    absVal = (arg1 > 0.0f) ? arg1 : -arg1;
+    if (absVal >= 16384.0f) {
+        sign = -1;
+        if (arg1 >= 0.0f) {
+            sign = 1;
+        }
+        arg1 = (f32) (sign << 0xE);
+    }
+    *arg3 = arg0 * arg6;
+    *arg4 = arg1 * arg6;
+    return 0;
 }
 
 extern s32 func_global_asm_80626F8C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, f32 arg6, s32 arg7);
@@ -1331,16 +1391,20 @@ RECOMP_PATCH void func_global_asm_80658624(s32 arg0, s32 *arg1, s32 *arg2, s32 *
     s16 var_a2;
     s32 i;
     u8 var_s3;
-    // s32 left, top, right, bottom;
+    s32 left, top, right, bottom;
 
     // left = 0; // character_change_array[cc_player_index].unk270[0];
     // top = 0;
     // recomp_get_ui_bounds(&right, &bottom);
+    left = character_change_array[cc_player_index].unk270[0];
+    top = character_change_array[cc_player_index].unk270[1];
+    right = character_change_array[cc_player_index].unk270[2];
+    bottom = character_change_array[cc_player_index].unk270[3];
 
-    *arg1 = character_change_array[cc_player_index].unk270[2];
-    *arg2 = character_change_array[cc_player_index].unk270[3];
-    *arg3 = character_change_array[cc_player_index].unk270[0];
-    *arg4 = character_change_array[cc_player_index].unk270[1];
+    *arg1 = right;
+    *arg2 = bottom;
+    *arg3 = left;
+    *arg4 = top;
     // var_s3 = 0;
     // for (i = 0; i < arg0; i++) {
     //     var_s3 = getScreenPosition(D_global_asm_807F6D78[i].unk0, D_global_asm_807F6D78[i].unk4, D_global_asm_807F6D78[i].unk8, &sp7C, &sp78, 0, 1.0f, cc_player_index);
