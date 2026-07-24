@@ -469,3 +469,50 @@ extern s8 D_bonus_8002DEF0[];
 extern u8 D_global_asm_80750AD4;
 extern Gfx **D_1000118;
 extern Gfx* printText(Gfx* dl, s16 x, s16 y, f32 scale, u8* string);
+
+typedef struct HandleAAD {
+    Actor *reels[4];
+    s16 unk10;
+    s16 unk12;
+    s16 unk14;
+    s16 unk16;
+    s8 unk18;
+    u8 unk19;
+    u8 unk1A;
+    s8 unk1B;
+    u8 unk1C;
+    u8 unk1D;
+    u8 unk1E;
+    s8 unk1F;
+    void *unk20;
+} HandleAAD;
+
+#define ACTOR_UNINITIALIZED(actor) (!(actor->object_properties_bitfield & 0x10))
+#define MATH_PI_F 3.1415927f
+void func_global_asm_806A2A10(s32, s32, s32);
+s16 func_global_asm_806FDB8C(s16, u8*, u8, f32, f32, f32);
+void func_global_asm_80737924(void *);
+extern void *D_global_asm_807457E4[];
+extern Actor *gCurrentActorPointer;
+extern Actor *gCurrentPlayer;
+extern void playSong(MUSIC_E arg0, f32 arg1); 
+extern void func_global_asm_806FDAB8(s16 arg0, f32 arg1);
+extern Actor* func_bonus_800253E4(s32 model, s16 x, s16 y, s16 z);
+extern u8 setAction(s16 actionIndex, Actor *actor, u8 playerIndex);
+extern void func_global_asm_8061C6A8(Actor *arg0, Actor *arg1, u8 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, f32 arg10);
+extern s32 playCutscene(Actor *arg0, s16 arg1, u8 arg2);
+extern u8 is_cutscene_active;
+extern void loadText(Actor *arg0, u16 fileIndex, u8 textIndex);
+extern SpriteData D_global_asm_80720CF0;
+extern void playSoundAtActorPosition(Actor *arg0, s16 arg1, u8 arg2, s16 arg3, u8 arg4);
+extern void func_global_asm_806A2B08(Actor *arg0);
+extern void func_bonus_800256C4(HandleAAD *arg0, u8 arg1);
+extern void func_global_asm_8061C464(Actor *arg0, Actor *arg1, u8 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, f32 argA);
+extern void func_bonus_800254B0(s16 x, s16 y, s16 z, s16 count);
+extern u8 func_bonus_80025480(HandleAAD *arg0, u8 arg1);
+extern void func_bonus_800264E0(u8 arg0, u8 textIndex);
+extern void func_global_asm_8069D2AC(u8 arg0, s16 arg1, s16 arg2, u8 *arg3, u16 arg4, u16 arg5, u8 arg6, u8 arg7);
+extern void func_bonus_8002563C(HandleAAD *arg0);
+extern void addActorToTextOverlayRenderArray(void *arg0, Actor *arg1, u8 arg2);
+extern void renderActor(Actor *arg0, u8 arg1);
+extern void func_bonus_800265C0(u8 arg0, u8 textIndex);
