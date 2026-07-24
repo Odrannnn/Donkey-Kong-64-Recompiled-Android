@@ -1,28 +1,7 @@
-#include "patches.h"
-#include "PR/os_message.h"
-#include "enums.h"
-#include "PR/os_exception.h"
-#include "PR/rcp.h"
-#include "misc_funcs.h"
+#include "common_structs.h"
 #include "debug_config.h"
 
 extern Gfx* handle_interpolation(Gfx * dl);
-
-typedef struct OSScTask_s {
-    struct OSScTask_s   *next;          /* note: this must be first */
-    u32                 state;
-    u32			flags;
-    void		*framebuffer;	/* used by graphics tasks */
-
-    OSTask              list;
-    void* unk_50; //?
-    OSMesgQueue         *msgQ;
-    OSMesg              msg;
-#ifndef _FINALROM                       /* all #ifdef items should    */
-    OSTime              startTime;      /* remain at the end!!, or    */
-    OSTime              totalTime;      /* possible conflict if       */
-#endif                                  /* FINALROM library used with */
-} OSScTask; 
 
 typedef struct Unk {
     char unk_00[4];

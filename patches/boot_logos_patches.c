@@ -1,9 +1,4 @@
-#include "patches.h"
-#include "PR/os_message.h"
-#include "enums.h"
-#include "PR/os_exception.h"
-#include "PR/rcp.h"
-#include "misc_funcs.h"
+#include "common_structs.h"
 #include "patches_main.h"
 
 Gfx gfxArena[0x200];

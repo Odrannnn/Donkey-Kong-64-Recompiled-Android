@@ -1,10 +1,4 @@
-#include "patches.h"
-#include "PR/os_message.h"
-#include "PR/os_exception.h"
-#include "PR/rcp.h"
-#include "misc_funcs.h"
-#include "PR/sched.h"
-#include "enums.h"
+#include "common_structs.h"
 #include "ui.h"
 #include "patches_ui.h"
 
@@ -626,7 +620,7 @@ RECOMP_PATCH Gfx *func_global_asm_8070068C(Gfx *dl) {
     return dl;
 }
 
-//@recomp: Display minigame timer - Currently has some weird 4:3 cutoff here that I don't understand
+//@recomp: Display minigame timer
 RECOMP_PATCH Gfx *func_global_asm_806A2B90(Gfx *dl, Actor *arg1) {
     AAD_global_asm_806A2A10 *sp5C;
     s32 sp58;
@@ -640,6 +634,7 @@ RECOMP_PATCH Gfx *func_global_asm_806A2B90(Gfx *dl, Actor *arg1) {
     f32 sp38;
     f32 sp34;
     s32 sp30;
+    enumSpriteAlignment alignment;
 
     sp5C = arg1->AAD_as_array[0];
     if (func_global_asm_805FCA64()) {
@@ -662,17 +657,27 @@ RECOMP_PATCH Gfx *func_global_asm_806A2B90(Gfx *dl, Actor *arg1) {
             if (arg1->unk168 == 3) {
                 var_v0 = -7;
             }
-            dl = alignHUD(dl, ALIGN_RIGHT);
-            setSpriteAlignment(ALIGN_RIGHT);
+            alignment = ALIGN_UNALIGNED;
+            if (arg1->x_position > 200) {
+                alignment = ALIGN_RIGHT;
+            } else if (arg1->x_position < 120) {
+                alignment = ALIGN_LEFT;
+            }
+            if (alignment != ALIGN_UNALIGNED) {
+                dl = alignHUD(dl, ALIGN_RIGHT);
+            }
+            setSpriteAlignment(alignment);
             dl = func_global_asm_806FE078(dl, 
                 sp5C->unk10, sp30, 
                 arg1->x_position + var_v0, 
                 arg1->y_position + 5.0f, 0.0f, 1.0f);
             setSpriteAlignment(ALIGN_NOT_2D);
-            dl = popHUD(dl);
+            if (alignment != ALIGN_UNALIGNED) {
+                dl = popHUD(dl);
+            }
             if (arg1->control_state == 2) {
                 dl = func_global_asm_8070068C(dl);
-                setSpriteAlignment(ALIGN_RIGHT);
+                setSpriteAlignment(alignment);
                 sp34 = func_global_asm_80612D1C(sp40);
                 sp38 = func_global_asm_80612D10(sp40);
                 drawSpriteAtPosition(&D_global_asm_8071FC58, 0.5f,
@@ -1002,6 +1007,7 @@ RECOMP_PATCH Gfx* func_bonus_80029B9C(Gfx* dl, Actor* arg1) {
                     setSpriteAlignment(ALIGN_NOT_2D);
                     break;
             }
+        default:
             break;
         }
     return dl;
@@ -1125,6 +1131,81 @@ RECOMP_PATCH Gfx *func_boss_800286B8(Gfx *dl, Actor *arg1) {
     dl = printText(dl, 50 * 4, (character_change_array->unk270[3] - 15) * 4, 0.6f, sp3C);
     dl = popHUD(dl);
     return dl;
+}
+
+extern u8 cc_number_of_players;
+extern Gfx *func_global_asm_806FEDB0(Gfx *dl, u8 arg1);
+extern u16 func_global_asm_806F8AD4(u8 arg0, u8 playerIndex);
+extern s32 func_global_asm_80690F30(u16, s32*, Actor *, u8, u8, u8, s32*, s32*, s32*);
+
+// @recomp: Sniper Scope
+RECOMP_PATCH Gfx *func_global_asm_806FF75C(Gfx* dl, Actor *arg1) {
+    u8 temp_a2;
+    s32 sp70;
+    s32 var_v0;
+    s32 sp68;
+    s32 sp64;
+    s32 sp60;
+
+    var_v0 = 2;
+
+    temp_a2 = arg1->PaaD->unk1A4;
+    if (cc_number_of_players >= 2) {
+        var_v0 = 3;
+    }
+    dl = func_global_asm_806FEDB0(dl, temp_a2);
+    gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
+    // Inner Segments
+    dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x100, 0x40, 3.0f, 2.0f, 0, 0.0f);
+    dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x40, 0x40, 2.0f, 3.0f, 0x5A, 0.0f);
+    dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x100, 0xB0, 2.0f, 3.0f, 0x10E, 0.0f);
+    dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x40, 0xB0, 3.0f, 2.0f, 0xB4, 0.0f);
+    // Outer Segments - Same notion as DKTV
+    gEXPushScissor(dl++);
+    gEXPushViewport(dl++);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
+    gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
+    dl = displayImage_simple(dl,
+        0, 0,
+        0x40, 0x40,
+        0x3A, G_IM_FMT_IA, 1,
+        3.0f, 3.0f,
+        0, 0);
+    dl = displayImage_simple(dl,
+        0, D_global_asm_80744494 + 4,
+        0x40, 0x40,
+        0x3A, G_IM_FMT_IA, 1,
+        3.0f, 3.0f,
+        0, 1);
+    gEXPopViewport(dl++);
+    gEXPopViewport(dl++);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 0);
+    gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, 0, 0);
+    dl = alignHUD(dl, ALIGN_RIGHT);
+    dl = displayImage_simple(dl,
+        D_global_asm_80744490, 0,
+        0x40, 0x40,
+        0x3A, G_IM_FMT_IA, 1,
+        3.0f, 3.0f,
+        1, 0);
+    dl = displayImage_simple(dl,
+        D_global_asm_80744490, D_global_asm_80744494 + 4,
+        0x40, 0x40,
+        0x3A, G_IM_FMT_IA, 1,
+        3.0f, 3.0f,
+        1, 1);
+    gEXPopScissor(dl++);
+    gEXPopViewport(dl++);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
+    gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
+    if ((func_global_asm_806F8AD4(3U, temp_a2)) && (func_global_asm_80690F30(var_v0, &sp70, arg1, 1, 0, 0, &sp68, &sp64, &sp60))) {
+        gDPSetPrimColor(dl++, 0, 0, 0x00, 0xC8, 0x00, 0xFF);
+    } else {
+        gDPSetPrimColor(dl++, 0, 0, 0xC8, 0x00, 0x00, 0xFF);
+    }
+    gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    return displayImage(dl, 0x38U, 3, 1, 0x40, 0x40, 0xA0, 0x78, 0.5f, 0.5f, 0x2D, 0.0f);
 }
 
 // This requires mallocs to be resolved

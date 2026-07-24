@@ -1,3 +1,4 @@
+#include "common_structs.h"
 #include "patches_main.h"
 
 #define gScissorUpLX D_global_asm_80744498
@@ -337,7 +338,6 @@ extern f32 D_global_asm_807F5FA8;
 extern f32 D_global_asm_807F5FAC;
 extern f32 D_global_asm_807F5FB0;
 extern f32 D_global_asm_807F5FB4;
-extern CharacterChange* character_change_array;
 extern u8 cc_player_index; // index into character_change_array, current_character_index[]
 extern f32 D_global_asm_807F5FE0;
 extern f32 D_global_asm_807F5FDC;

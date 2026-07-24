@@ -1,10 +1,7 @@
-#include "patches.h"
-#include "PR/os_message.h"
+#include "common_structs.h"
 #include "enums.h"
-#include "PR/os_exception.h"
-#include "PR/rcp.h"
-#include "misc_funcs.h"
 #include "debug_config.h"
+#include "misc_funcs.h"
 #include "patches_main.h"
 #include "patches_interpolation.h"
 
@@ -203,6 +200,8 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
                             } else {
                                 func_global_asm_8061D4E4(arg0);
                             }
+                            //@recomp: On cutscene end, disable interpolation for 2f. 1f seems to not be enough
+                            set_interpolation_lockdown(2);
                         } else {
                             temp_t0 = D_global_asm_807476FC->camera_bank[D_global_asm_807476F4].length_array[D_global_asm_807F5CF0 - 1];
                             params = &D_global_asm_807476FC->function_bank[D_global_asm_807F5CF2].params[0];
@@ -375,4 +374,55 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
     AAD->unkCC.x = temp_v0->position.f[0];
     AAD->unkCC.y = temp_v0->position.f[1];
     AAD->unkCC.z = temp_v0->position.f[2];
+}
+
+void func_global_asm_8061B840(CameraPaad*, u8);
+void func_global_asm_80620628(Actor *, f32, s16, u8);
+extern f32 D_global_asm_807476A8;
+
+// @recomp: Camera Flip handler
+RECOMP_PATCH s32 func_global_asm_80620F00(Actor* arg0, u8 arg1, u8 arg2) {
+    f32 temp_f2;
+    CameraPaad* temp_s0;
+    PlayerAdditionalActorData* temp_v0;
+    u8 var_a1;
+    u8 var_a2;
+    u8 var_v1;
+    u8 var_t7;
+
+    temp_s0 = arg0->AAD_as_array[0];
+    temp_f2 = D_global_asm_807476A8 - character_change_array[temp_s0->unkFB].near;
+    temp_v0 = temp_s0->unk0->AAD_as_array[0];
+    var_v1 = D_global_asm_807476A8 > 40.0f && temp_v0->unk114 < temp_f2;
+    var_a1 = temp_v0->unk118 < temp_f2;
+    var_a2 = temp_v0->unk11A < temp_f2;
+    var_t7 = temp_v0->unk116 < temp_f2;
+    if (arg2 != 0 && !var_a1 && !var_a2) {
+        var_v1 = FALSE;
+    }
+    if (var_v1) {
+        if (arg1 && (temp_s0->unk0->unkB8 != 0.0f)) {
+            if (var_a1 && !var_a2) {
+                temp_s0->unkB2 += 0x32;
+                func_global_asm_8061B840(temp_s0, 0xA);
+            } else if (var_a2 && !var_a1) {
+                temp_s0->unkB2 -= 0x32;
+                func_global_asm_8061B840(temp_s0, 0xA);
+            }
+        }
+        // @recomp: Disable camera flips
+        // temp_s0->unkF4++;
+        if (var_t7 && (temp_s0->unkF4 >= 0x15)) {
+            temp_s0->unkF4 = 0U;
+            if ((temp_s0->unk0->unkB8 != 0.0f) && (temp_s0->unk0->control_state != 0x59)) {
+                func_global_asm_80620628(arg0, 0.0f, temp_s0->unkB2, 1);
+                return TRUE;
+            }
+            func_global_asm_80620628(arg0, 0.0f, temp_s0->unk0->y_rotation, 1);
+        }
+        return TRUE;
+    }
+    temp_s0->unkFF = 0;
+    temp_s0->unkF4 = 0U;
+    return FALSE;
 }
