@@ -1212,6 +1212,60 @@ RECOMP_PATCH s32 func_global_asm_80601EE4(Struct8076D708 *arg0, Struct8076D708 *
     return 1;
 }
 
+extern void func_arcade_80026680(Gfx **dl_ptr);
+extern void func_arcade_800268AC(Gfx **dl_ptr);
+extern void func_arcade_80026EF4(Gfx **dl_ptr);
+extern void func_arcade_800275E8(Gfx **dl_ptr);
+extern void func_arcade_80027A38(Gfx **dl_ptr);
+extern u8  D_arcade_8004C724;
+extern s32 D_arcade_8004C6DC;
+extern u8  arcade_background_visual;
+
+// @recomp: Arcade DL Stuff
+RECOMP_PATCH void func_arcade_800259D0(Gfx **arg0) {
+    Gfx *dl = *arg0;
+    gDPSetAlphaCompare(dl++, G_AC_NONE);
+    gDPSetTexturePersp(dl++, G_TP_NONE);
+    // @recomp: Remove texture filtering
+    gDPSetTextureFilter(dl++, G_TF_POINT);
+    gDPSetTextureConvert(dl++, G_TC_FILT);
+    gDPSetTextureDetail(dl++, G_TD_CLAMP);
+    gDPSetTextureLOD(dl++, G_TL_TILE);
+    gDPSetTextureLUT(dl++, G_TT_NONE);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, 48, 36, 272, 232);
+
+    switch (D_arcade_8004C724) {
+        case 0://L80025B68
+            if (D_arcade_8004C6DC & 0x200) {
+                func_arcade_80026680(&dl);
+            }
+            break;
+        case 1:
+        case 4:
+        case 5://L80025B88
+            switch (arcade_background_visual) {
+                case 1:
+                    func_arcade_800268AC(&dl);
+                    break;
+                case 2:
+                    func_arcade_80026EF4(&dl);
+                    break;
+                case 3:
+                    func_arcade_800275E8(&dl);
+                    break;
+                default:
+                    func_arcade_80027A38(&dl);
+                    break;
+            }
+            break;
+    }
+    *arg0 = dl;
+}
+
+
 /*
 //Use for quickly getting to a certain map
 
