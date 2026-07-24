@@ -1326,6 +1326,125 @@ RECOMP_PATCH Gfx* func_race_8002CBEC(Gfx* dl, Actor* arg1) {
     return func_race_8002BEE8(dl, arg1);
 }
 
+extern s32 D_race_8002FCC0[];
+typedef struct Struct8002C67C_48 {
+    u8 pad0[0x4];
+    s16 unk4;
+    u8 pad6[0xA - 0x6];
+    s16 unkA;
+} Struct8002C67C_48;
+typedef struct Struct8002C67C_AAD {
+    u8 unk0;
+    u8 pad1[0x1E - 0x1];
+    u8 unk1E;
+    u8 pad1F[0x24 - 0x1F];
+    u8 unk24;
+} Struct8002C67C_AAD;
+typedef struct Struct8002C67C {
+    u8 pad0[0x2A];
+    u8 unk2A;
+    u8 pad2B[0x30 - 0x2B];
+    Actor *unk30;
+    u8 unk34;
+    u8 pad35;
+    u8 unk36;
+    u8 unk37;
+    u8 pad38[0x45 - 0x38];
+    u8 unk45;
+    u8 unk46;
+    u8 unk47;
+    Struct8002C67C_48 *unk48;
+    u8 pad4C[0x50 - 0x4C];
+    Mtx unk50[2];
+} Struct8002C67C;
+
+// @recomp: Draw Missles
+RECOMP_PATCH Gfx *func_race_8002C14C(Gfx *dl, Struct8002C67C *arg1) {
+    // Draw Missiles (Factory Car Race)
+    s16 temp_s4;
+    s32 base_x;
+    s32 y;
+    s32 i;
+
+    base_x = arg1->unk48->unk4 + 8;
+    y = arg1->unk48->unkA - 30;
+
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xC8, 0x00, 0xB4);
+    dl = alignHUD(dl, ALIGN_LEFT);
+    for (i = 0; i < arg1->unk2A; i++) {
+        dl = displayImage_simple(dl,
+            (base_x) + (i * 8),
+            y,
+            16, 16,
+            0x4A, G_IM_FMT_IA, 1,
+            0.5f, 0.5f, 0, 0
+        );
+    }
+    dl = popHUD(dl);
+    if (arg1->unk2A) {
+        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    }
+    return dl;
+}
+
+// @recomp: Race position UI
+RECOMP_PATCH Gfx* func_race_8002C76C(Gfx* dl, Struct8002C67C* arg1) {
+    Struct8002C67C_AAD* temp_t1;
+    s32 pad;
+    s32 pad2;
+    u8* sp68;
+    u8 var_t0;
+    u8 var_v0;
+    s32 sp60;
+    s32 sp5C;
+    u8 str[0x40];
+
+    var_t0 = arg1->unk37;
+    temp_t1 = arg1->unk30->AAD_as_array[0];
+    sp60 = arg1->unk48->unk4 + 8;
+    sp5C = arg1->unk48->unkA - 0x10;
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+
+    if (temp_t1->unk0 & 4) {
+        if (var_t0 < temp_t1->unk24) {
+            // @recomp: The below line is in the match for this function, but causes a compilation failure
+            // var_t0 &= var_t0; // ????
+        } else {
+            var_t0 = temp_t1->unk24;
+        }
+        var_t0 = MAX(var_t0, 1);
+        // do while(0) required here as we need the scoped sp50/4C/48 
+        do {
+            u8 *sp50 = getTextString(0x26U, 0xB, 1);
+            u8 *sp4C = getTextString(0x26U, 0xC, 1);
+            _sprintf(str, "%s %d %s %d", sp50, var_t0, sp4C, temp_t1->unk24);
+            dl = alignHUD(dl, ALIGN_LEFT);
+            dl = printStyledText(dl, 1, 2.0f * (sp60 * 4), 2.0f * (sp5C * 4), str, 4U);
+            dl = popHUD(dl);
+            gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+            gSPMatrix(dl++, &arg1->unk50[D_global_asm_807444FC], G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
+            sp5C -= (0.5f * func_global_asm_806FD894(1));
+        } while (0);
+    }
+    if (temp_t1->unk0 & 2) {
+        var_v0 = arg1->unk36;
+        if (temp_t1->unk1E == (var_v0 + 1)) {
+            var_v0 = 3;
+        }
+        if (arg1->unk45) {
+            var_v0 = 4;
+        }
+        dl = alignHUD(dl, ALIGN_LEFT);
+        dl = printStyledText(dl, 1, 2.0f * (sp60 * 4), 2.0f * (sp5C * 4), getTextString(0x26U, D_race_8002FCC0[var_v0], 1), 4U);
+        dl = popHUD(dl);
+    }
+    if ((arg1->unk34 > 2) && (arg1->unk34 < 5)) {
+        dl = func_global_asm_806FE078(dl, arg1->unk46, 2, 160.0f, 100.0f, 0.0f, 1.5f);
+    }
+    return dl;
+}
+
 // This requires mallocs to be resolved
 /*
     Gfx* func_global_asm_806ABA6C(Gfx*, void*, s32);
