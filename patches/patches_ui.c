@@ -1445,6 +1445,66 @@ RECOMP_PATCH Gfx* func_race_8002C76C(Gfx* dl, Struct8002C67C* arg1) {
     return dl;
 }
 
+// @recomp: Race missed gates UI
+RECOMP_PATCH Gfx *func_race_8002C2E8(Gfx *dl, RaceAdditionalActorData *arg1) {
+    f32 temp_f20;
+    f32 base_x;
+    f32 temp_f24;
+    f32 w;
+    u32 temp_v0;
+    f32 temp_f0; // 70
+    f32 a;
+    f32 c;
+    s32 i;
+    u8 *temp_v0_2;
+    Struct8002C67C_48 *temp_s0;
+    f32 temp;
+
+    temp_s0 = (Struct8002C67C_48*)arg1->unk48;
+    temp_v0 = func_global_asm_806FD894(1);
+    temp_f0 = temp_v0 * 0.5f;
+    temp_f20 = temp_s0->unk4 + 8;
+    temp_f24 = (temp_s0->unkA - 0x10);
+    temp_f24 -= (2 * temp_f0);
+
+    dl = alignHUD(dl, ALIGN_LEFT);
+    temp_v0_2 = getTextString(0x26U, 0xA, 1);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    dl = printStyledText(dl, 1, (2.0f * (temp_f20 * 4.0f)), (2.0f * (temp_f24 * 4.0f)), temp_v0_2, 4U);
+    gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(dl++, &arg1->unk50[D_global_asm_807444FC], G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
+    c = getCenterOfString(1, temp_v0_2);
+    temp_f20 += (0.5f * c);
+    base_x = temp_f20 + 1.0;
+    temp = temp_f24 + (0.4 * temp_f0) + 2;
+    a = 1.5f;
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0x00, 0xFF);
+    for (i = 0; i < 5; i++) {
+        w = base_x + (i * 12);
+        dl = displayImage_simple(dl,
+            w, temp,
+            64, 64,
+            0x4B, G_IM_FMT_IA, 1,
+            0.1875f, 0.1875f,
+            0, 0
+        );
+    }
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0x00, 0x00, 0xFF);
+    for (i = 0; i < 5 - arg1->unk44; i++) {
+        w = base_x + (i * 12);
+        dl = displayImage_simple(dl,
+            w, temp,
+            64, 64,
+            0x45, G_IM_FMT_IA, 1,
+            0.1875f, 0.1875f,
+            0, 0
+        );
+    }
+    dl = popHUD(dl);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    return dl;
+}
+
 // This requires mallocs to be resolved
 /*
     Gfx* func_global_asm_806ABA6C(Gfx*, void*, s32);
