@@ -1208,6 +1208,124 @@ RECOMP_PATCH Gfx *func_global_asm_806FF75C(Gfx* dl, Actor *arg1) {
     return displayImage(dl, 0x38U, 3, 1, 0x40, 0x40, 0xA0, 0x78, 0.5f, 0.5f, 0x2D, 0.0f);
 }
 
+typedef struct Struct8002CBEC_AAD_20_0_4 {
+    u8 pad0[0x27];
+    u8 unk27;
+    u8 pad28[0x2C - 0x28];
+    Actor *unk2C;
+} Struct8002CBEC_AAD_20_0_4;
+typedef struct Struct8002CBEC_AAD_20_0 {
+    Actor *unk0;
+    Struct8002CBEC_AAD_20_0_4 *unk4;
+} Struct8002CBEC_AAD_20_0;
+typedef struct Struct8002CBEC_AAD_20 {
+    Struct8002CBEC_AAD_20_0 unk0[2];
+} Struct8002CBEC_AAD_20;
+typedef struct Struct8002CBEC_AAD {
+    u8 unk0;
+    u8 pad1[0x14 - 0x1];
+    s16 unk14;
+    s16 unk16;
+    s16 unk18;
+    s16 unk1A;
+    u8 pad1C[2];
+    u8 unk1E;
+    u8 unk1F;
+    Struct8002CBEC_AAD_20 *unk20;
+} Struct8002CBEC_AAD;
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+} AAD_race_8002BDDC;
+
+// @recomp: Draw placement of dots in Tiny Car Race
+RECOMP_PATCH Gfx *func_race_8002BDDC(Gfx *dl, Actor *arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5, u8 arg6) {
+    f32 x, y;
+    AAD_race_8002BDDC *aaD;
+
+    aaD = arg1->additional_actor_data;
+    x = aaD->unkC - arg2;
+    y = aaD->unk10 - arg3;
+    x *= aaD->unk4;
+    y *= aaD->unk8;
+    x = ((x * 0.5f) + 50.0f);
+    x *= 4.0f;
+    y = ((y * 0.5f) + 60.0f);
+    y *= 4.0f;
+    gDPSetPrimColor(dl++, 0, 0, arg4, arg5, arg6, 0xC8);
+    return displayImage_simple(dl, (x / 4.0f) - 2, (y / 4.0f) - 2, 16, 16, 0x4A, G_IM_FMT_IA, 1, 0.25f, 0.25f, 0, 0);
+}
+
+extern Gfx *func_race_8002BEE8(Gfx *dl, Actor *arg1);
+
+// @recomp: Render Tiny Car Race Map
+RECOMP_PATCH Gfx* func_race_8002CBEC(Gfx* dl, Actor* arg1) {
+    s32 var_s3;
+    s32 var_v0;
+    s32 var_v1;
+    Struct8002CBEC_AAD_20_0_4* temp_s0;
+    Struct8002CBEC_AAD* temp_s5;
+    Struct8002CBEC_AAD_20* temp_s6;
+    Actor* temp_t0;
+
+    temp_s5 = arg1->AAD_as_array[0];
+    if (temp_s5->unk0 & 1) {
+        temp_s6 = temp_s5->unk20;
+        gDPPipeSync(dl++);
+        gSPTexture(dl++, 0xFFFF, 0xFFFF, 0, G_TX_RENDERTILE, G_OFF);
+        gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+        dl = func_global_asm_805FD030(dl);
+        dl = alignHUD(dl, ALIGN_LEFT);
+        gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x3C, 0xA0);
+        gDPSetCycleType(dl++, G_CYC_1CYCLE);
+        gDPSetCombineMode(dl++, G_CC_PRIMITIVE, G_CC_PRIMITIVE);
+        gDPFillRectangle(dl++, 18, 28, 82, 92);
+        gDPPipeSync(dl++);
+        gDPSetPrimColor(dl++, 0, 0, 0x80, 0x00, 0xFF, 0x64);
+        gDPFillRectangle(dl++, 16, 26, 84, 28);
+        gDPFillRectangle(dl++, 16, 92, 84, 94);
+        gDPFillRectangle(dl++, 16, 28, 18, 92);
+        gDPFillRectangle(dl++, 82, 28, 84, 92);
+        gDPPipeSync(dl++);
+        gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xB4);
+        gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPTexture(dl++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        dl = displayImage_simple(dl, (136 >> 2) - 16, (304 >> 2) - 16, 64, 64, temp_s5->unk14, G_IM_FMT_IA, 1, 0.5f, 0.5f, 0, 0);
+        dl = displayImage_simple(dl, (264 >> 2) - 16, (304 >> 2) - 16, 64, 64, temp_s5->unk16, G_IM_FMT_IA, 1, 0.5f, 0.5f, 0, 0);
+        dl = displayImage_simple(dl, (136 >> 2) - 16, (176 >> 2) - 16, 64, 64, temp_s5->unk18, G_IM_FMT_IA, 1, 0.5f, 0.5f, 0, 0);
+        dl = displayImage_simple(dl, (264 >> 2) - 16, (176 >> 2) - 16, 64, 64, temp_s5->unk1A, G_IM_FMT_IA, 1, 0.5f, 0.5f, 0, 0);
+        for (var_s3 = 0; var_s3 < temp_s5->unk1E; var_s3++) {
+            temp_t0 = temp_s6->unk0[var_s3].unk0;
+            if (temp_t0 == NULL) {
+                continue;
+            }
+            temp_s0 = temp_s6->unk0[var_s3].unk4;
+            if (temp_s0->unk27 == 0) {
+                var_v0 = 0x80;
+                var_v1 = 0x80;
+            } else if (temp_s0->unk27 == 1) {
+                var_v0 = 0xFF;
+                var_v1 = 0;
+            } else {
+                continue;
+            }
+
+            dl = func_race_8002BDDC(dl, arg1, temp_t0->x_position, temp_t0->z_position, var_v0, 0, var_v1);
+            if (temp_s0->unk2C != NULL) {
+                dl = func_race_8002BDDC(dl, arg1, temp_s0->unk2C->x_position, temp_s0->unk2C->z_position, 0xFF, 0xC8, 0);
+            }
+        }
+        dl = popHUD(dl);
+    }
+    return func_race_8002BEE8(dl, arg1);
+}
+
 // This requires mallocs to be resolved
 /*
     Gfx* func_global_asm_806ABA6C(Gfx*, void*, s32);
