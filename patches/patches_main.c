@@ -1,3 +1,4 @@
+#include "common_structs.h"
 #include "patches_main.h"
 
 #define gScissorUpLX D_global_asm_80744498
@@ -73,6 +74,17 @@ RECOMP_PATCH void func_global_asm_80611730(void) {
     } while (entry < &D_global_asm_807F0A58[count]);
 }
 
+void updateLag(s32 value) {
+    s32 limit = 1;
+    if ((is_cutscene_active != 3) && (is_cutscene_active != 4)) {
+        limit = 2;
+    }
+    if (value < limit) {
+        value = limit;
+    }
+    D_global_asm_80744478 = value;
+}
+
 RECOMP_PATCH void func_global_asm_80600674(void) {
     s32 max_boost = 1;
     s32 min_boost = 20;
@@ -89,6 +101,7 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
     AlterVolumes();
 
     //@recomp: patch to always greater than 1 (on console, default is 2. if zero, it will divide by zero and crash)
+
     if (D_global_asm_80744478 <= 1) {
         D_global_asm_80744478 = 2;
     }
@@ -129,7 +142,7 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
         }
         if (updateLagBoost) {
             //@recomp: dont update; stays at 2
-            //D_global_asm_80744478 = newBoost;
+            updateLag(newBoost);
         }
         if (object_timer > 10) {
             while (D_global_asm_8076AF10 + D_global_asm_80744478 > osdata->frame_count) {
@@ -143,7 +156,7 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
     osdata = &D_global_asm_80767A40;
 
     //@recomp: dont update; stays at 2
-    //D_global_asm_80744478 = osdata->frame_count - D_global_asm_8076AF10;
+    updateLag(osdata->frame_count - D_global_asm_8076AF10);
 
     D_global_asm_8076AF10 = osdata->frame_count;
     //recomp_printf("D_global_asm_80744478 is %d:\n", D_global_asm_80744478);
@@ -325,7 +338,6 @@ extern f32 D_global_asm_807F5FA8;
 extern f32 D_global_asm_807F5FAC;
 extern f32 D_global_asm_807F5FB0;
 extern f32 D_global_asm_807F5FB4;
-extern CharacterChange* character_change_array;
 extern u8 cc_player_index; // index into character_change_array, current_character_index[]
 extern f32 D_global_asm_807F5FE0;
 extern f32 D_global_asm_807F5FDC;
@@ -895,16 +907,16 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
     } else {
         gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 35.0f * cooldown);
     }
-    gDPLoadTextureBlock(dl++, (s32)temp_v0 + 0x80000000, G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
-    gDPTextureRectangle(
+    gDPLoadTextureBlock(dl++, OS_PHYSICAL_TO_K0(temp_v0), G_IM_FMT_IA, G_IM_SIZ_8b, 64, 64, 0, G_TX_NOMIRROR | G_TX_WRAP, G_TX_NOMIRROR | G_TX_WRAP, 6, 6, G_TX_NOLOD, G_TX_NOLOD);
+    gSPTextureRectangle(
         dl++,
         character_change_array->unk270[0] * 4,
         character_change_array->unk270[1] * 4,
         character_change_array->unk270[2] * 4,
         character_change_array->unk270[3] * 4,
         G_TX_RENDERTILE,
-        (s32)D_global_asm_80750228,
-        (s32)D_global_asm_8075022C,
+        (s32)D_global_asm_80750228 * 8.0f,
+        (s32)D_global_asm_8075022C * 8.0f,
         1024,
         -1024
     );
@@ -918,10 +930,10 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
         D_global_asm_8075022C -= (0.5 * half_lag);
     }
     if (D_global_asm_80750228 < 0.0) {
-        D_global_asm_80750228 = 255.0f;
+        D_global_asm_80750228 += 255.0f;
     }
     if (D_global_asm_8075022C < 0.0) {
-        D_global_asm_8075022C = 255.0f;
+        D_global_asm_8075022C += 255.0f;
     }
     return dl;
 }
@@ -1073,3 +1085,216 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     return dl;
 }
 */
+
+#define macro_8062DBDC_IF(a0, a1, a2) ((a0 * D_global_asm_807F5E50[0]) + (a1 * D_global_asm_807F5E50[1]) + (a2 * D_global_asm_807F5E50[2])) + D_global_asm_807F5E50[3]
+
+//@recomp: Culling patch for maps
+RECOMP_PATCH s32 func_global_asm_8062DBDC(s16 arg0, s16 arg1, s16 arg2, s16 arg3, s16 arg4, s16 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9, Struct8062DBDC *arg10) {
+    s32 var_a0;
+    s32 var_a1;
+    s32 var_a2;
+    s32 i;
+    s32 pad[3];
+ 
+    if (macro_8062DBDC_IF(arg0, arg1, arg2) < 0.0) {
+        if (macro_8062DBDC_IF(arg0, arg1, arg5) < 0.0) {
+            if (macro_8062DBDC_IF(arg0, arg4, arg2) < 0.0) {
+                if (macro_8062DBDC_IF(arg0, arg4, arg5) < 0.0) {
+                    if (macro_8062DBDC_IF(arg3, arg1, arg2) < 0.0) {
+                        if (macro_8062DBDC_IF(arg3, arg1, arg5) < 0.0) {
+                            if (macro_8062DBDC_IF(arg3, arg4, arg2) < 0.0) {
+                                if (macro_8062DBDC_IF(arg3, arg4, arg5) < 0.0) {
+                                    return TRUE;  //@recomp: Was false
+                                 }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    var_a0 = FALSE;
+    var_a1 = FALSE;
+    var_a2 = FALSE;
+    if ((arg0 <= arg6) && (arg6 <= arg3) && (arg1 <= arg7) && (arg7 <= arg4) && (arg2 <= arg8) && (arg8 <= arg5)) {
+        return TRUE;
+    }
+    for (i = 0; (i < 5) && (!var_a2); i++) {
+        if ((arg10[i].unk0[7] + (((arg10[i].unk0[4] * arg0) + (arg10[i].unk0[5] * arg1)) + (arg10[i].unk0[6] * arg2))) < 0) {
+            var_a0 = TRUE;
+        }
+        if ((arg10[i].unk0[7] + (((arg10[i].unk0[4] * arg0) + (arg10[i].unk0[5] * arg4)) + (arg10[i].unk0[6] * arg2))) < 0) {
+            var_a1 = TRUE;
+        }
+        if ((var_a0) && (var_a1)) {
+            var_a2 = TRUE;
+        }
+    }
+    if ((!var_a2) && (func_global_asm_8062E040(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) < arg9)) {
+        return TRUE;
+    }
+    for (i = 0; i < 5; i++) {
+        if (func_global_asm_8062E1F8(i, arg0, arg1, arg2, arg3, arg4, arg5, arg10)) {
+            return TRUE;
+        }
+    }
+    return TRUE;  // @recomp: Was false
+}
+
+//@recomp: Audio buffer get
+RECOMP_PATCH s32 func_global_asm_80601EE4(Struct8076D708 *arg0, Struct8076D708 *lastInfo) {
+    s16 *audioPtr;
+    s32 var_v1; // samples left?
+    s32 sp34;
+    s32 *new_var;
+    Acmd *temp_v1; // cmdp
+    s32 temp;
+
+    audioPtr = (s16 *) osVirtualToPhysical(arg0->unk0); // audioPtr = (s16 *) osVirtualToPhysical(info->data);
+
+    new_var = &D_global_asm_80770558;
+    func_global_asm_80602314();
+    var_v1 = osAiGetLength() >> 2;
+    if (lastInfo) {
+        s32 frameSamples = lastInfo->unk4 << 2;
+        osAiSetNextBuffer(lastInfo->unk0, frameSamples); // outputDataPointer, frameSamples
+    }
+    if ((var_v1 < 0x5C) && (*new_var == 0)) {
+        arg0->unk4 = D_global_asm_8077019C;
+        D_global_asm_80770558 = 2;
+    } else {
+        temp = *new_var;
+        if ((var_v1 >= 0x115) && (temp == 0)) {
+            arg0->unk4 = D_global_asm_80770194;
+            D_global_asm_80770558 = 2;
+        } else {
+            arg0->unk4 = 0x2E0;
+            if (temp != 0) {
+                temp -= 1;
+                D_global_asm_80770558 = temp;
+            }
+        }
+    }
+
+    temp_v1 = n_alAudioFrame((Acmd *) (&D_global_asm_8076D4D0)[D_global_asm_807452C8].unk0[0], &sp34, audioPtr, (s32) arg0->unk4);
+
+    if (sp34 == 0) {
+        return 0;
+    }
+    
+    arg0->unk8 = 0; //  next
+    arg0->unk5C = &D_global_asm_8076D6D0; // msgQ
+    arg0->unk60 = (OSMesg) (&arg0->unk68); // msg
+    arg0->unk10 = 1;
+    arg0->unk58 = &D_global_asm_8076D4C0;
+    arg0->unk48 = (Acmd *) (&D_global_asm_8076D4D0)[D_global_asm_807452C8].unk0[0];
+    arg0->unk4C = (temp_v1 - ((Acmd *) (&D_global_asm_8076D4D0)[D_global_asm_807452C8].unk0[0])) * sizeof(Acmd); // t->list.t.data_size
+    arg0->unk18 = 2; // t->list.t.flags = OS_TASK_DP_WAIT;
+    arg0->unk20 = &D_805FB000;
+    arg0->unk24 = (&D_805FB0D0) - (&D_805FB000); // t->list.t.ucode_boot_size = (s32) ((s32) rspbootTextEnd - (s32) rspbootTextStart);
+    arg0->unk1C = 0;
+    arg0->unk28 = &D_global_asm_80741310;
+    arg0->unk30 = &D_global_asm_80760590;
+    arg0->unk34 = SP_UCODE_DATA_SIZE; // t->list.t.ucode_data_size = SP_UCODE_DATA_SIZE;
+    arg0->unk50 = 0;
+    arg0->unk54 = 0x400;
+
+    osWritebackDCacheAll();
+
+    osSendMesg(
+        (OSMesgQueue *) func_global_asm_8060EE58((s32) (&D_global_asm_80767A40)), // OSMesgQueue*
+        &arg0->unk8, // OsMesg*
+        0 // flags
+    );
+
+    D_global_asm_807452C8 ^= 1; // swap which acmd list you use each frame
+
+    return 1;
+}
+
+extern void func_arcade_80026680(Gfx **dl_ptr);
+extern void func_arcade_800268AC(Gfx **dl_ptr);
+extern void func_arcade_80026EF4(Gfx **dl_ptr);
+extern void func_arcade_800275E8(Gfx **dl_ptr);
+extern void func_arcade_80027A38(Gfx **dl_ptr);
+extern u8  D_arcade_8004C724;
+extern s32 D_arcade_8004C6DC;
+extern u8  arcade_background_visual;
+
+// @recomp: Arcade DL Stuff
+RECOMP_PATCH void func_arcade_800259D0(Gfx **arg0) {
+    Gfx *dl = *arg0;
+    gDPSetAlphaCompare(dl++, G_AC_NONE);
+    gDPSetTexturePersp(dl++, G_TP_NONE);
+    // @recomp: Remove texture filtering
+    gDPSetTextureFilter(dl++, G_TF_POINT);
+    gDPSetTextureConvert(dl++, G_TC_FILT);
+    gDPSetTextureDetail(dl++, G_TD_CLAMP);
+    gDPSetTextureLOD(dl++, G_TL_TILE);
+    gDPSetTextureLUT(dl++, G_TT_NONE);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, 48, 36, 272, 232);
+
+    switch (D_arcade_8004C724) {
+        case 0://L80025B68
+            if (D_arcade_8004C6DC & 0x200) {
+                func_arcade_80026680(&dl);
+            }
+            break;
+        case 1:
+        case 4:
+        case 5://L80025B88
+            switch (arcade_background_visual) {
+                case 1:
+                    func_arcade_800268AC(&dl);
+                    break;
+                case 2:
+                    func_arcade_80026EF4(&dl);
+                    break;
+                case 3:
+                    func_arcade_800275E8(&dl);
+                    break;
+                default:
+                    func_arcade_80027A38(&dl);
+                    break;
+            }
+            break;
+    }
+    *arg0 = dl;
+}
+
+
+/*
+//Use for quickly getting to a certain map
+
+extern u8 D_global_asm_80755328;
+extern u8 D_global_asm_8075532C;
+typedef struct {
+    u8 unk0;
+    u8 unk1;
+    u16 unk2;
+} Struct8075E5C0;
+extern const Struct8075E5C0 D_global_asm_8075E5C0[];
+extern void func_global_asm_8060B750(s32 fileIndex);
+extern void func_global_asm_8060B7D0(Maps *mapPointer, s32 *exitPointer);
+extern void func_global_asm_805FF158(u8 arg0);
+void func_global_asm_80712490(Maps newMap, s32 newExit, u8 newGameMode);
+
+RECOMP_PATCH void func_global_asm_807131BC(void) {
+    Maps map;
+    s32 exit;
+
+    D_global_asm_8075532C = 0;
+    func_global_asm_8060B750(D_global_asm_8075E5C0[D_global_asm_80755328].unk0);
+    func_global_asm_8060B7D0(&map, &exit);
+    func_global_asm_805FF158(1);
+    func_global_asm_80712490(2, 0, GAME_MODE_ADVENTURE);
+}
+*/
+
+// @recomp: (Prevent the ) draw of borders for overscan
+RECOMP_PATCH Gfx *func_global_asm_80704960(Gfx *dl) {
+    return dl;
+}
