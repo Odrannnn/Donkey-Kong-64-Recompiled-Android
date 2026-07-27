@@ -100,12 +100,6 @@ extern Gfx *func_global_asm_805FD030(Gfx *dl);
 extern u8 cc_player_index;
 
 extern u8 D_global_asm_807FDB1D; // This is being used to determine the sprite alignment
-typedef enum enumSpriteAlignment {
-    ALIGN_NOT_2D,
-    ALIGN_UNALIGNED,
-    ALIGN_LEFT,
-    ALIGN_RIGHT,
-} enumSpriteAlignment;
 
 typedef struct {
     s32 unk0; // screen x

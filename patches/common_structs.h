@@ -17,6 +17,13 @@ typedef struct tuple_f {
     };
 } tuple_f;
 
+typedef enum enumSpriteAlignment {
+    ALIGN_NOT_2D,
+    ALIGN_UNALIGNED,
+    ALIGN_LEFT,
+    ALIGN_RIGHT,
+} enumSpriteAlignment;
+
 typedef struct AnimationStateUnk0_0 {
     f32 unk0;
     u16 unk4;
