@@ -251,6 +251,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
         if (D_global_asm_807F5D84 > 0) {
             gSPDisplayList(dl++, &D_1000118);
             dl = func_global_asm_805FD030(dl);
+            gEXMatrixGroup(dl++, 2, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_STRETCH, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
             gSPMatrix(dl++, &D_2000140, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
             gSPMatrix(dl++, &D_global_asm_807F5D98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gDPPipeSync(dl++);
@@ -267,24 +268,18 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
             gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
             switch (D_global_asm_807F5D85) {
                 case 7: // Pausing (Blurred Background)
-                    // D_global_asm_80747B30 = width;
-                    // D_global_asm_80747B34 = height;
-                    //func_global_asm_8062A3F0();
+                    func_global_asm_8062A3F0();
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, stored_framebuffer, 320, 240, 0, width, 1, 10); // TODO: This has a weird fb
+                    func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 319.0f, 239.0f, 0.0f, 0.0f);
                     if (global_properties_bitfield & 0x40) {
                         D_global_asm_807F5D84 = -2;
                     }
                     break;
                 case 1: // Fade Transition
-                    gDPPipeSync(dl++);
-                    gDPSetCycleType(dl++, G_CYC_1CYCLE);
-                    gDPSetTextureFilter(dl++, G_TF_BILERP);
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-                    gDPSetRenderMode(dl++, G_RM_AA_ZB_XLU_SURF, G_RM_AA_ZB_XLU_SURF2);
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, D_global_asm_807F5D86);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, stored_framebuffer, 320, 240, 0, width, 0, 10);
+                    func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 319.0f, 239.0f, 0.0f, 0.0f);
                     D_global_asm_807F5D86 -= sp54 * 5;
                     if (D_global_asm_807F5D86 < 0) {
                         D_global_asm_807F5D84 = -2;
@@ -293,25 +288,24 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                 case 2: // L -> R Swipe
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    // func_global_asm_807023E8(&dl, stored_framebuffer, 0, 320, 240, 0x20, 0x20, D_global_asm_807F5D86, 0.0f, width, height, D_global_asm_807F5D86, 0.0f);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, stored_framebuffer, 320, 240, D_global_asm_807F5D86, width, 1, 10);
+                    func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, D_global_asm_807F5D86, 0.0f, 319.0f, 239.0f, D_global_asm_807F5D86, 0.0f);
                     gDPPipeSync(dl++);
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
                     if (D_global_asm_807F5D86 >= 0x11) {
-                        // func_global_asm_807024E0(&dl, stored_framebuffer, 0, 320, 240, 0x10, 0x50, (D_global_asm_807F5D86 - 0x10), 0.0f, D_global_asm_807F5D86, height, (D_global_asm_807F5D86 - 0x10), 0.0f, 1, 0x10, 1, NULL);
+                        func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x50, (D_global_asm_807F5D86 - 0x10), 0.0f, D_global_asm_807F5D86, 239.0f, (D_global_asm_807F5D86 - 0x10), 0.0f, 1, 0x10, 1, NULL);
                     }
                     D_global_asm_807F5D86 += (sp54 * 0xA);
-                    if (D_global_asm_807F5D86 >= width) {
+                    if (D_global_asm_807F5D86 >= 0x137) {
                         D_global_asm_807F5D84 = -2;
                     }
                     break;
                 case 0: // R -> L Swipe (lt crypt)
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, stored_framebuffer, 320, 240, 0, D_global_asm_807F5D86, 1, 10);
+                    func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0xA, 0x50, 0.0f, 0.0f, D_global_asm_807F5D86, 239.0f, 0.0f, 0.0f);
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
                     if (D_global_asm_807F5D86 < 0x131) {
-                        // func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x20, D_global_asm_807F5D86, 0.0f, D_global_asm_807F5D86 + 0x10, height, D_global_asm_807F5D86, 0.0f, 1, 0x10, 2, NULL);
+                        func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x20, D_global_asm_807F5D86, 0.0f, D_global_asm_807F5D86 + 0x10, 239.0f, D_global_asm_807F5D86, 0.0f, 1, 0x10, 2, NULL);
                     }
                     D_global_asm_807F5D86 -= (sp54 * 0xA);
                     if (D_global_asm_807F5D86 < 0xB) {
@@ -321,15 +315,14 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                 case 3: // Dual Swipe
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    recomp_printf("Divide Transition: %d %d %d %d\n", D_global_asm_807F5D86 + ((width - 320) >> 1), width, 0, D_global_asm_807F5D88 + ((width - 320) >> 1));
-                    dl = drawFramebuffer(dl, 0, 0, width, height, stored_framebuffer, 320, 240, D_global_asm_807F5D86, width, 1, 10);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, stored_framebuffer, 320, 240, 0, D_global_asm_807F5D88, 1, 10);
+                    func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, D_global_asm_807F5D86, 0.0f, 319.0f, 239.0f, D_global_asm_807F5D86, 0.0f);
+                    func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0xA, 0x50, 0.0f, 0.0f, D_global_asm_807F5D88, 239.0f, 0.0f, 0.0f);
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
                     if (D_global_asm_807F5D86 >= 0x11) {
-                        // func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x50, (D_global_asm_807F5D86 - 0x10), 0.0f, D_global_asm_807F5D86, height, (D_global_asm_807F5D86 - 0x10), 0.0f, 1, 0x10, 1, NULL);
+                        func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x50, (D_global_asm_807F5D86 - 0x10), 0.0f, D_global_asm_807F5D86, 239.0f, (D_global_asm_807F5D86 - 0x10), 0.0f, 1, 0x10, 1, NULL);
                     }
                     if (D_global_asm_807F5D88 < 0x131) {
-                        // func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x20, D_global_asm_807F5D88, 0.0f, D_global_asm_807F5D88 + 0x10, height, D_global_asm_807F5D88, 0.0f, 1, 0x10, 2, NULL);
+                        func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x20, D_global_asm_807F5D88, 0.0f, D_global_asm_807F5D88 + 0x10, 239.0f, D_global_asm_807F5D88, 0.0f, 1, 0x10, 2, NULL);
                     }
                     D_global_asm_807F5D86 += (sp54 * 0xA);
                     D_global_asm_807F5D88 -= (sp54 * 0xA);
@@ -362,13 +355,6 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     if (D_global_asm_807F5D94 > 350.0f) {
                         D_global_asm_807F5D84 = -2;
                     }
-                    // gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-                    // D_global_asm_807F5D94 += (15.0 * sp54);
-                    // modifyFB_clockWipe(D_global_asm_807F5D94);
-                    // dl = drawFramebuffer(dl, 0, 0, width, height, stored_framebuffer, 320, 240, 0, width, 1, 10);
-                    // if (D_global_asm_807F5D94 > 350.0f) {
-                    //     D_global_asm_807F5D84 = -2;
-                    // }
                     break;
             }
             dl = popHUD(dl);
