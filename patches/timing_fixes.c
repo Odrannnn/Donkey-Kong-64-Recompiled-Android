@@ -317,6 +317,7 @@ RECOMP_PATCH void func_global_asm_8060F254(Struct131B0_2* arg0) {
 
 extern u8  D_global_asm_807444FC;
 extern s16 D_global_asm_80744490;
+extern Gfx *func_global_asm_8068C20C(Gfx *, u8);
 
 RECOMP_PATCH Gfx *func_global_asm_805FE4D4(Gfx *dl) {
     gEXEnable(dl++);
@@ -332,5 +333,6 @@ RECOMP_PATCH Gfx *func_global_asm_805FE4D4(Gfx *dl) {
     gEXSetNearClipping(dl++, FALSE);
     gEXSetTexcoordWrapPoint(dl++, 256 * 4, 256 * 4);
     gDPSetColorImage(dl++, 0, 2, D_global_asm_80744490, osVirtualToPhysical(D_global_asm_80744470[D_global_asm_807444FC]));
+    dl = func_global_asm_8068C20C(dl, 0); // @recomp: Run a special pre-world load framebuffer thing
     return dl;
 }

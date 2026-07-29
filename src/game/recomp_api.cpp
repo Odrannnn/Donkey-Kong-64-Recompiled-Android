@@ -163,10 +163,8 @@ extern "C" void recomp_get_ui_bounds(uint8_t* rdram, recomp_context* ctx) {
     int width, height;
     recompui::get_window_size(width, height);
     width = (width * 240) / height;
-
     s32* x_out = _arg<0, s32*>(rdram, ctx);
     s32* y_out = _arg<1, s32*>(rdram, ctx);
-
     *x_out = width;
     *y_out = 240;
     return;
