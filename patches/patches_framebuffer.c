@@ -146,10 +146,10 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     // func_global_asm_8062A3F0();
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     // Blurs it a little
-                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 128);
+                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 319.0f, 239.0f, 0.0f, 0.0f);
                     // Add a feathering call to add a little distortion
-                    func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x50, 0, 0.0f, 320, 239.0f, 0, 0.0f, 1, 0x10, 1, NULL);
+                    // func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x50, 0, 0.0f, 320, 239.0f, 0, 0.0f, 1, 0x10, 1, NULL);
                     if (global_properties_bitfield & 0x40) {
                         D_global_asm_807F5D84 = -2;
                     }
