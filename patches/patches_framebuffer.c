@@ -100,137 +100,9 @@ RECOMP_PATCH void func_global_asm_8070A848(Struct8070A848 *arg0, Struct8070A848 
     addActorToTextOverlayRenderArray(rdpClearFB, gCurrentActorPointer, 3);
 }
 
-Gfx* drawFramebuffer(Gfx* dl, s32 destX, s32 destY, s32 destW, s32 destH, u16* texture, s32 srcW, s32 srcH, s32 minX, s32 maxX, u8 default_render, u8 shift) {
-    if (default_render) {
-        gDPPipeSync(dl++);
-        gDPSetCycleType(dl++, G_CYC_1CYCLE);
-        gDPSetTextureFilter(dl++, G_TF_BILERP);
-        gDPSetCombineMode(dl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
-        gDPSetRenderMode(dl++, G_RM_AA_TEX_EDGE, G_RM_AA_TEX_EDGE2);
-    }
-
-    f32 scaleX = 1.0f;
-    f32 scaleY = 1.0f;
-
-    u16 dsdx = (u16)((1.0f / scaleX) * (1 << shift));
-    u16 dtdy = (u16)((1.0f / scaleY) * (1 << shift));
-
-    for (s32 tile_y = 0; tile_y < srcH; tile_y += 32) {
-        s32 cur_h = tile_y + 32 > srcH ? srcH - tile_y : 32;
-
-        for (s32 tile_x = 0; tile_x < srcW; tile_x += 64) {
-            s32 cur_w = tile_x + 64 > srcW ? srcW - tile_x : 64;
-
-            s32 dx0 = destX + (s32)(tile_x * scaleX);
-            s32 dx1 = destX + (s32)((tile_x + cur_w) * scaleX);
-            s32 dy0 = destY + (s32)(tile_y * scaleY);
-            s32 dy1 = destY + (s32)((tile_y + cur_h) * scaleY);
-            if (dx1 <= minX || dx0 >= maxX) {
-                continue;
-            }
-            s32 clippedLeft = 0;
-            if (dx0 < minX) {
-                clippedLeft = minX - dx0;
-                dx0 = minX;
-            }
-            if (dx1 > maxX) {
-                dx1 = maxX;
-            }
-            if (dx0 >= dx1) {
-                continue; // fully clipped away after rounding
-            }
-
-            u16* tile_texture = texture + ((tile_y * srcW) + tile_x);
-
-            gDPLoadTextureTile(dl++,
-                tile_texture, G_IM_FMT_RGBA, G_IM_SIZ_16b,
-                srcW, srcH,
-                0, 0, cur_w - 1, cur_h - 1,
-                0,
-                G_TX_CLAMP, G_TX_CLAMP,
-                G_TX_NOMASK, G_TX_NOMASK, G_TX_NOLOD, G_TX_NOLOD);
-            u16 sStart = (u16)(((s64)clippedLeft * dsdx) / 32);
-
-            gSPTextureRectangle(dl++,
-                dx0 << 2, dy0 << 2,
-                (dx1 << 2) - 1, (dy1 << 2) - 1,
-                G_TX_RENDERTILE,
-                sStart, 0, dsdx, dtdy);
-        }
-    }
-
-    gDPPipeSync(dl++);
-    return dl;
-}
-
-#define SQ(x) ((x) * (x))
-#define MATH_PI_F 3.1415927f
-
-f32 atan_approx(f32 x) {
-    f32 x2 = SQ(x);
-    return x - ((x * x2) / 3.0f) + ((x * SQ(x2)) / 5.0f);
-}
-
-f32 atan2f(f32 y, f32 x) {
-    f32 abs_x = (x < 0.0f) ? -x : x;
-    f32 abs_y = (y < 0.0f) ? -y : y;
-
-    if (x != 0.0f) {
-        if (abs_x > abs_y) {
-            // safe: |y/x| <= 1
-            f32 z = y / x;
-            if (x > 0.0f) {
-                return atan_approx(z);
-            } else if (y >= 0.0f) {
-                return atan_approx(z) + MATH_PI_F;
-            } else {
-                return atan_approx(z) - MATH_PI_F;
-            }
-        } else {
-            // |y/x| > 1, so use atan(y/x) = PI/2 - atan(x/y) instead
-            f32 z = x / y;
-            if (y > 0.0f) {
-                return (MATH_PI_F / 2.0f) - atan_approx(z);
-            } else {
-                return (-MATH_PI_F / 2.0f) - atan_approx(z);
-            }
-        }
-    } else {
-        if (y > 0.0f) {
-            return MATH_PI_F / 2.0f;
-        } else if (y < 0.0f) {
-            return -MATH_PI_F / 2.0f;
-        }
-        return 0.0f;
-    }
-}
-
-void modifyFB_clockWipe(s32 cw_angle) {
-    s32 x, y;
-    s32 dx, dy;
-    s32 offset;
-    s32 dist;
-    f32 angle;
-
-    offset = 0;
-    for (y = 0; y < 240; y++) {
-        for (x = 0; x < 320; x++) {
-            dx = x - 160;
-            dy = y - 120;
-            angle = atan2f((f32)dx, (f32)-dy) * (180.0f / MATH_PI_F);
-            if (angle < 0.0f) {
-                angle += 360.0f;
-            }
-            if (angle < cw_angle) {
-                stored_framebuffer[offset] = 0;
-            }
-            offset++;
-        }
-    }
-}
-
 extern s32 D_global_asm_80747B30;
 extern s32 D_global_asm_80747B34;
+// @recomp: Framebuffer effects renderer
 RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
     f32 sp54;
     s32 width, height;
@@ -270,11 +142,14 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
             gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
             switch (D_global_asm_807F5D85) {
                 case 7: // Pausing (Blurred Background)
-                    // D_global_asm_807F5D80 = stored_framebuffer;
+                    // @recomp: We can't morph the framebuffer image as this breaks RT64 widescreen support
                     // func_global_asm_8062A3F0();
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                    // Blurs it a little
+                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 128);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 319.0f, 239.0f, 0.0f, 0.0f);
+                    // Add a feathering call to add a little distortion
+                    func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x50, 0, 0.0f, 320, 239.0f, 0, 0.0f, 1, 0x10, 1, NULL);
                     if (global_properties_bitfield & 0x40) {
                         D_global_asm_807F5D84 = -2;
                     }
@@ -302,7 +177,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                         D_global_asm_807F5D84 = -2;
                     }
                     break;
-                case 0: // R -> L Swipe (lt crypt)
+                case 0: // R -> L Swipe (Lanky/Tiny crypt)
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0xA, 0x50, 0.0f, 0.0f, D_global_asm_807F5D86, 239.0f, 0.0f, 0.0f);
@@ -502,6 +377,37 @@ typedef struct Struct80767CE8 {
     u8 padDB8[0x11B0 - 0xDB8];
 } Struct80767CE8;
 
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+    s32 unk18;
+} Struct807FD9A8_unkC;
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    void *unk8;
+    Struct807FD9A8_unkC *unkC;
+    void *unk10;
+    void *unk14;
+    s32 *unk18;
+    s32 *unk1C;
+    s32 *unk20;
+    s32 unk24;
+    s32 unk28;
+    s32 unk2C;
+} Struct807FD9A8;
+
+typedef struct {
+    s32 offset;
+    s32 width;
+    s32 height;
+} TexEntry;
+
 extern u8 D_global_asm_807444F4;
 extern u8 D_global_asm_807444F8;
 extern Struct80767CE8 D_global_asm_80767CE8[2];
@@ -512,10 +418,9 @@ extern u8 D_global_asm_8076A0A4;
 extern u8 D_global_asm_8076A0B1;
 extern u8 D_global_asm_8076A0B2;
 extern f32 D_global_asm_807FD888;
-extern s32** D_global_asm_807FD9A8;
+extern Struct807FD9A8 * D_global_asm_807FD9A8;
 extern void* D_global_asm_807FD9B0;
-extern void* D_global_asm_807FD9B4;
-extern void* D_global_asm_807FD9B8;
+extern TexEntry* D_global_asm_807FD9B4;
 extern u8 D_global_asm_807FD9BC;
 extern u8 D_global_asm_807FD9BD;
 extern Gfx *D_global_asm_8076A050[];
@@ -523,6 +428,10 @@ extern u32 object_timer;
 extern u8 is_cutscene_active;
 extern s32 D_global_asm_807FBB64;
 extern u8 D_global_asm_807501E0;
+extern Vtx *D_global_asm_807FD9B8;
+extern s32 D_global_asm_80755068;
+extern s32 D_global_asm_8075506C;
+extern void *D_global_asm_807FD9A4;
 extern s32 func_global_asm_8070B7EC(Gfx**, void*, void*);
 extern void func_global_asm_80610044(void *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5);
 extern void func_global_asm_8070AF24(void);
@@ -532,6 +441,34 @@ extern void func_global_asm_8066B434(void *arg0, s32 arg1, s32 arg2);
 extern void func_global_asm_8061CBCC(void);
 extern void func_global_asm_805FE71C(Gfx *dl, u8 arg1, s32 *arg2, u8 arg3);
 extern void func_global_asm_805FE7B4(Gfx *dl, Gfx *arg1, s32 *arg2, u8 arg3);
+extern void *getPointerTableFile(enum pointertable_e pointerTableIndex, s32 fileIndex, u8 arg2, u8 arg3);
+extern void func_global_asm_80709890(Vtx *, Struct807FD9A8 **, void **, s32);
+extern s32 func_global_asm_80709ACC(Struct807FD9A8 *);
+extern void func_global_asm_807095E4(s32, s32);
+
+extern void *D_global_asm_807FD9AC;
+extern void *_malloc(s32);
+
+// @recomp: Zipper Snapshot
+RECOMP_PATCH void func_global_asm_8070AF24(void) {
+    switch (D_global_asm_807444F8) {
+        case 1:
+            D_global_asm_80755068 = 0;
+            D_global_asm_8075506C = 0;
+            break;
+        case 2:
+            D_global_asm_80755068 = 0x78;
+            break;
+    }
+    D_global_asm_807FD9B8 = getPointerTableFile(TABLE_19_UNKNOWN, 1, 1, 1);
+    // D_global_asm_807FD9B0 = _malloc(D_global_asm_80744490 * D_global_asm_80744494 * 2);
+    // func_global_asm_8070A848(D_global_asm_807FD9B0, D_global_asm_80744470[D_global_asm_807444FC]);
+    func_global_asm_80709890(D_global_asm_807FD9B8, &D_global_asm_807FD9A8, &D_global_asm_807FD9AC, 0);
+    func_global_asm_80709ACC(D_global_asm_807FD9A8);
+    D_global_asm_807FD9A4 = D_global_asm_807FD9A8->unk8;
+    D_global_asm_807FD9A8->unk8 = _malloc(D_global_asm_807FD9A8->unk0 * 0xC);
+    func_global_asm_807095E4(D_global_asm_807FD9A8->unk24, D_global_asm_807FD9A8->unk28);
+}
 
 // @recomp: Zipper Display
 RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
@@ -539,6 +476,7 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
     Gfx* sp30;
     u8 temp_t1;
     u8 temp_t5;
+    s32 i;
 
     func_global_asm_80610044(D_global_asm_8076A050[D_global_asm_807444FC], D_global_asm_8076A088, 3U, 1U, 0x4D2, 1U);
     D_global_asm_807444FC ^= 1;
@@ -562,6 +500,7 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
     } else {
         func_global_asm_8070AC74(&D_global_asm_8076A048->unk0, &sp34);
         D_global_asm_807501E0 = 0; // @recomp: Release all overlays to prevent repeated snapshots
+        gEXMatrixGroup(sp34++, 2, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_STRETCH, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
         if (func_global_asm_8070B7EC(&sp34, D_global_asm_807FD9B8, stored_framebuffer) != 0) {
             switch (D_global_asm_807444F8) {
             case 1:
@@ -571,11 +510,11 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
                 D_global_asm_807444F8 = 2;
                 break;
             case 2:
-                func_global_asm_8061134C(D_global_asm_807FD9B0);
-                func_global_asm_8061134C(D_global_asm_807FD9A8[2]);
+                // func_global_asm_8061134C(D_global_asm_807FD9B0);
+                func_global_asm_8061134C(D_global_asm_807FD9A8->unk8);
                 func_global_asm_8061134C(D_global_asm_807FD9B4);
-                func_global_asm_8061134C(D_global_asm_807FD9A8[4]);
-                func_global_asm_8061134C(D_global_asm_807FD9A8[5]);
+                func_global_asm_8061134C(D_global_asm_807FD9A8->unk10);
+                func_global_asm_8061134C(D_global_asm_807FD9A8->unk14);
                 func_global_asm_8066B434(D_global_asm_807FD9B8, 0x24B, 0x4A);
                 is_cutscene_active = D_global_asm_807444F4;
                 if ((is_cutscene_active == 1) && (D_global_asm_807FBB64 & 1)) {
@@ -586,6 +525,7 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
                 break;
             }
         }
+        gEXMatrixGroup(sp34++, 2, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
     }
     if (D_global_asm_807FD9BD != 0) {
         D_global_asm_807FD9BD--;
@@ -879,4 +819,169 @@ RECOMP_PATCH void func_global_asm_806E6234(void) {
         D_global_asm_807FC8B9 = cc_player_index;
         global_properties_bitfield |= 1;
     }
+}
+
+extern void func_global_asm_806F5378(void);
+extern void func_global_asm_807313BC(void);
+extern void func_global_asm_805FF5A0(Maps map);
+extern Maps next_map;
+extern s32 next_exit;
+extern s16 D_global_asm_8076AEF2;
+
+// @recomp: Zipper Transition
+RECOMP_PATCH void func_global_asm_805FF4D8(Maps map, s32 exit) {
+    func_global_asm_806F5378();
+    global_properties_bitfield |= 0x100;
+    next_map = map;
+    next_exit = exit;
+    D_global_asm_8076AEF2 = current_map;
+    func_global_asm_807313BC();
+    func_global_asm_805FF5A0(map);
+    // @recomp: Take the snapshot now
+    addActorToTextOverlayRenderArray(rdpStoreFB, gCurrentActorPointer, 0);
+    addActorToTextOverlayRenderArray(rdpClearFB, gCurrentActorPointer, 5);
+    // D_global_asm_807FD9B0 = _malloc(D_global_asm_80744490 * D_global_asm_80744494 * 2);
+    // func_global_asm_8070A848(D_global_asm_807FD9B0, D_global_asm_80744470[D_global_asm_807444FC]);
+}
+
+extern Gfx *func_global_asm_805FCFD8(Gfx *);
+extern Gfx *func_global_asm_805FE398(Gfx *);
+extern Gfx *func_global_asm_805FE4D4(Gfx *);
+extern void *D_global_asm_8076A080;
+extern u16 D_global_asm_8076A09C;
+extern Gfx **D_1000090;
+
+RECOMP_PATCH void func_global_asm_8070AC74(Mtx *arg0, Gfx **dlp) {
+    Gfx *dl;
+    dl = D_global_asm_8076A050[D_global_asm_807444FC];
+    gSPSegment(dl++, 0x00, 0x00000000);
+    gSPSegment(dl++, 0x02, osVirtualToPhysical(arg0));
+    gSPSegment(dl++, 0x01, osVirtualToPhysical(D_global_asm_8076A080));
+    gSPDisplayList(dl++, &D_1000090);
+    dl = func_global_asm_805FCFD8(dl);
+    dl = func_global_asm_805FE398(dl);
+    gDPPipeSync(dl++);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    guTranslate(&arg0[6], 0.0f, 0.0f, 0.0f);
+    guLookAt(&arg0[8], 0.0f, 0.0f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f);
+    guPerspective(arg0, &D_global_asm_8076A09C, 61.9f, 1.3333334f, 10.0f, 1000.0f, 1.0f);
+    gDPPipeSync(dl++);
+    dl = func_global_asm_805FE4D4(dl);
+    gDPSetColorDither(dl++, G_CD_MAGICSQ);
+    gDPSetAlphaDither(dl++, G_AD_PATTERN);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
+    gDPSetFillColor(dl++, 0xFFC1FFC1);
+    gDPSetRenderMode(dl++, G_RM_NOOP, G_RM_NOOP2);
+    gSPClearGeometryMode(dl++, G_ZBUFFER);
+    gDPFillRectangle(dl++, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
+    gSPPerspNormalize(dl++, D_global_asm_8076A09C);
+    gSPClipRatio(dl++, FRUSTRATIO_2);
+    *dlp = dl;
+}
+
+extern s16 D_global_asm_80754CE0;
+extern s16 D_global_asm_80754CEC[];
+s16 menuXShift = 0;
+s16 menuYShift = 0;
+extern void *D_global_asm_807FD978[8];
+
+RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
+    s32 i;
+    s32 spF8;
+    s32 spF4;
+    s32 x;
+    s32 y;
+    s32 var_t5;
+    u16 spE6;
+    s16 var_s4;
+    void *a2;
+    s32 j;
+    s32 X_REPEAT_COUNT, Y_REPEAT_COUNT;
+    s32 width, height;
+
+    recomp_get_ui_bounds(&width, &height);
+    X_REPEAT_COUNT = (width >> 7) + 2;
+    Y_REPEAT_COUNT = (height >> 7) + 2;
+
+    gSPLoadGeometryMode(dl++, 0);
+    gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
+    gDPSetTexturePersp(dl++, G_TP_NONE);
+    gDPSetTextureFilter(dl++, G_TF_POINT);
+    // 
+    gEXPushScissor(dl++);
+    // gEXPushViewport(dl++);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
+    // gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
+    //
+    gSPTexture(dl++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPPipeSync(dl++);
+    var_s4 = menuYShift + D_global_asm_80754CE0;
+    if (var_s4 < 0) {
+        var_s4 += 0x200;
+    }
+    if (var_s4 >= 0x200) {
+        var_s4 -= 0x200;
+    }
+    if (D_global_asm_807FD978[0] == NULL) {
+        for (i = 0; i < 8; i++) {
+            D_global_asm_807FD978[i] = getPointerTableFile(TABLE_25_TEXTURES_GEOMETRY, D_global_asm_80754CEC[i], 0U, 0U);
+        }
+    }
+    spE6 = 0;
+    for (spF4 = 0x40; spF4 >= 0; spF4 -= 0x40) {
+        spF8 = 0;
+        while (spF8 < 0x80) {
+            gDPPipeSync(dl++);
+            a2 = D_global_asm_807FD978[spE6 % 8];
+            gDPLoadTextureBlock(dl++,
+                OS_PHYSICAL_TO_K0(a2),
+                G_IM_FMT_RGBA, G_IM_SIZ_16b, 32, 64, 0,
+                G_TX_NOMIRROR | G_TX_CLAMP,
+                G_TX_NOMIRROR | G_TX_CLAMP,
+                G_TX_NOMASK, G_TX_NOMASK,
+                G_TX_NOLOD, G_TX_NOLOD);
+            x = (spF8 << 2) - menuXShift;
+            for (var_t5 = 0; var_t5 < X_REPEAT_COUNT; var_t5++) {
+                y = (spF4 << 2) - var_s4;
+                for (j = 0; j < Y_REPEAT_COUNT; j++) {
+                    gSPScisTextureRectangle(
+                        dl++,
+                        x,
+                        y,
+                        x + 0x80,
+                        y + 0x100,
+                        0,
+                        0,
+                        0x7FF,
+                        1024,
+                        -1024
+                    );
+                    y += 0x200;
+                }
+                x += 0x200;
+            }
+            spF8 += 0x20, spE6++;
+        }
+    }
+    menuXShift += 4;
+    menuYShift += 4;
+    if (menuXShift >= 0x200) {
+        menuXShift = 0;
+    }
+    if (menuYShift >= 0x200) {
+        menuYShift = 0;
+    }
+    gEXPopScissor(dl++);
+    // gEXPopViewport(dl++);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
+    // gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
+    gDPPipeSync(dl++);
+    gDPSetTexturePersp(dl++, G_TP_PERSP);
+    gDPSetTextureFilter(dl++, G_TF_BILERP);
+    return dl;
 }
