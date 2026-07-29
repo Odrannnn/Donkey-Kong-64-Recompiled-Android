@@ -61,6 +61,7 @@ Gfx *rdpStoreFB(Gfx *dl, Actor *a) {
         storedFBEffect = D_global_asm_807F5D85;
         D_global_asm_807F5D84 = 0;
     }
+    recomp_printf("Snap!\n");
     gDPSetColorImage(dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, OS_K0_TO_PHYSICAL(stored_framebuffer));
     return dl;
 }
@@ -73,6 +74,7 @@ Gfx *rdpClearFB(Gfx *dl, Actor *a) {
         D_global_asm_807F5D84 = 1;
         storedFBEffect = -1;
     }
+    recomp_printf("Reset!\n");
     gDPSetColorImage(dl++, 0, 2, D_global_asm_80744490, osVirtualToPhysical(D_global_asm_80744470[D_global_asm_807444FC]));
     return dl;
 }
@@ -95,7 +97,7 @@ RECOMP_PATCH void func_global_asm_8070A848(Struct8070A848 *arg0, Struct8070A848 
         src++;
     }
     addActorToTextOverlayRenderArray(rdpStoreFB, gCurrentActorPointer, 0);
-    addActorToTextOverlayRenderArray(rdpClearFB, gCurrentActorPointer, 5);
+    addActorToTextOverlayRenderArray(rdpClearFB, gCurrentActorPointer, 3);
 }
 
 Gfx* drawFramebuffer(Gfx* dl, s32 destX, s32 destY, s32 destW, s32 destH, u16* texture, s32 srcW, s32 srcH, s32 minX, s32 maxX, u8 default_render, u8 shift) {
@@ -268,7 +270,8 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
             gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
             switch (D_global_asm_807F5D85) {
                 case 7: // Pausing (Blurred Background)
-                    func_global_asm_8062A3F0();
+                    // D_global_asm_807F5D80 = stored_framebuffer;
+                    // func_global_asm_8062A3F0();
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 319.0f, 239.0f, 0.0f, 0.0f);
@@ -357,6 +360,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
             }
+            gEXMatrixGroup(dl++, 2, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
             dl = popHUD(dl);
             gDPPipeSync(dl++);
             gDPSetColorDither(dl++, G_CD_MAGICSQ);
@@ -518,6 +522,7 @@ extern Gfx *D_global_asm_8076A050[];
 extern u32 object_timer;
 extern u8 is_cutscene_active;
 extern s32 D_global_asm_807FBB64;
+extern u8 D_global_asm_807501E0;
 extern s32 func_global_asm_8070B7EC(Gfx**, void*, void*);
 extern void func_global_asm_80610044(void *arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4, u8 arg5);
 extern void func_global_asm_8070AF24(void);
@@ -545,6 +550,7 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
         break;
     case 0:
         D_global_asm_807FD9BC = 1;
+        recomp_printf("Taking Zipper Snapshot\n");
         func_global_asm_8070AF24();
         break;
     }
@@ -555,6 +561,7 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
         }
     } else {
         func_global_asm_8070AC74(&D_global_asm_8076A048->unk0, &sp34);
+        D_global_asm_807501E0 = 0; // @recomp: Release all overlays to prevent repeated snapshots
         if (func_global_asm_8070B7EC(&sp34, D_global_asm_807FD9B8, stored_framebuffer) != 0) {
             switch (D_global_asm_807444F8) {
             case 1:
@@ -829,145 +836,47 @@ RECOMP_PATCH void func_global_asm_806833DC(TagAAD *arg0) {
     }
 }
 
-/*
-//This is the function that renders all framebuffer transition effects
-RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
-    s32 sp54;
-    s32 width;
-    s32 height;
-    s32 progress;
+typedef struct Struct807FD610 {
+    s32 unk0; // Timer that ticks up once per frame
+    f32 unk4; // Probably float
+    f32 unk8; // Probably float
+    f32 unkC; // Probably float
+    f32 unk10[4];
+    s16 unk20[4];
+    s16 unk28; // Used
+    u16 unk2A; // Used, controller button bitfield
+    u16 unk2C; // Used, controller button bitfield
+    s8 unk2E; // Used
+    s8 unk2F; // Used
+    u8 unk30; // Used
+    u8 unk31;
+    s16 unk32;
+} Struct807FD610;
 
-    sp54 = D_global_asm_80744478 * 0.5f;
-    if (D_global_asm_80747B24 == 0) {
-        guScale(&D_global_asm_807F5D98, 2.0f, 2.0f, 1.0f);
-        D_global_asm_80747B24 = 1;
-    }
-    if ((D_global_asm_807F5D84 == 0) && (D_global_asm_80747B20 != 0)) {
-        D_global_asm_80747B20--;
-    }
-    if (D_global_asm_807F5D84 < 0) {
-        D_global_asm_807F5D84++;
-        if (D_global_asm_807F5D84 == 0) {
-            func_global_asm_8061134C(D_global_asm_807F5D80);
+extern Struct807FD610 D_global_asm_807FD610[]; 
+
+extern int gameIsInDKTVMode(void);
+extern int gameIsInMysteryMenuMinigameMode(void);
+extern int gameIsInAdventureMode(void);
+extern u8 func_global_asm_8061CB50(void);
+extern u8 func_global_asm_8062919C(void);
+extern u8 func_global_asm_806291A8(void);
+extern s8 D_global_asm_807FC8B9;
+extern u8 cc_player_index;
+
+// @recomp: Press start to pause code
+RECOMP_PATCH void func_global_asm_806E6234(void) {
+    if ((D_global_asm_807FD610[cc_player_index].unk2C & START_BUTTON)
+        && !func_global_asm_8061CB50()
+        && (D_global_asm_807FD888 == 0.0f)
+        && (gameIsInAdventureMode() || gameIsInMysteryMenuMinigameMode() || gameIsInDKTVMode())
+        && !func_global_asm_8062919C()
+        && !func_global_asm_806291A8()) {
+        if (!gameIsInDKTVMode()) {
+            func_global_asm_806291B4(7); // @recomp: Push transition effect 1f earlier to capture snapshot properly
+            D_global_asm_807F5D84 = 2; // @recomp: Delay notice
         }
-    } else {
-        if (D_global_asm_807F5D84 > 0) {
-            gSPDisplayList(dl++, &D_1000118);
-            dl = func_global_asm_805FD030(dl);
-            gSPMatrix(dl++, &D_2000140, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-            gSPMatrix(dl++, &D_global_asm_807F5D98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-            gDPPipeSync(dl++);
-            gDPSetTextureFilter(dl++, G_TF_POINT);
-            gDPSetColorDither(dl++, G_CD_DISABLE);
-            gDPSetScissor(dl++, G_SC_NON_INTERLACE, D_global_asm_80744498, D_global_asm_8074449C, D_global_asm_807444A0, D_global_asm_807444A4);
-            gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
-            recomp_get_ui_bounds(&width, &height);
-            recomp_printf("Rendering framebuffer %d: Width %d, Height %d\n", D_global_asm_807F5D85, width, height);
-            gEXPushScissor(dl++);
-            gEXPushViewport(dl++);
-            gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
-            gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
-            gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
-            
-            switch (D_global_asm_807F5D85) {
-                case 7:
-                    func_global_asm_8062A3F0();
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, (u8*)D_global_asm_807F5D80, 320, 240, 0, width);
-                    if (global_properties_bitfield & 0x40) {
-                        D_global_asm_807F5D84 = -2;
-                    }
-                    break;
-                case 1:
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, D_global_asm_807F5D86);
-                    func_global_asm_807023E8(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 319.0f, 239.0f, 0.0f, 0.0f);
-                    D_global_asm_807F5D86 -= sp54 * 5;
-                    if (D_global_asm_807F5D86 < 0) {
-                        D_global_asm_807F5D84 = -2;
-                    }
-                    break;
-                case 2:
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, (u8*)D_global_asm_807F5D80, 320, 240, D_global_asm_807F5D86, width);
-                    // func_global_asm_807023E8(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x20, 0x20, D_global_asm_807F5D86, 0.0f, 319.0f, 239.0f, D_global_asm_807F5D86, 0.0f);
-                    gDPPipeSync(dl++);
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-                    // if (D_global_asm_807F5D86 >= 0x11) {
-                    //     func_global_asm_807024E0(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x10, 0x50, (D_global_asm_807F5D86 - 0x10), 0.0f, D_global_asm_807F5D86, 239.0f, (D_global_asm_807F5D86 - 0x10), 0.0f, 1, 0x10, 1, NULL);
-                    // }
-                    D_global_asm_807F5D86 += (sp54 * 0xA);
-                    if (D_global_asm_807F5D86 >= width) {
-                        D_global_asm_807F5D84 = -2;
-                    }
-                    break;
-                case 0:
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    func_global_asm_807023E8(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0xA, 0x50, 0.0f, 0.0f, D_global_asm_807F5D86, 239.0f, 0.0f, 0.0f);
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-                    if (D_global_asm_807F5D86 < 0x131) {
-                        func_global_asm_807024E0(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x10, 0x20, D_global_asm_807F5D86, 0.0f, D_global_asm_807F5D86 + 0x10, 239.0f, D_global_asm_807F5D86, 0.0f, 1, 0x10, 2, NULL);
-                    }
-                    D_global_asm_807F5D86 -= (sp54 * 0xA);
-                    if (D_global_asm_807F5D86 < 0xB) {
-                        D_global_asm_807F5D84 = -2;
-                    }
-                    break;
-                case 3:
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
-                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                    progress = (320 - D_global_asm_807F5D86) * ((f32)width / 320.0f);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, (u8*)D_global_asm_807F5D80, 320, 240, width - progress, width);
-                    dl = drawFramebuffer(dl, 0, 0, width, height, (u8*)D_global_asm_807F5D80, 320, 240, 0, progress);
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-                    // if (D_global_asm_807F5D86 >= 0x11) {
-                    //     func_global_asm_807024E0(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x10, 0x50, (D_global_asm_807F5D86 - 0x10), 0.0f, D_global_asm_807F5D86, 239.0f, (D_global_asm_807F5D86 - 0x10), 0.0f, 1, 0x10, 1, NULL);
-                    // }
-                    // if (D_global_asm_807F5D88 < 0x131) {
-                    //     func_global_asm_807024E0(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x10, 0x20, D_global_asm_807F5D88, 0.0f, D_global_asm_807F5D88 + 0x10, 239.0f, D_global_asm_807F5D88, 0.0f, 1, 0x10, 2, NULL);
-                    // }
-                    D_global_asm_807F5D86 += (sp54 * 0xA);
-                    D_global_asm_807F5D88 -= (sp54 * 0xA);
-                    if (D_global_asm_807F5D86 >= 0x137) {
-                        D_global_asm_807F5D84 = -2;
-                    }
-                    break;
-                case 4:
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-                    D_global_asm_807F5D8C = D_global_asm_807F5D8C + (5.0 * sp54);
-                    D_global_asm_807F5D90 = D_global_asm_807F5D8C + 40.0f;
-                    func_global_asm_807024E0(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 320.0f, 239.0f, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A24C);
-                    if (D_global_asm_807F5D8C > 170.0f) {
-                        D_global_asm_807F5D84 = -2;
-                    }
-                    break;
-                case 5:
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-                    D_global_asm_807F5D8C = D_global_asm_807F5D8C + (12.0 * sp54);
-                    D_global_asm_807F5D90 = D_global_asm_807F5D8C + 40.0f;
-                    func_global_asm_807024E0(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 320.0f, 239.0f, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A228);
-                    if (D_global_asm_807F5D8C > 350.0f) {
-                        D_global_asm_807F5D84 = -2;
-                    }
-                    break;
-                case 6:
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
-                    D_global_asm_807F5D94 = D_global_asm_807F5D94 + (15.0 * sp54);
-                    func_global_asm_807024E0(&dl, D_global_asm_807F5D80, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 320.0f, 239.0f, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A130);
-                    if (D_global_asm_807F5D94 > 350.0f) {
-                        D_global_asm_807F5D84 = -2;
-                    }
-                    break;
-            }
-            dl = popHUD(dl);
-            gDPPipeSync(dl++);
-            gDPSetColorDither(dl++, G_CD_MAGICSQ);
-            gDPSetTextureFilter(dl++, G_TF_BILERP);
-        }
+        D_global_asm_807FC8B9 = cc_player_index;
+        global_properties_bitfield |= 1;
     }
-    return dl;
 }
-*/
