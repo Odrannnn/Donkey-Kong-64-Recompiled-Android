@@ -851,6 +851,7 @@ extern void *D_global_asm_8076A080;
 extern u16 D_global_asm_8076A09C;
 extern Gfx **D_1000090;
 
+// @recomp: Zipper DL Setup
 RECOMP_PATCH void func_global_asm_8070AC74(Mtx *arg0, Gfx **dlp) {
     Gfx *dl;
     dl = D_global_asm_8076A050[D_global_asm_807444FC];
@@ -885,6 +886,7 @@ s16 menuXShift = 0;
 s16 menuYShift = 0;
 extern void *D_global_asm_807FD978[8];
 
+// @recomp: Render main menu scrolling background
 RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     s32 i;
     s32 spF8;
@@ -912,10 +914,8 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     gDPSetTextureFilter(dl++, G_TF_POINT);
     // 
     gEXPushScissor(dl++);
-    // gEXPushViewport(dl++);
     gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
     gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
-    // gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
     //
     gSPTexture(dl++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -977,11 +977,118 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
         menuYShift = 0;
     }
     gEXPopScissor(dl++);
-    // gEXPopViewport(dl++);
     gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
-    // gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
     gDPPipeSync(dl++);
     gDPSetTexturePersp(dl++, G_TP_PERSP);
     gDPSetTextureFilter(dl++, G_TF_BILERP);
     return dl;
+}
+
+// @recomp: Tag Barrel Kickout
+void func_global_asm_80682AB4(void);
+void func_global_asm_80682DF4(void*, PlayerAdditionalActorData *, u8);
+void func_global_asm_806C8E58(s16);
+u8 func_global_asm_805FCA64(void);
+void func_global_asm_80602B60(s32 arg0, u8 arg1);
+s32 deleteActor(Actor*);
+void func_global_asm_806F09F0(Actor *arg0, u16 arg1);
+void func_global_asm_80627888(Actor *arg0);
+void func_global_asm_80709464(u8 playerIndex);
+s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
+extern s32 D_global_asm_8074E848[];
+    
+RECOMP_PATCH void func_global_asm_806836D0(TagAAD* arg0) {
+    s32 temp_s0;
+    u16 sp4A;
+    s32 pad[2];
+    s16 temp_s0_2;
+    s32 var_v0;
+    Actor* temp_v1;
+    PlayerAdditionalActorData* sp30;
+    s32 temp_t3;
+    s32 var_v1;
+
+    if (gCurrentActorPointer->control_state_progress == 0xFF) {
+        // Kickout procedure
+        temp_v1 = arg0->unk0;
+        sp30 = temp_v1->AAD_as_array[0];
+        var_v0 = temp_v1->unk12C;
+        if (var_v0 == -1) {
+            var_v0 = 0;
+        }
+        func_global_asm_80659670(arg0->unk2C, arg0->unk30, arg0->unk34, var_v0);
+        global_properties_bitfield |= 0x30030;
+        func_global_asm_80602B60(0x48, 0U);
+        func_global_asm_80602B60(0x6B, 0U);
+        func_global_asm_80602B60(0x49, 0U);
+        func_global_asm_80602B60(0x47, 0U);
+        func_global_asm_80602B60(0x65, 0U);
+        deleteActor(arg0->unk1C);
+        arg0->unk1C = NULL;
+        var_v1 = 0;
+        for (var_v1 = 0; var_v1 < 5; var_v1++) {
+            deleteActor(arg0->unk8[var_v1]);
+            arg0->unk8[var_v1] = 0;
+        }
+        // @recomp: Delay kickout stuff by 1f
+        gCurrentActorPointer->control_state = 2;
+        gCurrentActorPointer->control_state_progress = 0;
+        arg0->unk4 = 0x1EU;
+        sp30->unk1F0 &= 0xDFFFFFFF;
+        temp_s0_2 = D_global_asm_8074E814[arg0->unk6].unk2;
+        func_global_asm_806C8E58(temp_s0_2);
+        func_global_asm_806F09F0(temp_v1, temp_s0_2);
+        sp30->unk8C = 0;
+        temp_v1->y_rotation = arg0->unk38;
+        func_global_asm_80627888(sp30->unk104);
+        func_global_asm_8061EB04(temp_v1, 0U);
+        func_global_asm_80709464(0U);
+        character_change_array->unk2DC.unk6 |= 0x11;
+    } else {
+        sp4A = arg0->unk4;
+        if (arg0->unk4 != 0) {
+            arg0->unk4--;
+            func_global_asm_80682AB4();
+        }
+        arg0->unk3C++;
+        if ((arg0->unk4 == 0) && (func_global_asm_805FCA64())) {
+            temp_s0 = arg0->unk8[arg0->unk6]->unk58 == 0x13C;
+            temp_t3 = arg0->unk3C > 9000;
+            if (((D_global_asm_807FD610->unk30 >= 0x29) && (temp_t3 == 0)) || (!temp_s0)) {
+                arg0->unk4 = 0x14U;
+                if (arg0->unk8[arg0->unk6]->unk58 == 0x13C) {
+                    func_global_asm_80682DF4(arg0->unk8[arg0->unk6], arg0->unk8[arg0->unk6]->PaaD, 0x8C);
+                }
+                arg0->unk7 = arg0->unk6;
+                if (temp_s0 != 0) {
+                    arg0->unk20 = D_global_asm_807FD610->unk2E >= 0 ? 1 : -1;
+                }
+                arg0->unk6 += arg0->unk20;
+                if (arg0->unk6 < 0) {
+                    arg0->unk6 = 4;
+                } else if (arg0->unk6 >= 5) {
+                    arg0->unk6 = 0;
+                }
+                if (arg0->unk8[arg0->unk6]->unk58 == 0x13C) {
+                    func_global_asm_80682DF4(arg0->unk8[arg0->unk6], arg0->unk8[arg0->unk6]->PaaD, 0x8B);
+                }
+            } else {
+                if ((!temp_t3) && (sp4A)) {
+                    func_global_asm_80602CE0(0x65, 0x7E - D_global_asm_8074E848[arg0->unk6], 3U);
+                    func_global_asm_80602CE0(0x65, D_global_asm_8074E848[arg0->unk6], 2U);
+                    return;
+                }
+                if ((((temp_t3) && (temp_s0)) || (D_global_asm_807FD610->unk2C & 0xE000)) && (!func_global_asm_8062919C())) {
+                    if (temp_s0) {
+                        // @recomp: Delay kickout stuff by 1f
+                        gCurrentActorPointer->control_state_progress = 0xFF;
+                        func_global_asm_806291B4(3U); // @recomp: Push transition effect 1f earlier to capture snapshot properly
+                        D_global_asm_807F5D84 = 2; // @recomp: Delay notice
+                        return;
+                    }
+                    playSound(0x98, 0x7FFF, 63.0f, 1.0f, 0U, 0U);
+                }
+            }
+        }
+    }
 }
