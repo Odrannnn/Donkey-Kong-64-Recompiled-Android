@@ -1,5 +1,6 @@
 #include "common_structs.h"
 #include "patches_main.h"
+#include "ui.h"
 
 #define gScissorUpLX D_global_asm_80744498
 #define gScissorUpLY D_global_asm_8074449C
@@ -527,8 +528,10 @@ Gfx* func_global_asm_8065D994(Gfx*, s16);           /* extern */
 void* func_global_asm_8065FD88(Gfx*, s32, s32);       /* extern */
 
 typedef struct Struct807F6C0C {
-    s32 unk0;
-    s32 unk4;
+    s16 unk0;
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
     void *unk8;
     void *unkC;
 } Struct807F6C0C;
@@ -1297,4 +1300,275 @@ RECOMP_PATCH void func_global_asm_807131BC(void) {
 // @recomp: (Prevent the ) draw of borders for overscan
 RECOMP_PATCH Gfx *func_global_asm_80704960(Gfx *dl) {
     return dl;
+}
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+} Struct807F6C14;
+extern Struct807F6C14 *D_global_asm_807F6C14;
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+} Struct807F6C88;
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+} Struct807F6D78;
+
+extern Struct807F6C88 D_global_asm_807F6C88;
+extern Struct807F6C88 D_global_asm_807F6C90;
+extern Struct807F6C88 D_global_asm_807F6C98;
+extern Struct807F6C88 D_global_asm_807F6CA0;
+extern Struct807F6C88 D_global_asm_807F6CA8;
+extern Struct807F6C88 D_global_asm_807F6CB0;
+extern Struct807F6D78 D_global_asm_807F6F58;
+extern Struct807F6D78 D_global_asm_807F6E68;
+extern Struct807F6D78 D_global_asm_807F6D78[];
+void func_global_asm_806582F8(Struct807F6D78 *, Struct807F6D78 *, s32, s32 *, s32);
+
+// @recomp: Frustum Bound check
+RECOMP_PATCH s32 func_global_asm_80658134(s32 arg0, s32 arg1, s32 arg2, s32 arg3) {
+    s32 sp28;
+    s32 sp24;
+    Struct807F6C14 *temp_v0;
+    s32 var_a2;
+
+    sp24 = 0;
+    sp28 = 0;
+    temp_v0 = &D_global_asm_807F6C14[arg0];
+    D_global_asm_807F6C88.unk0 = temp_v0->unk0;
+    D_global_asm_807F6C88.unk4 = temp_v0->unk10;
+    D_global_asm_807F6C90.unk0 = temp_v0->unk20;
+    D_global_asm_807F6C90.unk4 = temp_v0->unk4;
+    D_global_asm_807F6C98.unk0 = temp_v0->unk14;
+    D_global_asm_807F6C98.unk4 = temp_v0->unk24;
+    D_global_asm_807F6CA0.unk0 = temp_v0->unk8;
+    D_global_asm_807F6CA0.unk4 = temp_v0->unk18;
+    D_global_asm_807F6CA8.unk0 = temp_v0->unk28;
+    D_global_asm_807F6CA8.unk4 = temp_v0->unkC;
+    D_global_asm_807F6CB0.unk0 = temp_v0->unk1C;
+    D_global_asm_807F6CB0.unk4 = temp_v0->unk2C;
+
+    // @recomp: Disable X Viewport checks with depth buffer checking
+    func_global_asm_806582F8((Struct807F6D78 *)&D_global_asm_807F6C88, &D_global_asm_807F6E68, 4, &sp28, 0);
+    if (sp28 == 0) return 0;
+    _memcpy(&D_global_asm_807F6F58, &D_global_asm_807F6E68, sizeof(tuple_f) * sp28);
+    sp24 = sp28;
+    func_global_asm_806582F8(&D_global_asm_807F6F58, &D_global_asm_807F6E68, sp24, &sp28, 2);
+    if (sp28 == 0) return 0;
+    _memcpy(&D_global_asm_807F6F58, &D_global_asm_807F6E68, sizeof(tuple_f) * sp28);
+    sp24 = sp28;
+    func_global_asm_806582F8(&D_global_asm_807F6F58, D_global_asm_807F6D78, sp24, &sp28, 4);
+    var_a2 = sp28;
+    if (var_a2 < 3) {
+        var_a2 = 0;
+    }
+    return var_a2;
+}
+
+// Used for chunk debugging
+s32 func_global_asm_806574B8(s32);
+
+typedef struct Struct807F6C1C {
+    u8 pad0[0x2];
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    u8 unk8;
+    u8 unk9;
+} Struct807F6C1C;
+
+extern Struct807F6C0C *D_global_asm_807F6C0C;
+extern s32 D_global_asm_807F6C10;
+extern Struct807F6C1C *D_global_asm_807F6C1C;
+extern s32 D_global_asm_807F6C20;
+extern u8 *D_global_asm_807F6C2C;
+extern s16 D_global_asm_807F6C30[];
+extern u8 D_global_asm_807F7078[];
+extern u8 func_global_asm_806575D0(s32 arg0, f32 arg1, f32 arg2, f32 arg3);
+extern void func_global_asm_8065756C(s16 arg0);
+extern void func_global_asm_80657CB0(s32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 *arg4, f32 *arg5, f32 *arg6);
+extern void func_global_asm_80657E24(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB);
+extern s32 func_global_asm_80657F14(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, s32 *arg8, s32 *arg9, s32 *argA, s32 *argB);
+extern s32 func_global_asm_80655CF8(s16 arg0, s32 arg1);
+extern u8 func_global_asm_80658000(s32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4);
+extern void func_global_asm_80658624(s32 arg0, s32 *arg1, s32 *arg2, s32 *arg3, s32 *arg4);
+extern void func_global_asm_80657508(s32 arg0);
+extern s32 func_global_asm_80663040(s32 arg0);
+
+// @recomp: Chunk Renderer
+RECOMP_PATCH void func_global_asm_80656F14(s16 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, f32 arg6, f32 arg7, f32 arg8) {
+    s32 temp_s1;
+    s32 temp_v0;
+    s32 var_s0;
+    s32 spC8;
+    s32 spC4;
+    s32 spC0;
+    s32 spBC;
+    s32 spB8;
+    s32 spB4;
+    s32 spB0;
+    s32 spAC;
+    s32 spA8;
+    s32 spA4;
+    s32 spA0;
+    s32 sp9C;
+    u8 cond2;
+    u8 cond3;
+    s32 cond1;
+    s32 var_s2;
+    s32 var_v1;
+
+    func_global_asm_8065756C(arg0);
+    for (var_s2 = 0; var_s2 < D_global_asm_807F6C20; var_s2++) {
+        if ((arg0 == D_global_asm_807F6C1C[var_s2].unk2) && (!func_global_asm_80655CF8(D_global_asm_807F6C1C[var_s2].unk4, arg1))) {
+            if (D_global_asm_807F6C1C[var_s2].unk9) {
+                D_global_asm_807F6C1C[var_s2].unk8 = 1;
+                temp_s1 = var_s2 / 2;
+                if (func_global_asm_806574B8(temp_s1)) {
+                    cond3 = func_global_asm_806575D0(temp_s1, arg6, arg7, arg8);
+                    if (cond3) {
+                        spB0 = arg4;
+                        spB8 = arg2;
+                        spB4 = arg3;
+                        spAC = arg5;
+                    } else if (func_global_asm_80658000(temp_s1, arg6, arg7, arg8, D_global_asm_807F6C1C[var_s2].unk6)) {
+                        cond1 = func_global_asm_80658134(temp_s1, arg6, arg7, arg8);
+                        if (cond1) {
+                            cond2 = TRUE;
+                            spB0 = arg4;
+                            spB8 = arg2;
+                            spB4 = arg3;
+                            spAC = arg5;
+                            // func_global_asm_80658624(cond1, &spC8, &spC4, &spC0, &spBC);
+                            // if (newly_pressed_input & 0x0800) {
+                            //     recomp_printf("--------------\n");
+                            //     recomp_printf("Chunk %d:\n", D_global_asm_807F6C1C[var_s2].unk4);
+                            //     recomp_printf("Ch %d, %d, %d, %d\n", spC8, spC4, spC0, spBC);
+                            //     recomp_printf("SC %d, %d, %d, %d\n", arg2, arg3, arg4, arg5);
+                            // }
+                            // cond2 = func_global_asm_80657F14(spC8, spC4, spC0, spBC, arg2, arg3, arg4, arg5, &spB8, &spB4, &spB0, &spAC);
+                        }
+                    } else {
+                        cond1 = 0;
+                        var_v1 = FALSE;
+                        var_s0 = 0;
+                        while (!var_v1 && (var_s0 < D_global_asm_807F6C10)) {
+                            if ((var_s2 == D_global_asm_807F6C0C[var_s0].unk2) && (D_global_asm_807F6C0C[var_s0].unk0 == D_global_asm_807F6C1C[var_s2].unk4)) {
+                                var_v1 = TRUE;
+                            } else {
+                                var_s0++;
+                            }
+                        }
+                        if ((var_v1 != 0) && (func_global_asm_80658000(temp_s1, arg6, arg7, arg8, D_global_asm_807F6C0C[var_s0].unk4))) {
+                            temp_v0 = func_global_asm_80658134(temp_s1, arg6, arg7, arg8);
+                            if (temp_v0) {
+                                // func_global_asm_80658624(temp_v0, &spC8, &spC4, &spC0, &spBC);
+                                // if (func_global_asm_80657F14(spC8, spC4, spC0, spBC, arg2, arg3, arg4, arg5, &spB8, &spB4, &spB0, &spAC) != 0) {
+                                    func_global_asm_80657508(var_s0);
+                                // }
+                            }
+                        }
+                        // if (func_global_asm_80663040(var_s2)) {
+                        //     temp_v0 = func_global_asm_80658134(temp_s1, arg6, arg7, arg8);
+                        //     if (temp_v0) {
+                        //         func_global_asm_80658624(temp_v0, &spC8, &spC4, &spC0, &spBC);
+                        //         if (func_global_asm_80657F14(spC8, spC4, spC0, spBC, arg2, arg3, arg4, arg5, &spB8, &spB4, &spB0, &spAC)) {
+                        //             D_global_asm_807F6C2C[var_s2] = 1;
+                        //         }
+                        //     }
+                        // }
+                    }
+                    if (((cond1) && (cond2)) || (cond3)) {
+                        D_global_asm_807F6C2C[var_s2] = 1;
+                        temp_s1 = D_global_asm_807F6C1C[var_s2].unk4;
+                        if (D_global_asm_807F7078[temp_s1]) {
+                            chunk_array_pointer[temp_s1].loaded = 1;
+                            chunk_array_pointer[temp_s1].unk1 |= 1 << cc_player_index;
+                            func_global_asm_80657E24(spB8, spB4, spB0, spAC,
+                                chunk_array_pointer[temp_s1].deload1,
+                                chunk_array_pointer[temp_s1].deload2,
+                                chunk_array_pointer[temp_s1].deload3,
+                                chunk_array_pointer[temp_s1].deload4,
+                                &spA8, &spA4, &spA0, &sp9C);
+                            chunk_array_pointer[temp_s1].deload1 = spA8;
+                            chunk_array_pointer[temp_s1].deload2 = spA4;
+                            chunk_array_pointer[temp_s1].deload3 = spA0;
+                            chunk_array_pointer[temp_s1].deload4 = sp9C;
+                            D_global_asm_807F6C30[arg1] = arg0;
+                            func_global_asm_80656F14(temp_s1, arg1 + 1, spB8, spB4, spB0, spAC, arg6, arg7, arg8);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+typedef struct Struct807F93F4 {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    u8 unk10;
+    u8 unk11;
+    s8 unk12;
+    s8 unk13;
+} Struct807F93F4;
+
+typedef struct Struct807F93F0 {
+    u8 pad0[0x38];
+    s16 unk38;
+    s16 unk3A;
+    s16 unk3C;
+    u8 unk3E;
+    u8 unk3F;
+} Struct807F93F0;
+
+extern u8 *D_global_asm_807F6C2C;
+extern Struct807F93F0 *D_global_asm_807F93F0;
+extern Struct807F93F4 *D_global_asm_807F93F4;
+extern s32 D_global_asm_807F93F8;
+extern s16 func_global_asm_80665DE0(f32 arg0, f32 arg1, f32 arg2, f32 arg3);
+extern f32 func_global_asm_80611BB4(f32 arg0, f32 arg1);
+
+// @recomp: Distant Screen renderer
+RECOMP_PATCH void func_global_asm_8066308C(f32 arg0, f32 arg1, f32 arg2) {
+    f32 temp_f12;
+    f32 delta;
+    s32 i;
+
+    for (i = 0; i < D_global_asm_807F93F8; i++) {
+        D_global_asm_807F93F4[i].unk11 = 0;
+        // if (D_global_asm_807F6C2C[D_global_asm_807F93F0[i].unk38]) {
+            D_global_asm_807F93F4[i].unk0 = _sqrtf(SQ(arg0 - D_global_asm_807F93F4[i].unk4) + SQ(arg1 - D_global_asm_807F93F4[i].unk8) + SQ(arg2 - D_global_asm_807F93F4[i].unkC));
+            temp_f12 = (D_global_asm_807F93F4[i].unk0 - D_global_asm_807F93F0[i].unk3A) / (D_global_asm_807F93F0[i].unk3C - D_global_asm_807F93F0[i].unk3A);
+            if (temp_f12 > 1.0) {
+                D_global_asm_807F93F4[i].unk10 = D_global_asm_807F93F0[i].unk3F;
+            } else if (temp_f12 < 0.0) {
+                D_global_asm_807F93F4[i].unk10 = D_global_asm_807F93F0[i].unk3E;
+            } else {
+                delta = D_global_asm_807F93F0[i].unk3F - D_global_asm_807F93F0[i].unk3E;
+                delta *= temp_f12;
+                D_global_asm_807F93F4[i].unk10 = delta + D_global_asm_807F93F0[i].unk3E;
+            }
+            D_global_asm_807F93F4[i].unk12 = (s32) (func_global_asm_80665DE0(arg0, arg2, D_global_asm_807F93F4[i].unk4, D_global_asm_807F93F4[i].unkC) * 0.5) % 255;
+            D_global_asm_807F93F4[i].unk13 = ((s32) ((s16)((func_global_asm_80611BB4(D_global_asm_807F93F4[i].unk8 - arg1, _sqrtf(SQ(arg2 - D_global_asm_807F93F4[i].unkC) + SQ(arg0 - D_global_asm_807F93F4[i].unk4))) * 2048.0) / 3.1415927410125732) * 0.5) % 255);
+            D_global_asm_807F93F4[i].unk11 = 1;
+        // } else {
+        //     D_global_asm_807F93F4[i].unk11 = 0;
+        // }
+    }
 }
