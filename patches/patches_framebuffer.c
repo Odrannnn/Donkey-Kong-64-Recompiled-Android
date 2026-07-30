@@ -135,13 +135,12 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
             gEXPushScissor(dl++);
             gEXPushViewport(dl++);
             gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
-            // gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
             gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
             switch (D_global_asm_807F5D85) {
                 case 7: // Pausing (Blurred Background)
                     // @recomp: We can't morph the framebuffer image as this breaks RT64 widescreen support
                     // func_global_asm_8062A3F0();
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM); // @recomp: Remove alpha texture stuff
                     // Blurs it a little
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 319.0f, 239.0f, 0.0f, 0.0f);
@@ -161,7 +160,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 2: // L -> R Swipe
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM); // @recomp: Remove alpha texture stuff
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, D_global_asm_807F5D86, 0.0f, 319.0f, 239.0f, D_global_asm_807F5D86, 0.0f);
                     gDPPipeSync(dl++);
@@ -175,7 +174,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 0: // R -> L Swipe (Lanky/Tiny crypt)
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM); // @recomp: Remove alpha texture stuff
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0xA, 0x50, 0.0f, 0.0f, D_global_asm_807F5D86, 239.0f, 0.0f, 0.0f);
                     gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
@@ -188,7 +187,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 3: // Dual Swipe
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM); // @recomp: Remove alpha texture stuff
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, D_global_asm_807F5D86, 0.0f, 319.0f, 239.0f, D_global_asm_807F5D86, 0.0f);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0xA, 0x50, 0.0f, 0.0f, D_global_asm_807F5D88, 239.0f, 0.0f, 0.0f);
@@ -206,7 +205,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 4: // Iris Wipe
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     D_global_asm_807F5D8C = D_global_asm_807F5D8C + (5.0 * sp54);
                     D_global_asm_807F5D90 = D_global_asm_807F5D8C + 40.0f;
                     func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, width, height, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A24C);
@@ -215,7 +214,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 5: // TL->BR Wipe
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     D_global_asm_807F5D8C = D_global_asm_807F5D8C + (12.0 * sp54);
                     D_global_asm_807F5D90 = D_global_asm_807F5D8C + 40.0f;
                     func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, width, height, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A228);
@@ -224,7 +223,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 6: // Clock Wipe
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
                     D_global_asm_807F5D94 = D_global_asm_807F5D94 + (15.0 * sp54);
                     func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, width, height, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A130);
                     if (D_global_asm_807F5D94 > 350.0f) {
@@ -974,4 +973,81 @@ RECOMP_PATCH void func_global_asm_806836D0(TagAAD* arg0) {
             }
         }
     }
+}
+
+s16 func_global_asm_8070C200(f32);
+
+extern TexEntry D_global_asm_80754F80[];
+extern u16 D_global_asm_80754FC8[];
+
+typedef struct Struct80709BC4 {
+    s32 unk0;
+    s32 unk4;
+    tuple_f *unk8;
+    Struct807FD9A8_unkC *unkC;
+    Vtx *unk10[2];
+    s32 *unk18;
+    s32 *unk1C;
+    s32 *unk20;
+} Struct80709BC4;
+
+// @recomp: Zipper renderer
+RECOMP_PATCH void func_global_asm_80709BC4(Gfx ** dl_ptr, Struct80709BC4* arg1, u16 *arg2) {
+    s32 temp_s2;
+    s32 temp_v1;
+    s32 var_t4;
+    s32 j;
+    s32 var_fp;
+    Gfx *dl;
+    s32 i;
+    s32 vtx_index; // 9c
+
+    dl = *dl_ptr;
+    for (j = 0; j < arg1->unk0; j++) {
+        arg1->unk10[D_global_asm_807444FC][j].v.ob[0] = func_global_asm_8070C200(arg1->unk8[j].x);
+        arg1->unk10[D_global_asm_807444FC][j].v.ob[1] = func_global_asm_8070C200(arg1->unk8[j].y);
+        arg1->unk10[D_global_asm_807444FC][j].v.ob[2] = func_global_asm_8070C200(arg1->unk8[j].z);
+    }
+    var_t4 = 0;
+    gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM); // @recomp: Add this to disable an artifact with RT64's snapshot
+    for (i = 0; arg1->unk18[i]; i++) {
+        temp_s2 = arg1->unk20[i];
+        var_fp = -0x63;
+        vtx_index = (arg1->unk1C[i] - temp_s2) + 1;
+        gSPVertex(dl++, osVirtualToPhysical(&arg1->unk10[D_global_asm_807444FC][temp_s2]), vtx_index, 0);
+        for (j = 0; j < arg1->unk18[i]; j++) {
+            temp_v1 = arg1->unkC[var_t4].unk18;
+            if (temp_v1 != var_fp) {
+                var_fp = temp_v1;
+                if (temp_v1 < 0) {
+                    temp_v1 = -1 - temp_v1;
+                    gDPLoadTextureBlock(dl++,
+                        &D_global_asm_80754FC8[D_global_asm_80754F80[temp_v1].offset],
+                        G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                        D_global_asm_80754F80[temp_v1].width, D_global_asm_80754F80[temp_v1].height - 1,
+                        0,
+                        G_TX_NOMIRROR, G_TX_NOMIRROR,
+                        G_TX_NOMASK,   G_TX_NOMASK,
+                        G_TX_NOLOD,    G_TX_NOLOD);
+                } else {
+                    gDPLoadTextureTile(dl++,
+                        &arg2[D_global_asm_807FD9B4[temp_v1].offset],
+                        G_IM_FMT_RGBA, G_IM_SIZ_16b,
+                        320, D_global_asm_807FD9B4[temp_v1].height,
+                        0, 0,
+                        D_global_asm_807FD9B4[temp_v1].width, D_global_asm_807FD9B4[temp_v1].height - 1,
+                        0,
+                        G_TX_NOMIRROR, G_TX_NOMIRROR,
+                        G_TX_NOMASK,   G_TX_NOMASK,
+                        G_TX_NOLOD,    G_TX_NOLOD);
+                }
+            }
+            gSPModifyVertex(dl++, arg1->unkC[var_t4].unk0 - temp_s2, G_MWO_POINT_ST, arg1->unkC[var_t4].unkC);
+            gSPModifyVertex(dl++, arg1->unkC[var_t4].unk4 - temp_s2, G_MWO_POINT_ST, arg1->unkC[var_t4].unk10);
+            gSPModifyVertex(dl++, arg1->unkC[var_t4].unk8 - temp_s2, G_MWO_POINT_ST, arg1->unkC[var_t4].unk14);
+            gSP1Triangle(dl++, arg1->unkC[var_t4].unk0 - temp_s2, arg1->unkC[var_t4].unk4 - temp_s2, arg1->unkC[var_t4].unk8 - temp_s2, 0);
+            var_t4++;
+        }
+    }
+    *dl_ptr = dl;
 }

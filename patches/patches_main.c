@@ -918,10 +918,10 @@ RECOMP_PATCH Gfx* func_global_asm_8068D264(Gfx* dl, f32* cooldown_timer) {
         character_change_array->unk270[2] * 4,
         character_change_array->unk270[3] * 4,
         G_TX_RENDERTILE,
-        (s32)D_global_asm_80750228 * 8.0f,
-        (s32)D_global_asm_8075022C * 8.0f,
-        1024,
-        -1024
+        (s32)(D_global_asm_8075022C * 8.0f),
+        (s32)(D_global_asm_80750228 * 8.0f),
+        -1024,
+        1024
     );
     gDPPipeSync(dl++);
 
