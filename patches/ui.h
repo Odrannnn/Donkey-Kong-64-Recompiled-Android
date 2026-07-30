@@ -4,6 +4,5 @@
 #include "patch_helpers.h"
 
 DECLARE_FUNC(void, recomp_get_ui_bounds, s32*, s32*);
-DECLARE_FUNC(f32, sqrtf_recomp, f32);
 
 #endif

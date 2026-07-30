@@ -414,7 +414,3 @@ extern "C" void osViGetCurrentMode_recomp(uint8_t* rdram, recomp_context* ctx) {
 
     ctx->r2 = MEM_BU(0x3, modep);
 }
-
-extern "C" void sqrtf_recomp(uint8_t* rdram, recomp_context* ctx) {
-    ctx->f0.fl = sqrtf(ctx->f12.fl);
-}
