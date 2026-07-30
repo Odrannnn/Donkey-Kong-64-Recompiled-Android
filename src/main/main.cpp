@@ -461,7 +461,7 @@ namespace dk64 {
                         name += "PIMGR";
                         break;
 
-                    case 80:
+                    case 254:
                         name += "VIMGR";
                         break;
 
@@ -474,22 +474,25 @@ namespace dk64 {
                 name += "INIT";
                 break;
             case 2:
-                name += "DEFRAG";
+                name += "NO_EXP_PAK";
+                break;
+            case 3:
+                name += "MAIN";
                 break;
             case 4:
                 name += "AUDIO";
                 break;
             case 5:
-                name += "RESET";
-                break;
-            case 6:
-                name += "MAIN";
-                break;
-            case 7:
-                name += "CONT";
+                name += "GFX_DEBUG";
                 break;
             case 8:
-                name += "RUMBLE";
+                name += "CPU_DEBUG";
+                break;
+            case 9:
+                name += "EEPROM";
+                break;
+            case 11:
+                name += "IDLE";
                 break;
             default:
                 name += std::to_string(t->id);
