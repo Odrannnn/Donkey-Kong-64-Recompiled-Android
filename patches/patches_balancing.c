@@ -321,8 +321,8 @@ RECOMP_PATCH void func_global_asm_806BE8BC(void) {
         default:
             if (gCurrentActorPointer->unk15F < 0x10U) {
                 addActorToTextOverlayRenderArray(func_global_asm_8068E474, gCurrentActorPointer, 3);
-                //@recomp: Change rabbit speed based on lag boost. Normal N64 Lag here is 2.2
-                func_global_asm_8072B324(gCurrentActorPointer, (sp37 ? 1.5 : 1.0) * ((f32)D_global_asm_80744478 / 2.2f) * D_global_asm_807FDC9C->unkD);
+                //@recomp: Change rabbit speed based on lag boost. Normal N64 Lag here is 2.1
+                func_global_asm_8072B324(gCurrentActorPointer, (sp37 ? 1.5 : 1.0) * ((f32)D_global_asm_80744478 / 2.1f) * D_global_asm_807FDC9C->unkD);
             }
             if ((RandChance(0.01)) && (gCurrentActorPointer->animation_state->unk64 == 0x302)) {
                 playActorAnimation(gCurrentActorPointer, (object_timer & 1) ? 0x303 : 0x304);

@@ -1010,6 +1010,7 @@ RECOMP_PATCH void func_global_asm_80709BC4(Gfx ** dl_ptr, Struct80709BC4* arg1, 
     }
     var_t4 = 0;
     gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM); // @recomp: Add this to disable an artifact with RT64's snapshot
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF); // @recomp: If I don't do this, then everything renders green-ish if chunky is not unlocked
     for (i = 0; arg1->unk18[i]; i++) {
         temp_s2 = arg1->unk20[i];
         var_fp = -0x63;
