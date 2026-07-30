@@ -61,7 +61,6 @@ Gfx *rdpStoreFB(Gfx *dl, Actor *a) {
         storedFBEffect = D_global_asm_807F5D85;
         D_global_asm_807F5D84 = 0;
     }
-    recomp_printf("Snap!\n");
     gDPSetColorImage(dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, OS_K0_TO_PHYSICAL(stored_framebuffer));
     return dl;
 }
@@ -74,7 +73,6 @@ Gfx *rdpClearFB(Gfx *dl, Actor *a) {
         D_global_asm_807F5D84 = 1;
         storedFBEffect = -1;
     }
-    recomp_printf("Reset!\n");
     gDPSetColorImage(dl++, 0, 2, D_global_asm_80744490, osVirtualToPhysical(D_global_asm_80744470[D_global_asm_807444FC]));
     return dl;
 }
@@ -134,7 +132,6 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
             gDPSetScissor(dl++, G_SC_NON_INTERLACE, D_global_asm_80744498, D_global_asm_8074449C, D_global_asm_807444A0, D_global_asm_807444A4);
             gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
             recomp_get_ui_bounds(&width, &height);
-            recomp_printf("Rendering framebuffer %d: Width %d, Height %d\n", D_global_asm_807F5D85, width, height);
             gEXPushScissor(dl++);
             gEXPushViewport(dl++);
             gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);

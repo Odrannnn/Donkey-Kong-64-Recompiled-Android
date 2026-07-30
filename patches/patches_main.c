@@ -1474,3 +1474,105 @@ RECOMP_PATCH void func_global_asm_8066308C(f32 arg0, f32 arg1, f32 arg2) {
         // }
     }
 }
+
+Gfx* func_global_asm_80703AB0(Gfx*, u8);
+Gfx* func_global_asm_80703CF8(Gfx*, u8);
+void func_global_asm_8070B324(f32, s32, s32 *);
+u8 isIntroStoryPlaying(void);
+void func_global_asm_80703850(u8 arg0);
+u8 func_global_asm_805FF000(u8 map);
+u8 func_global_asm_80600454(s16 arg0, u8 *arg1);
+void func_global_asm_8069D2AC(u8 arg0, s16 arg1, s16 arg2, char *arg3, u16 arg4, u16 arg5, u8 arg6, u8 arg7);
+u8 *getTextString(u8 fileIndex, s32 stringIndex, s32 arg2);
+void func_global_asm_80602B60(s32 arg0, u8 arg1);
+Gfx *func_global_asm_80703374(Gfx *dl, u8 r, u8 g, u8 b, u8 a);
+
+extern u8 D_global_asm_80750AC0;
+extern s32 D_global_asm_80754CC8[];
+extern s16 D_global_asm_8076A0AA;
+extern u8 D_global_asm_8076A0B1;
+extern f32 D_global_asm_807FD888;
+extern f32 loading_zone_transition_speed;
+extern u8 D_global_asm_8076A0AB;
+
+// @recomp: Transition manager
+RECOMP_PATCH Gfx* func_global_asm_80704484(Gfx *dl, u8 arg1) {
+    f32 temp_f0;
+    u8 sp5B;
+    u16 var_v1;
+    f32 sp54;
+    s32 var_v0;
+
+    if (loading_zone_transition_speed != 0.0f) {
+        if (arg1 == 2) {
+            var_v0 = 2;
+        } else {
+            var_v0 = 1;
+        }
+        D_global_asm_807FD888 += loading_zone_transition_speed * var_v0;
+        if (D_global_asm_807FD888 < 0.0f) {
+            func_global_asm_805FF000(D_global_asm_8076A0AB);
+            if (((D_global_asm_8076A0B1 & 0x20) == 0) && (func_global_asm_80600454(D_global_asm_8076A0AA, &sp5B))) {
+                func_global_asm_8069D2AC(1, 0, 0x64, getTextString(0x23, sp5B, 1), 0, 0x28, 6, 8);
+                D_global_asm_8076A0B1 |= 0x20;
+            }
+            func_global_asm_80602B60(0x2B, 0);
+            if (isIntroStoryPlaying() == 2) {
+                setIntroStoryPlaying(0);
+            }
+            loading_zone_transition_speed = 0.0f;
+            D_global_asm_807FD888 = 0.0f;
+            D_global_asm_8076A0B1 &= ~0x40;
+        } else if (D_global_asm_807FD888 > 31.0f) {
+            if (D_global_asm_8076A0B1 & 1) {
+                func_global_asm_80602B60(0x2C, 0);
+            }
+            loading_zone_transition_speed = 0.0f;
+            D_global_asm_807FD888 = 31.0f;
+            osViBlack(1);
+            D_global_asm_8076A0B1 |= 0xC;
+        } else {
+            sp54 = D_global_asm_807FD888 * 0.032258064f;
+
+            temp_f0 = (D_global_asm_807FD888 * 255.0f) / 28.0f;
+            var_v1 = (temp_f0 < 0.0f) ? 0.0f : MIN(255.0f, (temp_f0));
+            
+            if ((D_global_asm_807FD888 < ((loading_zone_transition_speed * 2) + 31.0f)) && (D_global_asm_8076A0B1 & 4)) {
+                D_global_asm_8076A0B1 ^= 6;
+            }
+            if ((D_global_asm_807FD888 > 28.0f) && (arg1 != 3)) {
+                dl = func_global_asm_80703374(dl, 0, 0, 0, 0xFF);
+            } else {
+                switch (arg1) {
+                    case 3:
+                        if (D_global_asm_80750AC0 == 1) {
+                            func_global_asm_80703850(var_v1);
+                            break;
+                        }
+                    case 2:
+                        dl = func_global_asm_80703AB0(dl, var_v1);
+                        break;
+                    case 1: // Spin transition
+                        // @recomp: Spin transition fix for non-overscan
+                        if (D_global_asm_807FD888 > 25.0f) { // Spin progress
+                            // Render nothing but black
+                            dl = func_global_asm_80703374(dl, 0, 0, 0, 0xFF);
+                        } else {
+                            // Render spin
+                            dl = func_global_asm_80703CF8(dl, var_v1);
+                        }
+                        break;
+                    default:
+                        dl = func_global_asm_80703374(dl, 0, 0, 0, var_v1);
+                        break;
+                }
+            }
+            if ((D_global_asm_8076A0B1 & 0x41) || !(D_global_asm_8076A0B1 & 0x20)) {
+                s32 sp44[3] = { 0 };
+                s32 pad;
+                func_global_asm_8070B324(1.0f - sp54, loading_zone_transition_speed >= 0.0f, sp44);
+            }
+        }
+    }
+    return dl;
+}
