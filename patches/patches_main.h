@@ -241,39 +241,6 @@ void func_global_asm_80610044(void* arg0, s32 arg1, u8 arg2, u8 arg3, s32 arg4, 
 //f32 at unk8 doesn't match with what's in structs.h (s16) 
 //for PlayerAdditionalActorData so making this struct
 
-typedef struct enemy_info {
-    u8 enemy_type; // at 0x00
-    u8 unk1;
-    u16 y_rotation; // at 0x02
-    s16 x_position; // at 0x04
-    s16 y_position; // at 0x06
-    s16 z_position; // at 0x08
-    u8 cutscene_model_index; // at 0x0A
-    u8 unkB;
-    u32 unkC;
-    u16 unk10;
-    u8 unk12;
-    u8 unk13;
-    u32 unk14;
-    Actor* unk18; // TODO: Is this accurate?
-    u32 unk1C;
-    Struct80027840* unk20;
-    u16 unk24;
-    u16 unk26;
-    u16 unk28; // Used
-    s16 unk2A; // Used
-    u32 unk2C;
-    f32 unk30; // Used
-    f32 unk34; // Used
-    f32 unk38; // Used
-    f32 unk3C; // at 0x3C
-    s16 unk40; // Used
-    s16 unk42;
-    u8 unk44; // Used
-    u8 unk45;
-    u16 unk46; // Used
-} EnemyInfo;
-
 typedef struct {
     s16     button;
     s8      stick_x;        /* -80 <= stick_x <= 80 */

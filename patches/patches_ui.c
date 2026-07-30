@@ -1704,6 +1704,198 @@ RECOMP_PATCH void func_bonus_8002570C(void) {
     renderActor(gCurrentActorPointer, 0U);
 }
 
+typedef struct Struct80755264 {
+    u8 unk0;
+    u8 unk1;
+    u8 unk2;
+    u8 unk3;
+    u16 *unk4;
+    u8 unk8;
+    u8 unk9;
+    u8 unkA;
+    u8 unkB;
+    Vtx *unkC;
+    void *unk10;
+} Struct80755264;
+
+typedef struct Struct807FD9E0_unk4 {
+    s16 unk0;
+    u8 pad2[0x8 - 0x2];
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    u8 pad14[0x20 - 0x14];
+    s16 unk20;
+    s16 unk22;
+    s16 unk24;
+    u8 pad26[2];
+    f32 unk28;
+    u8 pad2C[0x30 - 0x2C];
+    Mtx unk30[2];
+    u8 unkB0;
+    u8 unkB1;
+    u8 unkB2;
+    u8 padB3[0xB8 - 0xB3];
+} Struct807FD9E0_unk4;
+
+typedef struct Struct807FD9E0 {
+    u16 unk0;
+    u8 pad2[2];
+    Struct807FD9E0_unk4 *unk4;
+} Struct807FD9E0;
+
+#define ABS_D(d) (((d) > 0.0) ? (d) : -(d))
+
+Gfx* func_global_asm_807105D4(Gfx*, u8);
+extern Struct807FD9E0* D_global_asm_807550E0;
+extern Struct80755264 D_global_asm_80755264[];
+extern f32 D_global_asm_807FD9EC;
+extern u8 D_global_asm_807FDA1A;
+extern u8 D_global_asm_807FDA1B;
+extern u8 D_global_asm_807FDA1C;
+extern s16 D_global_asm_807FDA1E;
+extern void* D_global_asm_807FDA20;
+extern s32 (*D_global_asm_807FDA24)(Struct807FD9E0_unk4*);
+extern u8 D_global_asm_807FDA30[];
+extern Struct807FD9E0_unk4* D_global_asm_807FDAB0;
+extern s16 D_global_asm_807FDAB4;
+extern Actor *D_global_asm_807F5D10;
+extern PlayerAdditionalActorData *extra_player_info_pointer;
+extern Gfx **D_1000020;
+void func_global_asm_80612CA0(f32 (*arg0)[4], f32 arg1);
+
+f32 morphWeather(f32 val) {
+    s32 width, height;
+    s32 pillar_left;
+    recomp_get_ui_bounds(&width, &height);
+    pillar_left = -((width - 320) >> 1);
+    return (val * ((f32)width / 320.0f)) + pillar_left;
+}
+
+//@recomp: Weather renderer
+RECOMP_PATCH Gfx* func_global_asm_80710CA0(Gfx* dl, Actor* arg1) {
+    f64 var_f2_2;
+    f32 sp108[4][4];
+    f32 spC8[4][4];
+    f32 temp_f0;
+    f32 var_f2;
+    u8 spBF;
+    u8 spBE;
+    f64 temp_f0_2;
+    u16 temp_s0;
+    u16 var_s6;
+    s8 var_s5;
+    CameraPaad* temp_a2;
+    Struct807FD9E0_unk4* temp_s0_2;
+
+    temp_s0 = D_global_asm_807550E0->unk0;
+    temp_a2 = D_global_asm_807F5D10->AAD_as_array[0];
+    spBE = FALSE;
+    spBF = FALSE;
+    var_s6 = 0;
+    if ((gPlayerPointer->control_state == 3) || (gPlayerPointer->control_state == 5)) {
+        temp_f0 = D_global_asm_807F5D10->distance_from_floor;
+        if (temp_f0 > 180.0f) {
+            var_f2 = 0.0f;
+        } else {
+            var_f2 = 180.0f - temp_f0;
+        }
+        D_global_asm_807FD9EC = var_f2 * 0.02 * 240.0;
+    } else {
+        D_global_asm_807FD9EC = 240.0f;
+    }
+    if (gPlayerPointer->control_state == 0x42) {
+        if ((extra_player_info_pointer->unkBC == 0x62) || (extra_player_info_pointer->unkBC == 0x88)) {
+            spBE = TRUE;
+        }
+    }
+    if ((temp_a2->unkFA != 0) && (character_change_array->look_at_eye[1] < (temp_a2->unk90 + 3.0f))) {
+        spBF = TRUE;
+    }
+    gDPPipeSync(dl++);
+    gSPDisplayList(dl++, &D_1000118);
+    gSPDisplayList(dl++, &D_1000020);
+    gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPTexture(dl++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetTextureFilter(dl++, G_TF_BILERP);
+    gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    // 
+    dl = alignHUD(dl, ALIGN_LEFT);
+    // 
+    if (D_global_asm_80755264[D_global_asm_807FDA1C].unk0 == 1) {
+        dl = func_global_asm_807105D4(dl, 0);
+    }
+    var_s5 = 0x7F;
+    if (var_s5 >= 0) {
+        while ((var_s5 >= 0) && (temp_s0 != var_s6)) {
+            temp_s0_2 = &D_global_asm_807550E0->unk4[var_s5];
+            D_global_asm_807FDAB0 = temp_s0_2;
+            D_global_asm_807FDAB4 = D_global_asm_807FDA1E;
+            if ((temp_s0_2->unkB0 != 0) && (((temp_s0_2->unk0 == -1)) || (func_global_asm_806522CC(temp_s0_2->unk8, temp_s0_2->unkC, temp_s0_2->unk0))) && (!spBF) && (!spBE)) {
+                gDPSetPrimColor(dl++, 0, 0, D_global_asm_807FDA1B, D_global_asm_807FDA1B, D_global_asm_807FDA1B, temp_s0_2->unkB1);
+                if (D_global_asm_807FDA1C == 4) {
+                    switch (temp_s0_2->unk20) {
+                        case 8:
+                        case 10:
+                        case 12:
+                            dl = func_global_asm_807105D4(dl, ((temp_s0_2->unkB2++ >> 2) % 8) + 2);
+                            break;
+                        case 15:
+                        case 18:
+                        case 22:
+                            dl = func_global_asm_807105D4(dl, 0);
+                            break;
+                        default:
+                            dl = func_global_asm_807105D4(dl, 1);
+                            break;
+                    }
+                } else {
+                    if (D_global_asm_80755264[D_global_asm_807FDA1C].unk0 > 1) {
+                        dl = func_global_asm_807105D4(dl, temp_s0_2->unkB2++ % D_global_asm_80755264[D_global_asm_807FDA1C].unk0);
+                    }
+                }
+                temp_f0_2 = temp_s0_2->unk10 * 4.0;
+                var_f2_2 = ABS_D(temp_f0_2);
+                guScaleF(sp108, temp_f0_2, var_f2_2, 1.0f);
+                switch (D_global_asm_807FDA1C) {
+                    case 3:
+                        temp_s0_2->unk22 += temp_s0_2->unk28;
+                        func_global_asm_80612CA0(spC8, temp_s0_2->unk22);
+                        break;
+                    case 4:
+                        func_global_asm_80612CA0(spC8, temp_s0_2->unk24);
+                        break;
+                    default:
+                        func_global_asm_80612CA0(spC8, D_global_asm_807FDA1E);
+                        break;
+                }
+                guMtxCatF(sp108, spC8, sp108);
+                guTranslateF(spC8, morphWeather(temp_s0_2->unk8) * 4.0, temp_s0_2->unkC * 4.0, -50.0f);
+                guMtxCatF(sp108, spC8, sp108);
+                guMtxF2L(sp108, &temp_s0_2->unk30[D_global_asm_807444FC]);
+                gSPMatrix(dl++, &temp_s0_2->unk30[D_global_asm_807444FC], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+                gSPVertex(dl++, osVirtualToPhysical(D_global_asm_807FDA20), 4, 0);
+                gSP2Triangles(dl++, 0, 1, 2, 0, 0, 2, 3, 0);
+                gDPPipeSync(dl++);
+            }
+            if (temp_s0_2->unkB0) {
+                var_s6++;
+                if (D_global_asm_807FDA24(temp_s0_2) || (temp_s0_2->unk10 < 0.01)) {
+                    temp_s0_2->unkB0 = 0U;
+                    D_global_asm_807FDA1A++;
+                    D_global_asm_807FDA30[D_global_asm_807FDA1A] = var_s5;
+                    D_global_asm_807550E0->unk0--;
+                }
+            }
+            var_s5--;
+        }
+    }
+
+    dl = popHUD(dl);
+    return dl;
+}
+
 
 // This requires mallocs to be resolved
 /*
