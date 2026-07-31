@@ -510,3 +510,4 @@ extern void func_bonus_8002563C(HandleAAD *arg0);
 extern void addActorToTextOverlayRenderArray(void *arg0, Actor *arg1, u8 arg2);
 extern void renderActor(Actor *arg0, u8 arg1);
 extern void func_bonus_800265C0(u8 arg0, u8 textIndex);
+extern void func_global_asm_806F8004(f32 xRotation, f32 yRotation, f32 *xOut, f32 *yOut, f32 *zOut);

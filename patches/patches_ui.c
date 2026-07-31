@@ -1896,6 +1896,26 @@ RECOMP_PATCH Gfx* func_global_asm_80710CA0(Gfx* dl, Actor* arg1) {
     return dl;
 }
 
+//@recomp HUD Item Code
+RECOMP_PATCH void func_global_asm_806F8170(s32 HUDItemIndex, f32 *xOut, f32 *yOut, f32 *zOut) {
+    s32 temp_v0;
+
+    if (HUDItemIndex < 0) {
+        func_global_asm_806F8004(16.5f, 0.0f, xOut, yOut, zOut);
+        return;
+    }
+    if (HUDItemIndex == 8) {
+        func_global_asm_806F8004(1.5 - (D_global_asm_80754280->hud_item[HUDItemIndex].hud_count * 7), 26.0f, xOut, yOut, zOut);
+        return;
+    }
+    s32 width, height;
+    recomp_get_ui_bounds(&width, &height);
+    *xOut = (D_global_asm_80754280->hud_item[HUDItemIndex].unk_10 * width) / 320.0f;
+    *yOut = D_global_asm_80754280->hud_item[HUDItemIndex].unk_14;
+    *zOut = D_global_asm_80754280->hud_item[HUDItemIndex].unk_18;
+}
+
+
 
 // This requires mallocs to be resolved
 /*
