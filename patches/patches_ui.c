@@ -1896,7 +1896,7 @@ RECOMP_PATCH Gfx* func_global_asm_80710CA0(Gfx* dl, Actor* arg1) {
     return dl;
 }
 
-//@recomp HUD Item Code
+//@recomp Reposition where items go when they fly to the HUD.
 RECOMP_PATCH void func_global_asm_806F8170(s32 HUDItemIndex, f32 *xOut, f32 *yOut, f32 *zOut) {
     s32 temp_v0;
 
@@ -1913,6 +1913,18 @@ RECOMP_PATCH void func_global_asm_806F8170(s32 HUDItemIndex, f32 *xOut, f32 *yOu
     *xOut = (D_global_asm_80754280->hud_item[HUDItemIndex].unk_10 * width) / 320.0f;
     *yOut = D_global_asm_80754280->hud_item[HUDItemIndex].unk_14;
     *zOut = D_global_asm_80754280->hud_item[HUDItemIndex].unk_18;
+}
+
+//@recomp Fairy Camera shutter animation scaled to screen width.
+RECOMP_PATCH void func_global_asm_806FFB2C(Gfx *dl, Actor *arg1) {
+    f32 sp3C;
+    sp3C = arg1->control_state_progress * 1.4;
+    dl = func_global_asm_806FEDB0(dl, arg1->PaaD->unk1A4);
+    gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
+    s32 width, height;
+    recomp_get_ui_bounds(&width, &height);
+    displayImage(dl, 0x3C, 3, 1, 0x40, 0x40, 0xA0, 0x78, 5.0f * width / 320.0f, 5.0f * width / 320.0f, 0, sp3C);
 }
 
 
