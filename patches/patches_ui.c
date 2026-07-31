@@ -8,13 +8,13 @@ void setSpriteAlignment(enumSpriteAlignment alignment) {
 }
 
 Gfx *alignHUDTopBottom(Gfx * dl, enumSpriteAlignment alignment, s32 top, s32 bottom) {
-    s32 margin_reduction = 8;
+    s32 margin_reduction = 0;
     if (alignment == ALIGN_UNALIGNED) {
         return dl;
     }
     gEXPushScissor(dl++);
     gEXPushViewport(dl++);
-    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, top, 0, bottom);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, top, -10, bottom);
     if (alignment == ALIGN_RIGHT) {
         // Right align
         gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
@@ -30,6 +30,27 @@ Gfx *alignHUDTopBottom(Gfx * dl, enumSpriteAlignment alignment, s32 top, s32 bot
 
 Gfx *alignHUD(Gfx * dl, enumSpriteAlignment alignment) {
     return alignHUDTopBottom(dl, alignment, 0, D_global_asm_80744494);
+}
+
+Gfx *alignHUDGameplay(Gfx *dl, enumSpriteAlignment alignment) {
+    if (alignment == ALIGN_UNALIGNED) {
+        return dl;
+    }
+    s32 margin_reduction = recomp_get_ui_pillar();
+    gEXPushScissor(dl++);
+    gEXPushViewport(dl++);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, -margin_reduction, 0, -margin_reduction, D_global_asm_80744494);
+    if (alignment == ALIGN_RIGHT) {
+        // Right align
+        gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
+            -(D_global_asm_80744490 - margin_reduction) * 4, 0,
+            -(D_global_asm_80744490 - margin_reduction) * 4, 0);
+        gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, -(D_global_asm_80744490 - margin_reduction) * 4, 0);
+    } else if (alignment == ALIGN_LEFT) {
+        gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, -margin_reduction * 4, 0, -margin_reduction * 4, 0);
+        gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, -margin_reduction * 4, 0);
+    }
+    return dl;
 }
 
 Gfx *popHUD(Gfx *dl) {
@@ -528,7 +549,7 @@ RECOMP_PATCH Gfx *func_global_asm_8071338C(Gfx *dl) {
     temp = 20.0f;
     temp *= 2.0f;
     temp *= 4.0f;
-    dl = alignHUD(dl, ALIGN_LEFT);
+    dl = alignHUDGameplay(dl, ALIGN_LEFT);
     dl = printStyledText(dl, 1, 0x118, temp, string, 4);
     dl = popHUD(dl);
     return dl;
@@ -1182,7 +1203,7 @@ RECOMP_PATCH Gfx *func_global_asm_806FF75C(Gfx* dl, Actor *arg1) {
     gEXPopViewport(dl++);
     gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 0);
     gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, 0, 0);
-    dl = alignHUD(dl, ALIGN_RIGHT);
+    dl = alignHUDGameplay(dl, ALIGN_RIGHT);
     dl = displayImage_simple(dl,
         D_global_asm_80744490, 0,
         0x40, 0x40,
@@ -1745,6 +1766,8 @@ typedef struct Struct807FD9E0 {
 } Struct807FD9E0;
 
 #define ABS_D(d) (((d) > 0.0) ? (d) : -(d))
+#define ABS_F(d) (((d) > 0.0f) ? (d) : -(d))
+#define ABS(d) (((d) > 0) ? (d) : -(d))
 
 Gfx* func_global_asm_807105D4(Gfx*, u8);
 extern Struct807FD9E0* D_global_asm_807550E0;
@@ -2241,3 +2264,390 @@ RECOMP_PATCH void func_global_asm_806FFB2C(Gfx *dl, Actor *arg1) {
         return dl;
     }
 */
+
+typedef struct Struct805FD088 {
+    Mtx unk0;
+    Mtx unk40;
+    Mtx unk80;
+    Mtx unkC0;
+    Mtx unk100;
+    Mtx unk140;
+    Mtx unk180;
+    Mtx unk1C0;
+    Mtx unk200;
+    u8 pad240[0xDB0 - 0x240];
+    Gfx dl[0x80];
+} Struct805FD088;
+
+Gfx *func_global_asm_8062BF24(Gfx *, Struct805FD088 *);
+Gfx *func_global_asm_8068C20C(Gfx *, u8);
+Struct80750948 *func_global_asm_806C7C94(u8);
+Gfx *func_global_asm_80701CA0(Gfx *);
+Gfx *func_global_asm_80714060(Gfx *);
+Gfx *func_global_asm_806FAB20(Gfx *);
+Gfx *func_global_asm_80709344(Gfx *);
+Gfx *func_global_asm_805FCFD8(Gfx *);
+Gfx *func_global_asm_805FE398(Gfx *);
+Gfx *func_global_asm_805FE4D4(Gfx *);
+Gfx *func_global_asm_80704960(Gfx *);
+Gfx *func_global_asm_807007B8(Gfx *);
+Gfx *func_global_asm_80629300(Gfx *);
+Gfx *func_global_asm_8062A844(Gfx *);
+Gfx *func_global_asm_8062CA0C(Gfx *dl, f32 arg1, f32 arg2, f32 arg3);
+void func_global_asm_80722280(void);
+void func_global_asm_8068C0B4(void);
+void func_global_asm_806FBC34(void);
+f32 func_global_asm_8062A850(void);
+int func_global_asm_80714464(void);
+
+extern u8 D_global_asm_8074447C;
+extern u8 D_global_asm_80744480;
+extern u8 D_global_asm_80744484;
+extern u8 D_global_asm_80744488;
+extern u8 D_global_asm_8074448C;
+extern s16 D_global_asm_80744490;
+extern s16 D_global_asm_80744494;
+extern s16 D_global_asm_80744498;
+extern s16 D_global_asm_8074449C;
+extern s16 D_global_asm_807444A0;
+extern s16 D_global_asm_807444A4;
+extern s16 D_global_asm_807444A8;
+extern s16 D_global_asm_807444AC;
+extern s16 D_global_asm_807444B0;
+extern s16 D_global_asm_807444B4;
+extern f32 D_global_asm_807444B8;
+extern f32 D_global_asm_807444BC;
+extern f32 D_global_asm_807444C4;
+extern f32 D_global_asm_807444C8;
+extern u8 D_global_asm_807467E4;
+extern u8 D_global_asm_80750AB8;
+extern void *D_global_asm_8076A060;
+extern u16 D_global_asm_8076A09C;
+extern u8 D_global_asm_8076A0B1;
+extern u8 D_global_asm_8076A0B3;
+extern Gfx* D_global_asm_8076A050[];
+extern u8 D_global_asm_807444FC;
+extern void *D_global_asm_8076A080;
+extern Gfx **D_1000090;
+
+RECOMP_PATCH void func_global_asm_805FD088(Struct805FD088 *arg0, Gfx **arg1, Gfx **arg2) {
+    Gfx *dl; // 114
+    Gfx *dl_0;
+
+    dl = D_global_asm_8076A050[D_global_asm_807444FC];
+    dl_0 = &arg0->dl[0];
+    gSPPerspNormalize(dl_0++, D_global_asm_8076A09C);
+    gSPClipRatio(dl_0++, FRUSTRATIO_3);
+    gSPSegment(dl++, 0x00, 0x00000000);
+    gSPSegment(dl++, 0x02, osVirtualToPhysical(arg0));
+    gSPSegment(dl++, 0x01, osVirtualToPhysical(D_global_asm_8076A080));
+    gSPSegment(dl_0++, 0x00, 0x00000000);
+    gSPSegment(dl_0++, 0x02, osVirtualToPhysical(arg0));
+    gSPSegment(dl_0++, 0x01, osVirtualToPhysical(D_global_asm_8076A080));
+    gSPDisplayList(dl++, &D_1000090);
+    gSPDisplayList(dl_0++, &D_1000090);
+    {
+        f32 temp_f0;
+        f32 temp0;
+        f32 temp_f2;
+        u32 vf;
+        s16 n, d;
+        Struct80750948 *temp_v0_6;
+        s16 x, y;
+        s32 width, height;
+        dl = func_global_asm_805FCFD8(dl);
+        dl_0 = func_global_asm_805FCFD8(dl_0);
+        gDPSetScissorFrac(dl++, G_SC_NON_INTERLACE, 0, 0, D_global_asm_80744490 * 4.0f, D_global_asm_80744494 * 4.0f);
+        gDPSetScissorFrac(dl_0++, G_SC_NON_INTERLACE, 0, 0, D_global_asm_80744490 * 4.0f, D_global_asm_80744494 * 4.0f);
+        guTranslate(&arg0->unk180, 0.0f, 0.0f, 0.0f);
+        guOrtho(&arg0->unk80, 0.0f, (f32) D_global_asm_80744490 - 1.0, (f32) D_global_asm_80744494 - 1.0, 0.0f, -20000.0f, 20000.0f, 1.0f);
+        guOrtho(&arg0->unkC0, 0.0f, (f32) D_global_asm_80744490 * 4.0 - 1.0, (f32) D_global_asm_80744494 * 4.0 - 1.0, 0.0f, -20000.0f, 20000.0f, 1.0f);
+        guOrtho(&arg0->unk140, 0.0f, 2.0 * (f32) D_global_asm_80744490 - 1.0, 2.0 * (f32) D_global_asm_80744494 - 1.0, 0.0f, -20000.0f, 20000.0f, 1.0f);
+        guOrtho(&arg0->unk100, (f32) character_change_array->unk270[0] * 4.0, (f32) character_change_array->unk270[2] * 4.0 - 1.0, (f32) character_change_array->unk270[3] * 4.0 - 1.0, (f32) character_change_array->unk270[1] * 4.0, -20000.0f, 20000.0f, 1.0f);
+        temp0 = func_global_asm_8062A850();
+        guPerspective(&arg0->unk0, &D_global_asm_8076A09C, D_global_asm_807444B8, temp0 * D_global_asm_807444BC, D_global_asm_807444C8, D_global_asm_807444C4, 1.0f);
+        gSPMatrix(dl_0++, &D_2000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+        gSPMatrix(dl_0++, &D_2000200, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
+        gSPMatrix(dl_0++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        dl_0 = func_global_asm_805FD030(dl_0);
+        dl = func_global_asm_805FE398(dl);
+        gDPPipeSync(dl++);
+        dl = func_global_asm_805FE4D4(dl);
+        gDPSetColorDither(dl++, G_CD_MAGICSQ);
+        gDPSetAlphaDither(dl++, G_AD_PATTERN);
+        dl = func_global_asm_80704960(dl);
+        gSPClipRatio(dl++, FRUSTRATIO_3);
+        gDPPipeSync(dl++);
+        gDPSetCycleType(dl++, G_CYC_1CYCLE);
+        gSPClearGeometryMode(dl++, G_ZBUFFER | G_SHADE | G_CULL_BOTH | G_FOG | G_LIGHTING | G_TEXTURE_GEN | G_TEXTURE_GEN_LINEAR | G_LOD | G_SHADING_SMOOTH | G_CLIPPING | 0x0040F9FA)
+        gSPSetGeometryMode(dl++, G_SHADE | G_CULL_BACK | G_SHADING_SMOOTH);
+        dl = func_global_asm_8062BF24(dl, arg0);
+        dl = func_global_asm_80701CA0(dl);
+        if (cc_number_of_players == 1) {
+            dl = func_global_asm_807007B8(dl);
+        }
+        dl = func_global_asm_8068C20C(dl, 1);
+        dl = func_global_asm_80629300(dl);
+        dl = func_global_asm_8062A844(dl);
+        if ((current_map == MAP_DK_RAP) || (current_map == MAP_MAIN_MENU) || ((func_global_asm_80714464() != 0) && (current_map != MAP_BLOOPERS_ENDING))) {
+            D_global_asm_8076A0B1 &= 0xFFEF;
+            D_global_asm_8076A0B3 = 0;
+        }
+        if (((D_global_asm_8076A0B1 & 0x10) || (D_global_asm_8076A0B3 != 0)) && ((cc_number_of_players == 1) || (D_global_asm_80750AB8 == 1))) {
+            gDPPipeSync(dl++);
+            gDPSetCycleType(dl++, G_CYC_FILL);
+            gDPSetRenderMode(dl++, G_RM_NOOP, G_RM_NOOP2);
+            gSPClearGeometryMode(dl++, G_ZBUFFER);
+            gDPSetFillColor(dl++, 0x00010001);
+            gDPSetScissorFrac(dl++, G_SC_NON_INTERLACE,
+                D_global_asm_80744498 * 4.0f,
+                D_global_asm_8074449C * 4.0f,
+                D_global_asm_807444A0 * 4.0f,
+                D_global_asm_807444A4 * 4.0f);
+
+            if (D_global_asm_8076A0B3) {
+                D_global_asm_8076A0B3 -= 0xF;
+                temp_f2 = (1.0 - (D_global_asm_8076A0B3 / 255.0));
+                temp_f0 = (D_global_asm_807444AC - D_global_asm_807444A8) * temp_f2;
+                gDPFillRectangle(dl++,
+                    0,
+                    MAX(D_global_asm_807444A8 - temp_f0, 0.0f),
+                    MAX(D_global_asm_80744490, 0),
+                    MAX(D_global_asm_807444AC - temp_f0, 0.0f));
+                gDPFillRectangle(dl++, 0,
+                    D_global_asm_807444B0 + temp_f0,
+                    D_global_asm_80744490,
+                    D_global_asm_807444B4 + temp_f0);
+                character_change_array->unk270[1] = D_global_asm_807444AC - temp_f0;
+                character_change_array->unk270[3] = D_global_asm_807444B0 + temp_f0;
+            } else {
+                gDPFillRectangle(dl++, 0, D_global_asm_807444A8, D_global_asm_80744490, D_global_asm_807444AC);
+                gDPFillRectangle(dl++, 0, D_global_asm_807444B0, D_global_asm_80744490, D_global_asm_807444B4);
+                character_change_array->unk270[1] = D_global_asm_807444AC;
+                character_change_array->unk270[3] = D_global_asm_807444B0;
+            }
+            character_change_array->unk27A = character_change_array->unk270[3] - character_change_array->unk270[1];
+            character_change_array->unk280 = (f32) character_change_array->unk278 / (f32) character_change_array->unk27A;
+            gDPPipeSync(dl++);
+            gDPSetRenderMode(dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        }
+        if ((D_global_asm_8074447C) || (D_global_asm_80744480) || (D_global_asm_80744484) || (D_global_asm_80744488) || (D_global_asm_8074448C)) {
+            temp_v0_6 = func_global_asm_806C7C94(0);
+            character_change_array->unk270[0] = temp_v0_6->unk4 + D_global_asm_8074447C;
+            character_change_array->unk270[2] = temp_v0_6->unk8 - D_global_asm_80744480;
+            character_change_array->unk270[1] = temp_v0_6->unk6 + D_global_asm_80744484;
+            character_change_array->unk270[3] = temp_v0_6->unkA - D_global_asm_80744488;
+            gDPPipeSync(dl++);
+            gDPSetCycleType(dl++, G_CYC_FILL);
+            gDPSetRenderMode(dl++, G_RM_NOOP, G_RM_NOOP2);
+            gSPClearGeometryMode(dl++, G_ZBUFFER);
+            gDPSetFillColor(dl++, 0x00010001);
+            gDPSetScissorFrac(dl++,
+                G_SC_NON_INTERLACE,
+                D_global_asm_80744498 * 4.0f,
+                D_global_asm_8074449C * 4.0f,
+                D_global_asm_807444A0 * 4.0f,
+                D_global_asm_807444A4 * 4.0f);
+            // @recomp: Change bounds. Don't use gEX as we don't want this to respect the UI setting
+            recomp_get_ui_bounds(&width, &height);
+            if (D_global_asm_8074447C) {
+                dl = alignHUDGameplay(dl, ALIGN_LEFT);
+                gDPFillRectangle(dl++,
+                    temp_v0_6->unk4,
+                    temp_v0_6->unk6,
+                    character_change_array->unk270[0],
+                    temp_v0_6->unkA);
+                dl = popHUD(dl);
+            }
+            if (D_global_asm_80744480) {
+                dl = alignHUDGameplay(dl, ALIGN_RIGHT);
+                gDPFillRectangle(dl++,
+                    character_change_array->unk270[2],
+                    temp_v0_6->unk6,
+                    temp_v0_6->unk8,
+                    temp_v0_6->unkA);
+                dl = popHUD(dl);
+            }
+            if (D_global_asm_80744484) {
+                gDPFillRectangle(dl++,
+                character_change_array->unk270[0],
+                temp_v0_6->unk6,
+                character_change_array->unk270[2],
+                character_change_array->unk270[1]);
+            }
+            if (D_global_asm_80744488) {
+                gDPFillRectangle(dl++,
+                character_change_array->unk270[0],
+                character_change_array->unk270[3],
+                character_change_array->unk270[2],
+                temp_v0_6->unkA);
+            }
+            gDPPipeSync(dl++);
+            character_change_array->unk278 = character_change_array->unk270[2] - character_change_array->unk270[0];
+            character_change_array->unk27A = character_change_array->unk270[3] - character_change_array->unk270[1];
+            if (
+                (!D_global_asm_8074447C) &&
+                (!D_global_asm_80744480) &&
+                (!D_global_asm_80744484) &&
+                (!D_global_asm_80744488)) {
+                D_global_asm_8074448C = 0;
+            } else {
+                D_global_asm_8074448C = 1;
+            }
+            D_global_asm_8074447C = 0;
+            D_global_asm_80744480 = 0;
+            D_global_asm_80744484 = 0;
+            D_global_asm_80744488 = 0;
+            n = temp_v0_6->unk8 - temp_v0_6->unk4;
+            d = temp_v0_6->unkA - temp_v0_6->unk6;
+            character_change_array->unk280 = (f32)(n) / (f32)(d);
+            gDPSetRenderMode(dl++, G_RM_OPA_SURF, G_RM_OPA_SURF2);
+        }
+        dl = func_global_asm_805FD030(dl);
+        dl = func_global_asm_8068C20C(dl, 3);
+        dl = func_global_asm_8062CA0C(dl, character_change_array->look_at_eye_x, character_change_array->look_at_eye_y, character_change_array->look_at_eye_z);
+        dl = func_global_asm_8068C20C(dl, 5);
+        dl = func_global_asm_8068C20C(dl, 7);
+        if (D_global_asm_807467E4) {
+            D_global_asm_807467E4--;
+        }
+        dl = func_global_asm_80709344(dl);
+        dl = func_global_asm_806FAB20(dl);
+        dl = func_global_asm_80714060(dl);
+        func_global_asm_806FBC34();
+        func_global_asm_8068C0B4();
+        func_global_asm_80722280();
+        *arg1 = dl;
+        *arg2 = dl_0;
+    }
+}
+
+typedef struct struct80750814 {
+    u8 data[4];
+} struct80750814;
+
+typedef struct {
+    s16 duration;
+    s16 cooldown;
+    s8 squish_from;
+    s8 text_count;
+} EndSequenceCardStruct;
+
+extern EndSequenceCardStruct D_global_asm_807506D0[];
+extern s8 D_global_asm_80750754;
+extern s16 D_global_asm_80750758;
+
+extern f32 D_global_asm_807FC8E8;
+extern f32 D_global_asm_807FC8EC;
+extern u8 *D_global_asm_807FC8F0;
+
+extern struct80750814 D_global_asm_80750814;
+extern f32 D_global_asm_80750818[];
+extern f32 D_global_asm_80750828[];
+extern void *_malloc(s32);
+extern void func_global_asm_8061134C(void *);
+extern void func_global_asm_805FEE84(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
+
+RECOMP_PATCH Gfx *func_global_asm_806C75A4(Gfx *dl, Actor *arg1) {
+    s16 i;
+    s16 y;
+    u8 *str;
+    f32 var_f12;
+    f32 var_f2;
+    f32 var_f0;
+    f32 sp108;
+    struct80750814 sp104;
+    f32 spC4[4][4];
+    f32 sp84[4][4];
+    Mtx *temp_v0_2;
+    s16 var_v1;
+    s16 temp_a2;
+    s32 width, height;
+
+    sp104 = D_global_asm_80750814;
+    if (D_global_asm_80750754 < 0) {
+        return dl;
+    }
+    i = D_global_asm_807506D0[D_global_asm_80750754].squish_from;
+
+    var_v1 = (((D_global_asm_807FC8E8 - 0.5) * D_global_asm_80750818[i]) + (D_global_asm_80750828[i] * D_global_asm_807FC8EC));
+    // @recomp: Usually 0, but overscan
+    if (var_v1 < 10) {
+        var_v1 = 0;
+    }
+    sp104.data[i] = var_v1;
+    func_global_asm_805FEE84(sp104.data[1], sp104.data[3], sp104.data[0], sp104.data[2]);
+
+    if (D_global_asm_807FC8E8 == 0.0f) {
+        return dl;
+    }
+    temp_v0_2 = _malloc(sizeof(Mtx));
+    func_global_asm_8061134C(temp_v0_2);
+    gDPPipeSync(dl++);
+    gSPDisplayList(dl++, &D_1000118);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(dl++, temp_v0_2, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    var_f2 = 1.0f;
+    var_f12 = 1.0f;
+    recomp_get_ui_bounds(&width, &height);
+
+    if (i & 1) {
+        // left/right
+        var_f2 = D_global_asm_807FC8EC;
+    } else {
+        // top/bottom
+        var_f12 = D_global_asm_807FC8EC;
+    }
+    guScaleF(spC4, var_f2 * 0.55, var_f12 * 0.55, 1.f);
+    switch (i) {
+        case 0:
+            // Top
+            var_f0 = 160.0f;
+            sp108 = (D_global_asm_80750818[i] * D_global_asm_807FC8E8) + -55.0;
+            break;
+        case 2:
+            // Bottom
+            var_f0 = 160.0f;
+            sp108 = 265.0 - (D_global_asm_80750818[i] * D_global_asm_807FC8E8);
+            break;
+        case 1:
+            // Left
+            var_f0 = (D_global_asm_80750818[i] * D_global_asm_807FC8E8) + -70.0;
+            var_f0 += 8.0;
+            var_f0 -= ((width - 320) >> 1);
+            sp108 = 120.0f;
+            break;
+        case 3:
+            // Right
+            var_f0 = 390.0 - (D_global_asm_80750818[i] * D_global_asm_807FC8E8);
+            var_f0 -= 8.0;
+            var_f0 += ((width - 320) >> 1);
+            sp108 = 120.0f;
+            break;
+    }
+    guTranslateF(sp84, var_f0 * 4.0, sp108 * 4.0, 0.0f);
+    guMtxCatF(spC4, sp84, spC4);
+    guMtxF2L(spC4, temp_v0_2);
+    str = D_global_asm_807FC8F0;
+    for (i = 0; i < D_global_asm_80750758; str++) {
+        if (*str == '\0') {
+            i++;
+        }
+    }
+    y = -D_global_asm_807506D0[D_global_asm_80750754].text_count * 35;
+    for (i = 0; i < D_global_asm_807506D0[D_global_asm_80750754].text_count; str++, i++) {
+        temp_a2 = getCenterOfString(1, str) * 2;
+        dl = printStyledText(dl, 1, -temp_a2, y, str, 0);
+        y += 0x60;
+        while (*str) {
+            str++;
+        }
+    }
+    gSPPopMatrix(dl++, G_MTX_MODELVIEW);
+    gDPPipeSync(dl++);
+    return dl;
+}

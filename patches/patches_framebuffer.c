@@ -782,10 +782,11 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     s32 j;
     s32 X_REPEAT_COUNT, Y_REPEAT_COUNT;
     s32 width, height;
+    s32 pillar;
 
     recomp_get_ui_bounds(&width, &height);
-    X_REPEAT_COUNT = (width >> 7) + 2;
-    Y_REPEAT_COUNT = (height >> 7) + 2;
+    X_REPEAT_COUNT = (width >> 7) + 4;
+    Y_REPEAT_COUNT = (height >> 7) + 4;
 
     gSPLoadGeometryMode(dl++, 0);
     gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
@@ -795,9 +796,10 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     gDPSetTexturePersp(dl++, G_TP_NONE);
     gDPSetTextureFilter(dl++, G_TF_POINT);
     // 
+    pillar = recomp_get_ui_pillar();
     gEXPushScissor(dl++);
-    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
-    gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, -pillar, 0, pillar, D_global_asm_80744494);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, -pillar * 4, 0, -pillar * 4, 0);
     //
     gSPTexture(dl++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);

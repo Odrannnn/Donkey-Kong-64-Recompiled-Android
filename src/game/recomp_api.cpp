@@ -170,6 +170,28 @@ extern "C" void recomp_get_ui_bounds(uint8_t* rdram, recomp_context* ctx) {
     return;
 }
 
+extern "C" void recomp_get_ui_pillar(uint8_t* rdram, recomp_context* ctx) {
+    ultramodern::renderer::GraphicsConfig graphics_config = ultramodern::renderer::get_graphics_config();
+    int width, height, delta;
+    recompui::get_window_size(width, height);
+    width = (width * 240) / height;
+    delta = 0;
+    switch (graphics_config.hr_option) {
+        default:
+        case ultramodern::renderer::HUDRatioMode::Original:
+            delta = (width - 320) >> 1;
+            break;
+        case ultramodern::renderer::HUDRatioMode::Clamp16x9:
+            delta = (width - 426) >> 1;
+            break;
+        case ultramodern::renderer::HUDRatioMode::Full:
+            delta = 0;
+            break;
+    }
+    _return(ctx, delta);
+    return;
+}
+
 extern "C" void recomp_get_analog_cam_sensitivity(uint8_t* rdram, recomp_context* ctx) {
     _return<uint32_t>(ctx, dk64::get_analog_cam_sensitivity());
 }

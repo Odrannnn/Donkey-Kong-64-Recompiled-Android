@@ -13,6 +13,7 @@ recomp_get_sfx_volume = 0x8F000034;
 recomp_get_story_skip = 0x8F000038;
 recomp_get_camera_type = 0x8F00003C;
 recomp_get_ui_bounds = 0x8F000040;
+recomp_get_ui_pillar = 0x8F000044;
 osCreateMesgQueue_recomp = 0x8F000048;
 recomp_set_current_frame_poll_id = 0x8F00004C;
 recomp_time_us = 0x8F000050;
