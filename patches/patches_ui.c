@@ -1924,7 +1924,9 @@ RECOMP_PATCH void func_global_asm_806FFB2C(Gfx *dl, Actor *arg1) {
     gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
     s32 width, height;
     recomp_get_ui_bounds(&width, &height);
-    displayImage(dl, 0x3C, 3, 1, 0x40, 0x40, 0xA0, 0x78, 5.0f * width / 320.0f, 5.0f * width / 320.0f, 0, sp3C);
+    // We need to bump the scale up a bit to account for float imprecision,
+    // otherwise it leaves a 1px gap on the left.
+    displayImage(dl, 0x3C, 3, 1, 0x40, 0x40, 0xA0, 0x78, (5.0f * width) / 320.0f + 1.0f, (5.0f * width) / 320.0f + 1.0f, 0, sp3C);
 }
 
 
