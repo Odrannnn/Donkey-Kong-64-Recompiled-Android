@@ -205,7 +205,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 4: // Iris Wipe
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
                     D_global_asm_807F5D8C = D_global_asm_807F5D8C + (5.0 * sp54);
                     D_global_asm_807F5D90 = D_global_asm_807F5D8C + 40.0f;
                     func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, width, height, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A24C);
@@ -214,7 +214,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 5: // TL->BR Wipe
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
                     D_global_asm_807F5D8C = D_global_asm_807F5D8C + (12.0 * sp54);
                     D_global_asm_807F5D90 = D_global_asm_807F5D8C + 40.0f;
                     func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, width, height, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A228);
@@ -223,7 +223,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
                 case 6: // Clock Wipe
-                    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+                    gDPSetCombineMode(dl++, G_CC_MODULATEIA, G_CC_MODULATEIA);
                     D_global_asm_807F5D94 = D_global_asm_807F5D94 + (15.0 * sp54);
                     func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, width, height, 0.0f, 0.0f, 1, 0x10, 1, func_global_asm_8062A130);
                     if (D_global_asm_807F5D94 > 350.0f) {
