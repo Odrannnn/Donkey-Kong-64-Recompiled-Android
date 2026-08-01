@@ -1277,3 +1277,200 @@ RECOMP_PATCH Gfx* func_global_asm_807069A4(Gfx* dl, f32 arg1, f32 arg2, s32 arg3
     gEXMatrixGroup(dl++, MTXTAG_SKYBOXBLEND, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
     return dl;
 }
+
+Gfx* func_global_asm_80705F5C(Gfx*, s16, s16, s16);
+Gfx *func_global_asm_8070770C(Gfx *);
+void func_global_asm_80705C00(s16 arg0, s16 arg1, u8 arg2);
+void func_global_asm_8068B830(s16 arg0, s16 arg1, s16 arg2);
+void func_global_asm_8068B8A4(f32 arg0);
+void func_global_asm_8068B8FC(void);
+extern f32 D_global_asm_80754CE8;
+extern s16 D_global_asm_807FD800;
+extern f32 loading_zone_transition_speed;
+extern u8 loading_zone_transition_type;
+
+// @recomp: Skybox manager
+RECOMP_PATCH Gfx* func_global_asm_80707980(Gfx* dl, s32 arg1, s32 arg2, Mtx *arg3, s16 arg4) {
+    f32 temp_f0;
+    f32 var_f2;
+    f32 temp_f2;
+    f32 var_f14;
+    f32 var_f16;
+    f64 temp_f12;
+    s16 temp_v0;
+    s32 var_v0;
+
+    gDPPipeSync(dl++);
+    if ((loading_zone_transition_speed != 0.0f) && (loading_zone_transition_type == 3)) {
+        dl = func_global_asm_8070770C(dl);
+    }
+    switch (current_map) {
+        case MAP_FUNGI_DOGADON:
+        case MAP_FACTORY_MAD_JACK:
+        case MAP_AZTEC_DOGADON:
+        case MAP_TRAINING_GROUNDS_END_SEQUENCE:
+            return dl;
+        case MAP_AZTEC_BEETLE_RACE:
+            dl = func_global_asm_807069A4(dl, arg1, arg2, 0x2D, 320.0f, 240.0f);
+            break;
+        case MAP_KROOL_BARREL_LANKY_MAZE:
+        case MAP_STEALTHY_SNOOP_NORMAL_NO_LOGO:
+        case MAP_STEALTHY_SNOOP_NORMAL:
+        case MAP_MAD_MAZE_MAUL_HARD:
+        case MAP_STASH_SNATCH_NORMAL:
+        case MAP_MAD_MAZE_MAUL_EASY:
+        case MAP_MAD_MAZE_MAUL_NORMAL:
+        case MAP_STASH_SNATCH_EASY:
+        case MAP_STASH_SNATCH_HARD:
+        case MAP_MAD_MAZE_MAUL_INSANE:
+        case MAP_STASH_SNATCH_INSANE:
+        case MAP_STEALTHY_SNOOP_VERY_EASY:
+        case MAP_STEALTHY_SNOOP_EASY:
+        case MAP_STEALTHY_SNOOP_HARD:
+            dl = func_global_asm_807069A4(dl, arg1, arg2, 0x2E, 320.0f, 240.0f);
+            break;
+        case MAP_AZTEC:
+            switch (character_change_array->chunk) {
+                case 0:
+                case 1:
+                case 3:
+                case 6:
+                case 8:
+                case 10:
+                    dl = func_global_asm_8070770C(dl);
+                    break;
+                default:
+                    func_global_asm_80705C00(0x3E8, 0x4E20, 0U);
+                    dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 0, 0, 0, -1, 0.0f);
+                    break;
+            }
+            break;
+        case MAP_GALLEON:
+            temp_v0 = character_change_array->chunk;
+            // @recomp: Change chunk checks
+            // if (((temp_v0 != 7) && (temp_v0 != 6) && (temp_v0 != 8) && (temp_v0 != 0)) || (D_global_asm_807FD800 != 0)) {
+                if ((gPlayerPointer->unk12C == 9) || (gPlayerPointer->unk12C == 0xB) || (gPlayerPointer->unk12C == 3)) {
+                    var_v0 = 1;
+                } else {
+                    var_v0 = 0;
+                }
+                dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 0, 0, var_v0, 9, 0.0f);
+            // }
+            break;
+        case MAP_GALLEON_SEAL_RACE:
+            func_global_asm_80705C00(0xBB8, 0x2328, 0U);
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 0, 0, 0, -1, 0.0f);
+            break;
+        case MAP_JAPES_MOUNTAIN:
+            dl = func_global_asm_8070770C(dl);
+            break;
+        case MAP_TRAINING_GROUNDS:
+            dl = func_global_asm_8070770C(dl);
+            break;
+        case MAP_JAPES:
+            switch (character_change_array->chunk) {
+            case 8:
+            case 9:
+            case 12:
+            case 16:
+                dl = func_global_asm_8070770C(dl);
+                break;
+            case 11:
+            case 14:
+                func_global_asm_80705C00(0, 0x7530, 1U);
+                dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 4, 4, 1, -1, 0.0f);
+                break;
+            default:
+                func_global_asm_80705C00(0, 0x7530, 0U);
+                dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 4, 4, 0, -1, 0.0f);
+                break;
+            }
+            break;
+        case MAP_JAPES_ARMY_DILLO:
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 3, 3, 1, -1, 0.0f);
+            dl = func_global_asm_80705F5C(dl, 0, 0x7D00, 0);
+            break;
+        case MAP_FUNGI:
+            if ((character_change_array->chunk >= 0xC) && (character_change_array->chunk < 0x12)) {
+                dl = func_global_asm_8070770C(dl);
+            } else {
+                func_global_asm_80705C00(0, 0x5DC0, 1U);
+                dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 2, 2, 1, -1, 0.0f);
+                dl = func_global_asm_80705F5C(dl, 0, 0x5DC0, 1);
+            }
+            break;
+        case MAP_FUNGI_MINECART:
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 1, 1, 1, -1, 0.0f);
+            break;
+        case MAP_DK_ISLES_OVERWORLD:
+            if (func_global_asm_8061CB50() != 0) {
+                var_f14 = character_change_array->look_at_eye[0];
+                var_f16 = character_change_array->look_at_eye[2];
+            } else {
+                var_f14 = gPlayerPointer->position.f[0];
+                var_f16 = gPlayerPointer->position.f[2];
+            }
+            temp_f0 = var_f14 - 3000.0f;
+            temp_f2 = var_f16 - 5000.0f;
+            temp_f0 = _sqrtf(SQ(temp_f0) + SQ(temp_f2));
+            if (temp_f0 < 2500.0f) {
+                temp_f12 = (f64) ((2500.0f - temp_f0) / 1000.0f);
+                var_f2 = MIN(1.0, temp_f12);
+                func_global_asm_8068B830((s16) (s32) (2.0f + var_f2), (s16) (s32) (var_f2 * 400.0f), (s16) (s32) (var_f2 * 30.0f));
+                func_global_asm_8068B8A4((f32) (((f64) var_f2 * -0.6) + 1.0));
+            } else {
+                func_global_asm_8068B8FC();
+                func_global_asm_8068B8A4(1.0f);
+            }
+            func_global_asm_80705C00(0xBB8, 0x4E20, 0U);
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 5, 6, 1, -1, 0.0f);
+            break;
+        case MAP_DK_ISLES_DK_THEATRE:
+        case MAP_ROCK_INTRO_STORY:
+            func_global_asm_80705C00(0xBB8, 0x4E20, 0U);
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 5, 5, 1, -1, 0.0f);
+            break;
+        case MAP_GALLEON_PUFFTOSS:
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 6, 6, 1, -1, 0.0f);
+            dl = func_global_asm_80705F5C(dl, 0xC8, 0x4268, 0);
+            break;
+        case MAP_CASTLE:
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 6, 6, 1, -1, 0.0f);
+            dl = func_global_asm_80705F5C(dl, 0x3E8, 0x2EE0, 0);
+            break;
+        case MAP_KLUMSY_ENDING:
+            func_global_asm_80705C00(0x8FC, 0x1388, 0U);
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 7, 7, 0, -1, 0.0f);
+            break;
+        case MAP_BLOOPERS_ENDING:
+            gDPSetFillColor(dl++, 0xFFFFFFFF);
+            goto block_55;
+        case MAP_GALLEON_BARREL_BLAST:
+            gDPSetFillColor(dl++, 0xFFC1FFC1);
+            goto block_55;
+        case MAP_MAIN_MENU:
+            func_global_asm_80705C00(0x8FC, 0x1388, 1U);
+            dl = func_global_asm_80704B20(dl, arg1, arg2, arg3, 7, 6, 0, -1, D_global_asm_80754CE8);
+            dl = func_global_asm_80705F5C(dl, 0xC8, 0x2EE0, 2);
+            break;
+            
+        default:
+            gDPSetFillColor(dl++, 0x00010001);
+    block_55:
+            gDPSetRenderMode(dl++, G_RM_NOOP, G_RM_NOOP2);
+            gDPSetCycleType(dl++, G_CYC_FILL);
+            // @recomp: remove the -1
+            gDPFillRectangle(dl++,
+                character_change_array[arg4].unk270[0],
+                character_change_array[arg4].unk270[1],
+                character_change_array[arg4].unk270[2],
+                character_change_array[arg4].unk270[3]
+            );
+            gDPPipeSync(dl++);
+            gDPSetCycleType(dl++, G_CYC_1CYCLE);
+            break;
+    }
+    D_global_asm_80754CE8 = 0.0f;
+    gDPPipeSync(dl++);
+    return dl;
+}

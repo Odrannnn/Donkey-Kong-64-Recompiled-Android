@@ -213,7 +213,6 @@ extern void func_global_asm_80714A28(u16 arg0);
 extern Struct80717D84 *drawSpriteAtPosition(void *sprite, f32 scale, f32 x, f32 y, f32 z);
 extern void *_malloc(s32);
 extern s8 D_menu_80033F38;
-#define SQ(x) ((x) * (x)) 
 
 typedef struct {
     s16 unk0;

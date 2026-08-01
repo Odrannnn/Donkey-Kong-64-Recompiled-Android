@@ -13,7 +13,6 @@
 #define	OS_CPU_COUNTER		(OS_CLOCK_RATE*3/4)
 #define OS_NSEC_TO_CYCLES(n)	(((u64)(n)*(OS_CPU_COUNTER/15625000LL))/(1000000000LL/15625000LL))
 #define BUFFER_TIME OS_NSEC_TO_CYCLES(48484843)
-#define SQ(x) ((x) * (x))
 
 extern void osWritebackDCache(void*, s32);
 extern u32  osPiGetStatus(void);

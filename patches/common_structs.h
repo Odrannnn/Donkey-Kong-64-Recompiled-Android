@@ -23,6 +23,8 @@ typedef struct rgb {
     u8 blue;
 } rgb;
 
+#define SQ(x) ((x) * (x))
+
 typedef enum enumSpriteAlignment {
     ALIGN_NOT_2D,
     ALIGN_UNALIGNED,
