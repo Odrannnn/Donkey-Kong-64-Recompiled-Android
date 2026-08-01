@@ -142,14 +142,8 @@ void func_global_asm_8072A450(void);
 void renderActor(Actor *arg0, u8 arg1);
 extern u32 D_global_asm_80744478;
 extern Actor *gPlayerPointer;
-u32 func_global_asm_806119A0(void);
 extern u32 object_timer;
 extern u8 D_global_asm_807506C0[];
-
-#define ACTOR_UNINITIALIZED(actor) (!(actor->object_properties_bitfield & 0x10))
-#define RANDNUM() (func_global_asm_806119A0() & 0x7FFFFFFF)
-#define RandClamp(a) ((RANDNUM() >> 0xF) % a)
-#define RandChance(a) (RandClamp(1000) > (1000 - ((s32)((a) * 1000))))
 
 RECOMP_PATCH void func_global_asm_806BE8BC(void) {
     u8 sp37;

@@ -8,6 +8,7 @@ osSendMesg_recomp = 0x8F000014;
 recomp_get_gyro_deltas = 0x8F000018;
 recomp_powf = 0x8F000024;
 recomp_get_target_framerate = 0x8F000028;
+recomp_get_lightning_intensity = 0x8F00002C;
 recomp_get_bgm_volume = 0x8F000030;
 recomp_get_sfx_volume = 0x8F000034;
 recomp_get_story_skip = 0x8F000038;

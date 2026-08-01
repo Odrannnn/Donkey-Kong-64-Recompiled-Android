@@ -23,7 +23,13 @@ typedef struct rgb {
     u8 blue;
 } rgb;
 
+u32 func_global_asm_806119A0(void); // Having this here to prevent having to declare it for RANDNUM()
 #define SQ(x) ((x) * (x))
+#define ACTOR_UNINITIALIZED(actor) (!(actor->object_properties_bitfield & 0x10))
+#define MATH_PI_F 3.1415927f
+#define RANDNUM() (func_global_asm_806119A0() & 0x7FFFFFFF)
+#define RandClamp(a) ((RANDNUM() >> 0xF) % a)
+#define RandChance(a) (RandClamp(1000) > (1000 - ((s32)((a) * 1000))))
 
 typedef enum enumSpriteAlignment {
     ALIGN_NOT_2D,

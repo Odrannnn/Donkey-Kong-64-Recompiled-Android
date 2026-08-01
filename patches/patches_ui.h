@@ -480,8 +480,6 @@ typedef struct HandleAAD {
     void *unk20;
 } HandleAAD;
 
-#define ACTOR_UNINITIALIZED(actor) (!(actor->object_properties_bitfield & 0x10))
-#define MATH_PI_F 3.1415927f
 void func_global_asm_806A2A10(s32, s32, s32);
 s16 func_global_asm_806FDB8C(s16, u8*, u8, f32, f32, f32);
 void func_global_asm_80737924(void *);

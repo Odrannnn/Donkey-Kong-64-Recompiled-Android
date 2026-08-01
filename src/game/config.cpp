@@ -89,6 +89,19 @@ static void add_general_options(recomp::config::Config &config) {
         camera_type_options,
         dk64::CameraTypeMode::Free
     );
+    // Lightning Flashes
+    static EnumOptionVector lightning_flash_options = {
+        {dk64::LightningFlashMode::Off, "Off", "Off"},
+        {dk64::LightningFlashMode::Reduced, "Reduced", "Reduced"},
+        {dk64::LightningFlashMode::Vanilla, "Vanilla", "Vanilla"}
+    };
+    config.add_enum_option(
+        dk64::configkeys::general::lightning_flashes,
+        "Lightning Flash Intensity",
+        "Changes the intensity of lightning flashes within the game.",
+        lightning_flash_options,
+        dk64::LightningFlashMode::Reduced
+    );
 }
 
 template <typename T = uint32_t>
@@ -119,6 +132,10 @@ dk64::StorySkipMode dk64::get_story_skip() {
 
 dk64::CameraTypeMode dk64::get_camera_type() {
     return get_general_config_enum_value<dk64::CameraTypeMode>(dk64::configkeys::general::camera_type);
+}
+
+dk64::LightningFlashMode dk64::get_lightning_flash() {
+    return get_general_config_enum_value<dk64::LightningFlashMode>(dk64::configkeys::general::lightning_flashes);
 }
 
 dk64::CameraInvertMode dk64::get_first_person_invert_mode() {

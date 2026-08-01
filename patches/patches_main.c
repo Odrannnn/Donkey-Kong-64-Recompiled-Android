@@ -958,9 +958,6 @@ RECOMP_PATCH Gfx *func_global_asm_80703AB0(Gfx *dl, u8 arg1) {
     return dl;
 }
 
-//@recomp: rand() causes some issues with stdlib and collisions there. For now, just have this, which is what rand() does
-#define RANDNUM() (func_global_asm_806119A0() & 0x7FFFFFFF)
-
 // @recomp: Patch the static effect in the Rap to fill the full bounds
 RECOMP_PATCH Gfx *func_global_asm_807035C4(Gfx *dl, Actor *arg1) {
     s16 var_s1;

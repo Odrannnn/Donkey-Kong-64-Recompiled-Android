@@ -299,7 +299,6 @@ extern f32 D_global_asm_80750228;
 extern f32 D_global_asm_8075022C;
 
 extern void func_global_asm_80658E58(s16 arg0, s16 arg1, s16 arg2, s16 arg3);
-extern s32 func_global_asm_806119A0(void);
 
 typedef struct Struct8062DBDC {
     f64 unk0[8];

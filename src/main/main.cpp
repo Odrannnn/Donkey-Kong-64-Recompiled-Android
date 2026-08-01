@@ -790,6 +790,7 @@ int main(int argc, char** argv) {
     REGISTER_FUNC(recomp_get_sfx_volume);
     REGISTER_FUNC(recomp_get_story_skip);
     REGISTER_FUNC(recomp_get_camera_type);
+    REGISTER_FUNC(recomp_get_lightning_intensity);
     REGISTER_FUNC(recomp_get_ui_bounds);
     REGISTER_FUNC(recomp_get_ui_pillar);
     // REGISTER_FUNC(recomp_get_gyro_deltas);

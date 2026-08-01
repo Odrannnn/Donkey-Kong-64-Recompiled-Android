@@ -5,5 +5,6 @@
 
 DECLARE_FUNC(int, recomp_get_story_skip);
 DECLARE_FUNC(int, recomp_get_camera_type);
+DECLARE_FUNC(float, recomp_get_lightning_intensity);
 
 #endif

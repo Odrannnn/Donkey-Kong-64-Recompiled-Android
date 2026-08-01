@@ -21,6 +21,7 @@ namespace dk64 {
             inline const std::string analog_camera_sensitivity = "analog_camera_sensitivity";
             inline const std::string story_skip = "story_skip";
             inline const std::string camera_type = "camera_type";
+            inline const std::string lightning_flashes = "lightning_flashes";
         }
 
         namespace sound {
@@ -77,6 +78,13 @@ namespace dk64 {
     };
 
     CameraTypeMode get_camera_type();
+
+    enum class LightningFlashMode {
+        Vanilla,
+        Reduced,
+        Off
+    };
+    LightningFlashMode get_lightning_flash();
 
     void open_quit_game_prompt();
 };
