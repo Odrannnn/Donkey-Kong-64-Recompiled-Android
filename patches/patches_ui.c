@@ -2568,11 +2568,15 @@ RECOMP_PATCH Gfx *func_global_asm_806C75A4(Gfx *dl, Actor *arg1) {
     if (D_global_asm_80750754 < 0) {
         return dl;
     }
+    // Amend these figures to account for (lack of) overscan
+    D_global_asm_80750818[0] = 120.0f;
+    D_global_asm_80750818[1] = 160.0f;
+    D_global_asm_80750818[2] = 120.0f;
+    D_global_asm_80750818[3] = 160.0f;
     i = D_global_asm_807506D0[D_global_asm_80750754].squish_from;
 
     var_v1 = (((D_global_asm_807FC8E8 - 0.5) * D_global_asm_80750818[i]) + (D_global_asm_80750828[i] * D_global_asm_807FC8EC));
-    // @recomp: Usually 0, but overscan
-    if (var_v1 < 10) {
+    if (var_v1 < 0) {
         var_v1 = 0;
     }
     sp104.data[i] = var_v1;
