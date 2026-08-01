@@ -17,12 +17,26 @@ typedef struct tuple_f {
     };
 } tuple_f;
 
+typedef struct rgb {
+    u8 red;
+    u8 green;
+    u8 blue;
+} rgb;
+
 typedef enum enumSpriteAlignment {
     ALIGN_NOT_2D,
     ALIGN_UNALIGNED,
     ALIGN_LEFT,
     ALIGN_RIGHT,
 } enumSpriteAlignment;
+
+typedef enum interpolationIDs {
+    MTXTAG_DEFAULT,
+    MTXTAG_GLOBAL,
+    MTXTAG_FRAMEBUFFERTRANSITION,
+    MTXTAG_TAG3,
+    MTXTAG_SKYBOXBLEND,
+} interpolationIDs;
 
 typedef struct AnimationStateUnk0_0 {
     f32 unk0;

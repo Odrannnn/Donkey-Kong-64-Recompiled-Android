@@ -123,7 +123,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
         if (D_global_asm_807F5D84 > 0) {
             gSPDisplayList(dl++, &D_1000118);
             dl = func_global_asm_805FD030(dl);
-            gEXMatrixGroup(dl++, 2, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_STRETCH, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+            gEXMatrixGroup(dl++, MTXTAG_FRAMEBUFFERTRANSITION, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_STRETCH, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
             gSPMatrix(dl++, &D_2000140, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
             gSPMatrix(dl++, &D_global_asm_807F5D98, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
             gDPPipeSync(dl++);
@@ -231,7 +231,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     }
                     break;
             }
-            gEXMatrixGroup(dl++, 2, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+            gEXMatrixGroup(dl++, MTXTAG_FRAMEBUFFERTRANSITION, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
             dl = popHUD(dl);
             gDPPipeSync(dl++);
             gDPSetColorDither(dl++, G_CD_MAGICSQ);
@@ -496,7 +496,7 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
     } else {
         func_global_asm_8070AC74(&D_global_asm_8076A048->unk0, &sp34);
         D_global_asm_807501E0 = 0; // @recomp: Release all overlays to prevent repeated snapshots
-        gEXMatrixGroup(sp34++, 2, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_STRETCH, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+        gEXMatrixGroup(sp34++, MTXTAG_FRAMEBUFFERTRANSITION, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_STRETCH, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
         if (func_global_asm_8070B7EC(&sp34, D_global_asm_807FD9B8, stored_framebuffer) != 0) {
             switch (D_global_asm_807444F8) {
             case 1:
@@ -521,7 +521,7 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
                 break;
             }
         }
-        gEXMatrixGroup(sp34++, 2, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+        gEXMatrixGroup(sp34++, MTXTAG_FRAMEBUFFERTRANSITION, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
     }
     if (D_global_asm_807FD9BD != 0) {
         D_global_asm_807FD9BD--;
@@ -1053,4 +1053,227 @@ RECOMP_PATCH void func_global_asm_80709BC4(Gfx ** dl_ptr, Struct80709BC4* arg1, 
         }
     }
     *dl_ptr = dl;
+}
+
+typedef struct Struct80754ED8 {
+    void *unk0;
+    u8 pad4[0x22 - 0x4];
+    s16 unk22;
+} Struct80754ED8;
+
+extern Struct80754ED8 *D_global_asm_80754ED8[];
+extern rgb D_global_asm_80754EF8[8][4];
+extern f32 D_global_asm_807FD968;
+extern f32 D_global_asm_807FD96C;
+extern f32 D_global_asm_807FD970;
+extern Actor *D_global_asm_807F5D10;
+extern Actor *gPlayerPointer;
+extern Mtx D_2000080;
+extern Mtx D_2000180;
+extern void func_global_asm_80612CA0(f32 (*arg0)[4], f32 arg1);
+extern f32 func_global_asm_80612D10(f32 arg0);
+
+#define GPACK_RGBA32(r, g, b, a) (((u8)(r) << 0x18) | ((u8)(g) << 0x10) | ((u8)(b) << 0x8) | (u8)(a))
+
+// @recomp: Render skybox blend
+RECOMP_PATCH Gfx* func_global_asm_80704B20(Gfx* dl, s32 arg1, f32 arg2, Mtx* arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, f32 arg8) {
+    f32 temp_f2;
+    s32 sp140;
+    s32 sp13C;
+    s32 sp138;
+    s32 sp134;
+    f32 sp130;
+    f32 sp12C;
+    f32 sp128;
+    void** temp_t3;
+    f32 spE4[4][4];
+    f32 spA4[4][4];
+    s32 temp_t2;
+    CameraPaad* var_v1;
+
+    temp_f2 = -(256.0f - (func_global_asm_80612D10(arg2) * 300.0f)) - 80.0f;
+    var_v1 = D_global_asm_807F5D10->CaaD;
+    if (arg4 == 5) {
+        temp_f2 += ((0.08 * character_change_array->unk2CA) - 75.0);
+    }
+    switch (arg6) {
+        case 0:
+            sp128 = 1.0f;
+            sp12C = 1.0f;
+            sp130 = 1.0f;
+            break;
+        case 1:
+            if (D_global_asm_807FD968 >= 0.0f) {
+                sp130 = D_global_asm_807FD968;
+                sp12C = D_global_asm_807FD96C;
+                sp128 = D_global_asm_807FD970;
+            } else {
+                if (arg7 == -1) {
+                    arg7 = gPlayerPointer->unk12C;
+                }
+                func_global_asm_80659620(&sp130, &sp12C, &sp128, arg7);
+            }
+            break;
+    }
+    if ((var_v1->unkFA != 0) && (character_change_array->unk220 < (var_v1->unk90 + 3.0f))) {
+        sp130 *= 0.1;
+        sp12C *= 0.1;
+        sp128 *= 0.3;
+    }
+    sp140 = GPACK_RGBA32(
+        sp130 * (D_global_asm_80754EF8[arg4][0].red + (arg8 * (D_global_asm_80754EF8[arg5][0].red - D_global_asm_80754EF8[arg4][0].red))),
+        sp12C * (D_global_asm_80754EF8[arg4][0].green + (arg8 * (D_global_asm_80754EF8[arg5][0].green - D_global_asm_80754EF8[arg4][0].green))),
+        sp128 * (D_global_asm_80754EF8[arg4][0].blue + (arg8 * (D_global_asm_80754EF8[arg5][0].blue - D_global_asm_80754EF8[arg4][0].blue))),
+        0xFF);
+    sp13C = GPACK_RGBA32(
+        sp130 * (D_global_asm_80754EF8[arg4][1].red + (arg8 * (D_global_asm_80754EF8[arg5][1].red - D_global_asm_80754EF8[arg4][1].red))),
+        sp12C * (D_global_asm_80754EF8[arg4][1].green + (arg8 * (D_global_asm_80754EF8[arg5][1].green - D_global_asm_80754EF8[arg4][1].green))),
+        sp128 * (D_global_asm_80754EF8[arg4][1].blue + (arg8 * (D_global_asm_80754EF8[arg5][1].blue - D_global_asm_80754EF8[arg4][1].blue))),
+        0xFF);
+    sp138 = GPACK_RGBA32(
+        sp130 * (D_global_asm_80754EF8[arg4][2].red + (arg8 * (D_global_asm_80754EF8[arg5][2].red - D_global_asm_80754EF8[arg4][2].red))),
+        sp12C * (D_global_asm_80754EF8[arg4][2].green + (arg8 * (D_global_asm_80754EF8[arg5][2].green - D_global_asm_80754EF8[arg4][2].green))),
+        sp128 * (D_global_asm_80754EF8[arg4][2].blue + (arg8 * (D_global_asm_80754EF8[arg5][2].blue - D_global_asm_80754EF8[arg4][2].blue))),
+        0xFF);
+    sp134 = GPACK_RGBA32(
+        sp130 * (D_global_asm_80754EF8[arg4][3].red + (arg8 * (D_global_asm_80754EF8[arg5][3].red - D_global_asm_80754EF8[arg4][3].red))),
+        sp12C * (D_global_asm_80754EF8[arg4][3].green + (arg8 * (D_global_asm_80754EF8[arg5][3].green - D_global_asm_80754EF8[arg4][3].green))),
+        sp128 * (D_global_asm_80754EF8[arg4][3].blue + (arg8 * (D_global_asm_80754EF8[arg5][3].blue - D_global_asm_80754EF8[arg4][3].blue))),
+        0xFF);
+    gDPPipeSync(dl++);
+    gDPSetRenderMode(dl++, G_RM_AA_OPA_SURF, G_RM_AA_OPA_SURF2);
+    gDPSetCombineMode(dl++, G_CC_SHADE, G_CC_SHADE);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    gSPLoadGeometryMode(dl++, 0);
+    gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
+    gEXMatrixGroup(dl++, MTXTAG_SKYBOXBLEND, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_STRETCH, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+    gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPViewport(dl++, osVirtualToPhysical(&character_change_array->unk250[D_global_asm_807444FC]));
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+        character_change_array->unk270[0],
+        character_change_array->unk270[1],
+        character_change_array->unk270[2],
+        character_change_array->unk270[3]
+    );
+    temp_t2 = D_global_asm_80754ED8[arg4]->unk22;
+    guTranslateF(spE4, 0.0f, -temp_t2, 0.0f);
+    func_global_asm_80612CA0(spA4, ((s32) (((0x1000 - character_change_array->unk2CC) & 0xFFF) * 0x168) / 4096));
+    guMtxCatF(spE4, spA4, spE4);
+    guTranslateF(spA4, 160.0f, temp_t2 + temp_f2, 0.0f);
+    guMtxCatF(spE4, spA4, spE4);
+    guMtxF2L(spE4, arg3);
+    gSPMatrix(dl++, arg3, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPVertex(dl++, osVirtualToPhysical(D_global_asm_80754ED8[arg4]), 8, 0);
+    gSPModifyVertex(dl++, 0, G_MWO_POINT_RGBA, sp140);
+    gSPModifyVertex(dl++, 1, G_MWO_POINT_RGBA, sp140);
+    gSPModifyVertex(dl++, 2, G_MWO_POINT_RGBA, sp13C);
+    gSPModifyVertex(dl++, 3, G_MWO_POINT_RGBA, sp13C);
+    gSPModifyVertex(dl++, 4, G_MWO_POINT_RGBA, sp138);
+    gSPModifyVertex(dl++, 5, G_MWO_POINT_RGBA, sp138);
+    gSPModifyVertex(dl++, 6, G_MWO_POINT_RGBA, sp134);
+    gSPModifyVertex(dl++, 7, G_MWO_POINT_RGBA, sp134);
+    gSP2Triangles(dl++, 0, 1, 3, 0, 0, 3, 2, 0);
+    gSP2Triangles(dl++, 2, 3, 4, 0, 2, 4, 5, 0);
+    gSP2Triangles(dl++, 5, 4, 6, 0, 5, 6, 7, 0);
+    gEXMatrixGroup(dl++, MTXTAG_SKYBOXBLEND, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+    gDPPipeSync(dl++);
+    return dl;
+}
+
+typedef struct Struct807069A4_12C {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+} Struct807069A4_12C;
+
+void func_global_asm_807063B8(Struct807069A4_12C*, u8*, s32, f32);
+void func_global_asm_80702464(Gfx **dl, void *texture, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, f32 arg7, f32 arg8, f32 arg9, f32 argA, f32 argB, f32 argC, u8 argD, u8 argE);
+void func_global_asm_807065F8(s16, u8*, u8*, u8*);
+extern f32 D_global_asm_80754CE4;
+extern u16* D_global_asm_807FD8A0;
+extern Mtx D_global_asm_807FD8A8[];
+extern Mtx D_global_asm_807FD928;
+
+// @recomp: Render a textured skybox (Az Beetle Race, bonuses)
+RECOMP_PATCH Gfx* func_global_asm_807069A4(Gfx* dl, f32 arg1, f32 arg2, s32 arg3, f32 arg4, f32 arg5) {
+    PlayerAdditionalActorData* PaaD;
+    s32 i;
+    f32 var_f2;
+    Struct807069A4_12C sp12C[5];
+    u8 sp12B;
+    f32 var_f12;
+    Actor* temp_s3;
+    f32 spDC[4][4];
+    f32 sp9C[4][4];
+    u8 sp9B;
+    u8 sp9A;
+    u8 sp99;
+    f32 temp_f0; // 94
+    s32 width, height;
+    f32 upscale_ratio;
+
+    recomp_get_ui_bounds(&width, &height);
+    upscale_ratio = (f32)(width * 3) / (f32)(height * 4);  // x0.75 == / (4/3)
+
+    temp_f0 = 5.6f / D_global_asm_80754CE4;
+    temp_s3 = character_change_array->playerPointer;
+    PaaD = temp_s3->PaaD;
+    guScaleF(spDC, temp_f0, temp_f0, temp_f0);
+    guTranslateF(sp9C, -2560.0f * upscale_ratio, -1920.0f, 0.0f);
+    guMtxCatF(spDC, sp9C, spDC);
+    guRotateF(sp9C, (f32) ((0x1000 - PaaD->unk104->x_rotation) & 0xFFF) * 0.087890625f, 0.0f, 0.0f, 1.0f);
+    guMtxCatF(spDC, sp9C, spDC);
+    guTranslateF(sp9C, 2560.0f * upscale_ratio, 1920.0f, 0.0f);
+    guMtxCatF(spDC, sp9C, spDC);
+    guMtxF2L(spDC, &D_global_asm_807FD8A8[D_global_asm_807444FC]);
+    arg1 = 6.2831855f - arg1;
+    arg2 = (arg4 / arg5) * (6.2831855f - arg2);
+    if (D_global_asm_807FD8A0 == NULL) {
+        D_global_asm_807FD8A0 = getPointerTableFile(TABLE_14_TEXTURES_HUD, arg3, 0U, 0U);
+    }
+    gEXMatrixGroup(dl++, MTXTAG_SKYBOXBLEND, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_STRETCH, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+    gSPMatrix(dl++, &D_global_asm_807FD8A8[D_global_asm_807444FC], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gSPMatrix(dl++, &D_global_asm_807FD928, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
+    gDPPipeSync(dl++);
+    gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_NOOP2);
+    gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    func_global_asm_807065F8(temp_s3->y_position, &sp9B, &sp9A, &sp99);
+    gDPSetPrimColor(dl++, 0, 0, sp9B, sp9A, sp99, 0xFF);
+    gSPLoadGeometryMode(dl++, 0);
+    gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
+    var_f2 = arg1 * 0.15915494f * D_global_asm_80754CE4;
+    var_f12 = arg2 * 0.15915494f * D_global_asm_80754CE4;
+    while (var_f2 > 1.0f) {
+        var_f2 -= 1.0f;
+    }
+    while (var_f12 > 1.0f) {
+        var_f12 -= 1.0f;
+    }
+    var_f2 *= arg4;
+    var_f12 *= arg5;
+    sp12B = 1;
+    sp12C[0].unk0 = var_f2 - (460.0f * (1.0f / temp_f0) * 0.5f);
+    sp12C[0].unk8 = (460.0f * (1.0f / temp_f0) * 0.5f) + var_f2;
+    sp12C[0].unk4 = var_f12 - (380.0f * (1.0f / temp_f0) * 0.5f);
+    sp12C[0].unkC = (380.0f * (1.0f / temp_f0) * 0.5f) + var_f12;
+    sp12C[0].unk10 = -70.0f * (1.0f / temp_f0);
+    sp12C[0].unk14 = -70.0f * (1.0f / temp_f0);
+    func_global_asm_807063B8(sp12C, &sp12B, 0, arg4);
+    func_global_asm_807063B8(sp12C, &sp12B, 1, arg5);
+    for (i = 0; i < sp12B; i++) {
+        func_global_asm_80702464(&dl, D_global_asm_807FD8A0, 0,
+            (u32) arg4,
+            (u32) arg5,
+            0x20, 0x20,
+            sp12C[i].unk0, sp12C[i].unk4, sp12C[i].unk8,
+            sp12C[i].unkC, sp12C[i].unk10, sp12C[i].unk14,
+            0x10U, 0x10U);
+    }
+    gEXMatrixGroup(dl++, MTXTAG_SKYBOXBLEND, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+    return dl;
 }

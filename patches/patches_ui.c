@@ -2330,6 +2330,7 @@ extern u8 D_global_asm_807444FC;
 extern void *D_global_asm_8076A080;
 extern Gfx **D_1000090;
 
+// @recomp: General gfx loop
 RECOMP_PATCH void func_global_asm_805FD088(Struct805FD088 *arg0, Gfx **arg1, Gfx **arg2) {
     Gfx *dl; // 114
     Gfx *dl_0;
@@ -2548,6 +2549,7 @@ extern void *_malloc(s32);
 extern void func_global_asm_8061134C(void *);
 extern void func_global_asm_805FEE84(u8 arg0, u8 arg1, u8 arg2, u8 arg3);
 
+// @recomp: Render squish text, do some management
 RECOMP_PATCH Gfx *func_global_asm_806C75A4(Gfx *dl, Actor *arg1) {
     s16 i;
     s16 y;
@@ -2568,7 +2570,7 @@ RECOMP_PATCH Gfx *func_global_asm_806C75A4(Gfx *dl, Actor *arg1) {
     if (D_global_asm_80750754 < 0) {
         return dl;
     }
-    // Amend these figures to account for (lack of) overscan
+    // @recomp: Amend these figures to account for (lack of) overscan
     D_global_asm_80750818[0] = 120.0f;
     D_global_asm_80750818[1] = 160.0f;
     D_global_asm_80750818[2] = 120.0f;
