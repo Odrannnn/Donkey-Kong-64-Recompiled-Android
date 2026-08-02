@@ -176,6 +176,28 @@ RECOMP_PATCH void func_dk64_boot_800009D0(void) {
     func_dk64_boot_80000980();
 }
 
+Gfx *func_global_asm_805FE634(Gfx *dl, u8 arg1);
+void func_global_asm_805FE71C(Gfx *dl, u8 arg1, s32 *arg2, u8 arg3);
+extern void *_malloc(s32);
+extern s32 D_global_asm_807FBB64;
+extern s32 D_global_asm_8076A058;
+extern Gfx *D_global_asm_8076A050[];
+extern s32 D_global_asm_8076A088;
+
+// @recomp: DL Allocation handler
+RECOMP_PATCH void func_global_asm_805FE544(u8 arg0) {
+    // @recomp: Double the DL Allocation
+    if (D_global_asm_807FBB64 & 1) {
+        D_global_asm_8076A058 = 12000;
+    } else {
+        D_global_asm_8076A058 = arg0 * 6000;
+    }
+    D_global_asm_8076A050[0] = _malloc(D_global_asm_8076A058 * sizeof(Gfx));
+    D_global_asm_8076A050[1] = _malloc(D_global_asm_8076A058 * sizeof(Gfx));
+    func_global_asm_805FE71C(func_global_asm_805FE634(D_global_asm_8076A050[0], 0), 0, &D_global_asm_8076A088, 1);
+    func_global_asm_805FE71C(func_global_asm_805FE634(D_global_asm_8076A050[1], 1), 1, &D_global_asm_8076A088, 1);
+}
+
 //RECOMP_PATCH void func_global_asm_805FB5C4(OSMesgQueue* arg0, s32 arg1) {
 //    OSTime target_time;
 //    Struct80744464 sp34;

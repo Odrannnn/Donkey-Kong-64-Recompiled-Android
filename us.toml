@@ -43,3 +43,18 @@ before_vram = 0x8060B140
 #func = "func_global_asm_80678050"
 #text = """ctx->r6 = ADD32(ctx->r6, 0x4);"""
 #before_vram = 0x806780D4
+
+[[patches.instruction]]
+func = "func_global_asm_80610350"
+vram = 0x80610510
+value = 0x3C0D8100 #lui $t5, hi(heap_end)
+
+[[patches.instruction]]
+func = "func_global_asm_80610350"
+vram = 0x80610518
+value = 0x35AD0000 #ori $t5, $t5 lo(heap_end)
+
+[[patches.instruction]]
+func = "func_global_asm_80610350"
+vram = 0x80610564
+value = 0x3C0F8080 #lui $t7, hi(heap_start)

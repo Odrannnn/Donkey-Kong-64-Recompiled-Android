@@ -878,7 +878,9 @@ int main(int argc, char** argv) {
         .events_callbacks = thread_callbacks,
         .error_handling_callbacks = error_handling_callbacks,
         .threads_callbacks = threads_callbacks,
-        .message_queue_control = {},
+        .message_queue_control = {
+            .requeue_timer = false
+        },
     };
 
     recomp::start(cfg);

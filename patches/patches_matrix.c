@@ -20,6 +20,7 @@ s32 cur_drawn_model_transform_id = 0;
 s32 cur_model_transform_id_offset = 0;
 u8 cur_drawn_model_is_map = FALSE;
 u8 cur_model_uses_ex_vertex = FALSE;
+u8 cur_drawn_model_skip_interpolation = FALSE;
 
 typedef struct Struct80614C38_0 Struct80614C38;
 struct Struct80614C38_0 {
@@ -65,8 +66,7 @@ Gfx *set_model_matrix_group(Gfx * dl, void *geo_list, u8 skip_rotation, u8 *push
             // Other models use a group ID determined by the transform ID offset.
             group_id = cur_drawn_model_transform_id + cur_model_transform_id_offset;
         // }
-        if (skip_interpolation) {
-            //  || cur_drawn_model_skip_interpolation
+        if (skip_interpolation || cur_drawn_model_skip_interpolation) {
             // Skip interpolation if all interpolation is currently skipped or the transform was specified to be skipped.
             gEXMatrixGroupSkipAll(dl++, group_id, G_EX_PUSH, G_MTX_MODELVIEW, G_EX_EDIT_NONE);
         }
@@ -75,12 +75,12 @@ Gfx *set_model_matrix_group(Gfx * dl, void *geo_list, u8 skip_rotation, u8 *push
             // Use decomposed matrix interpolation on any other model.
             // u8 interpolation_mode = cur_model_uses_bones ? G_EX_INTERPOLATE_SIMPLE : G_EX_INTERPOLATE_DECOMPOSE;
             // u8 rotation_mode = skip_rotation ? G_EX_COMPONENT_SKIP : G_EX_COMPONENT_INTERPOLATE;
-            u8 vertex_interpolation_mode = cur_drawn_model_is_map && !cur_model_uses_ex_vertex ? G_EX_COMPONENT_INTERPOLATE : G_EX_COMPONENT_SKIP;
-            u8 texcoord_interpolation_mode = cur_drawn_model_is_map ? G_EX_COMPONENT_INTERPOLATE : G_EX_COMPONENT_SKIP;
+            // u8 vertex_interpolation_mode = cur_drawn_model_is_map && !cur_model_uses_ex_vertex ? G_EX_COMPONENT_INTERPOLATE : G_EX_COMPONENT_SKIP;
+            // u8 texcoord_interpolation_mode = cur_drawn_model_is_map ? G_EX_COMPONENT_INTERPOLATE : G_EX_COMPONENT_SKIP;
             u8 interpolation_mode = G_EX_INTERPOLATE_SIMPLE;
             u8 rotation_mode = G_EX_COMPONENT_INTERPOLATE;
-            // u8 vertex_interpolation_mode = G_EX_COMPONENT_SKIP;
-            // u8 texcoord_interpolation_mode = G_EX_COMPONENT_SKIP;
+            u8 vertex_interpolation_mode = G_EX_COMPONENT_SKIP;
+            u8 texcoord_interpolation_mode = G_EX_COMPONENT_SKIP;
             gEXMatrixGroup(dl++, group_id, interpolation_mode, G_EX_PUSH, G_MTX_MODELVIEW, G_EX_COMPONENT_INTERPOLATE, rotation_mode,
                 G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, vertex_interpolation_mode, G_EX_COMPONENT_INTERPOLATE,
                 G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, texcoord_interpolation_mode, G_EX_COMPONENT_AUTO);
@@ -329,8 +329,12 @@ RECOMP_PATCH Gfx* func_global_asm_80636FFC(Struct80636FFC* arg0, Gfx* dl, s32 ar
         gDPPipeSync(dl++);
         // @recomp: mtx tag
         cur_drawn_model_transform_id = 0x8000 + D_global_asm_807F6000[temp_v0_3].unk8A;
+        if (D_global_asm_807F6000[temp_v0_3].object_type == 622) { // Disable interpolation for the ship in intro story. Propellers look kinda weird with interpolation still
+            cur_drawn_model_skip_interpolation = TRUE;
+        }
         gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
         dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
+        cur_drawn_model_skip_interpolation = FALSE;
         // 
         gSPDisplayList(dl++, osVirtualToPhysical(arg0->unkA0[var_v0]));
         gDPPipeSync(dl++);

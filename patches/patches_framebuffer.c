@@ -484,7 +484,6 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
         break;
     case 0:
         D_global_asm_807FD9BC = 1;
-        recomp_printf("Taking Zipper Snapshot\n");
         func_global_asm_8070AF24();
         break;
     }
