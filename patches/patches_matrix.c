@@ -99,6 +99,7 @@ Gfx *pop_model_matrix_group(Gfx *dl) {
     return dl;
 }
 
+// @recomp: Actor matrix stuff
 RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
     ActorModelHeader *var_s0;
     s32 var_v1;
