@@ -8,6 +8,7 @@
 #define INTERPOLATION_DEBUG 0
 
 s32 interpolation_disable_timer = 0;
+u8 skip_interpolation = FALSE;
 #if INTERPOLATION_DEBUG
     s32 debug_counter = 0;
 #endif
@@ -25,10 +26,8 @@ void set_interpolation_lockdown(s32 value) {
     interpolation_disable_timer = value;
 }
 
-#define INTERP_ID 1  // Not sure on this yet. Rain... help me
-
 Gfx *handle_interpolation(Gfx * dl) {
-    u8 skip_interpolation = FALSE;
+    skip_interpolation = FALSE;
     if (interpolation_disable_timer > 0) {
         skip_interpolation = TRUE;
         #if INTERPOLATION_DEBUG
