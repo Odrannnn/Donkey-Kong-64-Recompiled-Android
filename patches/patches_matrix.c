@@ -104,14 +104,8 @@ RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
     s32 var_v1;
     u8 pushed_matrix_group = FALSE;
     s32 i;
-    u8 found_actor = FALSE;
 
-    for (i = 0; i < actor_count; i++) {
-        if (arg1 == actor_list[i]) {
-            cur_drawn_model_transform_id = 0x1000 + i;
-            found_actor = TRUE;
-        }
-    }
+    cur_drawn_model_transform_id = 0x1000 + arg1->unk54;
     var_s0 = (ActorModelHeader *)arg1->unk0;
     if (arg1->unk4C != NULL) {
         var_s0 = (ActorModelHeader *)arg1->unk4C;
@@ -124,17 +118,13 @@ RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
     gSPSegment(dl++, 0x04, osVirtualToPhysical(arg1->unk8));
     gSPSegment(dl++, 0x03, osVirtualToPhysical((ActorModelHeader *)var_s0->unk0));
     for (var_v1 = 0; var_v1 < var_s0->unk21; var_v1++) {
-        if (found_actor) {
-            cur_model_transform_id_offset = var_v1;
-            gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
-            dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
-        }
+        cur_model_transform_id_offset = var_v1;
+        gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+        dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
         gSPDisplayList(dl++, var_s0->unk4[var_v1]);
-        if (found_actor) {
-            gSPPopMatrix(dl++, G_MTX_MODELVIEW);
-            if (pushed_matrix_group) {
-                dl = pop_model_matrix_group(dl);
-            }
+        gSPPopMatrix(dl++, G_MTX_MODELVIEW);
+        if (pushed_matrix_group) {
+            dl = pop_model_matrix_group(dl);
         }
     }
     return dl;
