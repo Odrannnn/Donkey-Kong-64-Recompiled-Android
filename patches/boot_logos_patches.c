@@ -18,6 +18,7 @@ Gfx* printText(Gfx* dl, s16 x, s16 y, f32 scale, u8* string);
 extern u8 D_global_asm_8074450C;
 extern u8 D_menu_800339D0_02175720;
 RECOMP_DECLARE_EVENT(recomp_on_init());
+RECOMP_DECLARE_EVENT(dk64recomp_every_frame());
 #define TEXT_SCALE 0.25f
 #define ORIGINAL_TEXT_SCALE 0.5f
 
@@ -251,6 +252,9 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
         D_global_asm_8074682C = 0xC8;
 
         while (D_global_asm_80744460) {}
+
+        // @recomp: Fire per-frame event.
+        dk64recomp_every_frame();
 
         if (D_global_asm_8076A0B1 & 1 && !D_global_asm_8076A0B2) {
             func_global_asm_805FE7FC();
