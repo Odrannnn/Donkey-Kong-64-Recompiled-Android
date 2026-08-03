@@ -1388,7 +1388,7 @@ RECOMP_PATCH Gfx *func_race_8002C14C(Gfx *dl, Struct8002C67C *arg1) {
     s32 i;
 
     base_x = arg1->unk48->unk4 + 8;
-    y = arg1->unk48->unkA - 30;
+    y = arg1->unk48->unkA - 38;
 
     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xC8, 0x00, 0xB4);
     dl = alignHUD(dl, ALIGN_LEFT);
@@ -1497,7 +1497,7 @@ RECOMP_PATCH Gfx *func_race_8002C2E8(Gfx *dl, RaceAdditionalActorData *arg1) {
     c = getCenterOfString(1, temp_v0_2);
     temp_f20 += (0.5f * c);
     base_x = temp_f20 + 1.0;
-    temp = temp_f24 + (0.4 * temp_f0) + 2;
+    temp = temp_f24 + (0.4 * temp_f0) - 6;
     a = 1.5f;
     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0x00, 0xFF);
     for (i = 0; i < 5; i++) {
