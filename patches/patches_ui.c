@@ -62,6 +62,12 @@ Gfx *popHUD(Gfx *dl) {
     return dl;
 }
 
+extern Mtx identity_fixed_mtx;
+extern s32 cur_drawn_model_transform_id;
+extern s32 cur_model_transform_id_offset;
+Gfx *set_model_matrix_group(Gfx * dl, void *geo_list, u8 skip_rotation, u8 *pushed);
+Gfx *pop_model_matrix_group(Gfx *dl);
+
 //@recomp: Drawing sprite gfx function
 RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16 arg2) {
     s32 i;
@@ -72,6 +78,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     f32 sp150;
     f32 sp14C;
     Gfx* temp_s0;
+    u8 pushed_matrix_group;
     
     sp154 = 1.0f;
     sp150 = 1.0f;
@@ -101,8 +108,20 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
         dl = alignHUD(dl, sprite->unk36F);
     }
     temp_s0 = sprite->unk0[sprite->unk21++].unk0[D_global_asm_807444FC];
+    // Mtx tag
+    cur_drawn_model_transform_id = sprite->sprite_index;
+    cur_model_transform_id_offset = 0;
+    gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
+    //
     gSPDisplayList(dl++, osVirtualToPhysical(temp_s0));
     gDPPipeSync(temp_s0++);
+    // Mtx untag
+    gSPPopMatrix(dl++, G_MTX_MODELVIEW);
+    if (pushed_matrix_group) {
+        dl = pop_model_matrix_group(dl);
+    }
+    //
     gDPSetCycleType(temp_s0++, G_CYC_1CYCLE);
     gSPLoadGeometryMode(temp_s0++, 0);
     gDPSetColorDither(temp_s0++, G_CD_DISABLE);

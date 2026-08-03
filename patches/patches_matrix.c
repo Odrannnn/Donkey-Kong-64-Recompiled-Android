@@ -111,7 +111,7 @@ RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
     u8 pushed_matrix_group = FALSE;
     s32 i;
 
-    cur_drawn_model_transform_id = 0x1000 + arg1->unk54;
+    cur_drawn_model_transform_id = MTXTAG_ACTORS + (arg1->unk54 * 0x100);
     var_s0 = (ActorModelHeader *)arg1->unk0;
     if (arg1->unk4C != NULL) {
         var_s0 = (ActorModelHeader *)arg1->unk4C;
@@ -328,10 +328,11 @@ RECOMP_PATCH Gfx* func_global_asm_80636FFC(Struct80636FFC* arg0, Gfx* dl, s32 ar
         dl = func_global_asm_8065D008(dl, sp92, 0U);
         gDPPipeSync(dl++);
         // @recomp: mtx tag
-        cur_drawn_model_transform_id = 0x8000 + D_global_asm_807F6000[temp_v0_3].unk8A;
+        cur_drawn_model_transform_id = MTXTAG_PROP + D_global_asm_807F6000[temp_v0_3].unk8A;
         if (D_global_asm_807F6000[temp_v0_3].object_type == 622) { // Disable interpolation for the ship in intro story. Propellers look kinda weird with interpolation still
             cur_drawn_model_skip_interpolation = TRUE;
         }
+        cur_model_transform_id_offset = 0;
         gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
         dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
         cur_drawn_model_skip_interpolation = FALSE;
@@ -349,4 +350,45 @@ RECOMP_PATCH Gfx* func_global_asm_80636FFC(Struct80636FFC* arg0, Gfx* dl, s32 ar
     gDPPipeSync(dl++);
     gSPPopMatrix(dl++, G_MTX_MODELVIEW);
     return dl;
+}
+
+// @recomp: Sprite Matrix tagging init
+u16 current_sprite_id = 0;
+Struct80717D84 *func_global_asm_80714D08(void *sprite, f32 scale, f32 x, f32 y, f32 z, Actor *actor, s32 arg6, s32 boneIndex, u8 arg8);
+void func_global_asm_806335B0(s32 arg0, u8 arg1, s32 boneIndex, f32* x, f32* y, f32* z);
+u8 getBonePosition(Actor *actor, s32 boneIndex, f32 *x, f32 *y, f32 *z);
+void func_global_asm_80714A38(u8 arg0);
+extern u16 D_global_asm_807FDB36;
+
+RECOMP_PATCH Struct80717D84 *func_global_asm_80714B84(void *sprite, f32 scale, s32 arg2, s32 boneIndex, u8 arg4) {
+    f32 x, y, z;
+    Struct80717D84 *sp;
+
+    func_global_asm_806335B0(arg2, 1, boneIndex, &x, &y, &z);
+    sp = func_global_asm_80714D08(sprite, scale, x, y, z, NULL, arg2, boneIndex, arg4);
+    sp->sprite_index = MTXTAG_SPRITE + current_sprite_id;
+    current_sprite_id++;
+    return sp;
+}
+
+RECOMP_PATCH Struct80717D84 *func_global_asm_80714C08(void *sprite, f32 scale, Actor *actor, s32 boneIndex, u8 arg4) {
+    f32 x, y, z;
+    Struct80717D84 *sp;
+
+    getBonePosition(actor, boneIndex, &x, &y, &z);
+    if (!(actor->object_properties_bitfield & 0x200) && (actor->animation_state != NULL) && (D_global_asm_807FDB36 & 0x80)) {
+        func_global_asm_80714A38(0x40);
+    }
+    sp = func_global_asm_80714D08(sprite, scale, x, y, z, actor, 0, boneIndex, arg4);
+    sp->sprite_index = MTXTAG_SPRITE + current_sprite_id;
+    current_sprite_id++;
+    return sp;
+}
+
+RECOMP_PATCH Struct80717D84 *drawSpriteAtPosition(void* sprite, f32 scale, f32 x, f32 y, f32 z) {
+    Struct80717D84 *sp;
+    sp = func_global_asm_80714D08(sprite, scale, x, y, z, NULL, 0, 0, 0);
+    sp->sprite_index = MTXTAG_SPRITE + current_sprite_id;
+    current_sprite_id++;
+    return sp;
 }

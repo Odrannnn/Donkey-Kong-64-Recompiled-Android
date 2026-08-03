@@ -44,6 +44,9 @@ typedef enum interpolationIDs {
     MTXTAG_FRAMEBUFFERTRANSITION,
     MTXTAG_TAG3,
     MTXTAG_SKYBOXBLEND,
+    MTXTAG_ACTORS = 0x1000, // 0x100 allocated per actor
+    MTXTAG_PROP = 0x101000,
+    MTXTAG_SPRITE = 0x102000,
 } interpolationIDs;
 
 typedef struct AnimationStateUnk0_0 {
@@ -1846,3 +1849,78 @@ typedef struct prop {
     u8 unk8E;
     u8 unk8F;
 } Prop;
+
+typedef struct Struct80717D84 Struct80717D84;
+
+typedef struct {
+    Gfx *unk0[2];
+} Struct80717D84_unk0;
+
+typedef struct {
+    s32 unk0;
+    u8 unk4[0xA - 0x4];
+    u8 unkA;
+    u8 unkB;
+    s16 unkC;
+    s16 unkE;
+    u8 pad10[0x14 - 0x10];
+    u8 unk14;
+    u8 unk15;
+    s16 unk16;
+} Struct80717D84_unk330;
+
+struct Struct80717D84 {
+    Struct80717D84_unk0 unk0[4];
+    u8 unk20;
+    u8 unk21;
+    u8 unk22[0x26 - 0x22];
+    u16 sprite_index; // @recomp: Custom index for mtx tagging
+    Vtx unk28[4 * 4];
+    float unk128[4][2][4][4];
+    void *unk328;
+    u8 unk32C;
+    u8 unk32D[0x330 - 0x32D];
+    Struct80717D84_unk330 *unk330;
+    s8 unk334;
+    s8 unk335;
+    s8 unk336;
+    s8 unk337;
+    void *unk338;
+    s16 unk33C;
+    s8 unk33E;
+    s8 unk33F;
+    f32 unk340;
+    f32 unk344;
+    f32 unk348;
+    s16 unk34C;
+    s16 unk34E;
+    u8 unk350;
+    u8 unk351;
+    u8 unk352;
+    u8 unk353;
+    s32 unk354;
+    s32 unk358;
+    s32 unk35C;
+    f32 unk360;
+    f32 unk364;
+    s16 unk368;
+    u8 unk36A;
+    u8 unk36B;
+    u8 unk36C;
+    u8 unk36D;
+    u8 unk36E;
+    u8 unk36F;
+    u32 unk370[4];
+    s32 unk380;
+    void *unk384;
+    s16 unk388;
+    s8 unk38A;
+    s8 unk38B;
+    u16 unk38C;
+    s16 unk38E;
+    s16 unk390;
+    s16 unk392;
+    s16 unk394;
+    Struct80717D84 *unk398;
+    Struct80717D84 *unk39C;
+};
