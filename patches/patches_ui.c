@@ -1958,7 +1958,7 @@ RECOMP_PATCH void func_global_asm_806F8170(s32 HUDItemIndex, f32 *xOut, f32 *yOu
 }
 
 //@recomp Fairy Camera shutter animation scaled to screen width.
-RECOMP_PATCH void func_global_asm_806FFB2C(Gfx *dl, Actor *arg1) {
+RECOMP_PATCH Gfx *func_global_asm_806FFB2C(Gfx *dl, Actor *arg1) {
     f32 sp3C;
     sp3C = arg1->control_state_progress * 1.4;
     dl = func_global_asm_806FEDB0(dl, arg1->PaaD->unk1A4);
@@ -1968,7 +1968,7 @@ RECOMP_PATCH void func_global_asm_806FFB2C(Gfx *dl, Actor *arg1) {
     recomp_get_ui_bounds(&width, &height);
     // We need to bump the scale up a bit to account for float imprecision,
     // otherwise it leaves a 1px gap on the left.
-    displayImage(dl, 0x3C, 3, 1, 0x40, 0x40, 0xA0, 0x78, (5.0f * width) / 320.0f + 1.0f, (5.0f * width) / 320.0f + 1.0f, 0, sp3C);
+    return displayImage(dl, 0x3C, 3, 1, 0x40, 0x40, 0xA0, 0x78, (5.0f * width) / 320.0f + 1.0f, (5.0f * width) / 320.0f + 1.0f, 0, sp3C);
 }
 
 
@@ -2675,4 +2675,40 @@ RECOMP_PATCH Gfx *func_global_asm_806C75A4(Gfx *dl, Actor *arg1) {
     gSPPopMatrix(dl++, G_MTX_MODELVIEW);
     gDPPipeSync(dl++);
     return dl;
+}
+
+typedef struct {
+    s32 unk0;
+    s32 unk4;
+    s32 unk8;
+    s32 unkC;
+    s32 unk10;
+    s32 unk14;
+} Struct8068DBA4_arg1;
+
+// @recomp: Number Game Timer
+RECOMP_PATCH Gfx *func_global_asm_8068DBA4(Gfx *dl, Struct8068DBA4_arg1 *arg1) {
+    u8 sp34[12];
+
+    gSPDisplayList(dl++, &D_1000118);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0x96);
+
+    _sprintf(sp34, "%d", arg1->unk14);
+    dl = alignHUD(dl, ALIGN_RIGHT);
+    dl = printStyledText(dl, 3, 0x370, 0x50, sp34, 1);
+    dl = popHUD(dl);
+    return dl;
+}
+
+// @recomp: Draw Cannon Game UI
+RECOMP_PATCH Gfx *func_global_asm_806FEF7C(Gfx *dl, Actor *arg1) {
+    dl = func_global_asm_806FEDB0(dl, arg1->PaaD->unk1A4);
+    gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+    gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
+
+    s32 width, height;
+    recomp_get_ui_bounds(&width, &height);
+
+    return displayImage(dl, 0x3C, 3, 1, 0x40, 0x40, 0xA0, 0x78, (5.0f * width) / 320.0f + 1.0f, (5.0f * width) / 320.0f + 1.0f, 0, 0.001f);
 }
