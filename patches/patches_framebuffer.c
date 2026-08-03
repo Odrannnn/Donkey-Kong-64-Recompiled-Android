@@ -1075,7 +1075,7 @@ extern f32 func_global_asm_80612D10(f32 arg0);
 #define GPACK_RGBA32(r, g, b, a) (((u8)(r) << 0x18) | ((u8)(g) << 0x10) | ((u8)(b) << 0x8) | (u8)(a))
 
 // @recomp: Render skybox blend
-RECOMP_PATCH Gfx* func_global_asm_80704B20(Gfx* dl, s32 arg1, f32 arg2, Mtx* arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, f32 arg8) {
+RECOMP_PATCH Gfx* func_global_asm_80704B20(Gfx* dl, f32 arg1, f32 arg2, Mtx* arg3, u8 arg4, u8 arg5, u8 arg6, s8 arg7, f32 arg8) {
     f32 temp_f2;
     s32 sp140;
     s32 sp13C;
@@ -1289,7 +1289,7 @@ extern f32 loading_zone_transition_speed;
 extern u8 loading_zone_transition_type;
 
 // @recomp: Skybox manager
-RECOMP_PATCH Gfx* func_global_asm_80707980(Gfx* dl, s32 arg1, s32 arg2, Mtx *arg3, s16 arg4) {
+RECOMP_PATCH Gfx* func_global_asm_80707980(Gfx* dl, f32 arg1, f32 arg2, Mtx *arg3, s16 arg4) {
     f32 temp_f0;
     f32 var_f2;
     f32 temp_f2;
