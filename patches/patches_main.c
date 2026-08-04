@@ -235,7 +235,6 @@ RECOMP_PATCH void func_global_asm_805FE544(u8 arg0) {
 #define SCREEN_HEIGHT 240 // Normally 240
 #define SCREEN_WIDTH 427 // Normally 320
 #define OVERSCAN_SIZE 0  // Normally 10
-#define CUTSCENE_BORDERING 0 // Normally 30
 
 RECOMP_PATCH void func_global_asm_805FB944(u8 arg0) {
     u8 var_a1 = 1;
@@ -309,20 +308,7 @@ RECOMP_PATCH void func_global_asm_805FB944(u8 arg0) {
     }
     osViSetSpecialFeatures(VI_CTRL_TYPE_16 | VI_CTRL_SERRATE_ON);
     gScissor2LowerRightX = D_global_asm_8074450C * 320; //width
-    gScissor2LowerRightY = D_global_asm_8074450C * 240; //height
-    // Force cutscene borders to be on for the level intros where you have K. Rool's speech as text
-    // TODO: Tie to the options
-    s32 cutscene_border_size = CUTSCENE_BORDERING;
-    if (current_map == MAP_HELM_LEVEL_INTROS_GAME_OVER) {
-        if (D_global_asm_80755338 && ((D_global_asm_8075533C >= 15) && (D_global_asm_8075533C <= 22))) {
-            // Is level intro
-            cutscene_border_size = 40;
-        }
-    }
-    D_global_asm_807444AC = gScissorUpLY + (D_global_asm_8074450C * cutscene_border_size);
-    D_global_asm_807444B0 = gScissorLowerRightY - (D_global_asm_8074450C * cutscene_border_size);
-    D_global_asm_807444A8 = gScissorUpLY;
-    D_global_asm_807444B4 = gScissorLowerRightY;
+    gScissor2LowerRightY = D_global_asm_8074450C * 240; //height   
 }
 
 RECOMP_PATCH void func_global_asm_805FBC5C(void) {

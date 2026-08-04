@@ -64,3 +64,4 @@ osAiGetLength_recomp = 0x8F00011C;
 osWritebackDCacheAll_recomp = 0x8F000120;
 osAiSetNextBuffer_recomp = 0x8F000124;
 sqrtf_recomp = 0x8F00012C;
+recomp_get_cutscene_bordering = 0x8F000130;

@@ -102,6 +102,18 @@ static void add_general_options(recomp::config::Config &config) {
         lightning_flash_options,
         dk64::LightningFlashMode::Reduced
     );
+    // Cutscene borders
+    static EnumOptionVector cutscene_border_options = {
+        {dk64::CutsceneBordersMode::Off, "Off", "Off"},
+        {dk64::CutsceneBordersMode::On, "On", "On"}
+    };
+    config.add_enum_option(
+        dk64::configkeys::general::cutscene_borders,
+        "Cutscene Borders",
+        "If turned on, cutscenes will show borders on the top and the bottom of the screen as in the vanilla game.",
+        cutscene_border_options,
+        dk64::CutsceneBordersMode::Off
+    );
 }
 
 template <typename T = uint32_t>
@@ -136,6 +148,10 @@ dk64::CameraTypeMode dk64::get_camera_type() {
 
 dk64::LightningFlashMode dk64::get_lightning_flash() {
     return get_general_config_enum_value<dk64::LightningFlashMode>(dk64::configkeys::general::lightning_flashes);
+}
+
+dk64::CutsceneBordersMode dk64::get_cutscene_borders() {
+    return get_general_config_enum_value<dk64::CutsceneBordersMode>(dk64::configkeys::general::cutscene_borders);
 }
 
 dk64::CameraInvertMode dk64::get_first_person_invert_mode() {

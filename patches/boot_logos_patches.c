@@ -1,4 +1,5 @@
 #include "common_structs.h"
+#include "options.h"
 #include "patches_main.h"
 
 Gfx gfxArena[0x200];
@@ -17,10 +18,17 @@ s32 getCenterOfString(s16 renderStyle, u8* string);
 Gfx* printText(Gfx* dl, s16 x, s16 y, f32 scale, u8* string);
 extern u8 D_global_asm_8074450C;
 extern u8 D_menu_800339D0_02175720;
+extern s16 D_global_asm_807476F4;
 RECOMP_DECLARE_EVENT(recomp_on_init());
 RECOMP_DECLARE_EVENT(dk64recomp_every_frame());
 #define TEXT_SCALE 0.25f
 #define ORIGINAL_TEXT_SCALE 0.5f
+
+#define gScissorUpLX D_global_asm_80744498
+#define gScissorUpLY D_global_asm_8074449C
+#define gScissorLowerRightX D_global_asm_807444A0
+#define gScissorLowerRightY D_global_asm_807444A4
+#define OVERSCAN_SIZE 0  // Normally 10
 
 //@recomp: normally this is drawn at 480i, but rt64 doesn't support this. We swap the mode to 240p, then manually half the rare logo size when displaying
 RECOMP_PATCH Gfx* func_menu_8003292C(Gfx* dl) {
@@ -250,6 +258,34 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
             }
         }
         D_global_asm_8074682C = 0xC8;
+
+        //@recomp Update the cutscene border setting every frame instead of on map load
+        s32 cutscene_border_size = recomp_get_cutscene_bordering();
+        if (current_map == MAP_HELM_LEVEL_INTROS_GAME_OVER) {
+            if (is_cutscene_active && ((D_global_asm_807476F4 >= 15) && (D_global_asm_807476F4 <= 22))) {
+                // Is level intro
+                cutscene_border_size = 40;
+            }
+        }
+        switch (is_cutscene_active) {
+            case 3:
+            case 4:
+                gScissorUpLX = 0;
+                gScissorUpLY = 0;
+                gScissorLowerRightY = (D_global_asm_8074450C * 240);
+                break;
+            default:
+                gScissorUpLX = D_global_asm_8074450C * OVERSCAN_SIZE;
+                gScissorUpLY = D_global_asm_8074450C * OVERSCAN_SIZE;
+                gScissorLowerRightX = (D_global_asm_8074450C * (320 - OVERSCAN_SIZE));
+                gScissorLowerRightY = (D_global_asm_8074450C * (240 - OVERSCAN_SIZE));
+                break;
+        }
+        D_global_asm_807444AC = gScissorUpLY + (D_global_asm_8074450C * cutscene_border_size);
+        D_global_asm_807444B0 = gScissorLowerRightY - (D_global_asm_8074450C * cutscene_border_size);
+        D_global_asm_807444A8 = gScissorUpLY;
+        D_global_asm_807444B4 = gScissorLowerRightY;
+
 
         while (D_global_asm_80744460) {}
 

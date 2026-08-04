@@ -22,6 +22,7 @@ namespace dk64 {
             inline const std::string story_skip = "story_skip";
             inline const std::string camera_type = "camera_type";
             inline const std::string lightning_flashes = "lightning_flashes";
+            inline const std::string cutscene_borders = "cutscene_borders";
         }
 
         namespace sound {
@@ -85,6 +86,12 @@ namespace dk64 {
         Off
     };
     LightningFlashMode get_lightning_flash();
+
+    enum class CutsceneBordersMode {
+        On,
+        Off
+    };
+    CutsceneBordersMode get_cutscene_borders();
 
     void open_quit_game_prompt();
 };
