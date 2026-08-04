@@ -2701,7 +2701,7 @@ RECOMP_PATCH Gfx *func_global_asm_8068DBA4(Gfx *dl, Struct8068DBA4_arg1 *arg1) {
     return dl;
 }
 
-// @recomp: Draw Cannon Game UI
+// @recomp: Draw Cannon Game lens HUD
 RECOMP_PATCH Gfx *func_global_asm_806FEF7C(Gfx *dl, Actor *arg1) {
     dl = func_global_asm_806FEDB0(dl, arg1->PaaD->unk1A4);
     gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
@@ -2711,4 +2711,19 @@ RECOMP_PATCH Gfx *func_global_asm_806FEF7C(Gfx *dl, Actor *arg1) {
     recomp_get_ui_bounds(&width, &height);
 
     return displayImage(dl, 0x3C, 3, 1, 0x40, 0x40, 0xA0, 0x78, (5.0f * width) / 320.0f + 1.0f, (5.0f * width) / 320.0f + 1.0f, 0, 0.001f);
+}
+
+// @recomp: Cannon game shots remaining HUD
+RECOMP_PATCH Gfx *func_global_asm_8068DAF4(Gfx *dl, u8 *arg1) {
+    u8 sp38[8];
+
+    gSPDisplayList(dl++, &D_1000118);
+    gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0x96);
+
+    _sprintf(sp38, "%d", *arg1);
+    dl = alignHUD(dl, ALIGN_LEFT);
+    dl = printStyledText(dl, 3, 260, 80, sp38, 1);
+    dl = popHUD(dl);
+    return dl;
 }
