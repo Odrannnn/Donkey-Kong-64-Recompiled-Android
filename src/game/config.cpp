@@ -112,7 +112,7 @@ static void add_general_options(recomp::config::Config &config) {
         "Cutscene Borders",
         "If turned on, cutscenes will show borders on the top and the bottom of the screen as in the vanilla game.",
         cutscene_border_options,
-        dk64::CutsceneBordersMode::Off
+        dk64::CutsceneBordersMode::On
     );
 }
 
