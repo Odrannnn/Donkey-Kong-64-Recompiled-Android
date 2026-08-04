@@ -213,7 +213,7 @@ typedef struct {
     f32 unk364;
 } Struct806F9AF0_arg0;
 
-extern void *D_global_asm_80750518;
+extern SpriteData *D_global_asm_80750518[];
 extern f32 D_global_asm_807FD7A0[];
 extern void func_global_asm_806F9AF0(GlobalASMStruct71 *arg0, s8 *arg1);
 extern void func_global_asm_806F966C(GlobalASMStruct71 **arg0);
