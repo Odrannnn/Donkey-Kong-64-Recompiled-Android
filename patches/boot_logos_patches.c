@@ -182,9 +182,6 @@ typedef struct {
 } Struct80750948; //sizeof 0xC
 extern Struct80750948 D_global_asm_80750948[];
 extern Actor *gCurrentActorPointer;
-extern Gfx *rdpStoreFB(Gfx *dl, Actor *a);
-extern Gfx *rdpClearFB(Gfx *dl, Actor *a);
-extern void addActorToTextOverlayRenderArray(void *arg0, Actor *arg1, u8 arg2);
 
 RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     s32 phi_s4;
@@ -321,11 +318,6 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
 #ifdef DEBUG_WARP
             menuMain();
 #endif
-            if ((D_global_asm_80744504 == 1) && ((global_properties_bitfield & 0x300) == 0x200)) {
-                // @recomp: Take the snapshot now (Opening zipper)
-                addActorToTextOverlayRenderArray(rdpStoreFB, gCurrentActorPointer, 0);
-                addActorToTextOverlayRenderArray(rdpClearFB, gCurrentActorPointer, 5);
-            }
             func_global_asm_805FC2B0();
             break;
         }

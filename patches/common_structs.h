@@ -6,6 +6,8 @@
 #include "misc_funcs.h"
 #include "enums.h"
 
+extern u8 queue_dk64_fb_store;
+
 typedef struct tuple_f {
     union {
         struct {

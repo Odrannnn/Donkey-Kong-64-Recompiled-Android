@@ -34,6 +34,7 @@ extern s16 D_global_asm_807444B0;
 extern s16 D_global_asm_807444B4;
 extern Gfx **D_1000118;
 extern Mtx D_2000140;
+extern u8 is_cutscene_active;
 
 extern Gfx *alignHUD(Gfx *, enumSpriteAlignment);
 extern Gfx *popHUD(Gfx *);
@@ -53,27 +54,58 @@ u16 stored_framebuffer[320 * 240];
 
 extern Actor *gCurrentActorPointer;
 extern void addActorToTextOverlayRenderArray(void *arg0, Actor *arg1, u8 arg2);
-s8 storedFBEffect = -1;
-
-
-Gfx *rdpStoreFB(Gfx *dl, Actor *a) {
-    if (D_global_asm_807F5D84 == 2) {
-        storedFBEffect = D_global_asm_807F5D85;
-        D_global_asm_807F5D84 = 0;
-    }
-    gDPSetColorImage(dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, OS_K0_TO_PHYSICAL(stored_framebuffer));
-    return dl;
-}
 
 extern void *D_global_asm_80744470[];
 extern u8  D_global_asm_807444FC;
-Gfx *rdpClearFB(Gfx *dl, Actor *a) {
-    if (storedFBEffect > -1) {
-        D_global_asm_807F5D85 = storedFBEffect; // Delays it by 1f
-        D_global_asm_807F5D84 = 1;
-        storedFBEffect = -1;
+Gfx *rdpStoreFB(Gfx *dl, Actor *a) {
+    s32 x;
+    s32 y;
+
+    gDPPipeSync(dl++);
+    gDPSetCycleType(dl++, G_CYC_1CYCLE);
+    gDPSetTextureFilter(dl++, G_TF_POINT);
+    gDPSetAlphaCompare(dl++, G_AC_NONE);
+    gDPSetCombineMode(dl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
+    gDPSetRenderMode(dl++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetColorImage(dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, OS_K0_TO_PHYSICAL(stored_framebuffer));
+    for (y = 0; y < 240; y += 6) {
+        gDPLoadTextureTile(
+            dl++, D_global_asm_80744470[D_global_asm_807444FC],
+            G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, 240,
+            0, y, 320 - 1, MIN(y + 6, 240) - 1,
+            NULL,
+            G_TX_CLAMP, G_TX_CLAMP,
+            G_TX_NOMASK, G_TX_NOMASK,
+            0, 0
+        );
+        gSPScisTextureRectangle(
+            dl++,
+            0, y * 4,
+            320 * 4, MIN(y + 6, 240) * 4,
+            G_TX_RENDERTILE,
+            0, y << 5,
+            1024, 1024
+        );
     }
-    gDPSetColorImage(dl++, 0, 2, D_global_asm_80744490, osVirtualToPhysical(D_global_asm_80744470[D_global_asm_807444FC]));
+
+    gDPPipeSync(dl++);
+    gDPFullSync(dl++); // Required to ensure that this process is done before anything else gets rendered to the referenced FB
+    return dl;
+}
+
+extern void *D_global_asm_8076A060;
+extern Gfx *func_global_asm_8068C20C(Gfx *, u8);
+RECOMP_PATCH Gfx *func_global_asm_805FE398(Gfx *dl) {
+    dl = func_global_asm_8068C20C(dl, 0); // @recomp: Run a special pre-world load framebuffer thing
+    gDPPipeSync(dl++);
+    gDPSetRenderMode(dl++, G_RM_NOOP, G_RM_NOOP2);
+    gDPSetCycleType(dl++, G_CYC_FILL);
+    gSPClearGeometryMode(dl++, G_ZBUFFER);
+    gDPSetDepthImage(dl++, osVirtualToPhysical(D_global_asm_8076A060));
+    gDPSetColorImage(dl++, G_IM_FMT_RGBA, G_IM_SIZ_16b, D_global_asm_80744490, osVirtualToPhysical(D_global_asm_8076A060));
+    gDPSetFillColor(dl++, 0xFFFCFFFC);
+    gDPFillRectangle(dl++, 0, 0, D_global_asm_80744490 - 1, D_global_asm_80744494 - 1);
+    gDPPipeSync(dl++);
     return dl;
 }
 
@@ -94,8 +126,9 @@ RECOMP_PATCH void func_global_asm_8070A848(Struct8070A848 *arg0, Struct8070A848 
         dst++;
         src++;
     }
-    addActorToTextOverlayRenderArray(rdpStoreFB, gCurrentActorPointer, 0);
-    addActorToTextOverlayRenderArray(rdpClearFB, gCurrentActorPointer, 3);
+    if ((is_cutscene_active == 6) || (D_global_asm_807F5D84 == 0)) {
+        addActorToTextOverlayRenderArray(rdpStoreFB, gCurrentActorPointer, 0);
+    }
 }
 
 extern s32 D_global_asm_80747B30;
@@ -142,7 +175,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     // func_global_asm_8062A3F0();
                     gDPSetCombineMode(dl++, G_CC_MODULATEI_PRIM, G_CC_MODULATEI_PRIM); // @recomp: Remove alpha texture stuff
                     // Blurs it a little
-                    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+                    gDPSetPrimColor(dl++, 0, 0, 0x80, 0x80, 0x80, 0xFF);
                     func_global_asm_807023E8(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x20, 0x20, 0.0f, 0.0f, 319.0f, 239.0f, 0.0f, 0.0f);
                     // Add a feathering call to add a little distortion
                     // func_global_asm_807024E0(&dl, stored_framebuffer, 0, 0x140, 0xF0, 0x10, 0x50, 0, 0.0f, 320, 239.0f, 0, 0.0f, 1, 0x10, 1, NULL);
@@ -261,111 +294,6 @@ extern void func_global_asm_8065EAF4(void);
 extern void func_global_asm_806CC970(void);
 extern void renderActor(Actor *arg0, u8 arg1);
 
-// @recomp: Function to warp player upon taking warp pad
-RECOMP_PATCH void func_global_asm_806DB670(void) {
-    gCurrentActorPointer->unkB8 = 0;
-    switch (gCurrentActorPointer->control_state_progress) {
-        case 0:
-            gCurrentActorPointer->noclip_byte = 1;
-            if (spawnActor(ACTOR_BANAPORTER, 0x98)) {
-                moveAndScaleActorToAnother(gLastSpawnedActor, gCurrentActorPointer, 0.15f);
-            }
-            gCurrentActorPointer->control_state_progress++;
-            break;
-        case 1:
-            gCurrentActorPointer->control_state_progress++;
-            extra_player_info_pointer->unk23C = 4;
-            break;
-        case 2:
-            gCurrentActorPointer->x_position = ((extra_player_info_pointer->unk210 - gCurrentActorPointer->x_position) * 0.5) + gCurrentActorPointer->x_position;
-            gCurrentActorPointer->y_position = ((extra_player_info_pointer->unk214 - gCurrentActorPointer->y_position) * 0.5) + gCurrentActorPointer->y_position;
-            gCurrentActorPointer->z_position = ((extra_player_info_pointer->unk218 - gCurrentActorPointer->z_position) * 0.5) + gCurrentActorPointer->z_position;
-            if (extra_player_info_pointer->unk23C != 0) {
-                extra_player_info_pointer->unk23C--;
-                if (extra_player_info_pointer->unk23C == 0) {
-                    gCurrentActorPointer->object_properties_bitfield &= 0xFFFF7FFF;
-                    gCurrentActorPointer->shadow_opacity = 0;
-                }
-            }
-            break;
-        case 3:
-            gCurrentActorPointer->object_properties_bitfield &= 0xFFFF7FFF;
-            gCurrentActorPointer->shadow_opacity = 0;
-            gCurrentActorPointer->control_state_progress++;
-            break;
-        case 5:
-            extra_player_info_pointer->unk23C = 0x14;
-            break;
-        case 6:
-            extra_player_info_pointer->unk23C -= 1;
-            if (extra_player_info_pointer->unk23C == 0) {
-                func_global_asm_806291B4(2); // @recomp: Push transition effect 1f earlier to capture snapshot properly
-                D_global_asm_807F5D84 = 2; // @recomp: Delay notice
-                func_global_asm_8065EACC();
-                gCurrentActorPointer->control_state_progress++;
-            }
-            break;
-        case 7:
-            global_properties_bitfield &= 0xFFFCFFDF;
-            func_global_asm_80672C30(gCurrentActorPointer);
-            gCurrentActorPointer->x_position = extra_player_info_pointer->unk204;
-            gCurrentActorPointer->y_position = extra_player_info_pointer->unk208;
-            gCurrentActorPointer->unk8C = gCurrentActorPointer->y_position;
-            gCurrentActorPointer->z_position = extra_player_info_pointer->unk20C;
-            func_global_asm_806C8220(0, gCurrentActorPointer->unk178, gCurrentActorPointer->unk58);
-            func_global_asm_8061EB04(gCurrentActorPointer, extra_player_info_pointer->unk1A4);
-            extra_player_info_pointer->unk23C = 0x14;
-            
-            gCurrentActorPointer->control_state_progress++;
-            break;
-        case 8:
-            global_properties_bitfield |= 0x30020;
-            extra_player_info_pointer->unk23C -= 1;
-            if (extra_player_info_pointer->unk23C == 0) {
-                func_global_asm_80602498();
-                if (spawnActor(ACTOR_BANAPORTER, 0x98)) {
-                    moveAndScaleActorToAnother(gLastSpawnedActor, gCurrentActorPointer, 0.15f);
-                }
-                gCurrentActorPointer->control_state_progress++;
-                extra_player_info_pointer->unk23C = 0xC;
-            }
-            break;
-        case 10:
-            if (extra_player_info_pointer->unk23C != 0) {
-                extra_player_info_pointer->unk23C--;
-                if (extra_player_info_pointer->unk23C == 0) {
-                    gCurrentActorPointer->x_position = extra_player_info_pointer->unk210;
-                    gCurrentActorPointer->y_position = extra_player_info_pointer->unk214;
-                    gCurrentActorPointer->z_position = extra_player_info_pointer->unk218;
-                    gCurrentActorPointer->object_properties_bitfield |= 0x8000;
-                }
-            }
-            break;
-        case 11:
-            handleInputsForControlState(0x20);
-            playAnimation(gCurrentActorPointer, 0x1B);
-            setYAccelerationFrom80753578();
-            gCurrentActorPointer->control_state_progress++;
-            break;
-        case 12:
-        case 13:
-            handleInputsForControlState(0x20);
-            applyActorYAcceleration();
-            break;
-        case 14:
-            func_global_asm_80617770(gCurrentActorPointer, 0x2F, 0);
-            gCurrentActorPointer->control_state_progress++;
-            // fallthrough
-        case 15:
-            func_global_asm_806C8D20(gCurrentActorPointer);
-            func_global_asm_8065EAF4();
-            handleInputsForControlState(0x30);
-            break;
-    }
-    func_global_asm_806CC970();
-    renderActor(gCurrentActorPointer, 0);
-}
-
 typedef struct Struct80767CE8 {
     Mtx unk0;
     u8 pad40[0xDB0 - 0x40];
@@ -421,7 +349,6 @@ extern u8 D_global_asm_807FD9BC;
 extern u8 D_global_asm_807FD9BD;
 extern Gfx *D_global_asm_8076A050[];
 extern u32 object_timer;
-extern u8 is_cutscene_active;
 extern s32 D_global_asm_807FBB64;
 extern u8 D_global_asm_807501E0;
 extern Vtx *D_global_asm_807FD9B8;
@@ -444,27 +371,6 @@ extern void func_global_asm_807095E4(s32, s32);
 
 extern void *D_global_asm_807FD9AC;
 extern void *_malloc(s32);
-
-// @recomp: Zipper Snapshot
-RECOMP_PATCH void func_global_asm_8070AF24(void) {
-    switch (D_global_asm_807444F8) {
-        case 1:
-            D_global_asm_80755068 = 0;
-            D_global_asm_8075506C = 0;
-            break;
-        case 2:
-            D_global_asm_80755068 = 0x78;
-            break;
-    }
-    D_global_asm_807FD9B8 = getPointerTableFile(TABLE_19_UNKNOWN, 1, 1, 1);
-    // D_global_asm_807FD9B0 = _malloc(D_global_asm_80744490 * D_global_asm_80744494 * 2);
-    // func_global_asm_8070A848(D_global_asm_807FD9B0, D_global_asm_80744470[D_global_asm_807444FC]);
-    func_global_asm_80709890(D_global_asm_807FD9B8, &D_global_asm_807FD9A8, &D_global_asm_807FD9AC, 0);
-    func_global_asm_80709ACC(D_global_asm_807FD9A8);
-    D_global_asm_807FD9A4 = D_global_asm_807FD9A8->unk8;
-    D_global_asm_807FD9A8->unk8 = _malloc(D_global_asm_807FD9A8->unk0 * 0xC);
-    func_global_asm_807095E4(D_global_asm_807FD9A8->unk24, D_global_asm_807FD9A8->unk28);
-}
 
 // @recomp: Zipper Display
 RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
@@ -505,7 +411,7 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
                 D_global_asm_807444F8 = 2;
                 break;
             case 2:
-                // func_global_asm_8061134C(D_global_asm_807FD9B0);
+                func_global_asm_8061134C(D_global_asm_807FD9B0);
                 func_global_asm_8061134C(D_global_asm_807FD9A8->unk8);
                 func_global_asm_8061134C(D_global_asm_807FD9B4);
                 func_global_asm_8061134C(D_global_asm_807FD9A8->unk10);
@@ -583,80 +489,6 @@ extern s32 playCutscene(Actor *arg0, s16 arg1, u8 arg2);
 extern void func_global_asm_8061B650(Actor *arg0);
 extern void func_global_asm_806FB218(void);
 
-// @recomp: Enter Tag Barrel
-RECOMP_PATCH void func_global_asm_806833DC(TagAAD *arg0) {
-    s32 pad0;
-    s16 temp_v0_4;
-    Actor *temp_a0;
-    PlayerAdditionalActorData *temp_a1; // 30
-    s32 flag;
-    s32 temp_v0_3;
-
-    switch (gCurrentActorPointer->control_state_progress) {
-        case 0xB:
-            if (!func_global_asm_8061CB50()) {
-                gCurrentActorPointer->noclip_byte = 2;
-                gCurrentActorPointer->control_state_progress = 0;
-            }
-            break;
-        case 0xA:
-        case 0:
-            if (D_global_asm_807FBB70.unk200 == 4) {
-                arg0->unk0 = D_global_asm_807FBB70.unk1FC;
-                arg0->unk0->noclip_byte = 1;
-                temp_a1 = arg0->unk0->PaaD;
-                temp_a1->unk1F0 |= 0x20000000;
-                gCurrentActorPointer->control_state_progress = 1;
-                func_global_asm_806291B4(3); // @recomp: Push transition effect 1f earlier to capture snapshot properly
-                D_global_asm_807F5D84 = 2; // @recomp: Delay notice
-                arg0->unk4 = 2;
-                arg0->unk3C = 0;
-            }
-            break;
-        case 1:
-            if (arg0->unk4 != 0) {
-                arg0->unk4--;
-                return;
-            }
-            temp_a0 = arg0->unk0;
-            temp_v0_3 = temp_a0->unk12C;
-            temp_a1 = temp_a0->PaaD;
-            if (temp_v0_3 == -1) {
-                temp_v0_3 = 0;
-            }
-            func_global_asm_806C93E4(temp_a0, temp_a1);
-            func_global_asm_806C9304(arg0->unk0, temp_a1);
-            func_global_asm_80659620(&arg0->unk2C, &arg0->unk30, &arg0->unk34, temp_v0_3);
-            func_global_asm_80659670(1.0f, 1.0f, 1.0f, temp_v0_3);
-            gCurrentActorPointer->y_rotation = arg0->unk22;
-            gCurrentActorPointer->noclip_byte = 1;
-            temp_v0_4 = temp_a0->unk58;
-            global_properties_bitfield &= ~0x30030;
-            arg0->unk6 = 0;
-            while (temp_v0_4 != D_global_asm_8074E814[arg0->unk6].unk2) {
-                arg0->unk6++;
-            }
-            arg0->unk7 = arg0->unk6;
-            if (current_map != MAP_HELM) {
-                playSong(MUSIC_101_TAG_BARREL_ALL_OF_THEM, 1.0f);
-                func_global_asm_80602CE0(0x65, 0x7E - D_global_asm_8074E848[arg0->unk6], 1);
-            }
-            flag = func_global_asm_805FF018(gCurrentActorPointer->unk58, arg0->unk6);
-            setFlag(flag, TRUE, FLAG_TYPE_PERMANENT);
-            func_global_asm_80682E38(arg0);
-            func_global_asm_80627878(temp_a1->unk104);
-            arg0->unk38 = temp_a0->y_rotation;
-            temp_a0->y_rotation = gCurrentActorPointer->y_rotation;
-            func_global_asm_8060DEC8();
-            playCutscene(gCurrentActorPointer, 0xE, 0xC);
-            func_global_asm_8061B650(temp_a1->unk104);
-            func_global_asm_806FB218();
-            gCurrentActorPointer->control_state = 1;
-            gCurrentActorPointer->control_state_progress = 0;
-            break;
-    }
-}
-
 typedef struct Struct807FD610 {
     s32 unk0; // Timer that ticks up once per frame
     f32 unk4; // Probably float
@@ -685,45 +517,12 @@ extern u8 func_global_asm_806291A8(void);
 extern s8 D_global_asm_807FC8B9;
 extern u8 cc_player_index;
 
-// @recomp: Press start to pause code
-RECOMP_PATCH void func_global_asm_806E6234(void) {
-    if ((D_global_asm_807FD610[cc_player_index].unk2C & START_BUTTON)
-        && !func_global_asm_8061CB50()
-        && (D_global_asm_807FD888 == 0.0f)
-        && (gameIsInAdventureMode() || gameIsInMysteryMenuMinigameMode() || gameIsInDKTVMode())
-        && !func_global_asm_8062919C()
-        && !func_global_asm_806291A8()) {
-        if (!gameIsInDKTVMode()) {
-            func_global_asm_806291B4(7); // @recomp: Push transition effect 1f earlier to capture snapshot properly
-            D_global_asm_807F5D84 = 2; // @recomp: Delay notice
-        }
-        D_global_asm_807FC8B9 = cc_player_index;
-        global_properties_bitfield |= 1;
-    }
-}
-
 extern void func_global_asm_806F5378(void);
 extern void func_global_asm_807313BC(void);
 extern void func_global_asm_805FF5A0(Maps map);
 extern Maps next_map;
 extern s32 next_exit;
 extern s16 D_global_asm_8076AEF2;
-
-// @recomp: Zipper Transition
-RECOMP_PATCH void func_global_asm_805FF4D8(Maps map, s32 exit) {
-    func_global_asm_806F5378();
-    global_properties_bitfield |= 0x100;
-    next_map = map;
-    next_exit = exit;
-    D_global_asm_8076AEF2 = current_map;
-    func_global_asm_807313BC();
-    func_global_asm_805FF5A0(map);
-    // @recomp: Take the snapshot now
-    addActorToTextOverlayRenderArray(rdpStoreFB, gCurrentActorPointer, 0);
-    addActorToTextOverlayRenderArray(rdpClearFB, gCurrentActorPointer, 5);
-    // D_global_asm_807FD9B0 = _malloc(D_global_asm_80744490 * D_global_asm_80744494 * 2);
-    // func_global_asm_8070A848(D_global_asm_807FD9B0, D_global_asm_80744470[D_global_asm_807444FC]);
-}
 
 extern Gfx *func_global_asm_805FCFD8(Gfx *);
 extern Gfx *func_global_asm_805FE398(Gfx *);
@@ -879,102 +678,6 @@ void func_global_asm_80627888(Actor *arg0);
 void func_global_asm_80709464(u8 playerIndex);
 s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
 extern s32 D_global_asm_8074E848[];
-    
-RECOMP_PATCH void func_global_asm_806836D0(TagAAD* arg0) {
-    s32 temp_s0;
-    u16 sp4A;
-    s32 pad[2];
-    s16 temp_s0_2;
-    s32 var_v0;
-    Actor* temp_v1;
-    PlayerAdditionalActorData* sp30;
-    s32 temp_t3;
-    s32 var_v1;
-
-    if (gCurrentActorPointer->control_state_progress == 0xFF) {
-        // Kickout procedure
-        temp_v1 = arg0->unk0;
-        sp30 = temp_v1->AAD_as_array[0];
-        var_v0 = temp_v1->unk12C;
-        if (var_v0 == -1) {
-            var_v0 = 0;
-        }
-        func_global_asm_80659670(arg0->unk2C, arg0->unk30, arg0->unk34, var_v0);
-        global_properties_bitfield |= 0x30030;
-        func_global_asm_80602B60(0x48, 0U);
-        func_global_asm_80602B60(0x6B, 0U);
-        func_global_asm_80602B60(0x49, 0U);
-        func_global_asm_80602B60(0x47, 0U);
-        func_global_asm_80602B60(0x65, 0U);
-        deleteActor(arg0->unk1C);
-        arg0->unk1C = NULL;
-        var_v1 = 0;
-        for (var_v1 = 0; var_v1 < 5; var_v1++) {
-            deleteActor(arg0->unk8[var_v1]);
-            arg0->unk8[var_v1] = 0;
-        }
-        // @recomp: Delay kickout stuff by 1f
-        gCurrentActorPointer->control_state = 2;
-        gCurrentActorPointer->control_state_progress = 0;
-        arg0->unk4 = 0x1EU;
-        sp30->unk1F0 &= 0xDFFFFFFF;
-        temp_s0_2 = D_global_asm_8074E814[arg0->unk6].unk2;
-        func_global_asm_806C8E58(temp_s0_2);
-        func_global_asm_806F09F0(temp_v1, temp_s0_2);
-        sp30->unk8C = 0;
-        temp_v1->y_rotation = arg0->unk38;
-        func_global_asm_80627888(sp30->unk104);
-        func_global_asm_8061EB04(temp_v1, 0U);
-        func_global_asm_80709464(0U);
-        character_change_array->unk2DC.unk6 |= 0x11;
-    } else {
-        sp4A = arg0->unk4;
-        if (arg0->unk4 != 0) {
-            arg0->unk4--;
-            func_global_asm_80682AB4();
-        }
-        arg0->unk3C++;
-        if ((arg0->unk4 == 0) && (func_global_asm_805FCA64())) {
-            temp_s0 = arg0->unk8[arg0->unk6]->unk58 == 0x13C;
-            temp_t3 = arg0->unk3C > 9000;
-            if (((D_global_asm_807FD610->unk30 >= 0x29) && (temp_t3 == 0)) || (!temp_s0)) {
-                arg0->unk4 = 0x14U;
-                if (arg0->unk8[arg0->unk6]->unk58 == 0x13C) {
-                    func_global_asm_80682DF4(arg0->unk8[arg0->unk6], arg0->unk8[arg0->unk6]->PaaD, 0x8C);
-                }
-                arg0->unk7 = arg0->unk6;
-                if (temp_s0 != 0) {
-                    arg0->unk20 = D_global_asm_807FD610->unk2E >= 0 ? 1 : -1;
-                }
-                arg0->unk6 += arg0->unk20;
-                if (arg0->unk6 < 0) {
-                    arg0->unk6 = 4;
-                } else if (arg0->unk6 >= 5) {
-                    arg0->unk6 = 0;
-                }
-                if (arg0->unk8[arg0->unk6]->unk58 == 0x13C) {
-                    func_global_asm_80682DF4(arg0->unk8[arg0->unk6], arg0->unk8[arg0->unk6]->PaaD, 0x8B);
-                }
-            } else {
-                if ((!temp_t3) && (sp4A)) {
-                    func_global_asm_80602CE0(0x65, 0x7E - D_global_asm_8074E848[arg0->unk6], 3U);
-                    func_global_asm_80602CE0(0x65, D_global_asm_8074E848[arg0->unk6], 2U);
-                    return;
-                }
-                if ((((temp_t3) && (temp_s0)) || (D_global_asm_807FD610->unk2C & 0xE000)) && (!func_global_asm_8062919C())) {
-                    if (temp_s0) {
-                        // @recomp: Delay kickout stuff by 1f
-                        gCurrentActorPointer->control_state_progress = 0xFF;
-                        func_global_asm_806291B4(3U); // @recomp: Push transition effect 1f earlier to capture snapshot properly
-                        D_global_asm_807F5D84 = 2; // @recomp: Delay notice
-                        return;
-                    }
-                    playSound(0x98, 0x7FFF, 63.0f, 1.0f, 0U, 0U);
-                }
-            }
-        }
-    }
-}
 
 s16 func_global_asm_8070C200(f32);
 

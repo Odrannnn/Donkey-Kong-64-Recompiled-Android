@@ -333,6 +333,5 @@ RECOMP_PATCH Gfx *func_global_asm_805FE4D4(Gfx *dl) {
     gEXSetNearClipping(dl++, FALSE);
     gEXSetTexcoordWrapPoint(dl++, 256 * 4, 256 * 4);
     gDPSetColorImage(dl++, 0, 2, D_global_asm_80744490, osVirtualToPhysical(D_global_asm_80744470[D_global_asm_807444FC]));
-    dl = func_global_asm_8068C20C(dl, 0); // @recomp: Run a special pre-world load framebuffer thing
     return dl;
 }

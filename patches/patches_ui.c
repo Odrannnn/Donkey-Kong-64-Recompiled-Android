@@ -1972,317 +1972,316 @@ RECOMP_PATCH Gfx *func_global_asm_806FFB2C(Gfx *dl, Actor *arg1) {
 }
 
 
+Gfx* func_global_asm_806ABA6C(Gfx*, void*, s32);
+extern s8 D_global_asm_80750530[];
+extern s8 D_global_asm_80750538;
+extern s8 D_global_asm_80750560[];
+extern s16 D_global_asm_8075056C[];
+extern s8 D_global_asm_807505CC;
+extern u8 **D_global_asm_807FC7E0;
+typedef struct Struct807FC7F0 {
+    f32 unk0;
+    f32 unk4;
+    s16 unk8;
+    s16 unkA;
+    s16 unkC;
+    s16 unkE;
+    s8 unk10;
+    u8 unk11[7];
+} Struct807FC7F0;
+extern Struct807FC7F0 *D_global_asm_807FC7F0[];
+extern s8 D_global_asm_807FC7F8[];
+extern s8 D_global_asm_807FC80C;
+extern s8 D_global_asm_807FC818[];
+extern f32 D_global_asm_807FC840[];
+extern f32 D_global_asm_807FC868[];
+extern f32 D_global_asm_807FC890[];
+extern s8 D_global_asm_807FCC4B;
+extern u8 D_global_asm_807FCC4C;
+typedef struct character_progress {
+    u8 moves;
+    u8 simian_slam;
+    u8 weapon;
+    u8 ammo_belt;
+    u8 instrument;
+    u8 unk5;
+    u16 coins;
+    u16 instrument_ammo;
+    u16 coloured_bananas[14];
+    u16 coloured_bananas_fed_to_tns[14];
+    u16 golden_bananas[14];
+} CharacterProgress;
+typedef struct PlayerProgress {
+    union {
+        CharacterProgress character_progress[6];
+        u8 character_progress_as_bytes[6][0x5E];
+        u16 character_progress_as_shorts[6][0x2F];
+    };
+    u8 unk234[0x2F0 - 0x234];
+    u16 standardAmmo;
+    u16 homingAmmo;
+    u16 oranges;
+    u16 crystals;
+    u16 film;
+    s8 unk2FA;
+    s8 health;
+    u8 melons;
+    s8 unk2FD;
+    u16 unk2FE[(0x306 - 0x2FE) / 2];
+} PlayerProgress;
 
-// This requires mallocs to be resolved
-/*
-    Gfx* func_global_asm_806ABA6C(Gfx*, void*, s32);
-    extern s8 D_global_asm_80750530[];
-    extern s8 D_global_asm_80750538;
-    extern s8 D_global_asm_80750560[];
-    extern s16 D_global_asm_8075056C[];
-    extern s8 D_global_asm_807505CC;
-    extern u8 **D_global_asm_807FC7E0;
-    typedef struct Struct807FC7F0 {
-        f32 unk0;
-        f32 unk4;
-        s16 unk8;
-        s16 unkA;
-        s16 unkC;
-        s16 unkE;
-        s8 unk10;
-        u8 unk11[7];
-    } Struct807FC7F0;
-    extern Struct807FC7F0 *D_global_asm_807FC7F0[];
-    extern s8 D_global_asm_807FC7F8[];
-    extern s8 D_global_asm_807FC80C;
-    extern s8 D_global_asm_807FC818[];
-    extern f32 D_global_asm_807FC840[];
-    extern f32 D_global_asm_807FC868[];
-    extern f32 D_global_asm_807FC890[];
-    extern s8 D_global_asm_807FCC4B;
-    extern u8 D_global_asm_807FCC4C;
-    typedef struct character_progress {
-        u8 moves;
-        u8 simian_slam;
-        u8 weapon;
-        u8 ammo_belt;
-        u8 instrument;
-        u8 unk5;
-        u16 coins;
-        u16 instrument_ammo;
-        u16 coloured_bananas[14];
-        u16 coloured_bananas_fed_to_tns[14];
-        u16 golden_bananas[14];
-    } CharacterProgress;
-    typedef struct PlayerProgress {
-        union {
-            CharacterProgress character_progress[6];
-            u8 character_progress_as_bytes[6][0x5E];
-            u16 character_progress_as_shorts[6][0x2F];
-        };
-        u8 unk234[0x2F0 - 0x234];
-        u16 standardAmmo;
-        u16 homingAmmo;
-        u16 oranges;
-        u16 crystals;
-        u16 film;
-        s8 unk2FA;
-        s8 health;
-        u8 melons;
-        s8 unk2FD;
-        u16 unk2FE[(0x306 - 0x2FE) / 2];
-    } PlayerProgress;
+typedef struct PauseAAD {
+    f32 unk0;
+    f32 unk4;
+    s16 unk8[2];
+    s16 unkC[2];
+    s16 unk10;
+    s8 unk12;
+    u8 unk13;
+    s8 unk14;
+    u8 unk15;
+    s8 unk16;
+    s8 unk17;
+    u8 unk18;
+} PauseAAD;
 
-    typedef struct PauseAAD {
-        f32 unk0;
-        f32 unk4;
-        s16 unk8[2];
-        s16 unkC[2];
-        s16 unk10;
-        s8 unk12;
-        u8 unk13;
-        s8 unk14;
-        u8 unk15;
-        s8 unk16;
-        s8 unk17;
-        u8 unk18;
-    } PauseAAD;
+extern void *_malloc(s32);
+extern PlayerProgress D_global_asm_807FC950[];
+extern u8 getLevelIndex(u8 map, u8 arg1);
+extern u8 D_global_asm_8076A0AB;
+extern void func_global_asm_8061134C(void*);
+extern Gfx *func_global_asm_806A921C(Gfx *dl);
+extern Gfx *displayImage(Gfx *dl, u16 textureIndex, s32 arg3, u32 codec, s32 width, s32 height, s16 x, s16 y, f32 xScale, f32 yScale, s32 arg11, f32 arg12);
+extern Gfx *printText(Gfx *dl, s16 x, s16 y, f32 scale, u8 *string);
+extern f32 func_global_asm_80612790(s16 arg0);
+extern f32 func_global_asm_80612794(s16 arg0);
+extern Gfx *func_global_asm_806AA09C(s16 x, s16 y, s16 arg2, s16 arg3, Gfx *dl, s8 arg5, f32 scale);
+extern s16 D_global_asm_807FC828[];
+extern u8 func_global_asm_80712628(void);
 
-    extern void *_malloc(s32);
-    extern PlayerProgress D_global_asm_807FC950[];
-    extern u8 getLevelIndex(u8 map, u8 arg1);
-    extern u8 D_global_asm_8076A0AB;
-    extern void func_global_asm_8061134C(void*);
-    extern Gfx *func_global_asm_806A921C(Gfx *dl);
-    extern Gfx *displayImage(Gfx *dl, u16 textureIndex, s32 arg3, u32 codec, s32 width, s32 height, s16 x, s16 y, f32 xScale, f32 yScale, s32 arg11, f32 arg12);
-    extern Gfx *printText(Gfx *dl, s16 x, s16 y, f32 scale, u8 *string);
-    extern f32 func_global_asm_80612790(s16 arg0);
-    extern f32 func_global_asm_80612794(s16 arg0);
-    extern Gfx *func_global_asm_806AA09C(s16 x, s16 y, s16 arg2, s16 arg3, Gfx *dl, s8 arg5, f32 scale);
-    extern s16 D_global_asm_807FC828[];
-    extern u8 func_global_asm_80712628(void);
+// #define BORDER_TEXT_TOLERANCE 100
+// RECOMP_PATCH void* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
+//     u8 sp160[0x40];
+//     PauseAAD* sp15C;
+//     s16 i;
+//     s16 j;
+//     PlayerProgress *player;
+//     s32 world;
+//     Gfx* local_dl;
+//     f32 temp_f0;
+//     s16 temp_f18;
+//     f32 temp_f20;
+//     f32 temp_f22;
+//     f32 temp_f24;
+//     f32 temp_f26;
+//     f32 temp_f30;
+//     f32 temp_f8;
+//     f32 var_f0;
+//     f32 var_f14;
+//     f32 var_f2;
+//     s16 temp_s0;
+//     s16 temp_s4_2;
+//     s16 temp_t1;
+//     s16 var_s1;
+//     s32 var_s2_2;
+//     s16 var_s4;
+//     s32 gb_count;
+//     s32 temp_f8_2;
+//     Struct807FC7F0 *temp_s2;
+//     s32 temp_t7;
+//     u8 temp_t8;
+//     s32 temp_t8_2;
+//     s32 temp_t9_2;
+//     s32 var_v1;
+//     s8 health;
+//     Struct807FC7F0 *temp_v0_2;
+//     s32 gb_count_0;
+//     s32 x;
+//     s32 y;
+//     s32 offset;
 
-    #define BORDER_TEXT_TOLERANCE 100
-    RECOMP_PATCH void* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
-        u8 sp160[0x40];
-        PauseAAD* sp15C;
-        s16 i;
-        s16 j;
-        PlayerProgress *player;
-        s32 world;
-        Gfx* local_dl;
-        f32 temp_f0;
-        s16 temp_f18;
-        f32 temp_f20;
-        f32 temp_f22;
-        f32 temp_f24;
-        f32 temp_f26;
-        f32 temp_f30;
-        f32 temp_f8;
-        f32 var_f0;
-        f32 var_f14;
-        f32 var_f2;
-        s16 temp_s0;
-        s16 temp_s4_2;
-        s16 temp_t1;
-        s16 var_s1;
-        s32 var_s2_2;
-        s16 var_s4;
-        s32 gb_count;
-        s32 temp_f8_2;
-        Struct807FC7F0 *temp_s2;
-        s32 temp_t7;
-        u8 temp_t8;
-        s32 temp_t8_2;
-        s32 temp_t9_2;
-        s32 var_v1;
-        s8 health;
-        Struct807FC7F0 *temp_v0_2;
-        s32 gb_count_0;
-        s32 x;
-        s32 y;
-        s32 offset;
-
-        sp15C = arg1->AAD_as_array[0];
-        player = &D_global_asm_807FC950[0];
-        world = getLevelIndex(D_global_asm_8076A0AB, 1U);
-        local_dl = _malloc(0x1F40);
-        func_global_asm_8061134C(local_dl);
-        gSPDisplayList(dl++, local_dl);
-        local_dl = func_global_asm_806A921C(local_dl);
-        for (j = 0; j < 2; j++) {
-            temp_s2 = D_global_asm_807FC7F0[j];
-            if (temp_s2) {
-                for (i = 0; i < D_global_asm_807FC7F8[j]; i++) {
-                    var_f0 = sp15C->unk0;
-                    temp_v0_2 = &temp_s2[i];
-                    if (temp_v0_2->unk10 == 2) {
-                        var_f0 += sp15C->unk4;
-                    }
-                    x = (temp_v0_2->unk8 * 4) + (s32)(var_f0 * temp_v0_2->unk0) + (s16)(temp_v0_2->unkC * 4);
-                    y = (temp_v0_2->unkA * 4) + (s32)(var_f0 * temp_v0_2->unk4) + (temp_v0_2->unkE * 4);
-                    if (x < (BORDER_TEXT_TOLERANCE * 4)) {
-                        local_dl = alignHUD(dl, 1, 0);
-                    } else if (x > ((320 - BORDER_TEXT_TOLERANCE) * 4)) {
-                        local_dl = alignHUD(dl, 0, 1);
-                    }
-                    y += (sp15C->unkC[j] * 4);
-                    local_dl = printStyledText(local_dl, 1, x, y, temp_v0_2->unk11, 1U);
-                }
-            }
-        }
-        switch (sp15C->unk12) {
-        case 0:
-            temp_t8 = (player->melons * 0x34) - 0x34;
-            health = player->health;\
-            temp_s4_2 = 0x140;
-            temp_s4_2 = 0xA0 - (s32) (temp_s4_2 * sp15C->unk0);
-            for (i = 0; i < player->melons; i++) {
-                temp_s0 = (i << 0xA) + (object_timer * 0xC8);
-                temp_f24 = (func_global_asm_80612794(temp_s0) * 0.3f) + 3.0f;
-                temp_f20 = (func_global_asm_80612794(temp_s0 + 0x800) * 0.3f) + 3.0f;
-                temp_f22 = func_global_asm_80612794((temp_s0 >> 1) + 0x200) * 10.0f;
-                temp_f8 = func_global_asm_80612794(temp_s0);
-                temp_f24 *= 0.75f;
-                gDPPipeSync(local_dl++);
-                gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0x40);
-                temp_f8_2 = (((i * 0x69) + 0x280) + (temp_f22 * 0.75f)) - temp_t8;
-                temp_f26 = -(temp_f20 * 0.75f);
-                temp_f8 *= 0.5f;
-                temp_f8 += 0.5f;
-                temp_f8 *= 30.0f;
-                temp_f8 *= 0.75f;
-                local_dl = displayImage(local_dl, 0x5DU, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0x30, 0x2A,
-                    temp_f8_2, temp_s4_2 + (s16)temp_f8,
-                    temp_f24, temp_f26, 0, 0.0f);
-                gDPPipeSync(local_dl++);
-                gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
-                if (health > 0) {
-                    var_v1 = MIN(health - 1, 3);
-                    local_dl = displayImage(local_dl, var_v1 + 0x5A, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0x30, 0x2A,
-                        temp_f8_2, temp_s4_2 + temp_f8,
-                        temp_f24, temp_f26, 0, 0.0f);
-                }
-                health = MAX(0, health - 4);
-            }
-            gDPPipeSync(local_dl++);
-            var_s1 = 0x198;
-            var_s4 = (1.0f - sp15C->unk0) * 255.0f;
-            if (var_s4 < 0) {
-                var_s4 = 0;
-            }
-            if (var_s4 >= 0x100) {
-                var_s4 = 0xFF;
-            }
-            if (sp15C->unk17 != 3) {
-                for (i = 0; i < 3; i++) {
-                    if (i == sp15C->unk17) {
-                        gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, var_s4);
-                    } else {
-                        gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, var_s4 >> 1);
-                    }
-                    if ((i == 2) && ((world == 7) || ((world == 8) && (func_global_asm_80712628()) && (D_global_asm_807505CC == 0)))) {
-                        i++;
-                    }
-                    j = i;
-                    if ((i == 1) && (D_global_asm_807505CC != 0)) {
-                        j = 4;
-                    }
-                    if ((j == 2) && (D_global_asm_807505CC != 0)) {
-                        j = 5;
-                    }
-                    local_dl = printText(local_dl, 0x280, var_s1, 0.7f, D_global_asm_807FC7E0[j]);
-                    var_s1 += 0x44;
-                }
-            } else {
-                gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, var_s4);
-                local_dl = printText(local_dl, 0x280, 0x198, 0.7f, D_global_asm_807FC7E0[7]);
-                _sprintf(sp160, "q %s", D_global_asm_807FC7E0[0x10]);
-                local_dl = printText(local_dl, 0x280, 0x1E8, 1, sp160);
-                _sprintf(sp160, "b %s", D_global_asm_807FC7E0[0x11]);
-                local_dl = printText(local_dl, 0x280, 0x238, 1, sp160);
-            }
-            break;
-        case 1:
-            for (j = 0; j < 2; j++) {
-                temp_t8_2 = sp15C->unkC[j] << 2;
-                var_s2_2 = -sp15C->unk10;
-                temp_f0 = 1.0f - sp15C->unk0;
-                if ((temp_t8_2 < 0x3B6) && (temp_t8_2 >= -0x3B5)) {
-                    if (temp_f0 > 0.05f) {
-                        temp_f20 = 180.0f * temp_f0;
-                        temp_f0 *= 3.0f;
-                        i = 0;
-                        while (i < 5) {
-                            temp_s0 = (s32) (func_global_asm_80612794(var_s2_2) * temp_f20) + 0x280;
-                            temp_f18 = func_global_asm_80612790(var_s2_2) * temp_f20;
-                            offset = i + (j * 5);
-                            D_global_asm_807FC840[offset] = (s16) (temp_s0 + 0x20) - (6.0f * temp_f0);
-                            D_global_asm_807FC868[offset] = (s16) ((s32) (((32.0f * temp_f0) + 480.0f) - temp_f18) + temp_t8_2) - (30.0f * temp_f0);
-                            D_global_asm_807FC890[offset] = temp_f0 * 1.33;
-                            if (D_global_asm_80750530[i++]) {
-                                D_global_asm_807FC890[offset] *= 0.75;
-                            }
-                            var_s2_2 += 0x333;                       
-                        }
-                        gDPPipeSync(local_dl++);
-                    }
-                    local_dl = func_global_asm_806ABA6C(local_dl, sp15C, j);
-                }
-                temp_t1 = sp15C->unk8[j];
-                if (temp_t1 != 8) {
-                    var_f14 = 780.0f;
-                    var_f0 = MAX(sp15C->unk0, sp15C->unk4);
-                    if (temp_t8_2 == 0) {
-                        var_f14 += (var_f0 * 400.0);
-                    }
-                    gb_count_0 = *(s16*)(&player->character_progress[sp15C->unk14].golden_bananas[D_global_asm_80750560[temp_t1]]);
-                    local_dl = func_global_asm_806AA09C(0x2A8,
-                        temp_t8_2 + var_f14,
-                        gb_count_0,
-                        5, local_dl, 0, 0.8f);
-                }
-            }
-            D_global_asm_80750538++;
-            if (D_global_asm_80750538 >= 0xE) {
-                D_global_asm_80750538 = 0;
-            }
-            break;
-        case 2:
-            for (j = 0; j < 2; j++) {
-                temp_t9_2 = sp15C->unkC[j] * 4;
-                if ((temp_t9_2 < 0x3B6) && (temp_t9_2 >= -0x3B5)) {
-                    local_dl = func_global_asm_806ABA6C(local_dl, sp15C, j);
-                }
-                gb_count = 0;
-                for (i = 0; i < 5; i++) {
-                    gb_count += player->character_progress[i].golden_bananas[D_global_asm_80750560[sp15C->unk8[j]]];
-                }
-                if (sp15C->unk8[j] != 8) {
-                    var_f14 = 780.0f;
-                    var_f0 = MAX(sp15C->unk0, sp15C->unk4);
-                    if (temp_t9_2 == 0) {
-                        var_f14 += (f64)(var_f0 * 400.0);
-                    }
-                    local_dl = func_global_asm_806AA09C(0x2B0, temp_t9_2 + var_f14, gb_count, 0x19, local_dl, 0, 0.8f);
-                }
-            }
-            break;
-        case 3:
-            local_dl = printText(local_dl, 0x280, 0x74, 0.5f, D_global_asm_807FC7E0[0x12 + D_global_asm_807FC818[D_global_asm_807FC80C]]);
-            local_dl = printText(local_dl, 0x280, 0x3C, 0.65f, D_global_asm_807FC7E0[6]);
-            var_f14 = MAX(sp15C->unk4, sp15C->unk0);
-            var_f2 = (1.0f - var_f14) * 0.65f;
-            if (var_f2 < 0.01f) {
-                var_f2 = 0.01f;
-            }
-            local_dl = func_global_asm_806AA09C(0x280, 0x33C, D_global_asm_807FC828[D_global_asm_807FC818[D_global_asm_807FC80C]], D_global_asm_8075056C[D_global_asm_807FC818[D_global_asm_807FC80C]], local_dl, 1, var_f2);
-            break;
-        }
-        gSPEndDisplayList(local_dl++);
-        return dl;
-    }
-*/
+//     sp15C = arg1->AAD_as_array[0];
+//     player = &D_global_asm_807FC950[0];
+//     world = getLevelIndex(D_global_asm_8076A0AB, 1U);
+//     local_dl = _malloc(0x1F40);
+//     func_global_asm_8061134C(local_dl);
+//     gSPDisplayList(dl++, local_dl);
+//     local_dl = func_global_asm_806A921C(local_dl);
+//     for (j = 0; j < 2; j++) {
+//         temp_s2 = D_global_asm_807FC7F0[j];
+//         if (temp_s2) {
+//             for (i = 0; i < D_global_asm_807FC7F8[j]; i++) {
+//                 var_f0 = sp15C->unk0;
+//                 temp_v0_2 = &temp_s2[i];
+//                 if (temp_v0_2->unk10 == 2) {
+//                     var_f0 += sp15C->unk4;
+//                 }
+//                 x = (temp_v0_2->unk8 * 4) + (s32)(var_f0 * temp_v0_2->unk0) + (s16)(temp_v0_2->unkC * 4);
+//                 y = (temp_v0_2->unkA * 4) + (s32)(var_f0 * temp_v0_2->unk4) + (temp_v0_2->unkE * 4);
+//                 if (x < (BORDER_TEXT_TOLERANCE * 4)) {
+//                     local_dl = alignHUD(dl, ALIGN_LEFT);
+//                 } else if (x > ((320 - BORDER_TEXT_TOLERANCE) * 4)) {
+//                     local_dl = alignHUD(dl, ALIGN_RIGHT);
+//                 }
+//                 y += (sp15C->unkC[j] * 4);
+//                 local_dl = printStyledText(local_dl, 1, x, y, temp_v0_2->unk11, 1U);
+//                 if (x < (BORDER_TEXT_TOLERANCE * 4) || x > ((320 - BORDER_TEXT_TOLERANCE) * 4)) {
+//                     local_dl = popHUD(dl);
+//                 }
+//             }
+//         }
+//     }
+//     switch (sp15C->unk12) {
+//     case 0:
+//         temp_t8 = (player->melons * 0x34) - 0x34;
+//         health = player->health;\
+//         temp_s4_2 = 0x140;
+//         temp_s4_2 = 0xA0 - (s32) (temp_s4_2 * sp15C->unk0);
+//         for (i = 0; i < player->melons; i++) {
+//             temp_s0 = (i << 0xA) + (object_timer * 0xC8);
+//             temp_f24 = (func_global_asm_80612794(temp_s0) * 0.3f) + 3.0f;
+//             temp_f20 = (func_global_asm_80612794(temp_s0 + 0x800) * 0.3f) + 3.0f;
+//             temp_f22 = func_global_asm_80612794((temp_s0 >> 1) + 0x200) * 10.0f;
+//             temp_f8 = func_global_asm_80612794(temp_s0);
+//             temp_f24 *= 0.75f;
+//             gDPPipeSync(local_dl++);
+//             gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0x40);
+//             temp_f8_2 = (((i * 0x69) + 0x280) + (temp_f22 * 0.75f)) - temp_t8;
+//             temp_f26 = -(temp_f20 * 0.75f);
+//             temp_f8 *= 0.5f;
+//             temp_f8 += 0.5f;
+//             temp_f8 *= 30.0f;
+//             temp_f8 *= 0.75f;
+//             local_dl = displayImage(local_dl, 0x5DU, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0x30, 0x2A,
+//                 temp_f8_2, temp_s4_2 + (s16)temp_f8,
+//                 temp_f24, temp_f26, 0, 0.0f);
+//             gDPPipeSync(local_dl++);
+//             gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);
+//             if (health > 0) {
+//                 var_v1 = MIN(health - 1, 3);
+//                 local_dl = displayImage(local_dl, var_v1 + 0x5A, G_IM_FMT_RGBA, G_IM_SIZ_16b, 0x30, 0x2A,
+//                     temp_f8_2, temp_s4_2 + temp_f8,
+//                     temp_f24, temp_f26, 0, 0.0f);
+//             }
+//             health = MAX(0, health - 4);
+//         }
+//         gDPPipeSync(local_dl++);
+//         var_s1 = 0x198;
+//         var_s4 = (1.0f - sp15C->unk0) * 255.0f;
+//         if (var_s4 < 0) {
+//             var_s4 = 0;
+//         }
+//         if (var_s4 >= 0x100) {
+//             var_s4 = 0xFF;
+//         }
+//         if (sp15C->unk17 != 3) {
+//             for (i = 0; i < 3; i++) {
+//                 if (i == sp15C->unk17) {
+//                     gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, var_s4);
+//                 } else {
+//                     gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, var_s4 >> 1);
+//                 }
+//                 if ((i == 2) && ((world == 7) || ((world == 8) && (func_global_asm_80712628()) && (D_global_asm_807505CC == 0)))) {
+//                     i++;
+//                 }
+//                 j = i;
+//                 if ((i == 1) && (D_global_asm_807505CC != 0)) {
+//                     j = 4;
+//                 }
+//                 if ((j == 2) && (D_global_asm_807505CC != 0)) {
+//                     j = 5;
+//                 }
+//                 local_dl = printText(local_dl, 0x280, var_s1, 0.7f, D_global_asm_807FC7E0[j]);
+//                 var_s1 += 0x44;
+//             }
+//         } else {
+//             gDPSetPrimColor(local_dl++, 0, 0, 0xFF, 0xFF, 0xFF, var_s4);
+//             local_dl = printText(local_dl, 0x280, 0x198, 0.7f, D_global_asm_807FC7E0[7]);
+//             _sprintf(sp160, "q %s", D_global_asm_807FC7E0[0x10]);
+//             local_dl = printText(local_dl, 0x280, 0x1E8, 1, sp160);
+//             _sprintf(sp160, "b %s", D_global_asm_807FC7E0[0x11]);
+//             local_dl = printText(local_dl, 0x280, 0x238, 1, sp160);
+//         }
+//         break;
+//     case 1:
+//         for (j = 0; j < 2; j++) {
+//             temp_t8_2 = sp15C->unkC[j] << 2;
+//             var_s2_2 = -sp15C->unk10;
+//             temp_f0 = 1.0f - sp15C->unk0;
+//             if ((temp_t8_2 < 0x3B6) && (temp_t8_2 >= -0x3B5)) {
+//                 if (temp_f0 > 0.05f) {
+//                     temp_f20 = 180.0f * temp_f0;
+//                     temp_f0 *= 3.0f;
+//                     i = 0;
+//                     while (i < 5) {
+//                         temp_s0 = (s32) (func_global_asm_80612794(var_s2_2) * temp_f20) + 0x280;
+//                         temp_f18 = func_global_asm_80612790(var_s2_2) * temp_f20;
+//                         offset = i + (j * 5);
+//                         D_global_asm_807FC840[offset] = (s16) (temp_s0 + 0x20) - (6.0f * temp_f0);
+//                         D_global_asm_807FC868[offset] = (s16) ((s32) (((32.0f * temp_f0) + 480.0f) - temp_f18) + temp_t8_2) - (30.0f * temp_f0);
+//                         D_global_asm_807FC890[offset] = temp_f0 * 1.33;
+//                         if (D_global_asm_80750530[i++]) {
+//                             D_global_asm_807FC890[offset] *= 0.75;
+//                         }
+//                         var_s2_2 += 0x333;                       
+//                     }
+//                     gDPPipeSync(local_dl++);
+//                 }
+//                 local_dl = func_global_asm_806ABA6C(local_dl, sp15C, j);
+//             }
+//             temp_t1 = sp15C->unk8[j];
+//             if (temp_t1 != 8) {
+//                 var_f14 = 780.0f;
+//                 var_f0 = MAX(sp15C->unk0, sp15C->unk4);
+//                 if (temp_t8_2 == 0) {
+//                     var_f14 += (var_f0 * 400.0);
+//                 }
+//                 gb_count_0 = *(s16*)(&player->character_progress[sp15C->unk14].golden_bananas[D_global_asm_80750560[temp_t1]]);
+//                 local_dl = func_global_asm_806AA09C(0x2A8,
+//                     temp_t8_2 + var_f14,
+//                     gb_count_0,
+//                     5, local_dl, 0, 0.8f);
+//             }
+//         }
+//         D_global_asm_80750538++;
+//         if (D_global_asm_80750538 >= 0xE) {
+//             D_global_asm_80750538 = 0;
+//         }
+//         break;
+//     case 2:
+//         for (j = 0; j < 2; j++) {
+//             temp_t9_2 = sp15C->unkC[j] * 4;
+//             if ((temp_t9_2 < 0x3B6) && (temp_t9_2 >= -0x3B5)) {
+//                 local_dl = func_global_asm_806ABA6C(local_dl, sp15C, j);
+//             }
+//             gb_count = 0;
+//             for (i = 0; i < 5; i++) {
+//                 gb_count += player->character_progress[i].golden_bananas[D_global_asm_80750560[sp15C->unk8[j]]];
+//             }
+//             if (sp15C->unk8[j] != 8) {
+//                 var_f14 = 780.0f;
+//                 var_f0 = MAX(sp15C->unk0, sp15C->unk4);
+//                 if (temp_t9_2 == 0) {
+//                     var_f14 += (f64)(var_f0 * 400.0);
+//                 }
+//                 local_dl = func_global_asm_806AA09C(0x2B0, temp_t9_2 + var_f14, gb_count, 0x19, local_dl, 0, 0.8f);
+//             }
+//         }
+//         break;
+//     case 3:
+//         local_dl = printText(local_dl, 0x280, 0x74, 0.5f, D_global_asm_807FC7E0[0x12 + D_global_asm_807FC818[D_global_asm_807FC80C]]);
+//         local_dl = printText(local_dl, 0x280, 0x3C, 0.65f, D_global_asm_807FC7E0[6]);
+//         var_f14 = MAX(sp15C->unk4, sp15C->unk0);
+//         var_f2 = (1.0f - var_f14) * 0.65f;
+//         if (var_f2 < 0.01f) {
+//             var_f2 = 0.01f;
+//         }
+//         local_dl = func_global_asm_806AA09C(0x280, 0x33C, D_global_asm_807FC828[D_global_asm_807FC818[D_global_asm_807FC80C]], D_global_asm_8075056C[D_global_asm_807FC818[D_global_asm_807FC80C]], local_dl, 1, var_f2);
+//         break;
+//     }
+//     gSPEndDisplayList(local_dl++);
+//     return dl;
+// }
 
 typedef struct Struct805FD088 {
     Mtx unk0;
