@@ -232,14 +232,14 @@ extern void func_global_asm_8060FAA4(OSMesgQueue *arg0, OSMesg arg1, s32 arg2);
 extern OSTimer D_global_asm_807F0540;
 extern void func_global_asm_8060F928(Struct131B0_2 *arg0, Struct131B0_1 *arg1); 
 
+static s16 D_global_asm_80746858_copy = 0;
+
 RECOMP_PATCH void func_global_asm_8060F254(Struct131B0_2* arg0) {
     Struct131B0_1* sp54;
     s32 temp_a0;
     Struct131B0_1* temp_v0_3;
     s32 sp48;
     s32 i;
-    
-    D_global_asm_80746858 = 0;
 
     arg0->unk_284 += 1;
     arg0->unk_280 += 1;
@@ -247,16 +247,16 @@ RECOMP_PATCH void func_global_asm_8060F254(Struct131B0_2* arg0) {
 
     if (D_global_asm_80744510 != 0) {
         if (D_global_asm_80744510 == 1) {
-            if (D_global_asm_80746858 == 0) {
+            if (D_global_asm_80746858_copy == 0) {
                 osViBlack(1);
             }
-            if (D_global_asm_80746858 == 0x3C) {
+            if (D_global_asm_80746858_copy == 0x3C) {
                 osViSetMode(&osViModeTable[D_global_asm_8074684C[osTvType]]);
                 osViSetSpecialFeatures(0x42U);
                 osViBlack(0);
                 D_global_asm_80744510 = 2;
             }
-            D_global_asm_80746858 += 1;
+            D_global_asm_80746858_copy++;
         }
         osViSwapBuffer(D_global_asm_80744470[0]);
     }

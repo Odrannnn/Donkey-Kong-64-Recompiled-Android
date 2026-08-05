@@ -14,7 +14,7 @@ Gfx *alignHUDTopBottom(Gfx * dl, enumSpriteAlignment alignment, s32 top, s32 bot
     }
     gEXPushScissor(dl++);
     gEXPushViewport(dl++);
-    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, top, -10, bottom);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, top, 0, bottom);
     if (alignment == ALIGN_RIGHT) {
         // Right align
         gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
@@ -39,7 +39,7 @@ Gfx *alignHUDGameplay(Gfx *dl, enumSpriteAlignment alignment) {
     s32 margin_reduction = recomp_get_ui_pillar();
     gEXPushScissor(dl++);
     gEXPushViewport(dl++);
-    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, -margin_reduction, 0, -margin_reduction, D_global_asm_80744494);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, -margin_reduction, 0, margin_reduction, D_global_asm_80744494);
     if (alignment == ALIGN_RIGHT) {
         // Right align
         gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
