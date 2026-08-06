@@ -7,6 +7,9 @@ extern s8 D_global_asm_80745840;
 extern s8 D_global_asm_8074583C;
 extern void func_global_asm_8060A398(s32 arg0);
 extern void func_global_asm_80737B58(u8 arg0, u16 arg1);
+RECOMP_DECLARE_EVENT(recomp_on_file_start());
+RECOMP_DECLARE_EVENT(recomp_on_new_file_start());
+RECOMP_DECLARE_EVENT(recomp_on_dirty_file_start());
 
 void AlterVolumes(void) {
     s32 i;
@@ -121,6 +124,16 @@ extern s32 D_global_asm_80755338;
 extern s32 D_global_asm_8075533C;
 extern void func_global_asm_805FF4D8(Maps map, s32 exit);
 
+void fixHelmMedalsBug(void) {
+    s32 i;
+    
+    if (isFlagSet(0x302, FLAG_TYPE_PERMANENT)) { // BoM Shut Down
+        for (i = 0; i < 5; i++) {
+            setFlag(0x4B + i, TRUE, FLAG_TYPE_TEMPORARY);
+        }
+    }
+}
+
 // @recomp: Intro Story Story Skip Read
 RECOMP_PATCH void func_global_asm_807144B8(s8 arg0) {
     Maps map;
@@ -147,6 +160,13 @@ RECOMP_PATCH void func_global_asm_807144B8(s8 arg0) {
         map = MAP_DK_ISLES_DK_THEATRE;
         D_global_asm_8075533C = 0;
         exit = 0;
+    }
+    recomp_on_file_start();
+    if (func_global_asm_8060C6B8(0xD, 0, 0, current_file)) {
+        recomp_on_dirty_file_start();
+        fixHelmMedalsBug();
+    } else {
+        recomp_on_file_start();
     }
     func_global_asm_805FF4D8(map, exit); // initMapChange()
     game_mode = GAME_MODE_ADVENTURE;

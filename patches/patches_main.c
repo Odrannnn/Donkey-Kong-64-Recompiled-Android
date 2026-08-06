@@ -1578,6 +1578,9 @@ RECOMP_PATCH Gfx* func_global_asm_80704484(Gfx *dl, u8 arg1) {
                 func_global_asm_8070B324(1.0f - sp54, loading_zone_transition_speed >= 0.0f, sp44);
             }
         }
+    } else if (D_global_asm_807FD888 > 28.0f) {
+        // @recomp: Fix a bug with mid-transition
+        dl = func_global_asm_80703374(dl, 0, 0, 0, 0xFF);
     }
     return dl;
 }
