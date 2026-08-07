@@ -26,7 +26,7 @@ void set_interpolation_lockdown(s32 value) {
     interpolation_disable_timer = value;
 }
 
-Gfx *handle_interpolation(Gfx * dl) {
+Gfx *handle_interpolation(Gfx * dl, interpolationIDs id, u8 decrement) {
     skip_interpolation = FALSE;
     if (interpolation_disable_timer > 0) {
         skip_interpolation = TRUE;
@@ -34,18 +34,20 @@ Gfx *handle_interpolation(Gfx * dl) {
             recomp_printf("[%d] Interpolation disabled. %d frames left\n", debug_counter, interpolation_disable_timer);
             debug_counter++;
         #endif
-        interpolation_disable_timer--;
+        if (decrement) {
+            interpolation_disable_timer--;
+        }
     }
     if ((is_cutscene_active == 3) || (is_cutscene_active == 4)) {
         // Skip interpolation for Arcade/Jetpac
         skip_interpolation = TRUE;
     }
-    if (MTXTAG_GLOBAL != 0) {
+    if (id != 0) {
         if (skip_interpolation) {
-            gEXMatrixGroupSkipAllAspect(dl++, MTXTAG_GLOBAL, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO);
+            gEXMatrixGroupSkipAllAspect(dl++, id, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO);
         }
         else {
-            gEXMatrixGroup(dl++, MTXTAG_GLOBAL, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
+            gEXMatrixGroup(dl++, id, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
         }
     }
     else if (skip_interpolation) {

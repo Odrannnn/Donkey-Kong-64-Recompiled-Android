@@ -10,6 +10,8 @@
 #define gScissor2LowerRightX D_global_asm_80744490
 #define gScissor2LowerRightY D_global_asm_80744494
 
+RECOMP_DECLARE_EVENT(recomp_adjust_dl_allocation(s32 *allocation));
+
 RECOMP_PATCH void func_dk64_boot_8000102C(s32 offset, s32 size, void* dramAddr) {
     while (size & 0xf)
     {
@@ -186,11 +188,27 @@ extern s32 D_global_asm_8076A088;
 
 // @recomp: DL Allocation handler
 RECOMP_PATCH void func_global_asm_805FE544(u8 arg0) {
+    s32 temp;
+    s32 stored_temp;
     // @recomp: Double the DL Allocation
     if (D_global_asm_807FBB64 & 1) {
-        D_global_asm_8076A058 = 12000;
+        temp = 12000;
+        stored_temp = temp;
+        recomp_adjust_dl_allocation(&temp);
+        if (stored_temp > temp) {
+            // Some mod reduced the allocation
+            temp = stored_temp;
+        }
+        D_global_asm_8076A058 = temp;
     } else {
-        D_global_asm_8076A058 = arg0 * 6000;
+        temp = 6000;
+        stored_temp = temp;
+        recomp_adjust_dl_allocation(&temp);
+        if (stored_temp > temp) {
+            // Some mod reduced the allocation
+            temp = stored_temp;
+        }
+        D_global_asm_8076A058 = arg0 * temp;
     }
     D_global_asm_8076A050[0] = _malloc(D_global_asm_8076A058 * sizeof(Gfx));
     D_global_asm_8076A050[1] = _malloc(D_global_asm_8076A058 * sizeof(Gfx));

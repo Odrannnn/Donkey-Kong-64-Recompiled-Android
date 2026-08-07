@@ -1,7 +1,7 @@
 #include "common_structs.h"
 #include "debug_config.h"
 
-extern Gfx* handle_interpolation(Gfx * dl);
+extern Gfx* handle_interpolation(Gfx * dl, interpolationIDs id, u8 decrement);
 
 typedef struct Unk {
     char unk_00[4];
@@ -328,7 +328,7 @@ RECOMP_PATCH Gfx *func_global_asm_805FE4D4(Gfx *dl) {
     }
     gEXSetRefreshRate(dl++, 60 / delta);
     // Interpolation
-    dl = handle_interpolation(dl);
+    dl = handle_interpolation(dl, MTXTAG_GLOBAL, TRUE);
     // 
     gEXSetNearClipping(dl++, FALSE);
     gEXSetTexcoordWrapPoint(dl++, 256 * 4, 256 * 4);
