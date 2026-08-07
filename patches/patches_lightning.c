@@ -325,3 +325,106 @@ RECOMP_PATCH void func_global_asm_8068AD7C(void) {
     func_global_asm_80664D20();
     D_global_asm_807FC621 |= 0x80;
 }
+
+s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
+void func_global_asm_80608DA8(s32, u8, s32, s32, s32);
+extern void *_malloc(s32);
+extern f32 D_global_asm_80770DCC;
+extern f32 D_global_asm_80770DD0;
+extern f32 D_global_asm_80770DD4;
+extern f32 D_global_asm_807480DC;
+extern s8 D_global_asm_8077058C;
+extern u8 D_global_asm_80770DC9;
+extern f32 D_global_asm_807F621C;
+extern f32 D_global_asm_807F6220;
+extern f32 D_global_asm_807F6224;
+extern u8 is_cutscene_active;
+
+typedef struct InstanceData806443E4 {
+    s32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+} InstanceData806443E4;
+
+// @recomp: Japes stormy area lightning
+RECOMP_PATCH void func_global_asm_806443E4(Prop_ScriptData *arg0, s16 arg1, s16 arg2, s16 arg3) {
+    InstanceData806443E4 *var_v1;
+    f32 var_f16;
+    f32 var_f14;
+    f32 dx, dy, dz;
+    f32 intensity;
+
+    // fake match
+    if (gPlayerPointer->PaaD) {
+    }
+
+    if (gPlayerPointer->PaaD->unk1F0 & 0x20000000) {
+        return;
+    }
+    if (arg0->unk0 == NULL) {
+        var_v1 = _malloc(0x10);
+        arg0->unk0 = var_v1;
+        var_v1->unk0 = 0;
+        var_v1->unk4 = 0.0f;
+        var_v1->unk8 = 0.0f;
+        var_v1->unkC = 0.0f;
+    }
+    var_v1 = arg0->unk0;
+    dz = character_change_array->look_at_eye_z - D_global_asm_807F6224;
+    dx = character_change_array->look_at_eye_x - D_global_asm_807F621C;
+    dy = character_change_array->look_at_eye_y - D_global_asm_807F6220;
+    var_f16 = _sqrtf(SQ(dz) + (SQ(dx) + SQ(dy)));
+    if ((character_change_array->chunk == 0xE) && (is_cutscene_active != 1)) {
+        var_f14 = 1.0f;
+    } else if (character_change_array->chunk == 7) {
+        var_f14 = 0.0f;
+    } else {
+        var_f16 -= _sqrtf(SQ(D_global_asm_807F621C - 1714.0f) + SQ(D_global_asm_807F6220 - 226.0f) + SQ(D_global_asm_807F6224 - 3410.0f));
+        if (var_f16 < 0.0) {
+            var_f16 = 0.0f;
+        }
+        if (var_f16 > 600.0f) {
+            var_f14 = 0.0f;
+        } else {
+            var_f14 = 1.0 - (var_f16 / 600.0f);
+        }
+    }
+    if ((character_change_array->chunk == 0xE) || ((character_change_array->chunk == 0xB) && (var_f16 < D_global_asm_807480DC))) {
+        func_global_asm_80711410(2.9f, -0x1E, var_f14, 0xE, MAX(0.05, var_f14));
+    } else {
+        D_global_asm_8077058C = 0;
+    }
+    if (RandClamp(50) == 0xF) {
+        var_v1->unk0 = 0x28;
+    }
+    if (var_v1->unk0) {
+        var_v1->unk0--;
+        if (RandClamp(10) == 5) {
+            if (var_f16 < 2200.0f) {
+                if (D_global_asm_80770DC9 != 0) {
+                    if (D_global_asm_80770DD4 < 600.0f) {
+                        playSound(0x9C,
+                            (s32) ((((var_f14 * 32767.0f * 60.0f) / 255.0f) * (600.0 - D_global_asm_80770DD4)) / 1000.0),
+                                  D_global_asm_80770DCC,
+                                  0.8f,
+                                  0x1E,
+                                  (u32) D_global_asm_80770DD0);
+                    }
+                } else {
+                    func_global_asm_80608DA8(0x9C, var_f14 * 60.0f, 0x7F, 0x1E, (RANDNUM() >> 0xF) % 3);
+                }
+            }
+            var_v1->unk4 = 1.0f;
+            var_v1->unk8 = 1.0f;
+            var_v1->unkC = 1.0f;
+        }
+    }
+    var_v1->unk4 = ((0.4 - var_v1->unk4) * 0.2) + var_v1->unk4;
+    var_v1->unk8 = ((0.3 - var_v1->unk8) * 0.2) + var_v1->unk8;
+    var_v1->unkC = ((0.3 - var_v1->unkC) * 0.2) + var_v1->unkC;
+    intensity = recomp_get_lightning_intensity();
+    if (intensity > 0) {
+        func_global_asm_80659670(var_v1->unk4 * intensity, var_v1->unk8 * intensity, var_v1->unkC * intensity, 0xE);
+    }
+}
