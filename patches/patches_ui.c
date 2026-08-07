@@ -568,7 +568,7 @@ RECOMP_PATCH Gfx *func_global_asm_8071338C(Gfx *dl) {
     temp = 20.0f;
     temp *= 2.0f;
     temp *= 4.0f;
-    dl = alignHUDGameplay(dl, ALIGN_LEFT);
+    dl = alignHUD(dl, ALIGN_LEFT);
     dl = printStyledText(dl, 1, 0x118, temp, string, 4);
     dl = popHUD(dl);
     return dl;
