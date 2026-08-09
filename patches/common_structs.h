@@ -204,7 +204,7 @@ typedef struct {
     s32 unk28;
     s32 unk2C;
     s32 unk30;
-    void* unk34; // Used
+    Mtx* unk34; // Used
     s16 unk38;
     s16 unk3A;
     s32 unk3C;
