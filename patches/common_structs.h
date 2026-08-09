@@ -28,7 +28,9 @@ typedef struct rgb {
 u32 func_global_asm_806119A0(void); // Having this here to prevent having to declare it for RANDNUM()
 #define SQ(x) ((x) * (x))
 #define ACTOR_UNINITIALIZED(actor) (!(actor->object_properties_bitfield & 0x10))
+#define MATH_HALFPI_F 1.5707964f
 #define MATH_PI_F 3.1415927f
+#define MATH_2PI_F 6.283185482f
 #define RANDNUM() (func_global_asm_806119A0() & 0x7FFFFFFF)
 #define RandClamp(a) ((RANDNUM() >> 0xF) % a)
 #define RandChance(a) (RandClamp(1000) > (1000 - ((s32)((a) * 1000))))
@@ -49,6 +51,7 @@ typedef enum interpolationIDs {
     MTXTAG_ACTORS = 0x1000, // 0x100 allocated per actor
     MTXTAG_PROP = 0x101000,
     MTXTAG_SPRITE = 0x102000,
+    MTXTAG_TEXT = 0x200000,
 } interpolationIDs;
 
 typedef struct AnimationStateUnk0_0 {
@@ -147,7 +150,8 @@ typedef struct struct806A57C0_3 Struct806A57C0_3;
 
 typedef struct struct806A57C0_3_sub10 {
     s16 unk0;
-    s16 unk2;
+    u8 unk2;
+    u8 unk3;
     void* unk4;
     Mtx unk8[2];
     f32 unk88;
@@ -200,7 +204,7 @@ typedef struct {
     s32 unk28;
     s32 unk2C;
     s32 unk30;
-    void* unk34; // Used
+    Mtx* unk34; // Used
     s16 unk38;
     s16 unk3A;
     s32 unk3C;
