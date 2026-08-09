@@ -392,3 +392,126 @@ RECOMP_PATCH Struct80717D84 *drawSpriteAtPosition(void* sprite, f32 scale, f32 x
     current_sprite_id++;
     return sp;
 }
+
+s16 func_global_asm_806FD7A8(s32, u8);
+extern void *_malloc(s32);
+u8 func_global_asm_806FD894(s16 arg0);
+void func_global_asm_80611690(void *arg0);
+void func_global_asm_8061134C(void *arg0);
+extern Actor *gCurrentPlayer;
+extern u16 D_global_asm_80750AC8;
+s32 textbox_interpolation_id = 0;
+s32 last_interp_id_frame = 0;
+extern s32 D_global_asm_8076AF10;
+
+const u16 D_global_asm_8075A740[] = {
+    0, 0, 0, 0
+};
+f32 func_global_asm_80612D1C(f32 arg0);
+Gfx* printStyledText(Gfx* dl, s16 style, s16 x, s16 y, u8* string, u32 extraBitfield);
+extern Actor *gCurrentActorPointer;
+
+s32 getTextInterpolationId(void) {
+    return MTXTAG_TEXT + (gCurrentActorPointer->unk54 * 1000) + (textbox_interpolation_id % 1000);
+}
+
+RECOMP_PATCH void func_global_asm_806A370C(Gfx **arg0, AAD_global_asm_806A4DDC *arg1, Struct806A57C0_2 *arg2, Struct806A57C0_3 *arg3) {
+    Gfx *dl;
+    // wtf
+    union {
+        u16 h;
+        u8 b;
+        u8 pad[4];
+    } spE8;
+    f32 spA8[4][4];
+    f32 sp68[4][4];
+    f32 one;
+    f32 temp_f12;
+    f32 temp_f14;
+    f32 temp_f0;
+    f32 var_f2;
+    struct806A57C0_3_sub10 *temp_s1;
+    f32 sp4C;
+    u8 pushed_matrix_group = FALSE;
+
+    if (last_interp_id_frame != D_global_asm_8076AF10) {
+        textbox_interpolation_id = 0;
+        last_interp_id_frame = D_global_asm_8076AF10;
+    }
+    dl = *arg0;
+    one = 1.f;
+    spE8.h = D_global_asm_8075A740[0];
+    temp_s1 = &arg3->unk10;
+    guMtxIdentF(spA8);
+    if ((temp_s1->unk0 != 0) && (arg3->unk2 != 0)) {
+        temp_f12 = (arg3->unk0 * 0.5f) * 4.0f;
+        temp_f14 = (arg2->unk18 * 0.5f) * 4.0f;
+        guTranslateF(sp68, -temp_f12, -temp_f14, 0.0f);
+        guMtxCatF(spA8, sp68, spA8);
+        temp_s1->unk88 += 0.41887903213500977;
+        if (temp_s1->unk0 & 8) {
+            temp_f0 = temp_s1->unk88 * 0.5;
+            if (temp_f0 <= MATH_2PI_F) {
+                guRotateF(sp68, temp_f0 * 57.295776f, 0.0f, 0.0f, 1.0f);
+                guMtxCatF(spA8, sp68, spA8);
+            }
+        }
+        if (temp_s1->unk0 & 4) {
+            if (MATH_2PI_F >= temp_s1->unk88) {
+                var_f2 = func_global_asm_80612D1C(temp_s1->unk88 - MATH_HALFPI_F) + 1.0f;
+                var_f2 = (0.25f * var_f2) + 1.0f;
+            } else {
+                var_f2 = 1.0f;
+            }
+            guScaleF(sp68, var_f2, var_f2, 1.0f);
+            guMtxCatF(spA8, sp68, spA8);
+        }
+        if (temp_s1->unk0 & 2) {
+            sp4C = (4.0f * func_global_asm_80612D1C(temp_s1->unk88)) * ((20.0f - RandClamp(40)) / 20.0f);
+            guTranslateF(sp68, sp4C, (4.0f * func_global_asm_80612D1C(temp_s1->unk88)) * ((20.0f - RandClamp(40)) / 20.0f), 0.0f);
+            guMtxCatF(spA8, sp68, spA8);
+        }
+        guTranslateF(sp68, temp_f12, temp_f14, 0.0f);
+        guMtxCatF(spA8, sp68, spA8);
+    }
+    guScaleF(sp68, one, one, one);
+    guMtxCatF(spA8, sp68, spA8);
+    guTranslateF(sp68, (((f64) arg1->unk44) + arg3->unk4) * 4.0, (((f64) arg1->unk48) + arg3->unk8) * 4.0, 0.0f);
+    guMtxCatF(spA8, sp68, spA8);
+    guMtxF2L(spA8, &temp_s1->unk8[D_global_asm_807444FC]);
+    gEXMatrixGroupSkipAll(dl++, getTextInterpolationId(), G_EX_PUSH, G_MTX_MODELVIEW, G_EX_EDIT_NONE);
+    textbox_interpolation_id++;
+    gSPMatrix(dl++, &temp_s1->unk8[D_global_asm_807444FC], (G_MTX_NOPUSH | G_MTX_LOAD) | G_MTX_MODELVIEW);
+    gDPPipeSync(dl++);
+    gDPSetPrimColor(dl++, 0, 0, 0x28, 0x28, 0xFF, arg3->unk3);
+    spE8.b = temp_s1->unk2;
+    dl = printStyledText(dl, 6, 0, 0, (u8 *) (&spE8), 0);
+    gEXPopMatrixGroup(dl++, G_MTX_MODELVIEW); // @recomp: Mtx untag
+    *arg0 = dl;
+}
+
+RECOMP_PATCH void func_global_asm_806A3B78(Gfx **arg0, AAD_global_asm_806A4DDC *arg1, Struct806A57C0_2 *arg2, u8 arg3, u8 *arg4) {
+    Gfx *sp44;
+    s32 i;
+    Struct806A57C0_3 *var_s0;
+
+    sp44 = *arg0;
+    var_s0 = arg2->unkC;
+    i = 0;
+    if (last_interp_id_frame != D_global_asm_8076AF10) {
+        textbox_interpolation_id = 0;
+        last_interp_id_frame = D_global_asm_8076AF10;
+    }
+    while ((var_s0 != NULL) && (*arg4 == 0)) {
+        if (arg3 && (i == arg1->unk11)) {
+            *arg4 = 1;
+        }
+        if (arg2->unk0 & 1) {
+            func_global_asm_806A370C(&sp44, arg1, arg2, var_s0);
+            textbox_interpolation_id++;
+        }
+        var_s0 = var_s0->unkA0;
+        i++;
+    }
+    *arg0 = sp44;
+}
