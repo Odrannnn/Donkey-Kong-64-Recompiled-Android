@@ -65,6 +65,8 @@ Gfx *popHUD(Gfx *dl) {
 extern Mtx identity_fixed_mtx;
 extern s32 cur_drawn_model_transform_id;
 extern s32 cur_model_transform_id_offset;
+extern u8 disable_sprite_interpolation;
+extern u8 cur_drawn_model_skip_interpolation;
 Gfx *set_model_matrix_group(Gfx * dl, void *geo_list, u8 skip_rotation, u8 *pushed);
 Gfx *pop_model_matrix_group(Gfx *dl);
 
@@ -112,7 +114,9 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     cur_drawn_model_transform_id = sprite->sprite_index;
     cur_model_transform_id_offset = 0;
     gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    cur_drawn_model_skip_interpolation = disable_sprite_interpolation;
     dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
+    cur_drawn_model_skip_interpolation = FALSE;
     //
     gSPDisplayList(dl++, osVirtualToPhysical(temp_s0));
     gDPPipeSync(temp_s0++);
@@ -2056,6 +2060,7 @@ extern f32 func_global_asm_80612794(s16 arg0);
 extern Gfx *func_global_asm_806AA09C(s16 x, s16 y, s16 arg2, s16 arg3, Gfx *dl, s8 arg5, f32 scale);
 extern s16 D_global_asm_807FC828[];
 extern u8 func_global_asm_80712628(void);
+extern void set_sprite_interpolation_lockdown(s32 value);
 
 // @recomp: Pause Menu Text renderer
 RECOMP_PATCH Gfx* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
@@ -2431,6 +2436,7 @@ RECOMP_PATCH void func_global_asm_806AB4EC(PauseAAD *arg0, SpriteData *arg1, s32
     D_global_asm_807FC80F = 1;
 }
 
+
 // @recomp: Pause Menu Sprite Initialization Wrapper
 RECOMP_PATCH void func_global_asm_806AA304(PauseAAD* arg0, s32 arg1) {
     s32 sp8C;
@@ -2769,6 +2775,7 @@ extern Gfx* D_global_asm_8076A050[];
 extern u8 D_global_asm_807444FC;
 extern void *D_global_asm_8076A080;
 extern Gfx **D_1000090;
+extern void set_sprite_interpolation_state(void);
 
 // @recomp: General gfx loop
 RECOMP_PATCH void func_global_asm_805FD088(Struct805FD088 *arg0, Gfx **arg1, Gfx **arg2) {
@@ -2796,6 +2803,7 @@ RECOMP_PATCH void func_global_asm_805FD088(Struct805FD088 *arg0, Gfx **arg1, Gfx
         Struct80750948 *temp_v0_6;
         s16 x, y;
         s32 width, height;
+        set_sprite_interpolation_state();
         dl = func_global_asm_805FCFD8(dl);
         dl_0 = func_global_asm_805FCFD8(dl_0);
         gDPSetScissorFrac(dl++, G_SC_NON_INTERLACE, 0, 0, D_global_asm_80744490 * 4.0f, D_global_asm_80744494 * 4.0f);

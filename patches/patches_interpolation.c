@@ -8,7 +8,9 @@
 #define INTERPOLATION_DEBUG 0
 
 s32 interpolation_disable_timer = 0;
+s32 sprite_disable_timer = 0;
 u8 skip_interpolation = FALSE;
+u8 disable_sprite_interpolation = FALSE;
 #if INTERPOLATION_DEBUG
     s32 debug_counter = 0;
 #endif
@@ -24,6 +26,25 @@ void set_interpolation_lockdown(s32 value) {
         debug_counter++;
     #endif
     interpolation_disable_timer = value;
+}
+
+void set_sprite_interpolation_lockdown(s32 value) {
+    if (sprite_disable_timer > value) {
+        return;
+    }
+    #if INTERPOLATION_DEBUG
+        recomp_printf("\n[%d] Disabling sprite interpolation for %d frames\n", debug_counter, value);
+        debug_counter++;
+    #endif
+    sprite_disable_timer = value;
+}
+
+void set_sprite_interpolation_state(void) {
+    disable_sprite_interpolation = FALSE;
+    if (sprite_disable_timer > 0) {
+        sprite_disable_timer--;
+        disable_sprite_interpolation = TRUE;
+    }
 }
 
 Gfx *handle_interpolation(Gfx * dl, interpolationIDs id, u8 decrement) {
@@ -202,7 +223,7 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
                                 func_global_asm_8061D4E4(arg0);
                             }
                             //@recomp: On cutscene end, disable interpolation for 2f. 1f seems to not be enough
-                            set_interpolation_lockdown(2);
+                            set_interpolation_lockdown(3);
                         } else {
                             temp_t0 = D_global_asm_807476FC->camera_bank[D_global_asm_807476F4].length_array[D_global_asm_807F5CF0 - 1];
                             params = &D_global_asm_807476FC->function_bank[D_global_asm_807F5CF2].params[0];
@@ -411,10 +432,11 @@ RECOMP_PATCH s32 func_global_asm_80620F00(Actor* arg0, u8 arg1, u8 arg2) {
                 func_global_asm_8061B840(temp_s0, 0xA);
             }
         }
-        // @recomp: Disable camera flips
-        // temp_s0->unkF4++;
+        temp_s0->unkF4++;
         if (var_t7 && (temp_s0->unkF4 >= 0x15)) {
             temp_s0->unkF4 = 0U;
+            // @recomp: Disable interpolation globally for a couple frames
+            set_interpolation_lockdown(2);
             if ((temp_s0->unk0->unkB8 != 0.0f) && (temp_s0->unk0->control_state != 0x59)) {
                 func_global_asm_80620628(arg0, 0.0f, temp_s0->unkB2, 1);
                 return TRUE;
@@ -426,4 +448,85 @@ RECOMP_PATCH s32 func_global_asm_80620F00(Actor* arg0, u8 arg1, u8 arg2) {
     temp_s0->unkFF = 0;
     temp_s0->unkF4 = 0U;
     return FALSE;
+}
+
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    f32 unk4; // Used
+    u8 unk8; // Used
+    u8 unk9;
+    u8 unkA;
+    u8 unkB;
+    s32 unkC[2];
+} GlobalASMStruct76;
+
+typedef struct {
+    Actor* unk0;
+    s32 unk4;
+} GlobalASMStruct53;
+
+extern GlobalASMStruct76 D_global_asm_80750100[];
+extern GlobalASMStruct53 D_global_asm_807FB930[];
+extern s32 D_global_asm_807552F4[];
+extern u16 D_global_asm_807FBB34;
+extern s32 func_global_asm_8068A3A0(s32 arg0, u32 *arg1);
+extern f32 func_global_asm_8065D0FC(f32 arg0);
+extern void func_global_asm_8068A404(Actor *arg0, s32 arg1, s32 arg2);
+
+// @recomp: LOD Handler
+RECOMP_PATCH void func_global_asm_8068A508(void) {
+    PlayerAdditionalActorData *PaaD;
+    s32 sp80;
+    f32 dz;
+    f32 temp_f0_2;
+    f32 dy;
+    f32 temp_f20;
+    f32 dx;
+    s32 temp_a2;
+    s32 i;
+    Actor *temp_s0;
+
+    for (i = 0; i < D_global_asm_807FBB34; i++) {
+        temp_s0 = D_global_asm_807FB930[i].unk0;
+        if (!(temp_s0->object_properties_bitfield & 0x2000)) {
+            if ((temp_s0->object_properties_bitfield & 0x100)) {
+                temp_f20 = SQ(temp_s0->z_position - character_change_array->look_at_eye_z) + (
+                    SQ(temp_s0->x_position - character_change_array->look_at_eye_x) + 
+                    SQ(temp_s0->y_position - character_change_array->look_at_eye_y));
+                if (func_global_asm_8068A3A0(temp_s0->unk58, &sp80)) {
+                    temp_f0_2 = func_global_asm_8065D0FC(D_global_asm_80750100[sp80].unk4);
+                    switch (D_global_asm_80750100[sp80].unk8) {
+                        case 0:
+                            if (cc_number_of_players >= 2) {
+                                PaaD = temp_s0->PaaD;
+                                if (D_global_asm_807552F4[PaaD->unk1A4] >= 0) {
+                                    func_global_asm_8068A404(temp_s0, sp80, D_global_asm_807552F4[PaaD->unk1A4]);
+                                }
+                            }
+                            break;
+                        // case 1:
+                        //     if (SQ(temp_f0_2) < temp_f20) {
+                        //         if (temp_s0->unk4C == 0) {
+                        //             temp_s0->unk4C = func_global_asm_80612E90(temp_s0, D_global_asm_80750100[sp80].unk2, 0);
+                        //         }
+                        //     } else if (temp_s0->unk4C) {
+                        //         func_global_asm_80613794(temp_s0, 1);
+                        //     }
+                        //     break;
+                        // case 2:
+                        //     if (temp_f20 < SQ(temp_f0_2)) {
+                        //         if (temp_s0->unk4C == 0) {
+                        //             temp_s0->unk4C = func_global_asm_80612E90(temp_s0, D_global_asm_80750100[sp80].unk2, 0);
+                        //         }
+                        //     } else if (temp_s0->unk4C) {
+                        //         func_global_asm_80613794(temp_s0, 1);
+                        //     }
+                        //     break;
+                    }
+                }
+            }
+        }
+    }
 }
