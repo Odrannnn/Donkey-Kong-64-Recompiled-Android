@@ -248,3 +248,293 @@ RECOMP_PATCH void func_global_asm_806EA26C(void) {
         CaaD->unkF1 = cooldown;
     }
 }
+
+Gfx *func_menu_8002F980(Gfx *, MenuAdditionalActorData *, u8 **, s8, s32 *, s32, f32 *, f32, s32);
+s32 func_menu_800317E8(MenuAdditionalActorData *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, s8 arg6, f32 arg7);
+Gfx* printStyledText(Gfx* dl, s16 style, s16 x, s16 y, u8* string, u32 extraBitfield);
+s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
+void func_menu_8002FD38(MenuAdditionalActorData*, s32, s32);
+void func_menu_8002FC1C(Actor *, MenuAdditionalActorData *, s32);
+void func_menu_8002FE08(MenuAdditionalActorData*, s32);
+void func_global_asm_8060DEA8(void);
+extern s8 D_global_asm_8074583C;
+extern s8 D_global_asm_80745840;
+extern s8 D_global_asm_80745844;
+extern s16 D_menu_80033674;
+extern u32 global_properties_bitfield;
+extern u8 **label_string_pointer_array;
+
+// @recomp: Sound DL
+RECOMP_PATCH Gfx *func_menu_8002D520(Actor *arg0, Gfx *dl) {
+    MenuAdditionalActorData *MaaD = arg0->MaaD;
+    s32 sp60;
+    s8 pad[4];
+    f32 sp58;
+    f32 sp54;
+    f32 sp50;
+    s16 pad4;
+    s16 temp_f10;
+    s8 pad3[2];
+    s8 var_v0;
+    char sp40[4];
+
+    global_properties_bitfield &= ~0x10;
+    func_menu_800317E8(MaaD, 160.0f, 20.0f, &sp58, &sp54, 2, 0, 1.5f);
+    dl = printStyledText(dl, 1, 0x280, sp54 * 4.0f, label_string_pointer_array[32], 0x81U);
+    dl = func_menu_8002F980(dl, MaaD, &label_string_pointer_array[33], 4, &sp60, 1, &sp50, 80.0f, -1);
+    D_menu_80033674 = 0x3E8;
+    func_menu_800317E8(MaaD, 160.0f, 150.0f, &sp58, &sp54, 2, 0, 1.5f);
+    temp_f10 = sp54 * 4.0f;
+    sp58 = (sp58 - sp50) * 4.0f;
+    switch (sp60) {
+        case 0:
+            dl = printStyledText(dl, 1, sp58, temp_f10, label_string_pointer_array[D_global_asm_80745844 + 37], 0x81U);
+            break;
+        // case 1:
+        // case 2:
+        //     dl = printStyledText(dl, 1, sp58, temp_f10, label_string_pointer_array[40], 0x81U);
+        //     var_v0 = sp60 == 1 ? D_global_asm_8074583C : D_global_asm_80745840;
+        //     _sprintf(sp40, "%d", (var_v0 + 1) >> 1);
+        //     dl = printStyledText(dl, 1, sp58, temp_f10 + 0x78, &sp40, 0x81U);
+        //     break;
+        // case 3:
+        //     D_menu_80033674 = 0;
+        //     break;
+    }
+    return dl;
+}
+
+extern s16 D_menu_80033670;
+extern s8 D_global_asm_8074583C;
+extern s8 D_global_asm_80745840;
+extern s8 D_global_asm_80745844;
+
+void func_global_asm_8060A398(s32);
+void func_menu_80027E10(void);
+void func_menu_8002907C(void);
+void func_global_asm_8060C648(s32 arg0, u8 arg1, u8 arg2, u8 fileIndex, u32 arg4);
+
+// @recomp: Sound screen code
+RECOMP_PATCH void func_menu_8002CFA4(Actor *arg0, s32 arg1) {
+    MenuAdditionalActorData *MaaD = arg0->MaaD;
+    s8 sp23 = FALSE;
+
+    func_menu_8002907C();
+    if (MaaD->unk0 == 0.0f) {
+        if (MaaD->unk4 == 0.0f) {
+            switch (MaaD->unk17) {
+                case 0:
+                    if (!(D_menu_80033670 & 0x10) && (arg1 & 0x10)) {
+                        D_global_asm_80745844++;
+                        if (D_global_asm_80745844 > 2) {
+                            D_global_asm_80745844 = 0;
+                        }
+                        sp23 = TRUE;
+                    } else if (!(D_menu_80033670 & 0x20) && (arg1 & 0x20)) {
+                        D_global_asm_80745844--;
+                        if (D_global_asm_80745844 < 0) {
+                            D_global_asm_80745844 = 2;
+                        }
+                        sp23 = TRUE;
+                    }
+                    if (sp23) {
+                        func_menu_80027E10();
+                    }
+                    break;
+                // case 1:
+                //     if (arg1 & 0x10) {
+                //         D_global_asm_8074583C++;
+                //         playSound(0x2A0, 0x7FFF, 63.0f, 1.0f, 0, 0);
+                //         if (D_global_asm_8074583C > 0x28) {
+                //             D_global_asm_8074583C = 0x28;
+                //         }
+                //     } else if (arg1 & 0x20) {
+                //         D_global_asm_8074583C--;
+                //         playSound(0x2A0, 0x7FFF, 63.0f, 1.0f, 0, 0);
+                //         if (D_global_asm_8074583C < 0) {
+                //             D_global_asm_8074583C = 0;
+                //         }
+                //     }
+                //     func_global_asm_80737B58(0, ((D_global_asm_8074583C * 0x61A8) / 40));
+                //     func_global_asm_80737B58(1, ((D_global_asm_8074583C * 0x61A8) / 40));
+                //     func_global_asm_80737B58(2, ((D_global_asm_8074583C * 0x61A8) / 40));
+                //     func_global_asm_80737B58(3, ((D_global_asm_8074583C * 0x61A8) / 40));
+                //     break;
+                // case 2:
+                //     if (arg1 & 0x10) {
+                //         D_global_asm_80745840++;
+                //         if (D_global_asm_80745840 >= 0x29) {
+                //             D_global_asm_80745840 = 0x28;
+                //         }
+                //     } else if (arg1 & 0x20) {
+                //         D_global_asm_80745840--;
+                //         if (D_global_asm_80745840 < 0) {
+                //             D_global_asm_80745840 = 0;
+                //         }
+                //     }
+                //     func_global_asm_8060A398(0);
+                //     func_global_asm_8060A398(2);
+                //     break;
+                // case 3:
+                //     if (arg1 & 0x100) {
+                //         D_global_asm_80745844 = 0;
+                //         D_global_asm_8074583C = 0x28;
+                //         D_global_asm_80745840 = 0x28;
+                //         func_global_asm_80737B58(0, ((D_global_asm_8074583C * 0x61A8) / 40));
+                //         func_global_asm_80737B58(1, ((D_global_asm_8074583C * 0x61A8) / 40));
+                //         func_global_asm_80737B58(2, ((D_global_asm_8074583C * 0x61A8) / 40));
+                //         func_global_asm_80737B58(3, ((D_global_asm_8074583C * 0x61A8) / 40));
+                //         func_global_asm_8060A398(0);
+                //         func_global_asm_8060A398(2);
+                //         sp23 = 1;
+                //         func_menu_80027E10();
+                //     }
+                //     break;
+            }
+            if (arg1 & 2) {
+                if (func_global_asm_8060C6B8(0x1E, 0, 0, 0) != D_global_asm_80745844) {
+                    func_global_asm_8060C648(0x1E, 0, 0, 0, D_global_asm_80745844);
+                    func_global_asm_8060DEA8();
+                }
+                playSound(0x2C9, 0x7FFF, 63.0f, 1.0f, 0, 0);
+                MaaD->unk16 = 0;
+                MaaD->unk13 = 1;
+            } else {
+                func_menu_8002FD38(MaaD, 1, arg1);  // @recomp: Change to 1 option
+            }
+        }
+        func_menu_8002FE08(MaaD, 1);  // @recomp: Change to 1 option
+    }
+    func_menu_8002FC1C(arg0, MaaD, 1);
+    if (sp23) {
+        playSound(0x74, 0x7FFF, 63.0f, 1.0f, 0, 0);
+    }
+}
+
+extern s16 D_menu_80033674;
+void func_global_asm_8060C8AC(u8 arg0);
+
+// @recomp: Options DL
+RECOMP_PATCH Gfx *func_menu_8002DBDC(Actor *arg0, Gfx *dl) {
+    MenuAdditionalActorData *aaD;
+    u32 sp68;
+    f32 x;
+    f32 sp60;
+    f32 sp5C;
+    s32 pad6;
+    s16 y;
+    s32 pad;
+    s32 pad2;
+    s32 pad3;
+    s32 pad4;
+    s32 pad5;
+    s32 pad7;
+
+    aaD = arg0->additional_actor_data;
+    global_properties_bitfield &= ~0x10;
+    func_menu_800317E8(aaD, 160.0f, 20.0f, &x, &sp60, 1, 0, 1.5f);
+    dl = printStyledText(dl, 1, 640, sp60 * 4.0f, label_string_pointer_array[41], 0x81);
+    dl = func_menu_8002F980(dl, aaD, &label_string_pointer_array[44], 1, &sp68, 1, &sp5C, 80.0f, -1);
+    D_menu_80033674 = 1000;
+    func_menu_800317E8(aaD, 160.0f, 150.0f, &x, &sp60, 2, 0, 1.5f);
+    y = sp60 * 4.0f;
+    x = (x - sp5C) * 4.0f;
+    switch (sp68) {
+        // case 0:
+        //     dl = printStyledText(dl, 1, x, y + 64, label_string_pointer_array[47 + widescreen_enabled], 0x81);
+        //     break;
+        // case 1:
+        //     dl = printStyledText(dl, 1, x, y + 64, label_string_pointer_array[49 + story_skip], 0x81);
+        //     break;
+        case 0:  // @recomp: Isolate to just resetting highscores
+            D_menu_80033674 = 0;
+            break;
+        // case 3:
+        //     dl = printStyledText(dl, 1, x, y + 64, label_string_pointer_array[52 + D_global_asm_80744530], 0x81);
+        //     break;
+        // case 4:
+        //     dl = printStyledText(dl, 1, x, y + 64, label_string_pointer_array[51], 0x81);
+        //     break;
+    }
+    return dl;
+}
+
+// @recomp: Options Code
+extern u8 D_global_asm_80744530;
+extern s16 D_global_asm_80744544;
+extern u8 D_global_asm_807550C8;
+
+RECOMP_PATCH void func_menu_8002D8AC(Actor *arg0, s32 arg1) {
+    MenuAdditionalActorData *aaD;
+    s8 optionChanged;
+    s32 i;
+
+    aaD = arg0->MaaD;
+    optionChanged = FALSE;
+    if (aaD->unk0 == 0.0f) {
+        if (aaD->unk4 == 0.0f) {
+            switch (aaD->unk17) {
+                // case 0:
+                //     if ((arg1 & 0x30) && !(D_menu_80033670 & 0x30)) {
+                //         widescreen_enabled = 1 - widescreen_enabled;
+                //         optionChanged = TRUE;
+                //     }
+                //     break;
+                // case 1:
+                //     if ((arg1 & 0x30) && !(D_menu_80033670 & 0x30)) {
+                //         story_skip = 1 - story_skip;
+                //         optionChanged = TRUE;
+                //     }
+                //     break;
+                case 0:
+                    if (arg1 & 0x100) {
+                        func_global_asm_8060C8AC(0xFF);
+                        playSound(0x23C, 0x7FFF, 63.0f, 1.0f, 0, 0);
+                    }
+                    break;
+                // case 3:
+                //     if ((arg1 & 0x30) && !(D_menu_80033670 & 0x30)) {
+                //         D_global_asm_80744530 = 1 - D_global_asm_80744530;
+                //         optionChanged = TRUE;
+                //     }
+                //     break;
+                // case 4:
+                //     if ((arg1 & 0x10) && !(D_menu_80033670 & 0x10)) {
+                //         D_global_asm_807550C8++;
+                //         optionChanged = TRUE;
+                //     }
+                //     if ((arg1 & 0x20) && !(D_menu_80033670 & 0x20)) {
+                //         D_global_asm_807550C8--;
+                //         optionChanged = TRUE;
+                //     }
+                //     D_global_asm_807550C8 &= 3;
+                //     if (optionChanged) {
+                //         for (i = 0; i < 101; i++) {
+                //             func_global_asm_8061134C((label_string_pointer_array[i]));
+                //         }
+                //         func_global_asm_8061134C(label_string_pointer_array);
+                //         func_menu_800324CC();
+                //     }
+                //     break;
+            }
+            if (arg1 & 2) {
+                func_global_asm_8060C648(0x1F, 0, 0, 0, D_global_asm_807550C8);
+                func_global_asm_8060C648(0x20, 0, 0, 0, D_global_asm_80744530);
+                func_global_asm_8060DEA8();
+                playSound(0x2C9, 0x7FFF, 63.0f, 1.0f, 0, 0);
+                aaD->unk16 = 0;
+                aaD->unk13 = 1;
+            } else {
+                func_menu_8002FD38(aaD, 1, arg1);
+            }
+        }
+        func_menu_8002FE08(aaD, 1);
+    }
+    func_menu_8002FC1C(arg0, aaD, 1);
+    // if (newly_pressed_input_copy & (U_CBUTTONS | D_CBUTTONS)) {
+    //     D_global_asm_80744544 ^= 0x100;
+    // }
+    if (optionChanged) {
+        playSound(0x74, 0x7FFF, 63.0f, 1.0f, 0, 0);
+    }
+}
