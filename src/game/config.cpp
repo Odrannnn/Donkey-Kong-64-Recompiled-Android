@@ -27,15 +27,13 @@ static void add_general_options(recomp::config::Config &config) {
     static EnumOptionVector camera_invert_mode_options = {
         {dk64::CameraInvertMode::InvertNone, "InvertNone", "None"},
         {dk64::CameraInvertMode::InvertX, "InvertX", "Invert X"},
-        {dk64::CameraInvertMode::InvertY, "InvertY", "Invert Y"},
-        {dk64::CameraInvertMode::InvertBoth, "InvertBoth", "Invert Both"}
     };
     config.add_enum_option(
         dk64::configkeys::general::third_person_camera_invert_mode,
         "Invert Camera",
-        "Inverts the camera controls for the third person camera if it's enabled. <recomp-color primary>Invert X</recomp-color> is the default and matches the original game.<br /><br />If analog camera is off, only the <recomp-color primary>Invert X</recomp-color> setting will take effect.",
+        "Inverts the camera controls for the third person camera if it's enabled.",
         camera_invert_mode_options,
-        dk64::CameraInvertMode::InvertX
+        dk64::CameraInvertMode::InvertNone
     );
     static EnumOptionVector first_person_invert_mode_options = {
         {dk64::CameraInvertMode::InvertNone, "InvertNone", "None"},
@@ -50,17 +48,17 @@ static void add_general_options(recomp::config::Config &config) {
         first_person_invert_mode_options,
         dk64::CameraInvertMode::InvertY
     );
-    static EnumOptionVector flying_and_swimming_invert_options = {
+    static EnumOptionVector swimming_invert_options = {
         {dk64::CameraInvertMode::InvertNone, "InvertNone", "None"},
         {dk64::CameraInvertMode::InvertX, "InvertX", "Invert X"},
         {dk64::CameraInvertMode::InvertY, "InvertY", "Invert Y"},
         {dk64::CameraInvertMode::InvertBoth, "InvertBoth", "Invert Both"}
     };
     config.add_enum_option(
-        dk64::configkeys::general::flying_and_swimming_invert_mode,
-        "Invert Flying & Swimming",
-        "Inverts the controls for swimming and flying. <recomp-color primary>Invert Y</recomp-color> is the default and matches the original game.",
-        flying_and_swimming_invert_options,
+        dk64::configkeys::general::swimming_invert_mode,
+        "Invert Swimming",
+        "Inverts the controls for swimming. <recomp-color primary>Invert Y</recomp-color> is the default and matches the original game.",
+        swimming_invert_options,
         dk64::CameraInvertMode::InvertY
     );
     // Story Skip
@@ -134,8 +132,8 @@ dk64::CameraInvertMode dk64::get_third_person_camera_mode() {
     return get_general_config_enum_value<dk64::CameraInvertMode>(dk64::configkeys::general::third_person_camera_invert_mode);
 }
 
-dk64::CameraInvertMode dk64::get_flying_and_swimming_invert_mode() {
-    return get_general_config_enum_value<dk64::CameraInvertMode>(dk64::configkeys::general::flying_and_swimming_invert_mode);
+dk64::CameraInvertMode dk64::get_swimming_invert_mode() {
+    return get_general_config_enum_value<dk64::CameraInvertMode>(dk64::configkeys::general::swimming_invert_mode);
 }
 
 dk64::StorySkipMode dk64::get_story_skip() {

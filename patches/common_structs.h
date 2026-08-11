@@ -34,6 +34,9 @@ u32 func_global_asm_806119A0(void); // Having this here to prevent having to dec
 #define RANDNUM() (func_global_asm_806119A0() & 0x7FFFFFFF)
 #define RandClamp(a) ((RANDNUM() >> 0xF) % a)
 #define RandChance(a) (RandClamp(1000) > (1000 - ((s32)((a) * 1000))))
+#define ABS_D(d) (((d) > 0.0) ? (d) : -(d))
+#define ABS_F(d) (((d) > 0.0f) ? (d) : -(d))
+#define ABS(d) (((d) > 0) ? (d) : -(d))
 
 typedef enum enumSpriteAlignment {
     ALIGN_NOT_2D,

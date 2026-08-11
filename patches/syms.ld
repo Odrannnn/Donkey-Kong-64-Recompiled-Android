@@ -65,3 +65,5 @@ osWritebackDCacheAll_recomp = 0x8F000120;
 osAiSetNextBuffer_recomp = 0x8F000124;
 sqrtf_recomp = 0x8F00012C;
 recomp_get_cutscene_bordering = 0x8F000130;
+recomp_get_swimming_inverted_axes = 0x8F000134;
+recomp_get_first_person_inverted_axes = 0x8F000138;

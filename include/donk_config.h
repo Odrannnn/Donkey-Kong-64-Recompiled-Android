@@ -16,7 +16,7 @@ namespace dk64 {
             inline const std::string camera_invert_mode = "camera_invert_mode";
             inline const std::string analog_cam_mode = "analog_cam_mode";
             inline const std::string third_person_camera_invert_mode = "third_person_camera_invert_mode";
-            inline const std::string flying_and_swimming_invert_mode = "flying_and_swimming_invert_mode";
+            inline const std::string swimming_invert_mode = "swimming_invert_mode";
             inline const std::string first_person_invert_mode = "first_person_invert_mode";
             inline const std::string analog_camera_sensitivity = "analog_camera_sensitivity";
             inline const std::string story_skip = "story_skip";
@@ -49,7 +49,7 @@ namespace dk64 {
 
     CameraInvertMode get_third_person_camera_mode();
 
-    CameraInvertMode get_flying_and_swimming_invert_mode();
+    CameraInvertMode get_swimming_invert_mode();
 
     CameraInvertMode get_first_person_invert_mode();
 

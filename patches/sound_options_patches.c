@@ -1,5 +1,6 @@
 #include "common_structs.h"
 #include "debug_config.h"
+#include "input.h"
 #include "sound.h"
 #include "options.h"
 
@@ -221,10 +222,16 @@ RECOMP_PATCH void func_global_asm_806EA200(void) {
     s8 change = 0x2D;
     s8 require_new_input = 1;
     s8 cooldown = 0xB;
+    s32 invX = 0;
+    s32 invY = 0;
     if (recomp_get_camera_type() == 2) {
         cooldown = 5;
         change = 5 * (cooldown - 2);
         require_new_input = 0;
+    }
+    recomp_get_analog_inverted_axes(&invX, &invY);
+    if (invX) {
+        change = -change;
     }
     CameraPaad *CaaD = extra_player_info_pointer->unk104->AAD_as_array[0];
     if (((D_global_asm_807FD610[cc_player_index].unk2C & L_CBUTTONS) || (!require_new_input)) && (CaaD->unkF1 < 3)) {
@@ -237,10 +244,16 @@ RECOMP_PATCH void func_global_asm_806EA26C(void) {
     s8 change = 0x2D;
     s8 require_new_input = 1;
     s8 cooldown = 0xB;
+    s32 invX = 0;
+    s32 invY = 0;
     if (recomp_get_camera_type() == 2) {
         cooldown = 5;
         change = 5 * (cooldown - 2);
         require_new_input = 0;
+    }
+    recomp_get_analog_inverted_axes(&invX, &invY);
+    if (invX) {
+        change = -change;
     }
     CameraPaad *CaaD = extra_player_info_pointer->unk104->AAD_as_array[0];
     if (((D_global_asm_807FD610[cc_player_index].unk2C & R_CBUTTONS) || (!require_new_input)) && (CaaD->unkF1 < 3)) {
@@ -248,6 +261,90 @@ RECOMP_PATCH void func_global_asm_806EA26C(void) {
         CaaD->unkF1 = cooldown;
     }
 }
+
+extern Actor *gCurrentActorPointer;
+extern s16 D_global_asm_80753B34[];
+extern s16 D_global_asm_80753B44[];
+extern s16 D_global_asm_807FD584;
+void func_global_asm_806DF494(s16 *arg0, s16 arg1, s16 arg2);
+// @recomp: Swimming controls
+RECOMP_PATCH void func_global_asm_806E6B98(void) {
+    s16 phi_v0;
+    s8 pad;
+    s16 rot;
+    s16 phi_a2;
+    s8 stick_x, stick_y;
+    s32 invX = 0;
+    s32 invY = 0;
+
+    phi_v0 = gCurrentActorPointer->y_rotation;
+    phi_a2 = 0x10;
+    stick_x = D_global_asm_807FD610[cc_player_index].unk2E;
+    stick_y = D_global_asm_807FD610[cc_player_index].unk2F;
+    recomp_get_swimming_inverted_axes(&invX, &invY);
+    if (invX) stick_x = -stick_x;
+    if (!invY) stick_y = -stick_y;
+    if (D_global_asm_807FD610[cc_player_index].unk30 != 0) {
+        if (current_character_index[cc_player_index] == 7) {
+            phi_v0 -= (stick_x * 0.8);
+        } else {
+            phi_v0 -= (stick_x * 0.5);
+        }
+        gCurrentActorPointer->y_rotation = phi_v0 & 0xFFF;
+        if (stick_x >= 0) {
+            phi_v0 = 1;
+        } else {
+            phi_v0 = -1;
+        }
+        rot = phi_v0;
+        rot *= D_global_asm_80753B34[D_global_asm_807FD584];
+        rot &= 0xFFF;
+    } else {
+        rot = 0;
+    }
+    func_global_asm_806DF494(&gCurrentActorPointer->x_rotation, rot, phi_a2);
+    rot = ((D_global_asm_80753B44[D_global_asm_807FD584] * stick_y) / 70);
+    rot &= 0xFFF;
+    if (current_character_index[cc_player_index] == 7) {
+        phi_a2 = (ABS(0.5 * stick_y)) + 16.0;
+    }
+    func_global_asm_806DF494(&gCurrentActorPointer->z_rotation, rot, phi_a2);
+}
+
+f32 func_global_asm_806EA2D8(void);
+
+// @recomp: First person controls
+RECOMP_PATCH void func_global_asm_806EA628(void) {
+    PlayerAdditionalActorData *temp_a0;
+    s32 pad;
+    f32 *temp_v0;
+    s16 *temp_v1;
+    s8 stick_x, stick_y;
+    s32 invX = 0;
+    s32 invY = 0;
+
+    if (!(extra_player_info_pointer->unk1F0 & 0x8000)) {
+        stick_x = D_global_asm_807FD610[cc_player_index].unk2E;
+        stick_y = D_global_asm_807FD610[cc_player_index].unk2F;
+        recomp_get_first_person_inverted_axes(&invX, &invY);
+        if (invX) stick_x = -stick_x;
+        if (!invY) stick_y = -stick_y;
+        temp_a0 = extra_player_info_pointer->unk104->additional_actor_data;
+        temp_v1 = &temp_a0->unkB2;
+        *temp_v1 -= (stick_x * 0.08 * func_global_asm_806EA2D8() * 4096.0) / 360.0;
+        temp_v0 = &temp_a0->unkB8;
+        *temp_v0 += stick_y * 0.04 * func_global_asm_806EA2D8();
+        *temp_v1 &= 0xFFF;
+        if (temp_a0->unkBC + 0x32 < *temp_v0) {
+            *temp_v0 = temp_a0->unkBC + 0x32;
+        } else if (*temp_v0 < temp_a0->unkBC - 0x50) {
+            *temp_v0 = temp_a0->unkBC - 0x50;
+        }
+        extra_player_info_pointer->unk104->distance_from_floor = *temp_v0;
+        gCurrentActorPointer->y_rotation = (temp_a0->unkB2 + 0x800) & 0xFFF;
+    }
+}
+
 
 Gfx *func_menu_8002F980(Gfx *, MenuAdditionalActorData *, u8 **, s8, s32 *, s32, f32 *, f32, s32);
 s32 func_menu_800317E8(MenuAdditionalActorData *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, s8 arg6, f32 arg7);

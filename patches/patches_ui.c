@@ -1786,10 +1786,6 @@ typedef struct Struct807FD9E0 {
     Struct807FD9E0_unk4 *unk4;
 } Struct807FD9E0;
 
-#define ABS_D(d) (((d) > 0.0) ? (d) : -(d))
-#define ABS_F(d) (((d) > 0.0f) ? (d) : -(d))
-#define ABS(d) (((d) > 0) ? (d) : -(d))
-
 Gfx* func_global_asm_807105D4(Gfx*, u8);
 extern Struct807FD9E0* D_global_asm_807550E0;
 extern Struct80755264 D_global_asm_80755264[];
