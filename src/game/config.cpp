@@ -185,7 +185,7 @@ static void add_graphics_options(recomp::config::Config &config) {
         {dk64::CutsceneBordersMode::On, "On", "On"}
     };
     config.add_enum_option(
-        dk64::configkeys::general::cutscene_borders,
+        dk64::configkeys::graphics::cutscene_borders,
         "Cutscene Borders",
         "If turned on, cutscenes will show borders on the top and the bottom of the screen as in the vanilla game.",
         cutscene_border_options,
@@ -194,7 +194,7 @@ static void add_graphics_options(recomp::config::Config &config) {
 }
 
 dk64::CutsceneBordersMode dk64::get_cutscene_borders() {
-    return get_general_config_enum_value<dk64::CutsceneBordersMode>(dk64::configkeys::general::cutscene_borders);
+    return get_graphics_config_enum_value<dk64::CutsceneBordersMode>(dk64::configkeys::graphics::cutscene_borders);
 }
 
 static void set_control_defaults() {
