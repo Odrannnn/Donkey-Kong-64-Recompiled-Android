@@ -530,3 +530,105 @@ RECOMP_PATCH void func_global_asm_8068A508(void) {
         }
     }
 }
+
+Gfx *func_menu_80030340(Actor *actor, s32 arg1, Gfx *dl, s32 arg3);
+s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
+extern s8 D_menu_80033F50;
+
+// @recomp: Menu screen switcher
+RECOMP_PATCH void func_menu_8002FC1C(Actor *arg0, MenuAdditionalActorData *MaaD, s32 arg2) {
+    if (MaaD->unk16 == 0) {
+        MaaD->unk0 += 0.13f;
+        if (1.3f < MaaD->unk0) {
+            MaaD->unk0 = 1.0f;
+            MaaD->unk12 = MaaD->unk13;
+            MaaD->unk16 = -1;
+            func_menu_80030340(arg0, 0, NULL, 0);
+            set_sprite_interpolation_lockdown(2); // @recomp: Disable interp during screen transitions for 2f
+            playSound(0x2C9, 0x7FFF, 63.0f, 1.25f, 0, 0);
+        }
+    } else {
+        if (MaaD->unk0 > 0.0f) {
+            MaaD->unk0 -= 0.2f;
+            if (MaaD->unk0 < 0.0f) {
+                MaaD->unk0 = 0.0f;
+                if (arg2 != 0) {
+                    playSound(0x3C, 0x61A8, 63.0f, 1.0f, 0, 0);
+                    D_menu_80033F50 = 3;
+                }
+            }
+        }
+    }
+}
+
+typedef struct PauseAAD {
+    f32 unk0;
+    f32 unk4;
+    s16 unk8[2];
+    s16 unkC[2];
+    s16 unk10;
+    s8 unk12;
+    u8 unk13;
+    s8 unk14;
+    s8 unk15;
+    s8 unk16;
+    s8 unk17;
+    u8 unk18;
+} PauseAAD;
+
+void func_global_asm_806AA304(PauseAAD*, u8);
+extern s8 D_global_asm_8075052C;
+extern s8 D_global_asm_807505D0;
+extern u8 D_global_asm_807FC7F8[2];
+
+// @recomp: Pause screen switcher
+RECOMP_PATCH s32 func_global_asm_806ABC94(PauseAAD* arg0, s32 arg1, s32 arg2) {
+    s16 var_v1_2;
+    s32 var_v1;
+    s32 var_v0;
+
+    if (arg1 == 0) {
+        var_v1 = 0;
+        if (arg2 & 8) {
+            var_v1 = 1;
+        } else if (arg2 & 4) {
+            var_v1 = -1;
+        }
+        if (var_v1 != 0) {
+            var_v0 = arg0->unk8[arg0->unk15] + var_v1;
+            if (var_v0 < 0) {
+                var_v0 = D_global_asm_807505D0;
+            }
+            if (D_global_asm_807505D0 < var_v0) {
+                var_v0 = 0;
+            }
+            if (var_v0 != arg0->unk8[arg0->unk15]) {
+                arg0->unk15 = 1 - arg0->unk15;
+                arg0->unk8[arg0->unk15] = var_v0;
+                arg0->unkC[arg0->unk15] = var_v1 * 250;
+                func_global_asm_806AA304(arg0, 0);
+                playSound(0x2C9, 0x7FFF, 63, 1, 0, 0);
+            }
+        }
+    }
+    if (arg1 != 0) {
+        var_v1_2 = arg0->unkC[arg0->unk15];
+        if (var_v1_2 >= 0x15) {
+            var_v1_2 = 0x14;
+        }
+        if (var_v1_2 < -0x14) {
+            var_v1_2 = -0x14;
+        }
+        arg0->unkC[0] -= var_v1_2;
+        arg0->unkC[1] -= var_v1_2;
+        if (arg0->unkC[arg0->unk15] == 0) {
+            arg0->unk8[1 - arg0->unk15] = arg0->unk8[arg0->unk15];
+            arg1 = 0;
+            D_global_asm_807FC7F8[1 - arg0->unk15] = 0;
+            playSound(0x97, 0x4650, 63, 1, 0, 0);
+            set_sprite_interpolation_lockdown(2);
+            D_global_asm_8075052C = 3;
+        }
+    }
+    return arg1;
+}

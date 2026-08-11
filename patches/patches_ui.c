@@ -285,7 +285,7 @@ RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, 
     gSPDisplayList(dl++, &D_1000118);
     gDPSetCombineLERP(dl++, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0, 0, 0, 0, TEXEL0, TEXEL0, 0, PRIMITIVE, 0);
     temp_v0_3 = func_global_asm_806C7C94(0U);
-    // gDPSetScissor(dl++, G_SC_NON_INTERLACE, temp_v0_3->unk4, temp_v0_3->unk6, temp_v0_3->unk8, temp_v0_3->unkA);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, temp_v0_3->unk4, temp_v0_3->unk6, temp_v0_3->unk8, temp_v0_3->unkA);
     if ((D_global_asm_80744490 * 0.5) < D_global_asm_80754280->hud_item[arg0].screen_x) {
         sp5C = getCenterOfString(0x81, sp6C);
     }
@@ -2465,6 +2465,7 @@ RECOMP_PATCH void func_global_asm_806AA304(PauseAAD* arg0, s32 arg1) {
     temp_t0 = &D_global_asm_807FC950->character_progress[arg0->unk14];
     sp7C = D_global_asm_80750560[temp_t7_2];
     var_v1 = 0;
+    set_sprite_interpolation_lockdown(2);
     if (arg1 == 0) {
         D_global_asm_807FC800 = arg0->unk14;
         D_global_asm_807FC80D = D_global_asm_807FC80C;
