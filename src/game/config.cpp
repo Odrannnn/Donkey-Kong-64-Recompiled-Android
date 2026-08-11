@@ -261,10 +261,6 @@ static void set_control_descriptions() {
     recompinput::set_game_input_description(recompinput::GameInput::DPAD_RIGHT, "Unused. Mods may use it for additional features.");
 }
 
-dk64::CutsceneAspectRatioMode dk64::get_cutscene_aspect_ratio_mode() {
-    return get_graphics_config_enum_value<dk64::CutsceneAspectRatioMode>(dk64::configkeys::graphics::cutscene_aspect_ratio_mode);
-}
-
 void dk64::init_config() {
     std::filesystem::path recomp_dir = recompui::file::get_app_folder_path();
 

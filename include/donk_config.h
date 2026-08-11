@@ -22,7 +22,6 @@ namespace dk64 {
             inline const std::string story_skip = "story_skip";
             inline const std::string camera_type = "camera_type";
             inline const std::string lightning_flashes = "lightning_flashes";
-            inline const std::string cutscene_borders = "cutscene_borders";
         }
 
         namespace sound {
@@ -31,7 +30,7 @@ namespace dk64 {
         }
 
         namespace graphics {
-            inline const std::string cutscene_aspect_ratio_mode = "cutscene_aspect_ratio_mode";
+            inline const std::string cutscene_borders = "cutscene_borders";
         }
     }
 
@@ -54,15 +53,6 @@ namespace dk64 {
     CameraInvertMode get_first_person_invert_mode();
 
     uint32_t get_analog_cam_sensitivity();
-
-    enum class CutsceneAspectRatioMode {
-        Original,
-        Clamp16x9,
-        Full,
-        OptionCount
-    };
-
-    CutsceneAspectRatioMode get_cutscene_aspect_ratio_mode();
 
     enum class StorySkipMode {
         Off,
