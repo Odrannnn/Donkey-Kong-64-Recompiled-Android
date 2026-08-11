@@ -100,18 +100,7 @@ static void add_general_options(recomp::config::Config &config) {
         lightning_flash_options,
         dk64::LightningFlashMode::Reduced
     );
-    // Cutscene borders
-    static EnumOptionVector cutscene_border_options = {
-        {dk64::CutsceneBordersMode::Off, "Off", "Off"},
-        {dk64::CutsceneBordersMode::On, "On", "On"}
-    };
-    config.add_enum_option(
-        dk64::configkeys::general::cutscene_borders,
-        "Cutscene Borders",
-        "If turned on, cutscenes will show borders on the top and the bottom of the screen as in the vanilla game.",
-        cutscene_border_options,
-        dk64::CutsceneBordersMode::On
-    );
+    
 }
 
 template <typename T = uint32_t>
@@ -146,10 +135,6 @@ dk64::CameraTypeMode dk64::get_camera_type() {
 
 dk64::LightningFlashMode dk64::get_lightning_flash() {
     return get_general_config_enum_value<dk64::LightningFlashMode>(dk64::configkeys::general::lightning_flashes);
-}
-
-dk64::CutsceneBordersMode dk64::get_cutscene_borders() {
-    return get_general_config_enum_value<dk64::CutsceneBordersMode>(dk64::configkeys::general::cutscene_borders);
 }
 
 dk64::CameraInvertMode dk64::get_first_person_invert_mode() {
@@ -194,18 +179,22 @@ int dk64::get_sfx_volume() {
 
 static void add_graphics_options(recomp::config::Config &config) {
     using EnumOptionVector = const std::vector<recomp::config::ConfigOptionEnumOption>;
-    static EnumOptionVector cutscene_aspect_ratio_mode_options = {
-        {dk64::CutsceneAspectRatioMode::Original, "Original", "Original"},
-        {dk64::CutsceneAspectRatioMode::Clamp16x9, "Clamp16x9", "16:9"},
-        {dk64::CutsceneAspectRatioMode::Full, "Expand", "Expand"},
+    // Cutscene borders
+    static EnumOptionVector cutscene_border_options = {
+        {dk64::CutsceneBordersMode::Off, "Off", "Off"},
+        {dk64::CutsceneBordersMode::On, "On", "On"}
     };
     config.add_enum_option(
-        dk64::configkeys::graphics::cutscene_aspect_ratio_mode,
-        "Cutscene Aspect Ratio",
-        "Sets the aspect ratio limit for cutscenes. Cutscenes have been adjusted to work in <recomp-color primary>16:9</recomp-color>, which is the default option. Wider aspect ratios may show details that weren't meant to be on-screen.",
-        cutscene_aspect_ratio_mode_options,
-        dk64::CutsceneAspectRatioMode::Clamp16x9
-    );    
+        dk64::configkeys::general::cutscene_borders,
+        "Cutscene Borders",
+        "If turned on, cutscenes will show borders on the top and the bottom of the screen as in the vanilla game.",
+        cutscene_border_options,
+        dk64::CutsceneBordersMode::On
+    );
+}
+
+dk64::CutsceneBordersMode dk64::get_cutscene_borders() {
+    return get_general_config_enum_value<dk64::CutsceneBordersMode>(dk64::configkeys::general::cutscene_borders);
 }
 
 static void set_control_defaults() {

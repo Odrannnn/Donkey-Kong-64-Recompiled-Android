@@ -103,25 +103,6 @@ extern "C" void recomp_get_target_aspect_ratio(uint8_t* rdram, recomp_context* c
     }
 }
 
-extern "C" void recomp_get_cutscene_aspect_ratio(uint8_t *rdram, recomp_context *ctx) {
-    float original = _arg<0, float>(rdram, ctx);
-    int width, height;
-    recompui::get_window_size(width, height);
-
-    switch (dk64::get_cutscene_aspect_ratio_mode()) {
-        case dk64::CutsceneAspectRatioMode::Original:
-            _return(ctx, original);
-            return;
-        case dk64::CutsceneAspectRatioMode::Clamp16x9:
-        default:
-            _return(ctx, 16.0f / 9.0f);
-            return;
-        case dk64::CutsceneAspectRatioMode::Full:
-            _return(ctx, std::max(static_cast<float>(width) / height, original));
-            return;
-    }
-}
-
 extern "C" void recomp_get_bgm_volume(uint8_t* rdram, recomp_context* ctx) {
     _return(ctx, dk64::get_bgm_volume() / 2.5f);
 }
