@@ -36,9 +36,6 @@ extern Gfx **D_1000118;
 extern Mtx D_2000140;
 extern u8 is_cutscene_active;
 
-extern Gfx *alignHUD(Gfx *, enumSpriteAlignment);
-extern Gfx *popHUD(Gfx *);
-
 typedef struct {
     u32 unk0;
     u32 unk4;
@@ -265,7 +262,11 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
                     break;
             }
             gEXMatrixGroup(dl++, MTXTAG_FRAMEBUFFERTRANSITION, G_EX_INTERPOLATE_SIMPLE, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_INTERPOLATE, G_EX_ORDER_LINEAR, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO, G_EX_COMPONENT_SKIP, G_EX_COMPONENT_AUTO);
-            dl = popHUD(dl);
+            gEXPopScissor(dl++);
+            gEXPopViewport(dl++);
+            // Clear gEX
+            gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
+            gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
             gDPPipeSync(dl++);
             gDPSetColorDither(dl++, G_CD_MAGICSQ);
             gDPSetTextureFilter(dl++, G_TF_BILERP);
@@ -580,7 +581,6 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     s32 j;
     s32 X_REPEAT_COUNT, Y_REPEAT_COUNT;
     s32 width, height;
-    s32 pillar;
 
     recomp_get_ui_bounds(&width, &height);
     X_REPEAT_COUNT = (width >> 7) + 4;
@@ -593,11 +593,10 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
     gDPSetTexturePersp(dl++, G_TP_NONE);
     gDPSetTextureFilter(dl++, G_TF_POINT);
-    // 
-    pillar = recomp_get_ui_pillar();
+    //
     gEXPushScissor(dl++);
-    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, -pillar, 0, pillar, D_global_asm_80744494);
-    gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, -pillar * 4, 0, -pillar * 4, 0);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, width, height);
+    gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
     //
     gSPTexture(dl++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, 0xFF);

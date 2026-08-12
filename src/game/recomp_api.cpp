@@ -168,7 +168,18 @@ extern "C" void recomp_get_ui_bounds(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::renderer::GraphicsConfig graphics_config = ultramodern::renderer::get_graphics_config();
     int width, height;
     recompui::get_window_size(width, height);
-    width = (width * 240) / height;
+    switch (graphics_config.ar_option) {
+        case ultramodern::renderer::AspectRatio::Original:
+        default:
+            width = 320;
+            break;
+        case ultramodern::renderer::AspectRatio::Expand:
+            width = (width * 240) / height;
+            if (width < 320) {
+                width = 320;
+            }
+            break;
+    }
     s32* x_out = _arg<0, s32*>(rdram, ctx);
     s32* y_out = _arg<1, s32*>(rdram, ctx);
     *x_out = width;
@@ -180,19 +191,33 @@ extern "C" void recomp_get_ui_pillar(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::renderer::GraphicsConfig graphics_config = ultramodern::renderer::get_graphics_config();
     int width, height, delta;
     recompui::get_window_size(width, height);
-    width = (width * 240) / height;
+    switch (graphics_config.ar_option) {
+        case ultramodern::renderer::AspectRatio::Original:
+        default:
+            width = 320;
+            break;
+        case ultramodern::renderer::AspectRatio::Expand:
+            width = (width * 240) / height;
+            if (width < 320) {
+                width = 320;
+            }
+            break;
+    }
     delta = 0;
     switch (graphics_config.hr_option) {
         default:
         case ultramodern::renderer::HUDRatioMode::Original:
-            delta = (width - 320) >> 1;
+            delta = (width - 320) / 2;
             break;
         case ultramodern::renderer::HUDRatioMode::Clamp16x9:
-            delta = (width - 426) >> 1;
+            delta = (width - 426) / 2;
             break;
         case ultramodern::renderer::HUDRatioMode::Full:
             delta = 0;
             break;
+    }
+    if (delta < 0) {
+        delta = 0;
     }
     _return(ctx, delta);
     return;

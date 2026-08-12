@@ -643,6 +643,34 @@ typedef struct Struct80655DD0_arg1 {
     void *unk8;
 } Struct80655DD0_arg1;
 
+Gfx *determineChunkFix(Gfx *dl, Chunk *ch) {
+    if (cc_number_of_players == 1) {
+        // Needed for screen squishes (lol)
+        gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+            0,
+            0,
+            D_global_asm_80744490,
+            D_global_asm_80744494);
+        func_global_asm_80658E58(
+            0,
+            0,
+            D_global_asm_80744490,
+            D_global_asm_80744494);
+    } else {
+        gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+            character_change_array[cc_player_index].unk270[0],
+            character_change_array[cc_player_index].unk270[1],
+            character_change_array[cc_player_index].unk270[2],
+            character_change_array[cc_player_index].unk270[3]);
+        func_global_asm_80658E58(
+            character_change_array[cc_player_index].unk270[0],
+            character_change_array[cc_player_index].unk270[1],
+            character_change_array[cc_player_index].unk270[2],
+            character_change_array[cc_player_index].unk270[3]);
+    }
+    return dl;
+}
+
 // @recomp: Chunk bounds fix
 RECOMP_PATCH Gfx *func_global_asm_80655DD0(Gfx * dl, Struct80655DD0_arg1 * arg1, f32 arg2, f32 arg3, f32 arg4, s32 arg5) {
     s32 i;
@@ -683,16 +711,7 @@ RECOMP_PATCH Gfx *func_global_asm_80655DD0(Gfx * dl, Struct80655DD0_arg1 * arg1,
                 chunk_array_pointer[var_s6].unk2 = 0;
             }
             gDPPipeSync(dl++);
-            gDPSetScissor(dl++, G_SC_NON_INTERLACE,
-                0,
-                0,
-                D_global_asm_80744490,
-                D_global_asm_80744494);
-            func_global_asm_80658E58(
-                0,
-                0,
-                D_global_asm_80744490,
-                D_global_asm_80744494);
+            dl = determineChunkFix(dl, &chunk_array_pointer[var_s6]);
             dl = func_global_asm_806592B4(dl);
             if (arg5 & 0x10) {
                 dl = func_global_asm_8062EDA8(dl, var_s6);
@@ -763,16 +782,7 @@ RECOMP_PATCH Gfx *func_global_asm_80655DD0(Gfx * dl, Struct80655DD0_arg1 * arg1,
         var_s6 = D_global_asm_807F6C58[i];
         if (chunk_array_pointer[var_s6].loaded == 1) {
             gDPPipeSync(dl++);
-            gDPSetScissor(dl++, G_SC_NON_INTERLACE,
-                0,
-                0,
-                D_global_asm_80744490,
-                D_global_asm_80744494);
-            func_global_asm_80658E58(
-                0,
-                0,
-                D_global_asm_80744490,
-                D_global_asm_80744494);
+            dl = determineChunkFix(dl, &chunk_array_pointer[var_s6]);
             D_global_asm_807F6009 = 0xFF;
             var_a1 = ((u8)sp60) ? chunk_array_pointer[var_s6].unk20 : chunk_array_pointer[var_s6].unk1C;
             dl = func_global_asm_80630B70(dl, var_a1, arg2, arg3, arg4, arg5, var_s6, sp60);
@@ -790,11 +800,11 @@ RECOMP_PATCH Gfx *func_global_asm_80655DD0(Gfx * dl, Struct80655DD0_arg1 * arg1,
         gDPPipeSync(dl++);
     }
     gDPPipeSync(dl++);
-    gDPSetScissorFrac(dl++, G_SC_NON_INTERLACE,
-        character_change_array[cc_player_index].unk270[0] * 4.0f,
-        character_change_array[cc_player_index].unk270[1] * 4.0f,
-        character_change_array[cc_player_index].unk270[2] * 4.0f,
-        character_change_array[cc_player_index].unk270[3] * 4.0f);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE,
+        character_change_array[cc_player_index].unk270[0],
+        character_change_array[cc_player_index].unk270[1],
+        character_change_array[cc_player_index].unk270[2],
+        character_change_array[cc_player_index].unk270[3]);
     func_global_asm_80658E58(
         character_change_array[cc_player_index].unk270[0],
         character_change_array[cc_player_index].unk270[1],

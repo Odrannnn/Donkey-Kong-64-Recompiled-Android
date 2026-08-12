@@ -183,6 +183,14 @@ typedef struct {
 extern Struct80750948 D_global_asm_80750948[];
 extern Actor *gCurrentActorPointer;
 
+void fixMPBoundary(s16 *addr, s32 target, s32 grace) {
+    if (*addr >= (target - grace)) {
+        if (*addr <= (target + grace)) {
+            *addr = target;
+        }
+    }
+}
+
 RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     s32 phi_s4;
     OSMesg* sp38;
@@ -253,6 +261,10 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
             if (x->unk4_arr[3] >= 227) {
                 x->unk4_arr[3] = 240;
             }
+            fixMPBoundary(&x->unk4_arr[0], 160, 5);
+            fixMPBoundary(&x->unk4_arr[1], 120, 5);
+            fixMPBoundary(&x->unk4_arr[2], 160, 5);
+            fixMPBoundary(&x->unk4_arr[3], 120, 5);
         }
         D_global_asm_8074682C = 0xC8;
 
