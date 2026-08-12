@@ -36,6 +36,7 @@ Gfx *alignHUDGameplay(Gfx *dl, enumSpriteAlignment alignment) {
     if (alignment == ALIGN_UNALIGNED) {
         return dl;
     }
+    s32 width, height;
     s32 margin_reduction = recomp_get_ui_pillar();
     gEXPushScissor(dl++);
     gEXPushViewport(dl++);
@@ -2873,22 +2874,22 @@ RECOMP_PATCH void func_global_asm_805FD088(Struct805FD088 *arg0, Gfx **arg1, Gfx
             // @recomp: Change bounds. Don't use gEX as we don't want this to respect the UI setting
             recomp_get_ui_bounds(&width, &height);
             if (D_global_asm_8074447C) {
-                // dl = alignHUDGameplay(dl, ALIGN_LEFT);
-                // gDPFillRectangle(dl++,
-                //     temp_v0_6->unk4,
-                //     temp_v0_6->unk6,
-                //     character_change_array->unk270[0],
-                //     temp_v0_6->unkA);
-                // dl = popHUD(dl, ALIGN_LEFT);
+                dl = alignHUDGameplay(dl, ALIGN_LEFT);
+                gDPFillRectangle(dl++,
+                    temp_v0_6->unk4,
+                    temp_v0_6->unk6,
+                    character_change_array->unk270[0],
+                    temp_v0_6->unkA);
+                dl = popHUD(dl, ALIGN_LEFT);
             }
             if (D_global_asm_80744480) {
-                // dl = alignHUDGameplay(dl, ALIGN_RIGHT);
-                // gDPFillRectangle(dl++,
-                //     character_change_array->unk270[2],
-                //     temp_v0_6->unk6,
-                //     temp_v0_6->unk8,
-                //     temp_v0_6->unkA);
-                // dl = popHUD(dl, ALIGN_RIGHT);
+                dl = alignHUDGameplay(dl, ALIGN_RIGHT);
+                gDPFillRectangle(dl++,
+                    character_change_array->unk270[2],
+                    temp_v0_6->unk6,
+                    temp_v0_6->unk8,
+                    temp_v0_6->unkA);
+                dl = popHUD(dl, ALIGN_RIGHT);
             }
             if (D_global_asm_80744484) {
                 gDPFillRectangle(dl++,

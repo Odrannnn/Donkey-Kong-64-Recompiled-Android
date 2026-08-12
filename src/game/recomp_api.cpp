@@ -191,7 +191,18 @@ extern "C" void recomp_get_ui_pillar(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::renderer::GraphicsConfig graphics_config = ultramodern::renderer::get_graphics_config();
     int width, height, delta;
     recompui::get_window_size(width, height);
-    width = (width * 240) / height;
+    switch (graphics_config.ar_option) {
+        case ultramodern::renderer::AspectRatio::Original:
+        default:
+            width = 320;
+            break;
+        case ultramodern::renderer::AspectRatio::Expand:
+            width = (width * 240) / height;
+            if (width < 320) {
+                width = 320;
+            }
+            break;
+    }
     delta = 0;
     switch (graphics_config.hr_option) {
         default:
