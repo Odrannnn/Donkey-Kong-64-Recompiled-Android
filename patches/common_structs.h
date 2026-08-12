@@ -54,6 +54,7 @@ typedef enum interpolationIDs {
     MTXTAG_SKYBOXBLEND,
     MTXTAG_ACTORS = 0x1000, // 0x100 allocated per actor
     MTXTAG_PROP = 0x101000,
+    MTXTAG_PROPSPRITE = 0x101800,
     MTXTAG_SPRITE = 0x102000,
     MTXTAG_TEXT = 0x200000,
 } interpolationIDs;
