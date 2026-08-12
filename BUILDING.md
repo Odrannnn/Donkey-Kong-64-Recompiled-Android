@@ -30,7 +30,15 @@ In the setup process you'll need to select the following options and tools for i
 - C++ Clang Compiler for Windows
 - C++ CMake tools for Windows
 
-The other tool necessary will be `make` which can be installe via [Chocolatey](https://chocolatey.org/):
+You'll also need [vcpkg](https://vcpkg.io/en/). Once you have it built and installed, in the root of the DK64 recomp repo you'll need to run
+
+```bash
+vcpkg install curl
+```
+
+to install the required curl dependency for the mod loader.
+
+The last tool necessary will be `make` which can be installed via [Chocolatey](https://chocolatey.org/):
 ```bash
 choco install make
 ```
