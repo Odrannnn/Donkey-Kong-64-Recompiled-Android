@@ -37,6 +37,7 @@ u32 func_global_asm_806119A0(void); // Having this here to prevent having to dec
 #define ABS_D(d) (((d) > 0.0) ? (d) : -(d))
 #define ABS_F(d) (((d) > 0.0f) ? (d) : -(d))
 #define ABS(d) (((d) > 0) ? (d) : -(d))
+#define CLAMP(value, min, max) ((value) < (min) ? (min) : MIN(max, value))
 
 typedef enum enumSpriteAlignment {
     ALIGN_NOT_2D,

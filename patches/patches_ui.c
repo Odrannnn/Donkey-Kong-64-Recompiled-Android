@@ -53,7 +53,10 @@ Gfx *alignHUDGameplay(Gfx *dl, enumSpriteAlignment alignment) {
     return dl;
 }
 
-Gfx *popHUD(Gfx *dl) {
+Gfx *popHUD(Gfx *dl, enumSpriteAlignment alignment) {
+    if (alignment == ALIGN_UNALIGNED) {
+        return dl;
+    }
     gEXPopScissor(dl++);
     gEXPopViewport(dl++);
     // Clear gEX
@@ -231,7 +234,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     gDPPipeSync(temp_s0++);
     gSPEndDisplayList(temp_s0++);
     if ((sprite->unk36F != ALIGN_NOT_2D) && (sprite->unk36F != ALIGN_UNALIGNED)) {
-        dl = popHUD(dl);
+        dl = popHUD(dl, sprite->unk36F);
     }
     D_global_asm_807F6009 = 5;
     return dl;
@@ -259,7 +262,8 @@ RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, 
         alignment = ALIGN_RIGHT;
     }
     temp_v0_3 = func_global_asm_806C7C94(0U);
-    dl = alignHUDTopBottom(dl, alignment, temp_v0_3->unk4, temp_v0_3->unk8);
+    dl = alignHUD(dl, alignment);
+    // dl = alignHUDTopBottom(dl, alignment, temp_v0_3->unk4, temp_v0_3->unk8);
     gSPMatrix(dl++, &D_2000080, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     guTranslate(&sp74->unk8[D_global_asm_807444FC], arg1->unk4 * (1.0f - temp_f0), arg1->unk8 * (1.0f - temp_f0), 0.0f);
 
@@ -289,7 +293,7 @@ RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, 
         sp5C = getCenterOfString(0x81, sp6C);
     }
     dl = printStyledText(dl, 0x81, (sp74->unk0 - sp5C) * 4, sp74->unk4 * 4, sp6C, 0U);
-    dl = popHUD(dl);
+    dl = popHUD(dl, alignment);
     gSPPopMatrix(dl++, G_MTX_MODELVIEW);
     gDPPipeSync(dl++);
     return dl;
@@ -508,55 +512,21 @@ Gfx* displayImage_simple(Gfx* dl, s32 x, s32 y, s32 width, s32 height, s16 textu
 }
 
 //@recomp: Demo tv corner borders
-#define FAKE_OVERSCAN_THICKNESS 3
 RECOMP_PATCH Gfx *func_global_asm_806FF144(Gfx *dl) {
+    s32 width, height, pillar;
+    recomp_get_ui_bounds(&width, &height);
+    // pillar = 10 + ((width - 426) / 1.9f);
+    pillar = (width - 320) >> 1;
+
     gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
     gSPMatrix(dl++, &D_2000080, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-    gEXPushScissor(dl++);
-    gEXPushViewport(dl++);
-    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
-    gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
-    gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
-    gDPFillRectangle(dl++, gScissorUpLX, gScissorUpLY, gScissorUpLX + FAKE_OVERSCAN_THICKNESS, gScissorLowerRightY);
-    dl = displayImage_simple(dl,
-        0, 0,
-        0x40, 0x40,
-        0x3A, G_IM_FMT_IA, 1,
-        2.0f, 2.0f,
-        0, 0);
-    dl = displayImage_simple(dl,
-        0, D_global_asm_80744494,
-        0x40, 0x40,
-        0x3A, G_IM_FMT_IA, 1,
-        2.0f, 2.0f,
-        0, 1);
-    gEXPopViewport(dl++);
-    gEXPopViewport(dl++);
-    gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 0);
-    gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, 0, 0);
-    dl = alignHUD(dl, ALIGN_RIGHT);
-    gDPFillRectangle(dl++, gScissorLowerRightX - FAKE_OVERSCAN_THICKNESS, gScissorUpLY, gScissorLowerRightX, gScissorLowerRightY);
-    dl = displayImage_simple(dl,
-        D_global_asm_80744490, 0,
-        0x40, 0x40,
-        0x3A, G_IM_FMT_IA, 1,
-        2.0f, 2.0f,
-        1, 0);
-    dl = displayImage_simple(dl,
-        D_global_asm_80744490, D_global_asm_80744494,
-        0x40, 0x40,
-        0x3A, G_IM_FMT_IA, 1,
-        2.0f, 2.0f,
-        1, 1);
-    gEXPopScissor(dl++);
-    gEXPopViewport(dl++);
-    gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
-    gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
-    
-    gDPFillRectangle(dl++, gScissorUpLX, gScissorUpLY, gScissorLowerRightX, gScissorUpLY + FAKE_OVERSCAN_THICKNESS);
-    gDPFillRectangle(dl++, gScissorUpLX, gScissorLowerRightY - FAKE_OVERSCAN_THICKNESS, gScissorLowerRightX, gScissorLowerRightY);
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
+    dl = displayImage(dl, 0x3A, 3, 1, 0x40, 0x40, 0x3E - pillar, 0x3E, 2.0f, 2.0f, 0, 0.0f);
+    dl = displayImage(dl, 0x3A, 3, 1, 0x40, 0x40, D_global_asm_80744490 + pillar - 0x3E, 0x3E, 2.0f, 2.0f, 0x5A, 0.0f);
+    dl = displayImage(dl, 0x3A, 3, 1, 0x40, 0x40, D_global_asm_80744490 + pillar- 0x3E, D_global_asm_80744494 - 0x3E, 2.0f, 2.0f, 0xB4, 0.0f);
+    dl = displayImage(dl, 0x3A, 3, 1, 0x40, 0x40, 0x3E - pillar, D_global_asm_80744494 - 0x3E, 2.0f, 2.0f, 0x10E, 0.0f);
     return dl;
 }
 
@@ -564,6 +534,9 @@ RECOMP_PATCH Gfx *func_global_asm_806FF144(Gfx *dl) {
 RECOMP_PATCH Gfx *func_global_asm_8071338C(Gfx *dl) {
     u8 *string;
     f32 temp;
+    s32 width, height, pillar;
+    recomp_get_ui_bounds(&width, &height);
+    pillar = 10 + ((width - 320) >> 1);
 
     string = getTextString(0xC, 0, 1);
     gDPSetCombineMode(dl++, G_CC_DECALRGBA, G_CC_DECALRGBA);
@@ -571,9 +544,40 @@ RECOMP_PATCH Gfx *func_global_asm_8071338C(Gfx *dl) {
     temp = 20.0f;
     temp *= 2.0f;
     temp *= 4.0f;
-    dl = alignHUD(dl, ALIGN_LEFT);
-    dl = printStyledText(dl, 1, 0x118, temp, string, 4);
-    dl = popHUD(dl);
+    dl = printStyledText(dl, 1, (35 - pillar) * 8, temp, string, 4);
+    return dl;
+}
+
+extern void func_global_asm_8061134C(void*);
+extern Gfx *func_global_asm_807132DC(Gfx *);
+extern Gfx *func_global_asm_807135B4(Gfx *);
+extern Gfx *func_global_asm_80713438(Gfx *, s32);
+extern Gfx *func_global_asm_80713764(Gfx *, s32, f32);
+extern void func_global_asm_8062C99C(void *, s32, s32, s32, s32);
+extern u32 D_global_asm_80755320;
+
+// @recomp: DKTV Handler
+RECOMP_PATCH Gfx *func_global_asm_807138CC(Gfx *dl) {
+    void *temp_v0;
+    f32 temp_f0;
+    u8 temp_t2;
+
+    temp_v0 = _malloc(0x10);
+    func_global_asm_8061134C(temp_v0);
+    func_global_asm_8062C99C(temp_v0, 0, 0, 320, 240);
+    dl = func_global_asm_807132DC(dl);
+    dl = func_global_asm_807135B4(dl);
+    dl = func_global_asm_8071338C(dl);
+    D_global_asm_80755320++;
+    if (D_global_asm_80755320 < 0xD3U) {
+        temp_f0 = ((f32) (0xD2 - D_global_asm_80755320)) * 0.033333335f;
+        temp_f0 = CLAMP(temp_f0, 0.0f, 1.0f);
+        temp_t2 = 255.0f * temp_f0;
+        dl = func_global_asm_80713438(dl, temp_t2);
+        dl = func_global_asm_80713764(dl, temp_t2, 0);
+    }
+    gSPViewport(dl++, temp_v0);
+    dl = func_global_asm_806FF144(dl);
     return dl;
 }
 
@@ -592,7 +596,7 @@ RECOMP_PATCH Gfx *func_global_asm_8068D8C8(Gfx *dl, s32 arg1) {
         G_IM_FMT_RGBA, 2,
         1.0f, 1.0f,
         0, 0);
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_RIGHT);
     return dl;
 }
 
@@ -714,7 +718,7 @@ RECOMP_PATCH Gfx *func_global_asm_806A2B90(Gfx *dl, Actor *arg1) {
                 arg1->y_position + 5.0f, 0.0f, 1.0f);
             setSpriteAlignment(ALIGN_NOT_2D);
             if (alignment != ALIGN_UNALIGNED) {
-                dl = popHUD(dl);
+                dl = popHUD(dl, alignment);
             }
             if (arg1->control_state == 2) {
                 dl = func_global_asm_8070068C(dl);
@@ -806,7 +810,7 @@ RECOMP_PATCH Gfx* func_global_asm_8068DC54(Gfx* dl, s16 arg1, s16 arg2, s16* arg
         dl = printStyledText(dl, 3, (arg1 * 4) + 0x50, ((arg2 * 4) + 4) + sp74, (u8*)&sp6C, 1U);
     }
     if ((D_global_asm_807FDB1D != ALIGN_NOT_2D) && (D_global_asm_807FDB1D != ALIGN_UNALIGNED)) {
-        dl = popHUD(dl);
+        dl = popHUD(dl, D_global_asm_807FDB1D);
     }
     var_v1_2 = arg1 - 0x14;
     if ((*arg3 + sp5E) >= 0x64) {
@@ -834,7 +838,7 @@ RECOMP_PATCH Gfx* func_global_asm_8068DC54(Gfx* dl, s16 arg1, s16 arg2, s16* arg
             }
         }
         if ((D_global_asm_807FDB1D != ALIGN_NOT_2D) && (D_global_asm_807FDB1D != ALIGN_UNALIGNED)) {
-            dl = popHUD(dl);
+            dl = popHUD(dl, D_global_asm_807FDB1D);
         }
     }
     gDPPipeSync(dl++);
@@ -862,7 +866,7 @@ RECOMP_PATCH Gfx *func_bonus_80024000(Gfx *dl, Actor *arg1) {
         setSpriteAlignment(ALIGN_LEFT);
         dl = func_global_asm_806FE078(dl, a178->unk9, 8, 30.0f, 36.0f, 0.0f, 1.5f);
         setSpriteAlignment(ALIGN_NOT_2D);
-        dl = popHUD(dl);
+        dl = popHUD(dl, ALIGN_LEFT);
         // Counter
         setSpriteAlignment(ALIGN_LEFT);
         dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &a178->unk2, a178->unk4, &a178->unk8);
@@ -887,7 +891,7 @@ RECOMP_PATCH Gfx *func_bonus_800252A0(Gfx *dl, Actor *arg1) {
     setSpriteAlignment(ALIGN_LEFT);
     dl = func_global_asm_806FE078(dl, aaD->unk19, 8, 30.0f, 36.0f, 0.0f, 1.5f);
     setSpriteAlignment(ALIGN_NOT_2D);
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_LEFT);
     // Counter
     setSpriteAlignment(ALIGN_LEFT);
     dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aaD->unk14, aaD->unk16, &aaD->unk18);
@@ -932,7 +936,7 @@ RECOMP_PATCH Gfx *func_bonus_80026940(Gfx *dl, Actor *KoshController) {
         setSpriteAlignment(ALIGN_LEFT);
         dl = func_global_asm_806FE078(dl, init->unk25, 8, 30.0f, 36.0f, 0.0f, 1.5f);
         setSpriteAlignment(ALIGN_NOT_2D);
-        dl = popHUD(dl);
+        dl = popHUD(dl, ALIGN_LEFT);
         // Counter
         setSpriteAlignment(ALIGN_LEFT);
         dl = func_global_asm_8068DC54(
@@ -1007,7 +1011,7 @@ RECOMP_PATCH Gfx* func_bonus_80029B9C(Gfx* dl, Actor* arg1) {
                 setSpriteAlignment(ALIGN_LEFT);
                 dl = func_global_asm_806FE078(dl, aad178_copy->unk11, 8, 30.0f, 36.0f, 0.0f, 1.5f);
                 setSpriteAlignment(ALIGN_NOT_2D);
-                dl = popHUD(dl);
+                dl = popHUD(dl, ALIGN_LEFT);
                 // Counter
                 setSpriteAlignment(ALIGN_LEFT);
                 dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aad178_copy->unk14, aad178_copy->unk16, &aad178_copy->unk12);
@@ -1021,7 +1025,7 @@ RECOMP_PATCH Gfx* func_bonus_80029B9C(Gfx* dl, Actor* arg1) {
                 setSpriteAlignment(ALIGN_LEFT);
                 dl = func_global_asm_806FE078(dl, aad178->unk3, 8, 30.0f, 36.0f, 0.0f, 1.5f);
                 setSpriteAlignment(ALIGN_NOT_2D);
-                dl = popHUD(dl);
+                dl = popHUD(dl, ALIGN_LEFT);
                 // Counter
                 setSpriteAlignment(ALIGN_LEFT);
                 dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aad178->unk8, aad178->unkA, &aad178->unk6);
@@ -1041,7 +1045,7 @@ RECOMP_PATCH Gfx* func_bonus_80029B9C(Gfx* dl, Actor* arg1) {
                     setSpriteAlignment(ALIGN_LEFT);
                     dl = func_global_asm_806FE078(dl, aad->unk25, 8, 30.0f, 36.0f, 0.0f, 1.5f);
                     setSpriteAlignment(ALIGN_NOT_2D);
-                    dl = popHUD(dl);
+                    dl = popHUD(dl, ALIGN_LEFT);
                     // Counter
                     setSpriteAlignment(ALIGN_LEFT);
                     dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aad->unk28, aad->unk2A, &aad->unk26);
@@ -1090,7 +1094,7 @@ RECOMP_PATCH Gfx *func_bonus_8002CC08(Gfx *dl, Actor *arg1) {
             setSpriteAlignment(ALIGN_LEFT);
             dl = func_global_asm_806FE078(dl, aaD->unk23, 8, 30.0f, 36.0f, 0.0f, 1.5f);
             setSpriteAlignment(ALIGN_NOT_2D);
-            dl = popHUD(dl);
+            dl = popHUD(dl, ALIGN_LEFT);
             // Counter
             setSpriteAlignment(ALIGN_LEFT);
             dl = func_global_asm_8068DC54(dl, 0x26, 0x32, &aaD->unk26, aaD->unk28, &aaD->unk24);
@@ -1122,7 +1126,7 @@ RECOMP_PATCH Gfx *func_bonus_8002D010(Gfx *dl, Actor *arg1) {
     setSpriteAlignment(ALIGN_LEFT);
     dl = func_global_asm_806FE078(dl, aaD->unk3, 8, 30.0f, 36.0f, 0.0f, 1.0f);
     setSpriteAlignment(ALIGN_NOT_2D);
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_LEFT);
     // Counter
     setSpriteAlignment(ALIGN_LEFT);
     dl = func_global_asm_8068DC54(dl, 0x26, 0x2D, &aaD->unk8, aaD->unkA, &aaD->unk6);
@@ -1170,7 +1174,7 @@ RECOMP_PATCH Gfx *func_boss_800286B8(Gfx *dl, Actor *arg1) {
     _sprintf(sp3C, "ROUND %d", D_global_asm_80750AD4);
     dl = alignHUD(dl, ALIGN_LEFT);
     dl = printText(dl, 50 * 4, (character_change_array->unk270[3] - 15) * 4, 0.6f, sp3C);
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_LEFT);
     return dl;
 }
 
@@ -1187,6 +1191,7 @@ RECOMP_PATCH Gfx *func_global_asm_806FF75C(Gfx* dl, Actor *arg1) {
     s32 sp68;
     s32 sp64;
     s32 sp60;
+    s32 width, height, pillar;
 
     var_v0 = 2;
 
@@ -1196,50 +1201,19 @@ RECOMP_PATCH Gfx *func_global_asm_806FF75C(Gfx* dl, Actor *arg1) {
     }
     dl = func_global_asm_806FEDB0(dl, temp_a2);
     gDPSetPrimColor(dl++, 0, 0, 0x00, 0x00, 0x00, 0xFF);
-    // Inner Segments
+    gDPSetScissor(dl++, G_SC_NON_INTERLACE, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
+    recomp_get_ui_bounds(&width, &height);
+    pillar = (width - 320) >> 1;
+    // Inner
     dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x100, 0x40, 3.0f, 2.0f, 0, 0.0f);
     dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x40, 0x40, 2.0f, 3.0f, 0x5A, 0.0f);
     dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x100, 0xB0, 2.0f, 3.0f, 0x10E, 0.0f);
     dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x40, 0xB0, 3.0f, 2.0f, 0xB4, 0.0f);
-    // Outer Segments - Same notion as DKTV
-    gEXPushScissor(dl++);
-    gEXPushViewport(dl++);
-    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
-    gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
-    gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
-    dl = displayImage_simple(dl,
-        0, 0,
-        0x40, 0x40,
-        0x3A, G_IM_FMT_IA, 1,
-        3.0f, 3.0f,
-        0, 0);
-    dl = displayImage_simple(dl,
-        0, D_global_asm_80744494 + 4,
-        0x40, 0x40,
-        0x3A, G_IM_FMT_IA, 1,
-        3.0f, 3.0f,
-        0, 1);
-    gEXPopViewport(dl++);
-    gEXPopViewport(dl++);
-    gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT, 0, 0, 0, 0);
-    gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, 0, 0);
-    dl = alignHUDGameplay(dl, ALIGN_RIGHT);
-    dl = displayImage_simple(dl,
-        D_global_asm_80744490, 0,
-        0x40, 0x40,
-        0x3A, G_IM_FMT_IA, 1,
-        3.0f, 3.0f,
-        1, 0);
-    dl = displayImage_simple(dl,
-        D_global_asm_80744490, D_global_asm_80744494 + 4,
-        0x40, 0x40,
-        0x3A, G_IM_FMT_IA, 1,
-        3.0f, 3.0f,
-        1, 1);
-    gEXPopScissor(dl++);
-    gEXPopViewport(dl++);
-    gEXSetRectAlign(dl++, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, 0, 0);
-    gEXSetViewportAlign(dl++, G_EX_ORIGIN_NONE, 0, 0);
+    // Outer
+    dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x60 - pillar, 0x60, 3.0f, 3.0f, 0, 0.0f);
+    dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0xE0 + pillar, 0x60, 3.0f, 3.0f, 0x5A, 0.0f);
+    dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0xE0 + pillar, 0x90, 3.0f, 3.0f, 0xB4, 0.0f);
+    dl = displayImage(dl, 0x3AU, 3, 1, 0x40, 0x40, 0x60 - pillar, 0x90, 3.0f, 3.0f, 0x10E, 0.0f);
     if ((func_global_asm_806F8AD4(3U, temp_a2)) && (func_global_asm_80690F30(var_v0, &sp70, arg1, 1, 0, 0, &sp68, &sp64, &sp60))) {
         gDPSetPrimColor(dl++, 0, 0, 0x00, 0xC8, 0x00, 0xFF);
     } else {
@@ -1362,7 +1336,7 @@ RECOMP_PATCH Gfx* func_race_8002CBEC(Gfx* dl, Actor* arg1) {
                 dl = func_race_8002BDDC(dl, arg1, temp_s0->unk2C->x_position, temp_s0->unk2C->z_position, 0xFF, 0xC8, 0);
             }
         }
-        dl = popHUD(dl);
+        dl = popHUD(dl, ALIGN_LEFT);
     }
     return func_race_8002BEE8(dl, arg1);
 }
@@ -1421,7 +1395,7 @@ RECOMP_PATCH Gfx *func_race_8002C14C(Gfx *dl, Struct8002C67C *arg1) {
             0.5f, 0.5f, 0, 0
         );
     }
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_LEFT);
     if (arg1->unk2A) {
         gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     }
@@ -1462,7 +1436,7 @@ RECOMP_PATCH Gfx* func_race_8002C76C(Gfx* dl, Struct8002C67C* arg1) {
             _sprintf(str, "%s %d %s %d", sp50, var_t0, sp4C, temp_t1->unk24);
             dl = alignHUD(dl, ALIGN_LEFT);
             dl = printStyledText(dl, 1, 2.0f * (sp60 * 4), 2.0f * (sp5C * 4), str, 4U);
-            dl = popHUD(dl);
+            dl = popHUD(dl, ALIGN_LEFT);
             gSPMatrix(dl++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
             gSPMatrix(dl++, &arg1->unk50[D_global_asm_807444FC], G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
             sp5C -= (0.5f * func_global_asm_806FD894(1));
@@ -1478,7 +1452,7 @@ RECOMP_PATCH Gfx* func_race_8002C76C(Gfx* dl, Struct8002C67C* arg1) {
         }
         dl = alignHUD(dl, ALIGN_LEFT);
         dl = printStyledText(dl, 1, 2.0f * (sp60 * 4), 2.0f * (sp5C * 4), getTextString(0x26U, D_race_8002FCC0[var_v0], 1), 4U);
-        dl = popHUD(dl);
+        dl = popHUD(dl, ALIGN_LEFT);
     }
     if ((arg1->unk34 > 2) && (arg1->unk34 < 5)) {
         dl = func_global_asm_806FE078(dl, arg1->unk46, 2, 160.0f, 100.0f, 0.0f, 1.5f);
@@ -1541,7 +1515,7 @@ RECOMP_PATCH Gfx *func_race_8002C2E8(Gfx *dl, RaceAdditionalActorData *arg1) {
             0, 0
         );
     }
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_LEFT);
     gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     return dl;
 }
@@ -1931,7 +1905,7 @@ RECOMP_PATCH Gfx* func_global_asm_80710CA0(Gfx* dl, Actor* arg1) {
         }
     }
 
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_LEFT);
     return dl;
 }
 
@@ -2046,7 +2020,6 @@ extern void *_malloc(s32);
 extern PlayerProgress D_global_asm_807FC950[];
 extern u8 getLevelIndex(u8 map, u8 arg1);
 extern u8 D_global_asm_8076A0AB;
-extern void func_global_asm_8061134C(void*);
 extern Gfx *func_global_asm_806A921C(Gfx *dl);
 extern Gfx *displayImage(Gfx *dl, u16 textureIndex, s32 arg3, u32 codec, s32 width, s32 height, s16 x, s16 y, f32 xScale, f32 yScale, s32 arg11, f32 arg12);
 extern Gfx *printText(Gfx *dl, s16 x, s16 y, f32 scale, u8 *string);
@@ -2126,7 +2099,11 @@ RECOMP_PATCH Gfx* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
                 }
                 dl = printStyledText(dl, 1, x, y, temp_v0_2->unk11, 1U);
                 if (update_alignment) {
-                    dl = popHUD(dl);
+                    if (x > (240 * 4)) {
+                        dl = popHUD(dl, ALIGN_RIGHT);
+                    } else if (x < (80 * 4)) {
+                        dl = popHUD(dl, ALIGN_LEFT);
+                    }
                 }
             }
         }
@@ -2896,36 +2873,36 @@ RECOMP_PATCH void func_global_asm_805FD088(Struct805FD088 *arg0, Gfx **arg1, Gfx
             // @recomp: Change bounds. Don't use gEX as we don't want this to respect the UI setting
             recomp_get_ui_bounds(&width, &height);
             if (D_global_asm_8074447C) {
-                dl = alignHUDGameplay(dl, ALIGN_LEFT);
-                gDPFillRectangle(dl++,
-                    temp_v0_6->unk4,
-                    temp_v0_6->unk6,
-                    character_change_array->unk270[0],
-                    temp_v0_6->unkA);
-                dl = popHUD(dl);
+                // dl = alignHUDGameplay(dl, ALIGN_LEFT);
+                // gDPFillRectangle(dl++,
+                //     temp_v0_6->unk4,
+                //     temp_v0_6->unk6,
+                //     character_change_array->unk270[0],
+                //     temp_v0_6->unkA);
+                // dl = popHUD(dl, ALIGN_LEFT);
             }
             if (D_global_asm_80744480) {
-                dl = alignHUDGameplay(dl, ALIGN_RIGHT);
-                gDPFillRectangle(dl++,
-                    character_change_array->unk270[2],
-                    temp_v0_6->unk6,
-                    temp_v0_6->unk8,
-                    temp_v0_6->unkA);
-                dl = popHUD(dl);
+                // dl = alignHUDGameplay(dl, ALIGN_RIGHT);
+                // gDPFillRectangle(dl++,
+                //     character_change_array->unk270[2],
+                //     temp_v0_6->unk6,
+                //     temp_v0_6->unk8,
+                //     temp_v0_6->unkA);
+                // dl = popHUD(dl, ALIGN_RIGHT);
             }
             if (D_global_asm_80744484) {
                 gDPFillRectangle(dl++,
-                character_change_array->unk270[0],
-                temp_v0_6->unk6,
-                character_change_array->unk270[2],
-                character_change_array->unk270[1]);
+                    character_change_array->unk270[0],
+                    temp_v0_6->unk6,
+                    character_change_array->unk270[2],
+                    character_change_array->unk270[1]);
             }
             if (D_global_asm_80744488) {
                 gDPFillRectangle(dl++,
-                character_change_array->unk270[0],
-                character_change_array->unk270[3],
-                character_change_array->unk270[2],
-                temp_v0_6->unkA);
+                    character_change_array->unk270[0],
+                    character_change_array->unk270[3],
+                    character_change_array->unk270[2],
+                    temp_v0_6->unkA);
             }
             gDPPipeSync(dl++);
             character_change_array->unk278 = character_change_array->unk270[2] - character_change_array->unk270[0];
@@ -3019,6 +2996,8 @@ RECOMP_PATCH Gfx *func_global_asm_806C75A4(Gfx *dl, Actor *arg1) {
     D_global_asm_80750818[1] = 160.0f;
     D_global_asm_80750818[2] = 120.0f;
     D_global_asm_80750818[3] = 160.0f;
+    D_global_asm_80750828[1] = 60.0f;
+    D_global_asm_80750828[3] = 60.0f;
     i = D_global_asm_807506D0[D_global_asm_80750754].squish_from;
 
     var_v1 = (((D_global_asm_807FC8E8 - 0.5) * D_global_asm_80750818[i]) + (D_global_asm_80750828[i] * D_global_asm_807FC8EC));
@@ -3067,14 +3046,14 @@ RECOMP_PATCH Gfx *func_global_asm_806C75A4(Gfx *dl, Actor *arg1) {
         case 1:
             // Left
             var_f0 = (D_global_asm_80750818[i] * D_global_asm_807FC8E8) + -70.0;
-            var_f0 += 8.0;
+            var_f0 -= 12.0f; // @recomp: Move this 20 units to the left (lack of overscan, shortened borders) (was +8)
             var_f0 -= ((width - 320) >> 1);
             sp108 = 120.0f;
             break;
         case 3:
             // Right
             var_f0 = 390.0 - (D_global_asm_80750818[i] * D_global_asm_807FC8E8);
-            var_f0 -= 8.0;
+            var_f0 += 12.0f; // @recomp: Move this 20 units to the right (lack of overscan, shortened borders) (was -8)
             var_f0 += ((width - 320) >> 1);
             sp108 = 120.0f;
             break;
@@ -3122,7 +3101,7 @@ RECOMP_PATCH Gfx *func_global_asm_8068DBA4(Gfx *dl, Struct8068DBA4_arg1 *arg1) {
     _sprintf(sp34, "%d", arg1->unk14);
     dl = alignHUD(dl, ALIGN_RIGHT);
     dl = printStyledText(dl, 3, 0x370, 0x50, sp34, 1);
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_RIGHT);
     return dl;
 }
 
@@ -3149,6 +3128,6 @@ RECOMP_PATCH Gfx *func_global_asm_8068DAF4(Gfx *dl, u8 *arg1) {
     _sprintf(sp38, "%d", *arg1);
     dl = alignHUD(dl, ALIGN_LEFT);
     dl = printStyledText(dl, 3, 260, 80, sp38, 1);
-    dl = popHUD(dl);
+    dl = popHUD(dl, ALIGN_LEFT);
     return dl;
 }
