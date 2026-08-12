@@ -263,7 +263,19 @@ RECOMP_PATCH Gfx *func_global_asm_806F9D8C(s32 arg0, Struct806FA504_arg1 *arg1, 
         alignment = ALIGN_RIGHT;
     }
     temp_v0_3 = func_global_asm_806C7C94(0U);
-    dl = alignHUD(dl, alignment);
+    gEXPushScissor(dl++);
+    gEXPushViewport(dl++);
+    gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, 0, 0, D_global_asm_80744494);
+    if (alignment == ALIGN_RIGHT) {
+        // Right align
+        gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
+            -D_global_asm_80744490 * 4, 0,
+            -D_global_asm_80744490 * 4, 0);
+        gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, -D_global_asm_80744490 * 4, 0);
+    } else if (alignment == ALIGN_LEFT) {
+        gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, 0, 0, 0);
+        gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
+    }
     // dl = alignHUDTopBottom(dl, alignment, temp_v0_3->unk4, temp_v0_3->unk8);
     gSPMatrix(dl++, &D_2000080, G_MTX_PROJECTION | G_MTX_LOAD | G_MTX_NOPUSH);
     guTranslate(&sp74->unk8[D_global_asm_807444FC], arg1->unk4 * (1.0f - temp_f0), arg1->unk8 * (1.0f - temp_f0), 0.0f);
