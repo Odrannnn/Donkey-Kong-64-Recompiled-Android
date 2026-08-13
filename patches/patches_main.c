@@ -1612,3 +1612,422 @@ RECOMP_PATCH Gfx* func_global_asm_80704484(Gfx *dl, u8 arg1) {
     }
     return dl;
 }
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    s16 unk30;
+    s16 unk32;
+    s16 unk34;
+    u8 unk36;
+    u8 unk37;
+    u8 unk38;
+    u8 unk39;
+    s8 unk3A;
+    s8 unk3B;
+} Struct807F7500;
+
+#define LIGHT_LIMIT 0x30
+Struct807F7500 lightarray[LIGHT_LIMIT];
+extern f32 D_global_asm_807F7ED0;
+extern f32 D_global_asm_807F7ED4;
+extern f32 D_global_asm_807F7ED8;
+extern f32 D_global_asm_807F7EDC;
+extern f32 D_global_asm_807F7EE0;
+extern f32 D_global_asm_807F7EE4;
+extern s16 D_global_asm_80748300;
+
+extern f32 *D_global_asm_8076A0B4;
+extern f32 *D_global_asm_8076A0B8;
+extern f32 *D_global_asm_8076A0BC;
+extern f32 *D_global_asm_8076A0C0;
+extern f32 *D_global_asm_8076A0C4;
+extern f32 *D_global_asm_8076A0C8;
+
+extern s32 D_global_asm_807F6C28;
+extern s16 D_global_asm_807F7EC8;
+
+extern u8 D_global_asm_807F7EF8;
+extern f32 D_global_asm_807F7ECC;
+extern f32 D_global_asm_807F7ED0;
+extern f32 D_global_asm_807F7EE8;
+extern s16 D_global_asm_807F7EFA;
+extern s16 D_global_asm_807F7EFC;
+extern s16 D_global_asm_807F7EFE;
+
+RECOMP_PATCH void createLight(f32 arg0, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, u8 arg7, u8 arg8, u8 arg9, u8 argA) {
+    if (D_global_asm_80748300 == LIGHT_LIMIT) {
+        recomp_printf("Too many lights\n");
+        return;
+    }
+    lightarray[D_global_asm_80748300].unk34 = D_global_asm_807F7EFE;
+    lightarray[D_global_asm_80748300].unk3A = D_global_asm_807F7EF8;
+    lightarray[D_global_asm_80748300].unk30 = D_global_asm_807F7EFA;
+    lightarray[D_global_asm_80748300].unk32 = D_global_asm_807F7EFC;
+    lightarray[D_global_asm_80748300].unk8 = D_global_asm_807F7EE8;
+    lightarray[D_global_asm_80748300].unk0 = D_global_asm_807F7EE4;
+    lightarray[D_global_asm_80748300].unk18 = arg0;
+    lightarray[D_global_asm_80748300].unk1C = arg1;
+    lightarray[D_global_asm_80748300].unkC = D_global_asm_807F7EDC;
+    lightarray[D_global_asm_80748300].unk4 = D_global_asm_807F7ED8;
+    lightarray[D_global_asm_80748300].unk39 = arg7;
+    lightarray[D_global_asm_80748300].unk10 = D_global_asm_807F7EE0;
+    lightarray[D_global_asm_80748300].unk20 = arg2;
+    lightarray[D_global_asm_80748300].unk24 = arg3;
+    lightarray[D_global_asm_80748300].unk28 = arg4;
+    lightarray[D_global_asm_80748300].unk2C = arg5;
+    lightarray[D_global_asm_80748300].unk14 = arg6;
+    lightarray[D_global_asm_80748300].unk36 = arg8;
+    lightarray[D_global_asm_80748300].unk37 = arg9;
+    lightarray[D_global_asm_80748300].unk38 = argA;
+    D_global_asm_80748300++;
+    D_global_asm_807F7ED8 = D_global_asm_807F7ECC;
+    D_global_asm_807F7EDC = D_global_asm_807F7ED0;
+    D_global_asm_807F7EE0 = D_global_asm_807F7ED4;
+    D_global_asm_807F7EF8 = 0;
+    D_global_asm_807F7EFA = -1;
+    D_global_asm_807F7EFC = 700;
+    D_global_asm_807F7EFE = 600;
+    D_global_asm_807F7EE4 = 25.0f;
+    D_global_asm_807F7EE8 = 65.0f;
+}
+
+typedef struct {
+    Actor* unk0;
+    s32 unk4;
+} GlobalASMStruct53;
+s32 func_global_asm_8065C240(void*);
+void addActorRecolor(Actor *actor, s16 x, s16 y, s16 z, u8 alpha, u8 red, u8 green, u8 blue, u8);
+void func_global_asm_8065D254(Actor *actor, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5, s32 arg6, s32 arg7, u32 arg8, s32 arg9, f32 arg10);
+extern s32 D_global_asm_80748304;
+extern s32 D_global_asm_80748308;
+extern u16 D_global_asm_807FBB34;
+extern GlobalASMStruct53 D_global_asm_807FB930[];
+#define drawShadow8065A884(m) \
+    temp_res = ac->shadow_opacity / 255.0; \
+    func_global_asm_8065D254(ac, \
+    0x3C9, 0x40, 0x40, \
+    spC0 * ac->unk16E, spC4 * ac->unk16F, \
+    1, 0x64, \
+    (temp_res * D_global_asm_80748304 * (m)), \
+    var_s3 + 0xC00, var_f24 * (m))
+
+RECOMP_PATCH void func_global_asm_8065A884(void) {
+    s32 i;
+    Struct807F7500* light;
+    s32 sp14C;
+    f32 temp_f14;
+    f32 temp_f2;
+    f32 temp_f0;
+    f32 temp_f0_10;
+    f32 temp_f0_11;
+    f32 temp_f0_6;
+    f32 temp_f12;
+    f32 temp_f16;
+    f32 temp_f18;
+    f32 temp_f20;
+    f32 temp_f26;
+    f32 temp_f28;
+    f32 temp_f2_5;
+    f32 temp_f30;
+    f32 var_f20;
+    f32 var_f24; // 10c
+    s16 var_s3;
+    u8 spC8[0x40];
+    f32 spC4;
+    f32 spC0;
+    Actor* ac;
+    f32 var_f20_2;
+    f32 var_f22;
+    f32 var_f2;
+    s32 j;
+    f32 temp_res;
+
+    sp14C = 0;
+    for (i = 0; i < D_global_asm_807FBB34; i++) {
+        spC8[i] = FALSE;
+    }
+    for (i = 0; (i < D_global_asm_80748300) && (cc_number_of_players < 3); i++) {
+        light = &lightarray[i];
+        if ((func_global_asm_8065C240(light)) && (sp14C < 0xC)) {
+            sp14C += 1;
+            for (j = 0; j < D_global_asm_807FBB34; j++) {
+                ac = D_global_asm_807FB930[j].unk0;
+                if ((ac->object_properties_bitfield & 0x2000) == 0) {
+                    switch (light->unk39) {
+                        case 1:
+                            temp_f0 = light->unk24 - light->unk18;
+                            temp_f2 = light->unk28 - light->unk1C;
+                            temp_f14 = light->unk2C - light->unk20;
+                            var_f20 = _sqrtf(
+                                SQ(temp_f0) + 
+                                SQ(temp_f2) + 
+                                SQ(temp_f14));
+                            if (var_f20 == 0.0f) {
+                                var_f20 = 0.1f;
+                            }
+                            temp_f26 = temp_f0 / var_f20;
+                            temp_f28 = temp_f2 / var_f20;
+                            temp_f30 = temp_f14 / var_f20;
+                            temp_f0 = ac->position.f[0] - light->unk18;
+                            temp_f2 = ac->position.f[1] - light->unk1C;
+                            temp_f14 = ac->position.f[2] - light->unk20;
+                            var_f20_2 = _sqrtf(
+                                SQ(temp_f0) + 
+                                SQ(temp_f2) + 
+                                SQ(temp_f14)
+                            );
+                            if (var_f20_2 == 0.0f) {
+                                var_f20_2 = 0.1f;
+                            }
+                            temp_f12 = temp_f0 / var_f20_2;
+                            temp_f16 = temp_f2 / var_f20_2;
+                            temp_f18 = temp_f14 / var_f20_2;
+                            var_f22 = (temp_f12 * temp_f26) + (temp_f16 * temp_f28) + (temp_f18 * temp_f30);
+                            if (var_f22 < 0.0f) {
+                                var_f22 = 0.0f;
+                            }
+                            if (light->unkC <= var_f22) {
+                                if (light->unk4 <= var_f22) {
+                                    var_f22 = 1.0f;
+                                } else {
+                                    var_f22 = (var_f22 - light->unkC) * light->unk10;
+                                }
+                                addActorRecolor(ac,
+                                    light->unk18,
+                                    light->unk1C,
+                                    light->unk20, 0xFF,
+                                    light->unk36 * var_f22,
+                                    light->unk37 * var_f22,
+                                    light->unk38 * var_f22, 0U);
+                                if ((ac->object_properties_bitfield & 0x01000000) && (ac->object_properties_bitfield & 4)) {
+                                    temp_f0_6 = _sqrtf(
+                                        SQ(light->unk20 - ac->position.f[2]) + 
+                                        SQ(light->unk18 - ac->position.f[0])
+                                    );
+                                    if (temp_f0_6 != 0.0f) {
+                                        var_f2 = temp_f0_6;
+                                    } else {
+                                        var_f2 = 0.001f;
+                                    }
+                                    var_f24 = (light->unk1C - ac->position.f[1]) / var_f2;
+                                    if (!(var_f24 > 0.0f)) {
+                                        var_f24 = -var_f24;
+                                    }
+                                    if (var_f24 == 0.0f) {
+                                        var_f24 = 0.1f;
+                                    }
+                                    var_f24 = (ac->unk15E * 0.4f) / var_f24;
+                                    var_s3 = func_global_asm_80665DE0(
+                                        light->unk18, light->unk20,
+                                        ac->position.f[0], ac->position.f[2]
+                                    );
+                                    if (ac->animation_state) {
+                                        spC0 = ac->animation_state->scale[0];
+                                        spC4 = ac->animation_state->scale[2];
+                                    } else {
+                                        spC0 = 0.15f;
+                                        spC4 = 0.15f;
+                                    }
+                                    temp_res = ac->shadow_opacity / 255.0;
+                                    func_global_asm_8065D254(ac,
+                                        0x3C9, 0x40, 0x40,
+                                        spC0 * ac->unk16E, spC4 * ac->unk16F,
+                                        1, 0x64,
+                                        (D_global_asm_80748304 * var_f22 * temp_res),
+                                        var_s3 + 0xC00, var_f24 * var_f22);
+                                    spC8[j] = TRUE;
+                                }
+                            }
+                            break;
+                        case 0:
+                            var_f22 = _sqrtf(
+                                SQ(light->unk18 - ac->position.f[0]) +
+                                SQ(light->unk1C - ac->position.f[1]) + 
+                                SQ(light->unk20 - ac->position.f[2])
+                            ) - (f32) ac->unkCE;
+                            if (var_f22 < 0.0) {
+                                var_f22 = 0.1f;
+                            }
+                            temp_f20 = light->unk14 * 1.3f;
+                            if ((ac->object_properties_bitfield & 0x01000000) && (var_f22 < temp_f20) && (ac->object_properties_bitfield & 4)) {
+                                var_f2 = _sqrtf(
+                                    SQ(light->unk20 - ac->position.f[2]) +
+                                    SQ(light->unk18 - ac->position.f[0])
+                                );
+                                if (var_f2 == 0.0f) {
+                                    var_f2 = 1.0f;
+                                }
+                                var_f24 = (light->unk1C - ac->position.f[1]) / var_f2;
+                                if (!(var_f24 > 0.0f)) {
+                                    var_f24 = -var_f24;
+                                }
+                                if (var_f24 == 0.0f) {
+                                    var_f24 = 0.1f;
+                                }
+                                var_f24 = (ac->unk15E * 0.4f) / var_f24;
+                                var_s3 = func_global_asm_80665DE0(light->unk18, light->unk20, ac->position.f[0], ac->position.f[2]);
+                                if (var_f24 > 10.0f) {
+                                    var_f24 = 10.0f;
+                                }
+                                if (ac->animation_state) {
+                                    spC0 = ac->animation_state->scale[0];
+                                    spC4 = ac->animation_state->scale[2];
+                                } else {
+                                    spC0 = 0.15f;
+                                    spC4 = 0.15f;
+                                }
+                                spC8[j] = 1;
+                            }
+                            temp_f0_10 = temp_f20 / 3.0f;
+                            if (var_f22 < temp_f0_10) {
+                                addActorRecolor(ac,
+                                    light->unk18,
+                                    light->unk1C,
+                                    light->unk20, 0xFFU,
+                                    light->unk36,
+                                    light->unk37,
+                                    light->unk38, 0U);
+                                if ((ac->object_properties_bitfield & 0x01000000) && (ac->object_properties_bitfield & 4)) {
+                                    drawShadow8065A884(1.0f);
+                                }
+                            } else {
+                                var_f22 -= temp_f0_10;
+                                temp_f2_5 = temp_f20 - temp_f0_10;
+                                if (var_f22 < temp_f2_5) {
+                                    temp_f0_11 = 1.0f - (var_f22 / temp_f2_5);
+                                    addActorRecolor(ac,
+                                        light->unk18,
+                                        light->unk1C,
+                                        light->unk20, 0xFFU,
+                                        light->unk36 * temp_f0_11,
+                                        light->unk37 * temp_f0_11,
+                                        light->unk38 * temp_f0_11, 0U);
+                                    if ((ac->object_properties_bitfield & 0x01000000) && (ac->object_properties_bitfield & 4)) {
+                                        drawShadow8065A884(temp_f0_11);
+                                    }
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+        }
+    }
+    for (i = 0; i < D_global_asm_807FBB34; i++) {
+        if (spC8[i] == 0) {
+            ac = D_global_asm_807FB930[i].unk0;
+            if ((ac->object_properties_bitfield & 0x01000000) && (ac->object_properties_bitfield & 4)) {
+                if (ac->animation_state) {
+                    spC0 = ac->animation_state->scale[0];
+                    spC4 = ac->animation_state->scale[2];
+                } else {
+                    spC0 = 0.15f;
+                    spC4 = 0.15f;
+                }
+                temp_res = ac->shadow_opacity / 255.0;
+                func_global_asm_8065D254(ac,
+                    0x3C9, 0x40, 0x40,
+                    spC0 * ac->unk16E, spC4 * ac->unk16F,
+                    1, 0x64,
+                    (D_global_asm_80748308 * temp_res),
+                    0, 1.0f);
+            }
+        }
+    }
+}
+
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    s32 unk18;
+    f32 unk1C;
+    f32 unk20;
+    f32 unk24;
+    f32 unk28;
+    f32 unk2C;
+    f32 unk30;
+    f32 unk34;
+    s16 unk38;
+    s16 unk3A;
+    s16 unk3C;
+    u8 unk3E;
+    u8 unk3F; // Used
+} Struct807F78C0;
+s32 func_global_asm_8065BF18(Struct807F7500*, f32, f32, s32, s32, s32, s32, s32, s32, s32, s32);
+void func_global_asm_8065BE74(s16 arg0);
+extern Struct807F78C0 D_global_asm_807F78C0[];
+extern s16 D_global_asm_807F7BC0;
+
+RECOMP_PATCH s16 func_global_asm_8065BAA0(f32 arg0, f32 arg1, s32 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s32 arg9, u8* argA) {
+    f32 dz;
+    f32 dy;
+    f32 dx;
+    f32 var_f2;
+    s32 i;
+
+    *argA = FALSE;
+    D_global_asm_807F7BC0 = 0;
+    for (i = 0; i < D_global_asm_80748300; i++) {
+        if (func_global_asm_8065BF18(&lightarray[i], arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9)) {
+            if (D_global_asm_807F7BC0 < 0xC) {
+                if (lightarray[i].unk3A & 1) {
+                    *argA = TRUE;
+                }
+                D_global_asm_807F78C0[D_global_asm_807F7BC0].unk3F = i;
+                D_global_asm_807F78C0[D_global_asm_807F7BC0].unk38 = lightarray[i].unk18 * 3.0f;
+                D_global_asm_807F78C0[D_global_asm_807F7BC0].unk3A = lightarray[i].unk1C * 3.0f;
+                D_global_asm_807F78C0[D_global_asm_807F7BC0].unk3C = lightarray[i].unk20 * 3.0f;
+                D_global_asm_807F78C0[D_global_asm_807F7BC0].unk2C = lightarray[i].unk36 / 255.0;
+                D_global_asm_807F78C0[D_global_asm_807F7BC0].unk30 = lightarray[i].unk37 / 255.0;
+                D_global_asm_807F78C0[D_global_asm_807F7BC0].unk34 = lightarray[i].unk38 / 255.0;
+                D_global_asm_807F78C0[D_global_asm_807F7BC0].unk3E = lightarray[i].unk39;
+                switch (lightarray[i].unk39) {
+                    case 1:
+                        dx = lightarray[i].unk24 - lightarray[i].unk18;
+                        dy = lightarray[i].unk28 - lightarray[i].unk1C;
+                        dz = lightarray[i].unk2C - lightarray[i].unk20;
+                        var_f2 = _sqrtf(SQ(dx) + SQ(dy) + SQ(dz));
+                        if (var_f2 == 0.0f) {
+                            var_f2 = 0.1f;
+                        }
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk18 = 1210000;
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk4 = lightarray[i].unk4;
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unkC = dx / var_f2;
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk0 = lightarray[i].unkC;
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk10 = dy / var_f2;
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk8 = lightarray[i].unk10;
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk14 = dz / var_f2;
+                        break;
+                    case 0:
+                        if (lightarray[i].unk14 == 0.0f) {
+                            lightarray[i].unk14 = 0.1f;
+                        }
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk20 = ((lightarray[i].unk14 / 3.0f) * 3.0f);
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk18 = SQ(lightarray[i].unk14 * 3.0f);
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk1C = 1.0f / ((lightarray[i].unk14 * 3.0f) - D_global_asm_807F78C0[D_global_asm_807F7BC0].unk20);
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk28 = ((lightarray[i].unk14 * 1.3f) / 3.0f) * 3.0f;
+                        D_global_asm_807F78C0[D_global_asm_807F7BC0].unk24 = 1.0f / (((lightarray[i].unk14 * 1.3f) * 3.0f) - D_global_asm_807F78C0[D_global_asm_807F7BC0].unk28);
+                        break;
+                }
+                func_global_asm_8065BE74(D_global_asm_807F7BC0);
+                D_global_asm_807F7BC0++;
+            }
+        }
+    }
+    return D_global_asm_807F7BC0;
+}
