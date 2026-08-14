@@ -77,6 +77,12 @@ RECOMP_PATCH void func_global_asm_80611730(void) {
     } while (entry < &D_global_asm_807F0A58[count]);
 }
 
+extern int gameIsInDKTVMode(void);
+#define DK_DKTV_LAG_START 215
+#define DK_DKTV_LAG_END 325
+#define DK_DKTV_LAG_START2 420
+#define D_global_asm_807463AC (*(volatile s16*)0x807463AC)
+
 void updateLag(s32 value) {
     s32 limit = 1;
     if ((is_cutscene_active != 3) && (is_cutscene_active != 4)) {
@@ -99,6 +105,7 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
     u32 oldBoost;
     s32 i;
     Struct80767A40* osdata;
+    u8 is_dktv = FALSE;
 
     //@recomp: patch to always greater than 1 (on console, default is 2. if zero, it will divide by zero and crash)
     AlterVolumes();
@@ -109,7 +116,11 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
         D_global_asm_80744478 = 2;
     }
 
-    if (D_global_asm_8076AF14) {
+    if ((gameIsInDKTVMode()) && (current_map == MAP_JAPES)) {
+        // @recomp: DK's DKTV
+        is_dktv = TRUE;
+        D_global_asm_80744478 = 3;
+    } else if (D_global_asm_8076AF14) {
         osdata = &D_global_asm_80767A40;
         newBoost = osdata->frame_count - D_global_asm_8076AF10;
         newBoost = MAX(1, newBoost);
@@ -159,7 +170,9 @@ RECOMP_PATCH void func_global_asm_80600674(void) {
     osdata = &D_global_asm_80767A40;
 
     //@recomp: dont update; stays at 2
-    updateLag(osdata->frame_count - D_global_asm_8076AF10);
+    if (!is_dktv) {
+        updateLag(osdata->frame_count - D_global_asm_8076AF10);
+    }
 
     D_global_asm_8076AF10 = osdata->frame_count;
     //recomp_printf("D_global_asm_80744478 is %d:\n", D_global_asm_80744478);
@@ -477,74 +490,6 @@ RECOMP_PATCH void func_global_asm_80714A9C(void) {
     D_global_asm_807FDB40 = D_global_asm_8074450C * ((320 - OVERSCAN_SIZE));
     D_global_asm_807FDB42 = D_global_asm_8074450C * ((240 - OVERSCAN_SIZE));
     D_global_asm_807FDB3A = 0x258;
-}
-
-#define D_global_asm_807463AC (*(volatile s16*)0x807463AC)
-#define D_global_asm_807463B0 (*(volatile s16*)0x807463B0)
-#define D_global_asm_807463B4 (*(volatile u16*)0x807463B4)
-#define DK_DKTV_LAG_START 215
-#define DK_DKTV_LAG_END 325
-#define DK_DKTV_LAG_START2 420
-
-
-void getDKTVAttrs(s32 *numerator, s32 *denominator, s32 *scaled_frame) {
-    // Correction code for DK's DK TV Demo where lag desyncs the inputs from the intended sequence of events
-    // Rather than inducing lag, we change how frequently it'll change to the next input set.
-    *numerator = 2;
-    *denominator = 2;
-    *scaled_frame = D_global_asm_807463AC;
-    if (current_map == MAP_JAPES) {
-        if (D_global_asm_807463AC > DK_DKTV_LAG_START) {
-            if (D_global_asm_807463AC < DK_DKTV_LAG_END) {
-                *numerator = 3;
-                *scaled_frame = DK_DKTV_LAG_START + (((D_global_asm_807463AC - DK_DKTV_LAG_START) * 2) / 3);
-            } else if (D_global_asm_807463AC > DK_DKTV_LAG_START2) {
-                *numerator = 3;
-                *scaled_frame = DK_DKTV_LAG_START2 + (((D_global_asm_807463AC - DK_DKTV_LAG_START2) * 2) / 3);
-            }
-        }
-    }
-}
-
-//@recomp: Slow down the rate of the DK64 Buttons being parsed for DK's demo
-RECOMP_PATCH void func_global_asm_8060B55C(u16 *arg0) {
-    s32 numerator;
-    s32 denominator;
-    s32 scaled_frame;
-    getDKTVAttrs(&numerator, &denominator, &scaled_frame);
-    if (scaled_frame < (D_global_asm_807463B0 - 1)) {
-        *arg0 = D_global_asm_807ECE98->button & 0x7FFF;
-        if ((D_global_asm_807463AC % numerator) != denominator) {
-            D_global_asm_807ECE98++;
-        } else {
-            // Correct the demo fadeout timer counter so it doesn't fade out early
-            if (D_global_asm_8075531C > 0) {
-                D_global_asm_8075531C++;
-            }
-        }
-        D_global_asm_807463AC++;
-        return;
-    }
-    is_autowalking = 0;
-}
-
-//@recomp: Slow down the rate of the stick inputs being parsed for DK's demo
-RECOMP_PATCH void func_global_asm_8060B4D4(OSContPad *arg0) {
-    s32 numerator;
-    s32 denominator;
-    s32 scaled_frame;
-    getDKTVAttrs(&numerator, &denominator, &scaled_frame);
-    if (scaled_frame < (D_global_asm_807463B0 - 1)) {
-        arg0->stick_x = D_global_asm_807ECE98->stick_x;
-        arg0->stick_y = D_global_asm_807ECE98->stick_y;
-        if (D_global_asm_807ECE98->button & 0x8000) {
-            if ((D_global_asm_807463AC % numerator) != denominator) {
-                D_global_asm_807463B4 = D_global_asm_807ECE94[0];
-                D_global_asm_807ECE94++;
-            }
-        }
-        arg0->button = D_global_asm_807463B4 & 0xEFFF;
-    }
 }
 
 Gfx* func_global_asm_8062CEA8(Gfx*, void*, u8);      /* extern */
