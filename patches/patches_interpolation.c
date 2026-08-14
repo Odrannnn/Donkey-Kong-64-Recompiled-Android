@@ -544,7 +544,7 @@ RECOMP_PATCH void func_menu_8002FC1C(Actor *arg0, MenuAdditionalActorData *MaaD,
             MaaD->unk12 = MaaD->unk13;
             MaaD->unk16 = -1;
             func_menu_80030340(arg0, 0, NULL, 0);
-            set_sprite_interpolation_lockdown(2); // @recomp: Disable interp during screen transitions for 2f
+            set_interpolation_lockdown(2); // @recomp: Disable interp during screen transitions for 2f
             playSound(0x2C9, 0x7FFF, 63.0f, 1.25f, 0, 0);
         }
     } else {
@@ -626,7 +626,7 @@ RECOMP_PATCH s32 func_global_asm_806ABC94(PauseAAD* arg0, s32 arg1, s32 arg2) {
             arg1 = 0;
             D_global_asm_807FC7F8[1 - arg0->unk15] = 0;
             playSound(0x97, 0x4650, 63, 1, 0, 0);
-            set_sprite_interpolation_lockdown(2);
+            set_interpolation_lockdown(2);
             D_global_asm_8075052C = 3;
         }
     }

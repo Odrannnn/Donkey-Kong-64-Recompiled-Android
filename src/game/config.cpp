@@ -270,8 +270,8 @@ void dk64::init_config() {
 
     recompui::config::GeneralTabOptions general_options{};
     general_options.has_rumble_strength = true;
-    general_options.has_gyro_sensitivity = false;
-    general_options.has_mouse_sensitivity = false;
+    general_options.has_gyro_sensitivity = true;
+    general_options.has_mouse_sensitivity = true;
 
     auto &general_config = recompui::config::create_general_tab(general_options);
     add_general_options(general_config);

@@ -604,23 +604,18 @@ Gfx *determineChunkFix(Gfx *dl, Chunk *ch) {
             character_change_array[cc_player_index].unk270[1],
             D_global_asm_80744490,
             character_change_array[cc_player_index].unk270[3]);
-        func_global_asm_80658E58(
-            ch->deload1,
-            ch->deload2,
-            ch->deload3,
-            ch->deload4);
     } else {
         gDPSetScissor(dl++, G_SC_NON_INTERLACE,
             character_change_array[cc_player_index].unk270[0],
             character_change_array[cc_player_index].unk270[1],
             character_change_array[cc_player_index].unk270[2],
             character_change_array[cc_player_index].unk270[3]);
-        func_global_asm_80658E58(
-            ch->deload1,
-            ch->deload2,
-            ch->deload3,
-            ch->deload4);
     }
+    func_global_asm_80658E58(
+        ch->deload1,
+        ch->deload2,
+        ch->deload3,
+        ch->deload4);
     return dl;
 }
 
