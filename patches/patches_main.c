@@ -404,50 +404,58 @@ Gfx* func_global_asm_8070835C(Gfx*, u8);
 extern Mtx D_2000180;
 Gfx* func_global_asm_8062CA70(Gfx* dl, s32 arg1, s32 arg2, f32 arg3, f32 arg4, f32 arg5, s32 arg6);
 
-//RECOMP_PATCH Gfx* func_global_asm_8062C29C(Gfx* dl, f32 arg1, f32 arg2, f32 arg3, f32 arg4, f32 arg5, f32 arg6, f32 arg7, f32 arg8, f32 arg9) {
-//    s32 pad[25];
-//    Gfx* temp_s3;
-//
-//    temp_s3 = (void*) & character_change_array[cc_player_index].unk1F0[D_global_asm_807444FC];
-//    D_global_asm_807F5E64 = 0;
-//    D_global_asm_807F5FB4 = arg7;
-//    D_global_asm_807F5FB0 = arg8;
-//    D_global_asm_807F5FAC = arg9;
-//    D_global_asm_807F5FA8 = D_global_asm_807F5FAC;
-//    D_global_asm_807F5FE0 = func_global_asm_80612D10(arg7 * 0.017453292f);
-//    D_global_asm_807F5FE0 = (((D_global_asm_807F5FE0 - D_global_asm_807F5FDC) * 3.0) + D_global_asm_807F5FDC);
-//    func_global_asm_8062DB70(arg1, arg2, arg3, arg4, arg5, arg6);
-//    func_global_asm_8062A944(D_global_asm_807F5FB4, D_global_asm_807F5FB0, D_global_asm_807F5FA8);
-//    func_global_asm_8062AC68(&character_change_array[cc_player_index].unk8[D_global_asm_807444FC]);
-//    func_global_asm_8062AD28(arg1, arg2, arg3, &D_global_asm_807F5E68, (void*) & D_global_asm_807F5E20);
-//    func_global_asm_8062D620(D_global_asm_807F5DE4, D_global_asm_807F5E60, D_global_asm_807F5FF0, arg1, arg2, arg3, 0, !D_global_asm_807F5FEC, (D_global_asm_80750AB4 >= 2));
-//    gSPSegment(dl++, 0x06, osVirtualToPhysical(D_global_asm_807F5DE8));
-//    gSPSegment(dl++, 0x07, osVirtualToPhysical(D_global_asm_807F5DEC));
-//    dl = func_global_asm_80722294(dl, character_change_array[cc_player_index].playerPointer, cc_player_index);
-//    gSPSegment(dl++, 0x05, osVirtualToPhysical(temp_s3));
-//    gDPSetHilite1Tile(temp_s3++, G_TX_RENDERTILE, &character_change_array[cc_player_index].unk1D0[D_global_asm_807444FC], 32, 32);
-//    gSPEndDisplayList(temp_s3++);
-//    func_global_asm_8062C99C(&character_change_array[cc_player_index].unk250[D_global_asm_807444FC], character_change_array[cc_player_index].unk270[0], character_change_array[cc_player_index].unk270[1], character_change_array[cc_player_index].unk270[2], character_change_array[cc_player_index].unk270[3]);
-//    gSPPerspNormalize(dl++, character_change_array[cc_player_index].unk188);
-//    gSPViewport(dl++, osVirtualToPhysical(&character_change_array[cc_player_index].unk250[D_global_asm_807444FC]));
-//    //@recomp: change scissor to cover whole screen
-//    gDPSetScissor(dl++, G_SC_NON_INTERLACE, 0, 0, 320, 240);
-//    gSPLookAt(dl++, osVirtualToPhysical(&character_change_array[cc_player_index].unk190[D_global_asm_807444FC]));
-//    func_global_asm_80658E58(character_change_array[cc_player_index].unk270[0], character_change_array[cc_player_index].unk270[1], character_change_array[cc_player_index].unk270[2], character_change_array[cc_player_index].unk270[3]);
-//    dl = func_global_asm_8065919C(dl);
-//    dl = func_global_asm_8070835C(dl, cc_player_index);
-//    gSPMatrix(dl++, osVirtualToPhysical(&character_change_array[cc_player_index].unk88[D_global_asm_807444FC]), G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
-//    gSPMatrix(dl++, osVirtualToPhysical(&character_change_array[cc_player_index].unk8[D_global_asm_807444FC]), G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
-//    gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
-//    dl = func_global_asm_8062CA70(dl, D_global_asm_807F5DE4, D_global_asm_807F5E60, arg1, arg2, arg3, global_properties_bitfield);
-//    gDPPipeSync(dl++);
-//    return dl;
-//}
-
+extern s32 func_global_asm_80626F8C(f32 arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, f32 arg6, s32 arg7);
 //@recomp: Seems to be used for the culling of many objects, including actors and props
 RECOMP_PATCH s32 func_global_asm_80658E8C(f32 arg0, f32 arg1, f32 arg2, u8 arg3, u8 arg4) {
-    return 0;
+    f32 sp44;
+    f32 sp40;
+    s16 sp3E;
+    s16 sp3C;
+    f32 d;
+    f32 temp_f2_2;
+    s16 var_a0;
+    s16 var_a1;
+    s16 var_a2;
+    s16 var_v1;
+
+    func_global_asm_80626F8C(arg0, arg1, arg2, &sp44, &sp40, 0, 1.0f, cc_player_index);
+    sp3E = sp44;
+    sp3C = sp40;
+    d = _sqrtf(
+        SQ(arg0 - character_change_array[cc_player_index].unk21C) +
+        SQ(arg1 - character_change_array[cc_player_index].unk220) +
+        SQ(arg2 - character_change_array[cc_player_index].unk224)
+    );
+    if (d < 90.0f) {
+        return 0;
+    }
+    if (d >= 180.0f) {
+        var_v1 = 0x14;
+        var_a0 = 0x14;
+        var_a1 = 0;
+        var_a2 = 0x32;
+    } else {
+        temp_f2_2 = (d - 60.0f) / 120.0f;
+        if (temp_f2_2 > 0.0) {
+            var_v1 = (-60.0f * temp_f2_2) + 80.0f;
+            var_a0 = (-60.0f * temp_f2_2) + 80.0f;
+            var_a1 = (-130.0f * temp_f2_2) + 130.0f;
+            var_a2 = (-80.0f * temp_f2_2) + 130.0f;
+        } else {
+            var_v1 = 0x50;
+            var_a0 = 0x50;
+            var_a1 = 0x82;
+            var_a2 = 0x82;
+        }
+    }
+    // @recomp: Remove x bound checks
+    if ((sp3C < ((D_global_asm_807F735A - var_a1) - arg4)) || ((((D_global_asm_807F735E + var_a2 + arg4) < sp3C)))) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
+
 
 
 //@recomp: Sprite culling. Also used for the scissor of the sprite itself
@@ -593,14 +601,14 @@ Gfx *determineChunkFix(Gfx *dl, Chunk *ch) {
         // Needed for screen squishes (lol)
         gDPSetScissor(dl++, G_SC_NON_INTERLACE,
             0,
-            0,
+            character_change_array[cc_player_index].unk270[1],
             D_global_asm_80744490,
-            D_global_asm_80744494);
+            character_change_array[cc_player_index].unk270[3]);
         func_global_asm_80658E58(
-            0,
-            0,
-            D_global_asm_80744490,
-            D_global_asm_80744494);
+            ch->deload1,
+            ch->deload2,
+            ch->deload3,
+            ch->deload4);
     } else {
         gDPSetScissor(dl++, G_SC_NON_INTERLACE,
             character_change_array[cc_player_index].unk270[0],
@@ -608,10 +616,10 @@ Gfx *determineChunkFix(Gfx *dl, Chunk *ch) {
             character_change_array[cc_player_index].unk270[2],
             character_change_array[cc_player_index].unk270[3]);
         func_global_asm_80658E58(
-            character_change_array[cc_player_index].unk270[0],
-            character_change_array[cc_player_index].unk270[1],
-            character_change_array[cc_player_index].unk270[2],
-            character_change_array[cc_player_index].unk270[3]);
+            ch->deload1,
+            ch->deload2,
+            ch->deload3,
+            ch->deload4);
     }
     return dl;
 }
@@ -1147,35 +1155,6 @@ RECOMP_PATCH void func_arcade_800259D0(Gfx **arg0) {
     }
     *arg0 = dl;
 }
-
-
-/*
-//Use for quickly getting to a certain map
-
-extern u8 D_global_asm_80755328;
-extern u8 D_global_asm_8075532C;
-typedef struct {
-    u8 unk0;
-    u8 unk1;
-    u16 unk2;
-} Struct8075E5C0;
-extern const Struct8075E5C0 D_global_asm_8075E5C0[];
-extern void func_global_asm_8060B750(s32 fileIndex);
-extern void func_global_asm_8060B7D0(Maps *mapPointer, s32 *exitPointer);
-extern void func_global_asm_805FF158(u8 arg0);
-void func_global_asm_80712490(Maps newMap, s32 newExit, u8 newGameMode);
-
-RECOMP_PATCH void func_global_asm_807131BC(void) {
-    Maps map;
-    s32 exit;
-
-    D_global_asm_8075532C = 0;
-    func_global_asm_8060B750(D_global_asm_8075E5C0[D_global_asm_80755328].unk0);
-    func_global_asm_8060B7D0(&map, &exit);
-    func_global_asm_805FF158(1);
-    func_global_asm_80712490(2, 0, GAME_MODE_ADVENTURE);
-}
-*/
 
 // @recomp: (Prevent the ) draw of borders for overscan
 RECOMP_PATCH Gfx *func_global_asm_80704960(Gfx *dl) {
