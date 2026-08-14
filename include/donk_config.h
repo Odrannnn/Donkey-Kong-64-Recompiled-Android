@@ -65,7 +65,8 @@ namespace dk64 {
     enum class CameraTypeMode {
         Free,
         Follow,
-        BetterFree
+        BetterFree,
+        Mouse
     };
 
     CameraTypeMode get_camera_type();

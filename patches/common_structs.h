@@ -1033,7 +1033,10 @@ typedef struct {
 
 typedef struct {
     Actor *unk0;
-    u8 pad4[0x10 - 0x4];
+    u8 pad4[0x8 - 0x4];
+    u16 unk8;
+    u16 unkA;
+    u8 padC[0x10 - 0xC];
     s16 unk10;
     u8 pad12[0x20 - 0x12];
     f32 unk20;
@@ -1059,7 +1062,8 @@ typedef struct {
     f32 unk8C;
     f32 unk90;
     f32 unk94;
-    u8 pad98[0x9E - 0x98];
+    f32 unk98;
+    u8 pad9C[0x9E - 0x9C];
     s16 unk9E;
     f32 unkA0;
     f32 unkA4;
@@ -1074,7 +1078,10 @@ typedef struct {
     u8 padC4[0xCC - 0xC4];
     tuple_f unkCC;
     tuple_f unkD8;
-    u8 padE4[0xF1 - 0xE4];
+    u8 padE4[0xEE - 0xE4];
+    u8 unkEE;
+    u8 unkEF;
+    u8 unkF0;
     u8 unkF1;
     u8 unkF2;
     u8 unkF3;

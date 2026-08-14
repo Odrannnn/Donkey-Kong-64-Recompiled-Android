@@ -224,7 +224,10 @@ RECOMP_PATCH void func_global_asm_806EA200(void) {
     s8 cooldown = 0xB;
     s32 invX = 0;
     s32 invY = 0;
-    if (recomp_get_camera_type() == 2) {
+    s32 cam_type;
+
+    cam_type = recomp_get_camera_type();
+    if (cam_type == 2) {
         cooldown = 5;
         change = 5 * (cooldown - 2);
         require_new_input = 0;
@@ -246,7 +249,10 @@ RECOMP_PATCH void func_global_asm_806EA26C(void) {
     s8 cooldown = 0xB;
     s32 invX = 0;
     s32 invY = 0;
-    if (recomp_get_camera_type() == 2) {
+    s32 cam_type;
+
+    cam_type = recomp_get_camera_type();
+    if (cam_type == 2) {
         cooldown = 5;
         change = 5 * (cooldown - 2);
         require_new_input = 0;
@@ -261,6 +267,76 @@ RECOMP_PATCH void func_global_asm_806EA26C(void) {
         CaaD->unkF1 = cooldown;
     }
 }
+
+void func_global_asm_8062217C(Actor*, s16);
+// RECOMP_PATCH void func_global_asm_8061D1FC(Actor* arg0) {
+//     CameraPaad* CaaD;
+//     f32 temp_f2;
+//     f32 var_f0;
+//     f32 var_f14;
+//     f32 dMouseX, dMouseY;
+
+//     CaaD = arg0->CaaD;
+//     temp_f2 = D_global_asm_807FD610[CaaD->unkFB].unk2F * 0.5;
+//     if (!(CaaD->unkAC & 0x2000) && !(D_global_asm_807FBB64 & 0x40)) {
+//         if ((CaaD->unk8) && ((s32) CaaD->unk8 < 0x9B) && (CaaD->unkEF)) {
+//             if (( CaaD->unkA == 0) || ((s32)  CaaD->unkA >= 0x9B)) {
+//                 CaaD->unkF0 = CaaD->unkEE;
+//             }
+//             func_global_asm_8062217C(arg0, 1);
+//             CaaD->unkAC |= 8;
+//         } else {
+//             if ((CaaD->unkA) && ((s32) CaaD->unkA < 0x9B)) {
+//                 if (CaaD->unkEF) {
+//                     if ((CaaD->unkF0) && (CaaD->unkEF != CaaD->unkF0)) {
+//                         func_global_asm_8062217C(arg0, CaaD->unkF0);
+//                     }
+//                     CaaD->unkAC &= ~8;
+//                 }
+//             }
+//         }
+//     }
+//     if (temp_f2 > 20.0f) {
+//         var_f14 = temp_f2;
+//     } else {
+//         if (temp_f2 < -20.0f) {
+//             var_f0 = temp_f2;
+//         } else {
+//             var_f0 = 0.0f;
+//         }
+//         var_f14 = var_f0;
+//     }
+//     CaaD->unk98 = ((var_f14 - CaaD->unk98) * 0.05) + CaaD->unk98;
+//     CaaD->unkA0 += ((CaaD->unkA4 - CaaD->unkA0) * 0.2);
+//     if (CaaD->unkAC & 0x10) {
+//         arg0->distance_from_floor += ((300.0f - arg0->distance_from_floor) * 0.2);
+//     } else {
+//         arg0->distance_from_floor += ((CaaD->unkB8 - arg0->distance_from_floor) * 0.2);
+//     }
+//     recomp_get_mouse_deltas(&dMouseX, &dMouseY);
+//     if ((dMouseX != 0.0f) && (CaaD->unkF3 != 2)) {
+//         CaaD->unkB2 += dMouseX * (f32)(4096.0f / 360.0f);
+//     } else {
+//         if ((CaaD->unkB0) && (CaaD->unkF3 != 2)) {
+//             if (CaaD->unkB0 > 0) {
+//                 CaaD->unkB0 -= 9;
+//                 CaaD->unkB2 += 0x66;
+//                 if (CaaD->unkB0 < 0) {
+//                     CaaD->unkB0 = 0;
+//                 }
+//             } else {
+//                 CaaD->unkB0 += 9;
+//                 CaaD->unkB2 -= 0x66;
+//                 if (CaaD->unkB0 > 0) {
+//                     CaaD->unkB0 = 0;
+//                 }
+//             }
+//         } else if (CaaD->unkF3 == 2) {
+//             CaaD->unkB0 = 0;
+//             CaaD->unkF1 = 0;
+//         }
+//     }
+// }
 
 extern Actor *gCurrentActorPointer;
 extern s16 D_global_asm_80753B34[];
@@ -334,14 +410,14 @@ RECOMP_PATCH void func_global_asm_806EA628(void) {
         if (!invY) stick_y = -stick_y;
         if (stick_x == 0) {
             if (dGyroX != 0.0f) {
-                stick_x == dGyroX;
+                stick_x = dGyroX;
             } else if (dMouseX != 0.0f) {
                 stick_x = dMouseX;
             }
         }
         if (stick_y == 0) {
             if (dGyroY != 0.0f) {
-                stick_y == dGyroY;
+                stick_y = dGyroY;
             } else if (dMouseY != 0.0f) {
                 stick_y = dMouseY;
             }

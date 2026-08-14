@@ -128,14 +128,17 @@ extern "C" void recomp_get_story_skip(uint8_t* rdram, recomp_context* ctx) {
 extern "C" void recomp_get_camera_type(uint8_t* rdram, recomp_context* ctx) {
     switch (dk64::get_camera_type()) {
         case dk64::CameraTypeMode::Free:
-        _return(ctx, 0);
-        return;
+            _return(ctx, 0);
+            return;
         case dk64::CameraTypeMode::Follow:
-        _return(ctx, 1);
-        return;
+            _return(ctx, 1);
+            return;
         case dk64::CameraTypeMode::BetterFree:
-        _return(ctx, 2);
-        return;
+            _return(ctx, 2);
+            return;
+        case dk64::CameraTypeMode::Mouse:
+            _return(ctx, 3);
+            return;
     }
 }
 

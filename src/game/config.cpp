@@ -78,7 +78,8 @@ static void add_general_options(recomp::config::Config &config) {
     static EnumOptionVector camera_type_options = {
         {dk64::CameraTypeMode::Free, "Free", "Free Cam"},
         {dk64::CameraTypeMode::Follow, "Follow", "Follow Cam"},
-        {dk64::CameraTypeMode::BetterFree, "BetterFree", "Better Free Cam"}
+        {dk64::CameraTypeMode::BetterFree, "BetterFree", "Better Free Cam"},
+        {dk64::CameraTypeMode::Mouse, "Mouse", "Mouse Controlled"}
     };
     config.add_enum_option(
         dk64::configkeys::general::camera_type,
