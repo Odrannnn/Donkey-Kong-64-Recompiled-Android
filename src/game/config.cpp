@@ -70,7 +70,7 @@ static void add_general_options(recomp::config::Config &config) {
     config.add_enum_option(
         dk64::configkeys::general::story_skip,
         "Story Skip",
-        "Skips some story cutscenes.",
+        "Skips some story cutscenes.<br /><recomp-color primary>Off</recomp-color>: No story cutscenes are skipped.<br /><recomp-color primary>Intro Story Only</recomp-color>: Only the 5-minute introductory story is skipped. The K. Rool level intros will still play.<br /><recomp-color primary>On</recomp-color>: Both the introductory story and all K. Rool level intros are skipped.",
         story_skip_options,
         dk64::StorySkipMode::Off
     );
@@ -78,13 +78,12 @@ static void add_general_options(recomp::config::Config &config) {
     static EnumOptionVector camera_type_options = {
         {dk64::CameraTypeMode::Free, "Free", "Free Cam"},
         {dk64::CameraTypeMode::Follow, "Follow", "Follow Cam"},
-        {dk64::CameraTypeMode::BetterFree, "BetterFree", "Better Free Cam"},
-        {dk64::CameraTypeMode::Mouse, "Mouse", "Mouse Controlled"}
+        {dk64::CameraTypeMode::BetterFree, "BetterFree", "Better Free Cam"}
     };
     config.add_enum_option(
         dk64::configkeys::general::camera_type,
         "Camera Type",
-        "Changes the camera behavior.",
+        "Changes the camera behavior.<br /><recomp-color primary>Free Cam</recomp-color>: Camera can be controlled via pressing C-Left and C-Right. The camera does not try to push itself behind the player.<br /><recomp-color primary>Follow Cam</recomp-color>: Similar to <recomp-color secondary>Free Cam</recomp-color>, but the camera tries to push itself behind the player.<br /><recomp-color primary>Better Free Cam</recomp-color>: Similar to <recomp-color secondary>Free Cam</recomp-color>, but instead of a button press turning the camera 45 degrees, holding the button moves the camera at 5 degrees per frame.",
         camera_type_options,
         dk64::CameraTypeMode::Free
     );
@@ -97,7 +96,7 @@ static void add_general_options(recomp::config::Config &config) {
     config.add_enum_option(
         dk64::configkeys::general::lightning_flashes,
         "Lightning Flash Intensity",
-        "Changes the intensity of lightning flashes within the game.",
+        "Changes the intensity of lightning flashes within the game.<br /><recomp-color primary>Vanilla</recomp-color>: Lightning flashes at 100% intensity<br /><recomp-color primary>Reduced</recomp-color>: Lightning flashes at 60% intensity<br /><recomp-color primary>Off</recomp-color>: Lightning flashes are completely disabled",
         lightning_flash_options,
         dk64::LightningFlashMode::Reduced
     );
@@ -242,20 +241,20 @@ static void set_control_defaults() {
 }
 
 static void set_control_descriptions() {
-    recompinput::set_game_input_description(recompinput::GameInput::Y_AXIS_POS, "Used to move and for steering while flying and swimming. Axis inversion for flying and swimming can be configured in the General tab.");
-    recompinput::set_game_input_description(recompinput::GameInput::Y_AXIS_NEG, "Used to move and for steering while flying and swimming. Axis inversion for flying and swimming can be configured in the General tab.");
-    recompinput::set_game_input_description(recompinput::GameInput::X_AXIS_NEG, "Used to move and for steering while flying and swimming. Axis inversion for flying and swimming can be configured in the General tab.");
-    recompinput::set_game_input_description(recompinput::GameInput::X_AXIS_POS, "Used to move and for steering while flying and swimming. Axis inversion for flying and swimming can be configured in the General tab.");
-    recompinput::set_game_input_description(recompinput::GameInput::A, "Used to jump and select options in menus. Also used for flying upwards.");
+    recompinput::set_game_input_description(recompinput::GameInput::Y_AXIS_POS, "Used to move and for steering while swimming. Axis inversion for swimming can be configured in the General tab.");
+    recompinput::set_game_input_description(recompinput::GameInput::Y_AXIS_NEG, "Used to move and for steering while swimming. Axis inversion for swimming can be configured in the General tab.");
+    recompinput::set_game_input_description(recompinput::GameInput::X_AXIS_NEG, "Used to move and for steering while swimming. Axis inversion for swimming can be configured in the General tab.");
+    recompinput::set_game_input_description(recompinput::GameInput::X_AXIS_POS, "Used to move and for steering while swimming. Axis inversion for swimming can be configured in the General tab.");
+    recompinput::set_game_input_description(recompinput::GameInput::A, "Used to jump and select options in menus.");
     recompinput::set_game_input_description(recompinput::GameInput::B, "Used for attacks, which change depending on whether you are stationary, moving, in the air, or crouching.");
     recompinput::set_game_input_description(recompinput::GameInput::Z, "Used to crouch, which enables A, B and the C-Buttons to perform different actions.");
     recompinput::set_game_input_description(recompinput::GameInput::L, "Unused. Mods may use it for additional features.");
-    recompinput::set_game_input_description(recompinput::GameInput::R, "Used to center the camera behind Banjo on the ground, and to perform tighter turns while flying or swimming.");
+    recompinput::set_game_input_description(recompinput::GameInput::R, "Used to center the camera behind the player, and to perform tighter turns while in the coconut boat.");
     recompinput::set_game_input_description(recompinput::GameInput::START, "Used for pausing and for skipping certain cutscenes.");
-    recompinput::set_game_input_description(recompinput::GameInput::C_UP, "Used to enter first-person mode, and to shoot eggs while holding Z.");
-    recompinput::set_game_input_description(recompinput::GameInput::C_DOWN, "Used to toggle between the different camera zoom levels, and to shoot eggs backwards while holding Z.");
-    recompinput::set_game_input_description(recompinput::GameInput::C_LEFT, "Used to rotate the camera sideways. Axis inversion can be configured in the General tab. Also used to enter Talon Trot while holding Z.");
-    recompinput::set_game_input_description(recompinput::GameInput::C_RIGHT, "Used to rotate the camera sideways. Axis inversion can be configured in the General tab). Also used to enter Wonderwing while holding Z.");
+    recompinput::set_game_input_description(recompinput::GameInput::C_UP, "Used to enter first-person mode and to play your instrument while holding Z");
+    recompinput::set_game_input_description(recompinput::GameInput::C_DOWN, "Used to toggle between the different camera zoom levels, and to pull out the fairy camera while holding Z.");
+    recompinput::set_game_input_description(recompinput::GameInput::C_LEFT, "Used to rotate the camera sideways. Axis inversion can be configured in the General tab. Also used to pull out your fruit weapon while holding Z.");
+    recompinput::set_game_input_description(recompinput::GameInput::C_RIGHT, "Used to rotate the camera sideways. Axis inversion can be configured in the General tab). Also used to throw an orange while holding Z.");
     recompinput::set_game_input_description(recompinput::GameInput::DPAD_UP, "Unused. Mods may use it for additional features.");
     recompinput::set_game_input_description(recompinput::GameInput::DPAD_DOWN, "Unused. Mods may use it for additional features.");
     recompinput::set_game_input_description(recompinput::GameInput::DPAD_LEFT, "Unused. Mods may use it for additional features.");

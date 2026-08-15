@@ -1,7 +1,7 @@
 # Donkey Kong 64: Recompiled
 Donkey Kong 64: Recompiled is a project that uses [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) to **statically recompile** Donkey Kong 64 into a native port with many new features and enhancements. This project uses [RT64](https://github.com/rt64/rt64) as the rendering engine to provide some of these enhancements.
 
-### [Check out the latest release here](https://github.com/Rainchus/Dk64-Recompiled/releases).
+### [Check out the latest release here](https://github.com/Rainchus/Donkey-Kong-64-Recompiled/releases).
 
 ### **This repository and its releases do not contain game assets. The original game is required to build or run this project.**
 
@@ -64,7 +64,7 @@ Any aspect ratio is supported, with most effects modded to work correctly in wid
 **Note**: Some animation quirks can be seen at the edges of the screen in certain cutscenes when using very wide aspect ratios.
 
 #### Additional Control Options
-Customize your experience by setting your stick deadzone to your liking, as well as adjusting the X and Y axis inversion for both aiming and the optional dual analog camera.
+Customize your experience by setting your stick deadzone to your liking, as well as adjusting the X and Y axis inversion for aiming.
 
 #### Low Input Lag
 This project has been optimized to have as little input lag as possible, making the game feel more responsive than ever!
@@ -80,9 +80,9 @@ To play on Steam Deck, extract the Linux build onto your deck. Then, in desktop 
 ## FAQ
 
 #### What is static recompilation?
-Static recompilation is the process of automatically translating an application from one platform to another. For more details, check out the full description of how this project's recompilation works here: [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp).
+Static recompilation is the process of automatically [translating an application from one platform to another](https://www.youtube.com/watch?v=lMGu6Ng_3yA&t=55s). For more details, check out the full description of how this project's recompilation works here: [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp).
 
-#### How is this related to the decompilation project?
+#### How is this related to the in-progress decompilation project?
 Unlike N64 ports in the past, this project is not based on the source code provided by a decompilation of the game. This is because static recompilation bypasses the need for decompiled source code when making a port, allowing ports to be made **without source code**. However, the reverse engineering work done by the decompilation team was invaluable for providing some of the enhancements featured in this project. For this reason, the project uses headers and some functions from the decompilation project in order to make modifications to the game. Many thanks to the decompilation team for all of the hard work they've done.
 
 #### Where is the savefile stored?
