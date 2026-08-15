@@ -268,13 +268,29 @@ RECOMP_PATCH void func_global_asm_806EA26C(void) {
     }
 }
 
-void func_global_asm_8062217C(Actor*, s16);
+// extern Actor *gCurrentPlayer;
+
+// u8 readMouseForCamera(void) {
+//     if (recomp_get_camera_type() != 3) {
+//         return FALSE;
+//     }
+//     if (gameIsInDKTVMode()) {
+//         return FALSE;
+//     }
+//     if ((gCurrentPlayer->control_state > 1) && (gCurrentPlayer->control_state < 6)) {
+//         return FALSE;
+//     }
+//     return TRUE;
+// }
+
+// void func_global_asm_8062217C(Actor*, s16);
 // RECOMP_PATCH void func_global_asm_8061D1FC(Actor* arg0) {
 //     CameraPaad* CaaD;
 //     f32 temp_f2;
 //     f32 var_f0;
 //     f32 var_f14;
 //     f32 dMouseX, dMouseY;
+//     f32 opp, adj, ang, dTheta, cosd, sind;
 
 //     CaaD = arg0->CaaD;
 //     temp_f2 = D_global_asm_807FD610[CaaD->unkFB].unk2F * 0.5;
@@ -313,28 +329,32 @@ void func_global_asm_8062217C(Actor*, s16);
 //     } else {
 //         arg0->distance_from_floor += ((CaaD->unkB8 - arg0->distance_from_floor) * 0.2);
 //     }
-//     recomp_get_mouse_deltas(&dMouseX, &dMouseY);
-//     if ((dMouseX != 0.0f) && (CaaD->unkF3 != 2)) {
-//         CaaD->unkB2 += dMouseX * (f32)(4096.0f / 360.0f);
-//     } else {
-//         if ((CaaD->unkB0) && (CaaD->unkF3 != 2)) {
-//             if (CaaD->unkB0 > 0) {
-//                 CaaD->unkB0 -= 9;
-//                 CaaD->unkB2 += 0x66;
-//                 if (CaaD->unkB0 < 0) {
-//                     CaaD->unkB0 = 0;
-//                 }
-//             } else {
-//                 CaaD->unkB0 += 9;
-//                 CaaD->unkB2 -= 0x66;
-//                 if (CaaD->unkB0 > 0) {
-//                     CaaD->unkB0 = 0;
-//                 }
+//     if (readMouseForCamera()) {
+//         recomp_get_mouse_deltas(&dMouseX, &dMouseY);
+//         if (CaaD->unkF3 != 2) {
+//             if (dMouseX != 0.0f) {
+//                 CaaD->unkB0 = 0;
+//                 CaaD->unkB0 += (dMouseX / 12.0f) * (4096.0f / 360.0f);
 //             }
-//         } else if (CaaD->unkF3 == 2) {
-//             CaaD->unkB0 = 0;
-//             CaaD->unkF1 = 0;
 //         }
+//     }
+//     if ((CaaD->unkB0) && (CaaD->unkF3 != 2)) {
+//         if (CaaD->unkB0 > 0) {
+//             CaaD->unkB0 -= 9;
+//             CaaD->unkB2 += 0x66;
+//             if (CaaD->unkB0 < 0) {
+//                 CaaD->unkB0 = 0;
+//             }
+//         } else {
+//             CaaD->unkB0 += 9;
+//             CaaD->unkB2 -= 0x66;
+//             if (CaaD->unkB0 > 0) {
+//                 CaaD->unkB0 = 0;
+//             }
+//         }
+//     } else if (CaaD->unkF3 == 2) {
+//         CaaD->unkB0 = 0;
+//         CaaD->unkF1 = 0;
 //     }
 // }
 
