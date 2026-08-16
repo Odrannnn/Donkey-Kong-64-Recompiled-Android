@@ -1483,6 +1483,7 @@ RECOMP_PATCH Gfx* func_global_asm_80704484(Gfx *dl, u8 arg1) {
             D_global_asm_807FD888 = 31.0f;
             osViBlack(1);
             D_global_asm_8076A0B1 |= 0xC;
+            dl = func_global_asm_80703374(dl, 0, 0, 0, 0xFF);
         } else {
             sp54 = D_global_asm_807FD888 * 0.032258064f;
 
