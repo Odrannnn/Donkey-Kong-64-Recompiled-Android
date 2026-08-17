@@ -212,7 +212,7 @@ static void add_technical_options(recomp::config::Config &config) {
     config.add_enum_option(
         dk64::configkeys::technical::multiplayer_enabled,
         "Enable Multiplayer",
-        "Enables the ability to enter Multiplayer. Multiplayer is considered a <recomp-color secondary>Work-in-Progress feature</recomp-color> that wouldn't normally be included at this stage.<br />That being said, Multiplayer is used for various glitches, so this can be enabled should you wish to use glitches such as \"Funky Weapons Glitch\" or \"Main Menu Moves\"",
+        "Enables the ability to enter Multiplayer. Multiplayer is considered a <recomp-color secondary>Work-in-Progress feature</recomp-color> that is classed as non-functional.<br />You should not enable this feature unless you wish to use glitches such as \"Funky Weapons Glitch\" or \"Main Menu Moves\"",
         multiplayer_options,
         dk64::MultiplayerEnabled::Off
     );

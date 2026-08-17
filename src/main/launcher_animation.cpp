@@ -30,16 +30,21 @@ struct AnimatedSvg {
     std::vector<Keyframe2D> position_keyframes;
     std::vector<Keyframe2D> scale_keyframes;
     std::vector<KeyframeRot> rotation_keyframes;
+    std::vector<KeyframeRot> opacity_keyframes;
     AnimationData position_animation;
     AnimationData scale_animation;
     AnimationData rotation_animation;
+    AnimationData opacity_animation;
     float width = 0;
     float height = 0;
 };
 
 struct LauncherContext {
     AnimatedSvg isles_svg;
-    AnimatedSvg logo_svg;
+    AnimatedSvg logo_d_svg;
+    AnimatedSvg logo_k_svg;
+    AnimatedSvg logo_64_svg;
+    AnimatedSvg logo_recomp_svg;
     AnimatedSvg bg_svg;
     std::array<AnimatedSvg, 3> cloud_svgs;
     recompui::Element *wrapper;
@@ -125,12 +130,15 @@ void update_animated_svg(AnimatedSvg &animated_svg, float delta_time, float bg_w
     float position_x = 0.0f, position_y = 0.0f;
     float scale_x = 1.0f, scale_y = 1.0f;
     float rotation_degrees = 0.0f;
+    float opacity = 1.0f;
     calculate_2d_from_keyframes(animated_svg.position_keyframes, animated_svg.position_animation, delta_time, position_x, position_y);
     calculate_2d_from_keyframes(animated_svg.scale_keyframes, animated_svg.scale_animation, delta_time, scale_x, scale_y);
     calculate_rot_from_keyframes(animated_svg.rotation_keyframes, animated_svg.rotation_animation, delta_time, rotation_degrees);
+    calculate_rot_from_keyframes(animated_svg.opacity_keyframes, animated_svg.opacity_animation, delta_time, opacity);
     animated_svg.svg->set_translate_2D(position_x + bg_width / 2.0f - animated_svg.width / 2.0f, position_y + bg_height / 2.0f - animated_svg.height / 2.0f);
     animated_svg.svg->set_scale_2D(scale_x, scale_y);
     animated_svg.svg->set_rotation(rotation_degrees);
+    animated_svg.svg->set_opacity(opacity);
 }
 
 bool check_skip_input(SDL_Event* event) {
@@ -164,8 +172,6 @@ const float jiggy_scale_anim_end = jiggy_scale_anim_start + jiggy_scale_anim_len
 const float jiggy_move_over_start = jiggy_scale_anim_end + 0.5f;
 const float jiggy_move_over_length = 0.75f;
 const float jiggy_move_over_end = jiggy_move_over_start + jiggy_move_over_length;
-const float jiggy_shine_start = jiggy_move_over_end + 0.6f;
-const float jiggy_shine_length = 0.8f;
 
 const float animation_skip_time = 10.0f;
 
@@ -200,7 +206,10 @@ void dk64::launcher_animation_setup(recompui::LauncherMenu *menu) {
     launcher_context.cloud_svgs[2] = create_animated_svg(context, background_container, "Cloud1.svg", 461.0f, 154.0f);
     launcher_context.isles_svg = create_animated_svg(context, launcher_context.wrapper, "DkIsles.svg", 1920.0f, 1920.0f);
 
-    launcher_context.logo_svg = create_animated_svg(context, background_container, "Logo.svg", 6187.0f * 0.125f, 2625.0f * 0.125f);
+    launcher_context.logo_64_svg = create_animated_svg(context, background_container, "logo_64.svg", 336, 283);
+    launcher_context.logo_k_svg = create_animated_svg(context, background_container, "logo_k.svg", 267, 304);
+    launcher_context.logo_d_svg = create_animated_svg(context, background_container, "logo_d.svg", 292, 306);
+    launcher_context.logo_recomp_svg = create_animated_svg(context, background_container, "logo_subtitle.svg", 1280, 747);
     
     // Animate the clouds.
     const float cloud_scale_duration = 0.3f;
@@ -264,14 +273,68 @@ void dk64::launcher_animation_setup(recompui::LauncherMenu *menu) {
     launcher_context.isles_svg.position_animation.interpolation_method = InterpolationMethod::Smootherstep;
     launcher_context.isles_svg.rotation_animation.interpolation_method = InterpolationMethod::Smootherstep;
 
+    const float pop_to_top_duration = 0.2f;
+    const float pop_to_end_duration = 0.1f;
+    const float pop_total_duration = pop_to_top_duration + pop_to_end_duration;
+    const float pop_top_scale = 0.9f;
+    const float pop_end_scale = 0.75f;
+    const float pop_y = -405.0f;
+    const float pop_d_x = -160.0f;
+    const float pop_k_x = -10.0f;
+    const float pop_64_x = 160.0f;
     // Animate the logo.
-    launcher_context.logo_svg.position_keyframes = {
-        { 0.0f, 0.0f, -900.0f },
-        { 1.0f, 0.0f, -900.0f },
+    // D
+    launcher_context.logo_d_svg.position_keyframes = {
+        { 0.0f, pop_d_x, pop_y },
+        { 1.0f, pop_d_x, pop_y },
+    };
+    launcher_context.logo_d_svg.scale_keyframes = {
+        { (0 * pop_total_duration) + 0.0f, 0.0f, 0.0f },
+        { (0 * pop_total_duration) + pop_to_top_duration, pop_top_scale, pop_top_scale },
+        { (0 * pop_total_duration) + pop_to_top_duration + pop_to_end_duration, pop_end_scale, pop_end_scale },
+    };
+    // K
+    launcher_context.logo_k_svg.position_keyframes = {
+        { 0.0f, pop_k_x, pop_y },
+        { 1.0f, pop_k_x, pop_y },
+    };
+    launcher_context.logo_k_svg.scale_keyframes = {
+        { 0.0f, 0.0f, 0.0f },
+        { (1 * pop_total_duration) + 0.0f, 0.0f, 0.0f },
+        { (1 * pop_total_duration) + pop_to_top_duration, pop_top_scale, pop_top_scale },
+        { (1 * pop_total_duration) + pop_to_top_duration + pop_to_end_duration, pop_end_scale, pop_end_scale },
+    };
+    // 64
+    launcher_context.logo_64_svg.position_keyframes = {
+        { 0.0f, pop_64_x, pop_y },
+        { 1.0f, pop_64_x, pop_y },
+    };
+    launcher_context.logo_64_svg.scale_keyframes = {
+        { 0.0f, 0.0f, 0.0f },
+        { (2 * pop_total_duration) + 0.0f, 0.0f, 0.0f },
+        { (2 * pop_total_duration) + pop_to_top_duration, pop_top_scale, pop_top_scale },
+        { (2 * pop_total_duration) + pop_to_top_duration + pop_to_end_duration, pop_end_scale, pop_end_scale },
+    };
+    // Subtitle
+    launcher_context.logo_recomp_svg.position_keyframes = {
+        { 0.0f, 0.0f, -265.0f },
+        { 1.0f, 0.0f, -265.0f },
         { 2.0f, 0.0f, -365.0f },
     };
-
-    launcher_context.logo_svg.position_animation.interpolation_method = InterpolationMethod::Smootherstep;
+    launcher_context.logo_recomp_svg.scale_keyframes = {
+        { 0.0f, 0.5f, 0.5f },
+        { 2.0f, 0.5f, 0.5f },
+    };
+    launcher_context.logo_recomp_svg.opacity_keyframes = {
+        { 0.0f, 0.0f },
+        { 1.0f, 0.0f },
+        { 2.0f, 1.0f },
+    };
+    launcher_context.logo_d_svg.position_animation.interpolation_method = InterpolationMethod::Smootherstep;
+    launcher_context.logo_k_svg.position_animation.interpolation_method = InterpolationMethod::Smootherstep;
+    launcher_context.logo_64_svg.position_animation.interpolation_method = InterpolationMethod::Smootherstep;
+    launcher_context.logo_recomp_svg.position_animation.interpolation_method = InterpolationMethod::Smootherstep;
+    launcher_context.logo_recomp_svg.opacity_animation.interpolation_method = InterpolationMethod::Smootherstep;
 
 
     launcher_context.water = context.create_element<recompui::Element>(background_container, 0);
@@ -304,7 +367,10 @@ void dk64::launcher_animation_update(recompui::LauncherMenu *menu) {
         update_animated_svg(launcher_context.cloud_svgs[i], delta_time, bg_width, bg_height);
     }
     update_animated_svg(launcher_context.isles_svg, delta_time, bg_width, bg_height);
-    update_animated_svg(launcher_context.logo_svg, delta_time, bg_width, bg_height);
+    update_animated_svg(launcher_context.logo_64_svg, delta_time, bg_width, bg_height);
+    update_animated_svg(launcher_context.logo_k_svg, delta_time, bg_width, bg_height);
+    update_animated_svg(launcher_context.logo_d_svg, delta_time, bg_width, bg_height);
+    update_animated_svg(launcher_context.logo_recomp_svg, delta_time, bg_width, bg_height);
     launcher_context.water->set_top(bg_height - 70);
 
     launcher_context.bg_svg.svg->set_top(0);
