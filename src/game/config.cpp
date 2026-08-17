@@ -150,6 +150,11 @@ T get_graphics_config_enum_value(const std::string& option_id) {
     return static_cast<T>(std::get<uint32_t>(recompui::config::get_graphics_config().get_option_value(option_id)));
 }
 
+template <typename T = uint32_t>
+T get_technical_config_enum_value(const std::string& option_id) {
+    return static_cast<T>(std::get<uint32_t>(recompui::config::get_config("technical").get_option_value(option_id)));
+}
+
 static void add_sound_options(recomp::config::Config &config) {
     config.add_percent_number_option(
         dk64::configkeys::sound::bgm_volume,
@@ -195,6 +200,26 @@ static void add_graphics_options(recomp::config::Config &config) {
 
 dk64::CutsceneBordersMode dk64::get_cutscene_borders() {
     return get_graphics_config_enum_value<dk64::CutsceneBordersMode>(dk64::configkeys::graphics::cutscene_borders);
+}
+
+static void add_technical_options(recomp::config::Config &config) {
+    using EnumOptionVector = const std::vector<recomp::config::ConfigOptionEnumOption>;
+    // Multiplayer
+    static EnumOptionVector multiplayer_options = {
+        {dk64::MultiplayerEnabled::Off, "Off", "Off"},
+        {dk64::MultiplayerEnabled::On, "On", "On"}
+    };
+    config.add_enum_option(
+        dk64::configkeys::technical::multiplayer_enabled,
+        "Enable Multiplayer",
+        "Enables the ability to enter Multiplayer. Multiplayer is considered a <recomp-color secondary>Work-in-Progress feature</recomp-color> that wouldn't normally be included at this stage.<br />That being said, Multiplayer is used for various glitches, so this can be enabled should you wish to use glitches such as \"Funky Weapons Glitch\" or \"Main Menu Moves\"",
+        multiplayer_options,
+        dk64::MultiplayerEnabled::Off
+    );
+}
+
+dk64::MultiplayerEnabled dk64::get_multiplayer_enabled() {
+    return get_technical_config_enum_value<dk64::MultiplayerEnabled>(dk64::configkeys::technical::multiplayer_enabled);
 }
 
 static void set_control_defaults() {
@@ -285,6 +310,9 @@ void dk64::init_config() {
 
     auto &sound_config = recompui::config::create_sound_tab();
     add_sound_options(sound_config);
+
+    auto &technical_config = recompui::config::create_config_tab("Technical", "technical", true);
+    add_technical_options(technical_config);
 
     recompui::config::create_mods_tab();
 

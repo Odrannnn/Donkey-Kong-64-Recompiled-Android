@@ -11,6 +11,8 @@ extern void func_global_asm_80737B58(u8 arg0, u16 arg1);
 RECOMP_DECLARE_EVENT(recomp_on_file_start());
 RECOMP_DECLARE_EVENT(recomp_on_new_file_start());
 RECOMP_DECLARE_EVENT(recomp_on_dirty_file_start());
+RECOMP_DECLARE_EVENT(recomp_on_flag_check(s16 *flag, u8 *flag_type));
+RECOMP_DECLARE_EVENT(recomp_on_flag_change(s16 *flag, u8 *target_state, u8 *flag_type));
 
 void AlterVolumes(void) {
     s32 i;
@@ -746,5 +748,70 @@ RECOMP_PATCH void func_menu_8002D8AC(Actor *arg0, s32 arg1) {
     // }
     if (optionChanged) {
         playSound(0x74, 0x7FFF, 63.0f, 1.0f, 0, 0);
+    }
+}
+
+u8 temporary_flag_block[0xE];
+u8 *getFlagBlockAddress(u8 flagType);
+void func_global_asm_807311C4(s16 index);
+RECOMP_PATCH u8 isFlagSet(s16 flagIndex, u8 flagType) { // TODO: Can we use the FlagTypes enum? Needs to be a u8 to match
+    u8 *flagBlock;
+    s16 flagByte;
+    
+    if ((flagIndex == 0x1C) && (flagType == FLAG_TYPE_GLOBAL)) {
+        // Multiplayer enabled global flag
+        if (!recomp_get_mp_enabled()) {
+            return FALSE;
+        }
+    }
+    recomp_on_flag_check(&flagIndex, &flagType);
+    if (flagIndex == -1) {
+        return 0;
+    }
+    switch (flagType) {
+        case FLAG_TYPE_PERMANENT:
+        case FLAG_TYPE_GLOBAL:
+            flagBlock = getFlagBlockAddress(flagType);
+            break;
+        case FLAG_TYPE_TEMPORARY:
+            flagBlock = temporary_flag_block;
+    }
+    flagByte = flagIndex >> 3;
+    return flagBlock[flagByte] >> (s16)(flagIndex - flagByte * 8) & 1;
+}
+
+RECOMP_PATCH void setFlag(s16 flagIndex, u8 newValue, u8 flagType) {
+    u8 *flagBlock;
+    s16 flagByte;
+    s32 sp2C; // This is load bearing, cannot remove
+
+    recomp_on_flag_change(&flagIndex, &newValue, &flagType);
+    if (flagIndex != -1) {
+        switch (flagType) {
+            case FLAG_TYPE_PERMANENT:
+            case FLAG_TYPE_GLOBAL:
+                flagBlock = getFlagBlockAddress(flagType);
+                break;
+            case FLAG_TYPE_TEMPORARY:
+                flagBlock = temporary_flag_block;
+                break;
+        }
+        flagByte = flagIndex >> 3;
+        if (newValue) {
+            flagBlock[flagByte] |= 1 << (s16)(flagIndex - (flagByte * 8));
+        } else {
+            flagBlock[flagByte] &= ~(1 << (s16)(flagIndex - (flagByte * 8)));
+        }
+        if (newValue && (flagType == FLAG_TYPE_PERMANENT)) {
+            func_global_asm_807311C4(flagIndex);
+        }
+    }
+}
+
+RECOMP_PATCH void func_global_asm_80731030(void) { // clearTemporaryFlags()
+    s32 flagIndex;
+    
+    for (flagIndex = 0; flagIndex != 0xE; flagIndex++) {
+        temporary_flag_block[flagIndex] = 0;
     }
 }

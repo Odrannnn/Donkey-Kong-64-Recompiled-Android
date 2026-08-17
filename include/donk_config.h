@@ -32,6 +32,10 @@ namespace dk64 {
         namespace graphics {
             inline const std::string cutscene_borders = "cutscene_borders";
         }
+
+        namespace technical {
+            inline const std::string multiplayer_enabled = "multiplayer_enabled";
+        }
     }
 
     // TODO: Move loading configs to the runtime once we have a way to allow per-project customization.
@@ -83,6 +87,12 @@ namespace dk64 {
         Off
     };
     CutsceneBordersMode get_cutscene_borders();
+
+    enum class MultiplayerEnabled {
+        Off,
+        On
+    };
+    MultiplayerEnabled get_multiplayer_enabled();
 
     void open_quit_game_prompt();
 };

@@ -167,6 +167,17 @@ extern "C" void recomp_get_cutscene_bordering(uint8_t* rdram, recomp_context* ct
     }
 }
 
+extern "C" void recomp_get_mp_enabled(uint8_t* rdram, recomp_context* ctx) {
+    switch (dk64::get_multiplayer_enabled()) {
+        case dk64::MultiplayerEnabled::Off:
+            _return(ctx, 0);
+            return;
+        case dk64::MultiplayerEnabled::On:
+            _return(ctx, 1);
+            return;
+    }
+}
+
 extern "C" void recomp_get_ui_bounds(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::renderer::GraphicsConfig graphics_config = ultramodern::renderer::get_graphics_config();
     int width, height;

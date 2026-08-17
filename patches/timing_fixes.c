@@ -219,8 +219,6 @@ RECOMP_PATCH void func_global_asm_8060F730(Struct131B0_2* arg0) {
     func_global_asm_8060F854(arg0, temp_s0);
 }
 
-#define D_global_asm_80746858 (*(volatile s16*)0x80746858)
-
 extern OSTime D_global_asm_807F04F8;
 extern s8 D_global_asm_80744510;
 extern OSViMode	osViModeTable[];
