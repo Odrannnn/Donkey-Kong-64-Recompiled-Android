@@ -73,6 +73,14 @@ extern u8 cur_drawn_model_skip_interpolation;
 Gfx *set_model_matrix_group(Gfx * dl, void *geo_list, u8 skip_rotation, u8 *pushed);
 Gfx *pop_model_matrix_group(Gfx *dl);
 
+u8 localSpriteInterpDisabled(Struct80717D84* sprite) {
+    return (sprite->unk36F & 0x8) != 0;
+}
+
+u8 getRawAlignment(Struct80717D84* sprite) {
+    return sprite->unk36F & ~0x8;
+}
+
 //@recomp: Drawing sprite gfx function
 RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16 arg2) {
     s32 i;
@@ -84,6 +92,7 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     f32 sp14C;
     Gfx* temp_s0;
     u8 pushed_matrix_group;
+    u8 raw_alignment;
     
     sp154 = 1.0f;
     sp150 = 1.0f;
@@ -94,11 +103,12 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     if ((((gPlayerPointer->control_state == 0x83) || (gPlayerPointer->control_state == 0x67)) && !(sprite->unk38C & 0x20)) || (((global_properties_bitfield & 0x100002) == 0x100002) && !(sprite->unk38C & 0x100))) {
         return dl;
     }
+    raw_alignment = getRawAlignment(sprite);
     if (arg2 == -1) {
         arg2 = sprite->unk38A;
     }
     if (sprite->unk388 != -1) {
-        if (sprite->unk36F != 0) {
+        if (raw_alignment != 0) {
             // @recomp: disable sprite culling
             if (!func_global_asm_806522CC(sprite->unk340 * 0.25, sprite->unk344 * 0.25, sprite->unk388)) {
                 return dl;
@@ -109,8 +119,8 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
             }
         }
     }
-    if (sprite->unk36F) {
-        dl = alignHUD(dl, sprite->unk36F);
+    if (raw_alignment) {
+        dl = alignHUD(dl, raw_alignment);
     }
     temp_s0 = sprite->unk0[sprite->unk21++].unk0[D_global_asm_807444FC];
     // Mtx tag
@@ -118,6 +128,9 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     cur_model_transform_id_offset = 0;
     gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     cur_drawn_model_skip_interpolation = disable_sprite_interpolation;
+    if (localSpriteInterpDisabled(sprite)) {
+        cur_drawn_model_skip_interpolation = TRUE;
+    }
     dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
     cur_drawn_model_skip_interpolation = FALSE;
     //
@@ -148,11 +161,11 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
         sp14C = (sp159 / 255.0);
     }
     gDPSetPrimColor(temp_s0++, 0, 0, sprite->unk36A * sp154, sprite->unk36B * sp150, sprite->unk36C * sp14C, sprite->unk36D);
-    if (sprite->unk36F != 0) {
+    if (raw_alignment != 0) {
         gSPMatrix(temp_s0++, &D_20000C0, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
         gSPMatrix(temp_s0++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
         temp_s0 = func_global_asm_805FD030(temp_s0);
-        if (sprite->unk36F == ALIGN_UNALIGNED) {
+        if (raw_alignment == ALIGN_UNALIGNED) {
             if (sprite->unk388 == -1) {
                 gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
                     sprite->unk38E,
@@ -217,10 +230,10 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     gSPPopMatrix(temp_s0++, G_MTX_MODELVIEW);
     gDPPipeSync(temp_s0++);
     gDPSetColorDither(temp_s0++, G_CD_MAGICSQ);
-    if (sprite->unk36F != 0) {
+    if (raw_alignment != 0) {
         gSPMatrix(temp_s0++, &D_2000000, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_PROJECTION);
         gSPMatrix(temp_s0++, &D_2000200, G_MTX_NOPUSH | G_MTX_MUL | G_MTX_PROJECTION);
-        if (sprite->unk36F == ALIGN_UNALIGNED) {
+        if (raw_alignment == ALIGN_UNALIGNED) {
             if (sprite->unk388 == -1) {
                 gDPSetScissor(temp_s0++, G_SC_NON_INTERLACE,
                     0,
@@ -233,8 +246,8 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
     }
     gDPPipeSync(temp_s0++);
     gSPEndDisplayList(temp_s0++);
-    if ((sprite->unk36F != ALIGN_NOT_2D) && (sprite->unk36F != ALIGN_UNALIGNED)) {
-        dl = popHUD(dl, sprite->unk36F);
+    if ((raw_alignment != ALIGN_NOT_2D) && (raw_alignment != ALIGN_UNALIGNED)) {
+        dl = popHUD(dl, raw_alignment);
     }
     D_global_asm_807F6009 = 5;
     return dl;
@@ -2317,7 +2330,6 @@ extern u16 D_global_asm_807FCC46;
 extern u16 D_global_asm_807FCC48;
 extern u8 current_character_index[];
 extern s8 D_global_asm_807FC80F;
-extern void func_global_asm_806AC07C(Struct80717D84 *, u8 *);
 f32 func_global_asm_806119FC(void);
 typedef struct Struct80717D84_unk384_806AB4EC {
     f32 unk0;
@@ -2331,6 +2343,189 @@ typedef struct Struct80717D84_unk384_806AB4EC {
     f32 unk20;
     f32 unk24;
 } Struct80717D84_unk384_806AB4EC;
+
+extern rgba D_global_asm_8075054C[];
+extern f32 D_global_asm_807FC808;
+
+RECOMP_PATCH void func_global_asm_806AC07C(Struct80717D84* arg0, s8* arg1) {
+    PauseAAD* temp_t6; // 54
+    f32* temp_a2; // 50
+    f32 var_f14; // 4C
+    f32 var_f2;
+    f32 temp_f2_2;
+    s32 sp40;
+    s32 temp_t2; // 3C
+    s32 temp_v0;
+    s32 temp_f10;
+    s32 var_v0_2;
+    f32 temp_f;
+
+    f32 old_x, old_y, dx, dy;
+
+    temp_t6 = (PauseAAD*)arg0->unk35C;
+    temp_a2 = (f32*)arg0->unk384;
+    if (!temp_a2) {
+        return;
+    }
+    old_x = arg0->unk340;
+    old_y = arg0->unk344;
+    var_f14 = temp_t6->unk0;
+    sp40 = temp_t6->unkC[(s32)temp_a2[1]] * 4.0;
+    temp_f10 = temp_a2[0];
+    switch (temp_f10) {
+        case 0:
+        case 4:
+        case 11:
+        case 12:
+            var_f14 = 1.0 - var_f14;
+            if (var_f14 < 0.0f) {
+                var_f14 = 0.0f;
+            }
+            if (var_f14 > 1.0f) {
+                var_f14 = 1.0f;
+            }
+            arg0->unk36D = var_f14 * 255.0f;
+            if (temp_f10 == 4) {
+                arg0->unk360 = (temp_a2[4] * var_f14) * 4.0;
+                arg0->unk364 = arg0->unk360;
+            }
+            var_f14 = 0.0f;
+            arg0->unk340 = temp_a2[2];
+            arg0->unk344 = temp_a2[3] + sp40;
+            if (temp_f10 == 0xB) {
+                arg0->unk340 = 600.0 - D_global_asm_807FC808;
+            }
+            if (temp_f10 == 0xC) {
+                arg0->unk340 = D_global_asm_807FC808 + 680.0;
+            }
+            break;
+        case 1:
+        case 2:
+        case 7:
+            if (temp_f10 != 1) {
+                var_f14 += temp_t6->unk4;
+            }
+            if (temp_f10 == 7) {
+                arg0->unk364 = temp_a2[6] + (func_global_asm_80612794(((object_timer * 0x78) & 0xFFF)) * 0.35);
+            }
+            arg0->unk340 = (temp_a2[4] * var_f14) + temp_a2[2];
+            arg0->unk344 = (temp_a2[5] * var_f14) + temp_a2[3] + sp40;
+            break;
+        case 3:
+        case 5:
+        case 8:
+        case 15:
+            var_f14 = 1.0 - var_f14;
+            if (var_f14 < 0) {
+                var_f14 = 0;
+            }
+            if (var_f14 > 1) {
+                var_f14 = 1;
+            }
+            temp_v0 = (s32) (temp_a2[2] * 0.25) - temp_t6->unk10;
+            var_f2 = 180.0f;
+            if (temp_f10 != 3) {
+                var_f2 = 240.0f;
+            }
+            var_f2 *= var_f14;
+            arg0->unk360 = (temp_a2[4] * var_f14) * 4.0;
+            arg0->unk364 = arg0->unk360;
+            arg0->unk340 = (func_global_asm_80612794(temp_v0) * var_f2) + 640.0;
+            var_f14 = 0;
+            arg0->unk344 = (480.0 - (func_global_asm_80612790(temp_v0) * var_f2)) + sp40;
+            if (temp_f10 == 8) {
+                var_f14 = 0;
+                arg0->unk344 += (func_global_asm_80612794((s16) ((object_timer * 0x78) & 0xFFF)) * 10.0f);
+            }
+            if (temp_f10 == 0xF) {
+                var_f14 = 0;
+                arg0->unk364 *= (1.0 + (func_global_asm_80612794(((object_timer * 0x78) & 0xFFF)) * 0.2));
+            }
+            if ((temp_f10 == 5) || (temp_f10 == 8) || (temp_f10 == 0xF)) {
+                var_v0_2 = 0xFF - (s32) ((arg0->unk344 - 240.0) * 1.5);
+                if (var_v0_2 < 0x5F) {
+                    var_v0_2 = 0x5F;
+                }
+                if (var_v0_2 > 0xFF) {
+                    var_v0_2 = 0xFF;
+                }
+                arg0->unk36A = var_v0_2;
+                arg0->unk36B = var_v0_2;
+                arg0->unk36C = var_v0_2;
+            }
+            break;
+        case 6:
+            if ((SQ(temp_a2[4] - temp_a2[6]) + SQ(temp_a2[5] - temp_a2[7])) < 400.0f) {
+                temp_a2[9] -= 1.0;
+                if (temp_a2[9] < 0.0) {
+                    temp_a2[8] += (1000.0 + (func_global_asm_806119FC() * 2000.0));
+                    temp_t2 = (s32) temp_a2[8] & 0xFFF;
+                    temp_a2[8] = temp_t2;
+                    temp_f2_2 = ((func_global_asm_806119FC() * 40.0) + 20.0) * 4.0;
+                    temp_a2[6] = (func_global_asm_80612794(temp_t2) * (temp_f2_2 * 0.8));
+                    temp_a2[7] = func_global_asm_80612790(temp_t2) * temp_f2_2;
+                    if (func_global_asm_806119FC() < 0.25) {
+                        temp_a2[9] = (func_global_asm_806119FC() * 40.0) + 15.0;
+                    } else {
+                        temp_a2[9] = 0.0f;
+                    }
+                }
+            }
+            var_f2 = (temp_a2[6] - temp_a2[4]) * 0.1;
+            if (var_f2 < -8.0) {
+                var_f2 = -8.0;
+            }
+            if (var_f2 > 8.0) {
+                var_f2 = 8.0;
+            }
+            temp_a2[4] += var_f2;
+            var_f2 = (temp_a2[7] - temp_a2[5]) * 0.1;
+            if (var_f2 < -8.0) {
+                var_f2 = -8.0;
+            }
+            if (var_f2 > 8.0) {
+                var_f2 = 8.0;
+            }
+            temp_a2[5] += var_f2;
+            arg0->unk340 = temp_a2[4] + temp_a2[2];
+            temp_f = func_global_asm_80612794((object_timer * 0x78) & 0xFFF) * 10.0f;
+            arg0->unk344 = (temp_f + (temp_a2[3] + temp_a2[5] + sp40 + (960.0f * var_f14)));
+            var_f14 = 0;
+            break;
+        case 10:
+            var_v0_2 = (s32) temp_a2[2];
+            arg0->unk340 = D_global_asm_807FC840[var_v0_2];
+            arg0->unk344 = D_global_asm_807FC868[var_v0_2];
+            arg0->unk360 = D_global_asm_807FC890[var_v0_2];
+            arg0->unk364 = D_global_asm_807FC890[var_v0_2];
+            D_global_asm_807FC840[var_v0_2] = -200.0f;
+            D_global_asm_807FC868[var_v0_2] = -200.0f;
+            if (var_v0_2 >= 5) {
+                var_v0_2 -= 5;
+            }
+            if (D_global_asm_80750530[var_v0_2] == 0) {
+                arg0->unk36A = D_global_asm_8075054C[var_v0_2].red;
+                arg0->unk36B = D_global_asm_8075054C[var_v0_2].green;
+                arg0->unk36C = D_global_asm_8075054C[var_v0_2].blue;
+            }
+            break;
+    }
+    if ((temp_t6->unk15 != (s32) temp_a2[1]) && ((sp40 < -0x3C0) || (sp40 >= 0x3C1))) {
+        *arg1 = 1;
+    }
+    if ((var_f14 > 1.0f) || (temp_t6->unk0 > 1.0f)) {
+        *arg1 = 1;
+    }
+    dx = ABS_F(arg0->unk340 - old_x);
+    dy = ABS_F(arg0->unk344 - old_y);
+    if ((dx > 80.0f) || (dy > 80.0f)) {
+        // Disable interpolation
+        arg0->unk36F |= 0x8;
+    } else {
+        // Re-enable interpolation
+        arg0->unk36F &= ~0x8;
+    }
+}
 
 // @recomp: Pause menu sprite draw function
 RECOMP_PATCH void func_global_asm_806AB4EC(PauseAAD *arg0, SpriteData *arg1, s32 arg2, s32 arg3, f32 arg4, u8 arg5, s32 arg6) {

@@ -25,6 +25,14 @@ typedef struct rgb {
     u8 blue;
 } rgb;
 
+
+typedef struct rgba {
+    u8 red;
+    u8 green;
+    u8 blue;
+    u8 alpha;
+} rgba;
+
 u32 func_global_asm_806119A0(void); // Having this here to prevent having to declare it for RANDNUM()
 #define SQ(x) ((x) * (x))
 #define ACTOR_UNINITIALIZED(actor) (!(actor->object_properties_bitfield & 0x10))
@@ -40,10 +48,14 @@ u32 func_global_asm_806119A0(void); // Having this here to prevent having to dec
 #define CLAMP(value, min, max) ((value) < (min) ? (min) : MIN(max, value))
 
 typedef enum enumSpriteAlignment {
-    ALIGN_NOT_2D,
-    ALIGN_UNALIGNED,
-    ALIGN_LEFT,
-    ALIGN_RIGHT,
+    ALIGN_NOT_2D = 0x0,
+    ALIGN_UNALIGNED = 0x1,
+    ALIGN_LEFT = 0x2,
+    ALIGN_RIGHT = 0x3,
+    ALIGN_NOT_2D_NOINTERP = 0x8,
+    ALIGN_UNALIGNED_NOINTERP = 0x9,
+    ALIGN_LEFT_NOINTERP = 0xA,
+    ALIGN_RIGHT_NOINTERP = 0xB,
 } enumSpriteAlignment;
 
 typedef enum interpolationIDs {
@@ -1949,7 +1961,7 @@ struct Struct80717D84 {
     u8 unk36A;
     u8 unk36B;
     u8 unk36C;
-    u8 unk36D;
+    s8 unk36D;
     u8 unk36E;
     u8 unk36F;
     u32 unk370[4];

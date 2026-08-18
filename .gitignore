@@ -6,6 +6,8 @@
 # Input elf and rom files
 *.elf
 *.z64
+*.v64
+*.n64
 
 # Output C files
 RecompiledFuncs/
