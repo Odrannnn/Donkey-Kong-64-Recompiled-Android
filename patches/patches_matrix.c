@@ -104,12 +104,49 @@ Gfx *pop_model_matrix_group(Gfx *dl) {
     return dl;
 }
 
+typedef struct actor_lockdown_struct {
+    Actor * actor;
+    u16 value;
+    u8 used;
+    u8 pad;
+} actor_lockdown_struct;
+
+#define ACTOR_LOCKDOWN_BUFFER_SIZE 16
+static actor_lockdown_struct actor_lockdowns[ACTOR_LOCKDOWN_BUFFER_SIZE];
+
+void set_actor_interpolation_lockdown(Actor * ac, u16 value) {
+    s32 i;
+    actor_lockdown_struct *ld;
+    for (i = 0; i < ACTOR_LOCKDOWN_BUFFER_SIZE; i++) {
+        ld = &actor_lockdowns[i];
+        if ((ld->actor == ac) || (!ld->used)) {
+            if (!ld->used) {
+                ld->used = TRUE;
+                ld->value = value;
+                ld->actor = ac;
+            } else if (ld->value < value) {
+                ld->value = value;
+            }
+            recomp_printf("Set interpolation lockdown for actor %08X for %d frames\n", ac, value);
+            return;
+        }
+    }
+}
+
+void clear_actor_interpolation_lockdowns(void) {
+    s32 i;
+    for (i = 0; i < ACTOR_LOCKDOWN_BUFFER_SIZE; i++) {
+        actor_lockdowns[i].used = FALSE;
+    }
+}
+
 // @recomp: Actor matrix stuff
 RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
     ActorModelHeader *var_s0;
     s32 var_v1;
     u8 pushed_matrix_group = FALSE;
     s32 i;
+    actor_lockdown_struct *ld;
 
     cur_drawn_model_transform_id = MTXTAG_ACTORS + (arg1->unk54 * 0x100);
     var_s0 = (ActorModelHeader *)arg1->unk0;
@@ -123,6 +160,18 @@ RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
     dl = func_global_asm_80614C38(dl, arg1, var_s0);
     gSPSegment(dl++, 0x04, osVirtualToPhysical(arg1->unk8));
     gSPSegment(dl++, 0x03, osVirtualToPhysical((ActorModelHeader *)var_s0->unk0));
+    for (i = 0; i < ACTOR_LOCKDOWN_BUFFER_SIZE; i++) {
+        ld = &actor_lockdowns[i];
+        if (ld->used && ld->actor == arg1) {
+            if (ld->value > 0) {
+                cur_drawn_model_skip_interpolation = TRUE;
+                ld->value--;
+            }
+            if (ld->value == 0) {
+                ld->used = FALSE;
+            }
+        }
+    }
     for (var_v1 = 0; var_v1 < var_s0->unk21; var_v1++) {
         cur_model_transform_id_offset = var_v1;
         gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
@@ -133,6 +182,7 @@ RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
             dl = pop_model_matrix_group(dl);
         }
     }
+    cur_drawn_model_skip_interpolation = FALSE;
     return dl;
 }
 

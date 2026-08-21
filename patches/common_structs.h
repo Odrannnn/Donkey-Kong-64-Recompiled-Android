@@ -1130,7 +1130,7 @@ struct actor {
     u32 unk44;
     u32 unk48;
     u32 unk4C;
-    u32 unk50;
+    void *unk50;
     u32 unk54;
     Actors unk58;
     u16 interactable; // Bitfield at 0x5C
@@ -1978,3 +1978,115 @@ struct Struct80717D84 {
     Struct80717D84 *unk398;
     Struct80717D84 *unk39C;
 };
+
+typedef struct {
+    s16 coords_0[3]; // 0x0
+    s16 coords_1[3]; // 0x6
+    s16 coords_2[3]; // 0xC
+    s16 coords_3[3]; // 0x12
+    s16 coords_4[3]; // 0x18
+} EnemyAggressionBox;
+
+typedef struct EnemyMovementBox EnemyMovementBox;
+
+struct EnemyMovementBox {
+    s16 x_pos_0; // 0x0
+    s16 z_pos_0; // 0x2
+    s16 x_pos_1; // 0x4
+    s16 z_pos_1; // 0x6
+    u8 pad[4];
+    EnemyAggressionBox *aggression_box_pointer; // = 0xC, -- u32
+    u8 pad10[0xC];
+    Actor *unk1C;
+};
+
+typedef struct SpawnerFileData {
+    u8 enemy_value; // 0x0
+    u8 unk1;
+	u16 y_rot; // 0x2
+	s16 x_pos; // 0x4
+	s16 y_pos; // 0x6
+	s16 z_pos; // 0x8
+	u8 cs_model; // 0xA
+    u8 unkB;
+	u8 max_idle_speed; // 0xC
+	u8 max_aggro_speed; // 0xD
+    u8 unkE;
+	u8 scale; // 0xF
+	u8 aggro; // 0x10
+    u8 unk11;
+	u8 something_spawn_state; // 0x12
+	u8 spawn_trigger; // 0x13
+	u8 respawn_timer_init; // 0x14 - Result is multiplied by 30 to get actual respawn timer
+	u8 unk15;
+} SpawnerFileData;
+
+typedef struct SpawnerData_unk20 {
+    u8 unk0;
+    u8 unk1;
+} SpawnerData_unk20;
+
+typedef struct {
+	SpawnerFileData init;
+    u8 unk16;
+    u8 unk17;
+    Actor *tied_actor; // 0x18
+	EnemyMovementBox *movement_box_pointer; // 0x1C
+	SpawnerData_unk20 *unk20; // 0x20
+	s16 respawn_time; // 0x24
+    s16 unk26;
+    s32 unk28;
+	f32 unk2C; // 0x2C initially written to 0.01
+	f32 unk30; // 0x30 initially written to 1
+	f32 animation_speed; // 0x34
+	u32 unk38; // 0x38 TODO: maybe float, based on alt enemy type
+	u32 unk3C;
+    s16 chunk; // 0x40
+	u8 spawn_state; // 0x42
+	u8 counter; // 0x43
+	u8 alternative_enemy_spawn; // 0x44
+
+	// 1000 0000 0000 0000 - ?
+	// 0100 0000 0000 0000 - ? Resets on Respawn
+	// 0010 0000 0000 0000 - ? Resets on Respawn
+	// 0001 0000 0000 0000 - ?
+
+	// 0000 1000 0000 0000 - ?
+	// 0000 0100 0000 0000 - ?
+	// 0000 0010 0000 0000 - ?
+	// 0000 0001 0000 0000 - ?
+
+	// 0000 0000 1000 0000 - ?
+	// 0000 0000 0100 0000 - Ignores instrument plays
+	// 0000 0000 0010 0000 - Ignores movement boundaries
+	// 0000 0000 0001 0000 - ?
+
+	// 0000 0000 0000 1000 - ? Reset on respawn
+	// 0000 0000 0000 0100 - ?
+	// 0000 0000 0000 0010 - Won't Respawn
+	// 0000 0000 0000 0001 - Spawned from respawn pending
+
+    // TODO: proper bitfield syntax
+	u16 properties_bitfield; // = 0x46 bitfield -- TODO: Document this, find where this comes from so we can display stuff pre-load
+} EnemySpawner;
+
+typedef struct {
+    u8 pad0[0x2 - 0x0];
+    s16 unk2;
+    s16 unk4;
+    s16 unk6;
+    s16 unk8;
+    union {
+        u8 unkA_u8[2];
+        u16 unkA_u16;
+        s16 unkA_s16;
+    };
+    u8 unkC;
+    u8 unkD;
+    u8 unkE;
+    u8 unkF;
+    u8 unk10;
+    u8 unk11;
+    u8 unk12;
+    u8 unk13;
+} CharacterSpawner;
