@@ -140,6 +140,14 @@ void clear_actor_interpolation_lockdowns(void) {
     }
 }
 
+s32 getActorMatrixTag(Actor *ac) {
+    if (ac->unk58 == 333) {
+        // Main Menu barrel. This respawns every frame because dk64 lol
+        return MTXTAG_MAINMENU_BARREL;
+    }
+    return MTXTAG_ACTORS + (ac->unk54 * 0x100);
+}
+
 // @recomp: Actor matrix stuff
 RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
     ActorModelHeader *var_s0;
@@ -148,7 +156,7 @@ RECOMP_PATCH Gfx *func_global_asm_80614B34(Gfx *dl, Actor *arg1) {
     s32 i;
     actor_lockdown_struct *ld;
 
-    cur_drawn_model_transform_id = MTXTAG_ACTORS + (arg1->unk54 * 0x100);
+    cur_drawn_model_transform_id = getActorMatrixTag(arg1);
     var_s0 = (ActorModelHeader *)arg1->unk0;
     if (arg1->unk4C != NULL) {
         var_s0 = (ActorModelHeader *)arg1->unk4C;
@@ -927,7 +935,7 @@ RECOMP_PATCH Gfx *func_global_asm_8069F904(Gfx *dl, Actor *arg1) {
     gDPPipeSync(dl++);
     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, arg1->y_rotation);
     // push mtx
-    cur_drawn_model_transform_id = MTXTAG_ACTORS + (arg1->unk54 * 0x100);
+    cur_drawn_model_transform_id = getActorMatrixTag(arg1);
     cur_model_transform_id_offset = 0x10;
     gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
@@ -1006,7 +1014,7 @@ RECOMP_PATCH Gfx *func_global_asm_8069FA40(Gfx *dl, Actor *arg1) {
     guMtxF2L(spBC, sp78);
     gSPMatrix(dl++, sp78, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
     // push mtx
-    cur_drawn_model_transform_id = MTXTAG_ACTORS + (arg1->unk54 * 0x100);
+    cur_drawn_model_transform_id = getActorMatrixTag(arg1);
     cur_model_transform_id_offset = 0x10;
     gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
     dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
