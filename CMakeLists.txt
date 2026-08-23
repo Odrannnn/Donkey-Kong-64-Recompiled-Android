@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
 if(NOT DEFINED ENV{VCPKG_ROOT})
-    set(ENV{VCPKG_ROOT} ${CMAKE_SOURCE_DIR}/thirdparty/vcpkg)
+    set(ENV{VCPKG_ROOT} ${CMAKE_SOURCE_DIR}/lib/vcpkg)
 endif()
 
 include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
