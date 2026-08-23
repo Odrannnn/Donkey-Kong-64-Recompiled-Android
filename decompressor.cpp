@@ -78,55 +78,6 @@ std::array<uint8_t, 4> convertChunk(const std::array<uint8_t, 4>& chunk, bool by
     return output;
 }
 
-// Converts ROM to z64 (Big-Endian) in-place if necessary
-void convertToZ64(std::vector<uint8_t>& romBuffer) {
-    if (romBuffer.size() < 4) {
-        throw std::runtime_error("Invalid ROM: File is too small.");
-    }
-
-    std::array<uint8_t, 4> magic = {romBuffer[0], romBuffer[1], romBuffer[2], romBuffer[3]};
-    std::array<uint8_t, 4> validate = magic;
-    
-    std::sort(validate.begin(), validate.end());
-    std::array<uint8_t, 4> expected = {0x12, 0x37, 0x40, 0x80};
-
-    if (validate != expected) {
-        throw std::runtime_error("Invalid ROM: N64 header magic bytes not recognized.");
-    }
-
-    uint8_t first = magic[0];
-    bool byteSwapped = (first == 0x37 || first == 0x12);
-    bool wordSwapped = (first == 0x40 || first == 0x12);
-
-    if (!byteSwapped && !wordSwapped) {
-        std::cout << "[ROM Format] z64 (Big-Endian) detected - no conversion required.\n";
-        return;
-    }
-
-    if (byteSwapped && !wordSwapped) {
-        std::cout << "[ROM Format] v64 (Byte-Swapped) detected - converting to z64...\n";
-    } else if (!byteSwapped && wordSwapped) {
-        std::cout << "[ROM Format] n64 (Little-Endian) detected - converting to z64...\n";
-    } else {
-        std::cout << "[ROM Format] Word and Byte-Swapped detected - converting to z64...\n";
-    }
-
-    size_t length = romBuffer.size() - (romBuffer.size() % 4);
-    for (size_t pos = 0; pos < length; pos += 4) {
-        std::array<uint8_t, 4> chunk = {
-            romBuffer[pos + 0],
-            romBuffer[pos + 1],
-            romBuffer[pos + 2],
-            romBuffer[pos + 3]
-        };
-        std::array<uint8_t, 4> converted = convertChunk(chunk, byteSwapped, wordSwapped);
-        romBuffer[pos + 0] = converted[0];
-        romBuffer[pos + 1] = converted[1];
-        romBuffer[pos + 2] = converted[2];
-        romBuffer[pos + 3] = converted[3];
-    }
-}
-
 void readAndDecompressOverlays(std::fstream& fr, std::vector<Overlay>& overlays) {
     for (auto& x : overlays) {
         x.codeCompressedSize = x.dataROMAddress - x.codeROMAddress;
@@ -207,8 +158,6 @@ int main(int argc, char* argv[]) {
             return 1;
         }
         inFile.close();
-
-        convertToZ64(romBuffer);
 
         if ((romBuffer[0x3B] != 0x4E) || (romBuffer[0x3C] != 0x44) || (romBuffer[0x3D] != 0x4F) || (romBuffer[0x3E] != 0x45)) {
             std::cerr << "Provided ROM is not the US version.\n";
