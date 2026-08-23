@@ -1134,3 +1134,31 @@ RECOMP_PATCH Gfx* func_global_asm_8065FD88(Gfx* dl, u8 arg1, u8 arg2) {
     }
     return dl;
 }
+
+void getAnimationArg16(s16 *arg0);
+
+RECOMP_PATCH void func_global_asm_806187E8(Actor *arg0) {
+    s16 sp1E;
+
+    getAnimationArg16(&sp1E);
+    arg0->unk146_s16 |= sp1E;
+    set_actor_interpolation_lockdown(arg0, 1);
+}
+
+RECOMP_PATCH void func_global_asm_80618820(Actor *arg0) {
+    s16 sp1E;
+
+    getAnimationArg16(&sp1E);
+    arg0->unk146_s16 &= ~sp1E;
+    set_actor_interpolation_lockdown(arg0, 1);
+}
+
+RECOMP_PATCH void func_global_asm_8068A764(Actor *arg0, u8 arg1) {
+    arg0->unk146_s16 |= 1 << arg1;
+    set_actor_interpolation_lockdown(arg0, 1);
+}
+
+RECOMP_PATCH void func_global_asm_8068A784(Actor *arg0, u8 arg1) {
+    arg0->unk146_s16 &= ~(1 << arg1);
+    set_actor_interpolation_lockdown(arg0, 1);
+}
