@@ -2,10 +2,14 @@
 #include "enums.h"
 #include "debug_config.h"
 #include "misc_funcs.h"
+#include "options.h"
 #include "patches_main.h"
 #include "patches_interpolation.h"
 
 #define INTERPOLATION_DEBUG 1
+
+RECOMP_DECLARE_EVENT(recomp_on_cutscene_play(s16 *cutscene, u8 *cutscene_bitfield));
+RECOMP_DECLARE_EVENT(recomp_on_autowalk());
 
 s32 interpolation_disable_timer = 0;
 s32 persp_interpolation_disable_timer = 0;
@@ -1307,5 +1311,199 @@ RECOMP_PATCH void func_global_asm_806BFBF4(void) {
     func_global_asm_8072A450();
     if ((D_global_asm_807FDC98->properties_bitfield & 0x1000) && (func_global_asm_8072881C(0, &D_global_asm_807FDC90->unk28)) && (((temp_s2->unk0 == 1)) || (temp_s2->unk0 == 9) || (temp_s2->unk0 == 0x68))) {
         func_global_asm_8072881C(0x81, &D_global_asm_807FDC90->unk28);
+    }
+}
+
+extern u8 D_global_asm_8076A0B1;
+extern u8 D_global_asm_8076A0B3;
+void func_global_asm_8061C464(Actor *arg0, Actor *arg1, u8 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, f32 argA);
+void func_global_asm_8061C6A8(Actor *arg0, Actor *arg1, u8 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, f32 arg10);
+
+void clearCutsceneBarInterp(void) {
+    if (recomp_get_cutscene_bordering() > 0) {
+        set_persp_interpolation_lockdown(2);
+    }
+}
+
+RECOMP_PATCH void func_global_asm_8061C518(Actor *arg0, Actor *arg1, u8 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, f32 argA) {
+    f32 sp3C;
+
+    sp3C = arg1->animation_state->scale[1];
+    if (is_cutscene_active == 1) {
+        func_global_asm_8061D4E4(arg0);
+    }
+    D_global_asm_8076A0B3 = 0;
+    clearCutsceneBarInterp();
+    D_global_asm_8076A0B1 |= 0x10;
+    arg1->animation_state->scale[1] = 0.15f;
+    func_global_asm_8061C6A8(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, argA);
+    arg1->animation_state->scale[1] = sp3C;
+    global_properties_bitfield &= ~1;
+}
+
+RECOMP_PATCH void func_global_asm_8061C600(Actor *arg0, Actor *arg1, u8 arg2, s16 arg3, s16 arg4, s16 arg5, s16 arg6, s16 arg7, s16 arg8, s16 arg9, f32 argA) {
+    if (is_cutscene_active == 1) {
+        func_global_asm_8061D4E4(arg0);
+    }
+    D_global_asm_8076A0B3 = 0;
+    clearCutsceneBarInterp();
+    D_global_asm_8076A0B1 |= 0x10;
+    func_global_asm_8061C464(
+        arg0,
+        arg1,
+        arg2,
+        arg3,
+        arg4,
+        arg5,
+        arg6,
+        arg7,
+        arg8,
+        arg9,
+        argA
+    );
+}
+
+extern OSTime D_global_asm_807F5CE0;
+#define D_global_asm_807476D0 *(volatile OSTime *)(0x807476D0)
+u8 isIntroStoryPlaying(void);
+void func_global_asm_806119F0(s32 arg0);
+u16 func_global_asm_8061C804(s16);
+void func_global_asm_80629174(void);
+void func_boss_80029140(s16* arg0);
+s32 deleteActor(Actor*);
+extern s16 D_global_asm_807476F8;
+extern s8 D_global_asm_807F5CFA;
+extern u8 D_global_asm_807F5D14;
+extern u8 D_global_asm_807476EC;
+extern Actor *D_global_asm_807F5D10;
+extern u8 D_global_asm_807F5CF6;
+extern u8 D_global_asm_807476D8;
+extern u8 D_global_asm_80770DC9;
+extern u8 current_character_index[];
+extern u16 D_global_asm_807FBB34;
+
+RECOMP_PATCH s32 playCutscene(Actor *arg0, s16 arg1, u8 arg2) {
+    u16 sp26;
+    s32 i;
+    Actor *ac;
+
+    sp26 = 0;
+    if ((is_cutscene_active == 1) && (D_global_asm_807F5CF4 & 0x80)) {
+        return 0;
+    }
+
+    if ((arg2 & 4) && (current_map != MAP_TEST_MAP)) {
+        D_global_asm_807476FC = &D_global_asm_807F5B10[1];
+    } else {
+        D_global_asm_807476FC = &D_global_asm_807F5B10[0];
+    }
+
+    // @recomp: Patch cutscene controller duping, which fixes a bug if you're not  so good at Owl Race (https://www.youtube.com/watch?v=A0bWoo1h8FQ)
+    for (i = 0; i < D_global_asm_807FBB34; i++) {
+        ac = D_global_asm_807FB930[i].unk0;
+        if (ac->unk58 == 173) {
+            // @recomp: Delete any lingering cutscene controllers
+            deleteActor(ac);
+        }
+    }
+
+    if (spawnActor(ACTOR_CUTSCENE_CONTROLLER, 0)) {
+        D_global_asm_807F5D0C = gLastSpawnedActor;
+        gLastSpawnedActor->noclip_byte = 1;
+    } else {
+        return 0;
+    }
+    
+    recomp_on_cutscene_play(&arg1, &arg2);
+
+    if ((!(arg2 & 4)) && (D_global_asm_807FBB64 & 1)) {
+        func_boss_80029140(&arg1);
+    }
+
+    if (arg0 != NULL) {
+        D_global_asm_807F5CE8 = arg0;
+    } else {
+        D_global_asm_807F5CE8 = character_change_array->playerPointer;
+    }
+
+    is_cutscene_active = 1;
+
+    if (!(arg2 & 8)) {
+        D_global_asm_8076A0B1 |= 0x10;
+        D_global_asm_8076A0B3 = 0;
+        clearCutsceneBarInterp();
+    }
+
+    D_global_asm_807476D0 = osGetTime();
+    D_global_asm_807476F4 = arg1;
+    D_global_asm_807476F8 = arg1;
+    D_global_asm_807F5CF4 = arg2;
+    D_global_asm_807F5CFA = 0;
+    D_global_asm_807476D8 = 0;
+    D_global_asm_807476E4 = 0;
+    D_global_asm_807F5CEC = 0;
+    D_global_asm_807F5CF0 = 0;
+    D_global_asm_807F5CF2 = 0;
+    D_global_asm_807F5CEE = 0;
+    D_global_asm_807476F0 = 0;
+    D_global_asm_807F5CF6 = D_global_asm_80770DC9;
+    global_properties_bitfield |= 0x2000;
+    global_properties_bitfield &= ~0x1001;
+    gPlayerPointer->unkB8 = 0.0f;
+    if (current_character_index[0] == 7) {
+        gPlayerPointer->y_velocity = 0.0f;
+    }
+    gPlayerPointer->object_properties_bitfield |= 0x400;
+    extra_player_info_pointer->unk10 = 0;
+    D_global_asm_807F5D10->x_rotation = 0;
+    func_global_asm_80629174();
+    if (D_global_asm_807476EC != 0) {
+        sp26 = func_global_asm_8061C804(arg1);
+    }
+    D_global_asm_807476EC = 0;
+    if ((arg1 == 0) && (current_map == MAP_DK_ISLES_DK_THEATRE)) {
+        func_global_asm_806119F0(0x8E32B6F7U);
+        D_global_asm_807F5CE0 = osGetTime();
+        D_global_asm_807F5D14 = 0;
+    } else if (!isIntroStoryPlaying()) {
+        D_global_asm_807F5CE0 = 0;
+    }
+    return sp26;
+}
+
+typedef struct AutowalkRDRAM AutowalkRDRAM;
+struct AutowalkRDRAM {
+    s16 count;
+    AutowalkRDRAM *items;
+};
+extern AutowalkRDRAM *D_global_asm_80753E90;
+extern u8 is_autowalking;
+extern void *D_global_asm_807FD70C;
+extern AutowalkRDRAM *D_global_asm_807FD708;
+extern Actor *D_global_asm_807FD710;
+extern s16 D_global_asm_807FD714;
+extern s16 D_global_asm_807FD718;
+extern Actor *D_global_asm_807FD71C;
+void func_global_asm_806F37BC(Actor *arg0, void *arg1);
+
+RECOMP_PATCH void func_global_asm_806F386C(u8 arg0, Actor *arg1, Actor *arg2, s16 arg3, u8 arg4) {
+    PlayerAdditionalActorData *temp_v0;
+
+    temp_v0 = arg1->PaaD;
+    if (D_global_asm_80753E90[0].count >= arg0) {
+        is_autowalking = 3;
+        D_global_asm_8076A0B1 |= 0x10;
+        clearCutsceneBarInterp();
+        D_global_asm_807FD710 = arg1;
+        temp_v0->unk1F0 &= ~1;
+        D_global_asm_807FD714 = 0;
+        D_global_asm_807FD708 = &D_global_asm_80753E90->items[arg0];
+        D_global_asm_807FD70C = D_global_asm_807FD708->items;
+        D_global_asm_807FD718 = arg3;
+        D_global_asm_807FD71C = arg2;
+        if (arg4 == 0) {
+            func_global_asm_806F37BC(arg1, D_global_asm_807FD70C);
+        }
+        recomp_on_autowalk();
     }
 }
