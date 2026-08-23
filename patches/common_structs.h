@@ -47,20 +47,13 @@ u32 func_global_asm_806119A0(void); // Having this here to prevent having to dec
 #define ABS(d) (((d) > 0) ? (d) : -(d))
 #define CLAMP(value, min, max) ((value) < (min) ? (min) : MIN(max, value))
 
-typedef enum enumSpriteAlignment {
-    ALIGN_NOT_2D = 0x0,
-    ALIGN_UNALIGNED = 0x1,
-    ALIGN_LEFT = 0x2,
-    ALIGN_RIGHT = 0x3,
-    ALIGN_LEFT_OVERSCAN_HIDE = 0x4,
-    ALIGN_RIGHT_OVERSCAN_HIDE = 0x5,
-    ALIGN_NOT_2D_NOINTERP = 0x8,
-    ALIGN_UNALIGNED_NOINTERP = 0x9,
-    ALIGN_LEFT_NOINTERP = 0xA,
-    ALIGN_RIGHT_NOINTERP = 0xB,
-    ALIGN_LEFT_OVERSCAN_HIDE_NOINTERP = 0xC,
-    ALIGN_RIGHT_OVERSCAN_HIDE_NOINTERP = 0xD,
-} enumSpriteAlignment;
+#define ALIGN_ON_SCREEN 0x01
+#define ALIGN_POSITION_LEFT 0x02
+#define ALIGN_POSITION_RIGHT 0x04
+#define ALIGN_HIDING_IN_OVERSCAN 0x08
+#define ALIGN_NO_INTERP 0x10
+#define ALIGN_LEFT (ALIGN_POSITION_LEFT | ALIGN_ON_SCREEN)
+#define ALIGN_RIGHT (ALIGN_POSITION_RIGHT | ALIGN_ON_SCREEN)
 
 typedef enum interpolationIDs {
     MTXTAG_DEFAULT,
