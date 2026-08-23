@@ -20,6 +20,7 @@ s32 cur_drawn_model_transform_id = 0;
 s32 cur_model_transform_id_offset = 0;
 u8 cur_drawn_model_is_map = FALSE;
 u8 cur_model_uses_ex_vertex = FALSE;
+u8 cur_model_uses_vertex_interp = FALSE;
 u8 cur_drawn_model_skip_interpolation = FALSE;
 
 typedef struct Struct80614C38_0 Struct80614C38;
@@ -75,11 +76,11 @@ Gfx *set_model_matrix_group(Gfx * dl, void *geo_list, u8 skip_rotation, u8 *push
             // Use decomposed matrix interpolation on any other model.
             // u8 interpolation_mode = cur_model_uses_bones ? G_EX_INTERPOLATE_SIMPLE : G_EX_INTERPOLATE_DECOMPOSE;
             u8 rotation_mode = skip_rotation ? G_EX_COMPONENT_SKIP : G_EX_COMPONENT_INTERPOLATE;
-            // u8 vertex_interpolation_mode = cur_drawn_model_is_map && !cur_model_uses_ex_vertex ? G_EX_COMPONENT_INTERPOLATE : G_EX_COMPONENT_SKIP;
+            u8 vertex_interpolation_mode = cur_model_uses_vertex_interp ? G_EX_COMPONENT_INTERPOLATE : G_EX_COMPONENT_SKIP;
             // u8 texcoord_interpolation_mode = cur_drawn_model_is_map ? G_EX_COMPONENT_INTERPOLATE : G_EX_COMPONENT_SKIP;
             u8 interpolation_mode = G_EX_INTERPOLATE_SIMPLE;
             // u8 rotation_mode = G_EX_COMPONENT_INTERPOLATE;
-            u8 vertex_interpolation_mode = G_EX_COMPONENT_SKIP;
+            // u8 vertex_interpolation_mode = G_EX_COMPONENT_SKIP;
             u8 texcoord_interpolation_mode = G_EX_COMPONENT_SKIP;
             gEXMatrixGroup(dl++, group_id, interpolation_mode, G_EX_PUSH, G_MTX_MODELVIEW, G_EX_COMPONENT_INTERPOLATE, rotation_mode,
                 G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, G_EX_COMPONENT_INTERPOLATE, vertex_interpolation_mode, G_EX_COMPONENT_INTERPOLATE,
@@ -1026,5 +1027,110 @@ RECOMP_PATCH Gfx *func_global_asm_8069FA40(Gfx *dl, Actor *arg1) {
         dl = pop_model_matrix_group(dl);
     }
     //
+    return dl;
+}
+
+typedef struct global_asm_struct_58 GlobalASMStruct58;
+typedef struct {
+    f32 unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    u8 unk14[0x46 - 0x14];
+    s16 unk46;
+    s16 unk48;
+    s16 unk4A;
+    s16 unk4C;
+    s16 unk4E;
+    s16 unk50[2];
+    u8 unk54[0x60 - 0x54];
+    u8 unk60;
+    u8 unk61;
+    u8 unk62;
+    u8 unk63;
+    u8 unk64;
+    u8 unk65;
+    u8 unk66;
+    u8 unk67;
+    u8 unk68;
+} GlobalASMStruct58_unk0;
+struct global_asm_struct_58 {
+    GlobalASMStruct58_unk0 *unk0;
+    f32 unk4;
+    f32 unk8;
+    f32 unkC;
+    f32 unk10;
+    f32 unk14;
+    f32 unk18;
+    s32 unk1C[1];
+    s32 unk20;
+    Gfx *unk24[2];
+    s32 unk2C;
+    s32 unk30;
+    s32 unk34;
+    s32 unk38;
+    s32 unk3C;
+    s16 unk40;
+    s16 unk42;
+    s16 unk44;
+    s16 unk46;
+    s16 unk48;
+    s8 unk4A;
+    s8 unk4B;
+    u8 unk4C;
+    s8 unk4D;
+    s16 unk4E;
+    GlobalASMStruct58 *next;
+};
+extern GlobalASMStruct58 *D_global_asm_807F93C0;
+void* func_global_asm_8065FEB8(void*, GlobalASMStruct58*);
+void func_global_asm_80660070(Gfx *, s32, GlobalASMStruct58*);
+typedef struct Struct80748A90 {
+    void *unk0;
+    void *unk4;
+    void *unk8;
+    void *unkC[2];
+    u8 unk14[4];
+} Struct80748A90;
+
+extern Struct80748A90 D_global_asm_80748A90[];
+
+// @recomp: Fluids
+RECOMP_PATCH Gfx* func_global_asm_8065FD88(Gfx* dl, u8 arg1, u8 arg2) {
+    GlobalASMStruct58* var_s0;
+    void* temp_v0;
+    s32 i;
+    u8 pushed_matrix_group;
+
+    var_s0 = D_global_asm_807F93C0;
+    i = 0;
+    while (var_s0) {
+        if ((var_s0->unk4C & 1) && (arg2 == D_global_asm_80748A90[var_s0->unk0->unk66].unk14[2])) {
+            dl = func_global_asm_8065FEB8(dl, var_s0);
+            // Tag Matrix
+            cur_drawn_model_transform_id = MTXTAG_FLUIDS + i;
+            i++;
+            pushed_matrix_group = FALSE;
+            cur_model_transform_id_offset = 0;
+            cur_model_uses_vertex_interp = TRUE;
+            gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+            dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
+            //
+            gSPDisplayList(dl++, osVirtualToPhysical(var_s0->unk24[D_global_asm_807444FC]));
+            if (!(var_s0->unk4C & 4)) {
+                func_global_asm_80660070(var_s0->unk24[D_global_asm_807444FC], var_s0->unk1C[D_global_asm_807444FC], var_s0);
+                var_s0->unk4C |= 4;
+            }
+            // Pop Matrix
+            gSPPopMatrix(dl++, G_MTX_MODELVIEW);
+            cur_model_uses_vertex_interp = FALSE;
+            if (pushed_matrix_group) {
+                dl = pop_model_matrix_group(dl);
+            }
+            //
+        }
+        var_s0 = var_s0->next;
+    }
     return dl;
 }
