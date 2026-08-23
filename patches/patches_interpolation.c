@@ -5,38 +5,45 @@
 #include "patches_main.h"
 #include "patches_interpolation.h"
 
-#define INTERPOLATION_DEBUG 0
+#define INTERPOLATION_DEBUG 1
 
 s32 interpolation_disable_timer = 0;
+s32 persp_interpolation_disable_timer = 0;
 s32 sprite_disable_timer = 0;
 u8 skip_interpolation = FALSE;
+u8 skip_persp_interp = FALSE;
 u8 disable_sprite_interpolation = FALSE;
 #if INTERPOLATION_DEBUG
     s32 debug_counter = 0;
 #endif
 
-void set_interpolation_lockdown(s32 value) {
-    // Sets a lockdown timer for when interpolation can occur
-    if (interpolation_disable_timer > value) {
-        // If something else has put a lockdown on interpolation that lasts longer, then don't overwrite it
+void lockdown_handler(s32 value, s32 *addr) {
+    if (*addr > value) {
         return;
     }
-    #if INTERPOLATION_DEBUG
-        recomp_printf("\n[%d] Disabling interpolation for %d frames\n", debug_counter, value);
-        debug_counter++;
-    #endif
-    interpolation_disable_timer = value;
+    *addr = value;
+}
+
+void set_interpolation_lockdown(s32 value) {
+    lockdown_handler(value, &interpolation_disable_timer);
+}
+
+void set_persp_interpolation_lockdown(s32 value) {
+    lockdown_handler(value, &persp_interpolation_disable_timer);
 }
 
 void set_sprite_interpolation_lockdown(s32 value) {
-    if (sprite_disable_timer > value) {
-        return;
+    lockdown_handler(value, &sprite_disable_timer);
+}
+
+void skipInterpHandler(s32 *ticker_addr, u8 *boolean_addr, u8 decrement) {
+    *boolean_addr = FALSE;
+    if (*ticker_addr > 0) {
+        *boolean_addr = TRUE;
+        if (decrement) {
+            *ticker_addr = *ticker_addr - 1;
+        }
     }
-    #if INTERPOLATION_DEBUG
-        recomp_printf("\n[%d] Disabling sprite interpolation for %d frames\n", debug_counter, value);
-        debug_counter++;
-    #endif
-    sprite_disable_timer = value;
 }
 
 void set_sprite_interpolation_state(void) {
@@ -48,23 +55,15 @@ void set_sprite_interpolation_state(void) {
 }
 
 Gfx *handle_interpolation(Gfx * dl, interpolationIDs id, u8 decrement) {
-    skip_interpolation = FALSE;
-    if (interpolation_disable_timer > 0) {
-        skip_interpolation = TRUE;
-        #if INTERPOLATION_DEBUG
-            recomp_printf("[%d] Interpolation disabled. %d frames left\n", debug_counter, interpolation_disable_timer);
-            debug_counter++;
-        #endif
-        if (decrement) {
-            interpolation_disable_timer--;
-        }
-    }
+    skipInterpHandler(&interpolation_disable_timer, &skip_interpolation, decrement);
+    skipInterpHandler(&persp_interpolation_disable_timer, &skip_persp_interp, decrement);
     if ((is_cutscene_active == 3) || (is_cutscene_active == 4)) {
         // Skip interpolation for Arcade/Jetpac
         skip_interpolation = TRUE;
+        skip_persp_interp = TRUE;
     }
     if (id != 0) {
-        if (skip_interpolation) {
+        if (skip_interpolation || skip_persp_interp) {
             gEXMatrixGroupSkipAllAspect(dl++, id, G_EX_NOPUSH, G_MTX_PROJECTION, G_EX_EDIT_NONE, G_EX_ASPECT_AUTO);
         }
         else {
@@ -223,7 +222,7 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
                                 func_global_asm_8061D4E4(arg0);
                             }
                             //@recomp: On cutscene end, disable interpolation for 2f. 1f seems to not be enough
-                            set_interpolation_lockdown(3);
+                            set_persp_interpolation_lockdown(3);
                         } else {
                             temp_t0 = D_global_asm_807476FC->camera_bank[D_global_asm_807476F4].length_array[D_global_asm_807F5CF0 - 1];
                             params = &D_global_asm_807476FC->function_bank[D_global_asm_807F5CF2].params[0];
@@ -313,7 +312,7 @@ RECOMP_PATCH void func_global_asm_8061DBD4(Actor* arg0, f32* arg1, f32* arg2, f3
                                 case 4:
                                 case 5:
                                     //@recomp: On cutscene segment init, disable interpolation for 2f. 1f seems to not be enough
-                                    set_interpolation_lockdown(2);
+                                    set_persp_interpolation_lockdown(2);
                                     break;                            
                             }
                         }
@@ -436,7 +435,7 @@ RECOMP_PATCH s32 func_global_asm_80620F00(Actor* arg0, u8 arg1, u8 arg2) {
         if (var_t7 && (temp_s0->unkF4 >= 0x15)) {
             temp_s0->unkF4 = 0U;
             // @recomp: Disable interpolation globally for a couple frames
-            set_interpolation_lockdown(2);
+            set_persp_interpolation_lockdown(2);
             if ((temp_s0->unk0->unkB8 != 0.0f) && (temp_s0->unk0->control_state != 0x59)) {
                 func_global_asm_80620628(arg0, 0.0f, temp_s0->unkB2, 1);
                 return TRUE;
