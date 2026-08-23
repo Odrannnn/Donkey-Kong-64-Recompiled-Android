@@ -15,13 +15,13 @@ Gfx *alignHUDTopBottom(Gfx * dl, enumSpriteAlignment alignment, s32 top, s32 bot
     gEXPushScissor(dl++);
     gEXPushViewport(dl++);
     gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_RIGHT, 0, top, 0, bottom);
-    if (alignment == ALIGN_RIGHT) {
+    if ((alignment == ALIGN_RIGHT) || (alignment == ALIGN_RIGHT_OVERSCAN_HIDE)) {
         // Right align
         gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
             -(D_global_asm_80744490 - margin_reduction) * 4, 0,
             -(D_global_asm_80744490 - margin_reduction) * 4, 0);
         gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, -(D_global_asm_80744490 - margin_reduction) * 4, 0);
-    } else if (alignment == ALIGN_LEFT) {
+    } else if ((alignment == ALIGN_LEFT) || (alignment == ALIGN_LEFT_OVERSCAN_HIDE)) {
         gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, 0, -margin_reduction * 4, 0, -margin_reduction * 4);
         gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, 0, 0);
     }
@@ -40,13 +40,13 @@ Gfx *alignHUDGameplay(Gfx *dl, enumSpriteAlignment alignment) {
     gEXPushScissor(dl++);
     gEXPushViewport(dl++);
     gDPSetScissor(dl++, G_SC_NON_INTERLACE, 0, 0, D_global_asm_80744490, D_global_asm_80744494);
-    if (alignment == ALIGN_RIGHT) {
+    if ((alignment == ALIGN_RIGHT) || (alignment == ALIGN_RIGHT_OVERSCAN_HIDE)) {
         // Right align
         gEXSetRectAlign(dl++, G_EX_ORIGIN_RIGHT, G_EX_ORIGIN_RIGHT,
             -(D_global_asm_80744490 - margin_reduction) * 4, 0,
             -(D_global_asm_80744490 - margin_reduction) * 4, 0);
         gEXSetViewportAlign(dl++, G_EX_ORIGIN_RIGHT, -(D_global_asm_80744490 - margin_reduction) * 4, 0);
-    } else if (alignment == ALIGN_LEFT) {
+    } else if ((alignment == ALIGN_LEFT) || (alignment == ALIGN_LEFT_OVERSCAN_HIDE)) {
         gEXSetRectAlign(dl++, G_EX_ORIGIN_LEFT, G_EX_ORIGIN_LEFT, -margin_reduction * 4, 0, -margin_reduction * 4, 0);
         gEXSetViewportAlign(dl++, G_EX_ORIGIN_LEFT, -margin_reduction * 4, 0);
     }
@@ -104,6 +104,11 @@ RECOMP_PATCH Gfx * func_global_asm_80715E94(Struct80717D84* sprite, Gfx *dl, s16
         return dl;
     }
     raw_alignment = getRawAlignment(sprite);
+    if ((raw_alignment == ALIGN_LEFT_OVERSCAN_HIDE) || ((raw_alignment == ALIGN_RIGHT_OVERSCAN_HIDE))) {
+        if (((sprite->unk340 * 0.25) < 11) || ((sprite->unk340 * 0.25) > 309)) {
+            return dl;
+        }
+    }
     if (arg2 == -1) {
         arg2 = sprite->unk38A;
     }
@@ -347,10 +352,11 @@ RECOMP_PATCH void func_menu_80030894(MenuAdditionalActorData *arg0, void *sprite
         case 0xB: // A/B Buttons (Multi Join)
         case 0xD: // A/B/CDown Buttons (Multi Join)
         case 0x10:  // A Button (Mystery Menu)
+        case 0x11: // Z Button (Mystery Menu)
             if (x > 240) {
-                alignment = ALIGN_RIGHT;
+                alignment = ALIGN_RIGHT_OVERSCAN_HIDE;
             } else if (x < 80) {
-                alignment = ALIGN_LEFT;
+                alignment = ALIGN_LEFT_OVERSCAN_HIDE;
             }
             break;
         case 2: // GB, Orange (file select screen)
@@ -363,7 +369,6 @@ RECOMP_PATCH void func_menu_80030894(MenuAdditionalActorData *arg0, void *sprite
         case 12: // Z Button (sound, options)
         case 14: // Fairy (Mystery Menu)
         case 15: // Kong Heads (file info screen), kong placeholders (multi join)
-        case 0x11: // Z Button (Mystery Menu)
         case 0x12: // Barrel Bottom
         default:
             break;

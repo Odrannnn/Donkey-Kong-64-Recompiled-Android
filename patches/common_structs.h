@@ -52,10 +52,14 @@ typedef enum enumSpriteAlignment {
     ALIGN_UNALIGNED = 0x1,
     ALIGN_LEFT = 0x2,
     ALIGN_RIGHT = 0x3,
+    ALIGN_LEFT_OVERSCAN_HIDE = 0x4,
+    ALIGN_RIGHT_OVERSCAN_HIDE = 0x5,
     ALIGN_NOT_2D_NOINTERP = 0x8,
     ALIGN_UNALIGNED_NOINTERP = 0x9,
     ALIGN_LEFT_NOINTERP = 0xA,
     ALIGN_RIGHT_NOINTERP = 0xB,
+    ALIGN_LEFT_OVERSCAN_HIDE_NOINTERP = 0xC,
+    ALIGN_RIGHT_OVERSCAN_HIDE_NOINTERP = 0xD,
 } enumSpriteAlignment;
 
 typedef enum interpolationIDs {
