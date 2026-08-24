@@ -128,7 +128,7 @@ void set_actor_interpolation_lockdown(Actor * ac, u16 value) {
             } else if (ld->value < value) {
                 ld->value = value;
             }
-            recomp_printf("Set interpolation lockdown for actor %08X for %d frames\n", ac, value);
+            // recomp_printf("Set interpolation lockdown for actor %d (%08X) for %d frames\n", ac->unk58, ac, value);
             return;
         }
     }
@@ -1137,12 +1137,20 @@ RECOMP_PATCH Gfx* func_global_asm_8065FD88(Gfx* dl, u8 arg1, u8 arg2) {
 
 void getAnimationArg16(s16 *arg0);
 
+void setHandLockdown(Actor *ac) {
+    if ((ac->unk58 == 98) || (ac->unk58 == 136) || (ac->unk58 == 137)) {
+        // @recomp: Tag Barrels set their hand state every frame. We can just ditch this
+        return;
+    }
+    set_actor_interpolation_lockdown(ac, 1);
+}
+
 RECOMP_PATCH void func_global_asm_806187E8(Actor *arg0) {
     s16 sp1E;
 
     getAnimationArg16(&sp1E);
     arg0->unk146_s16 |= sp1E;
-    set_actor_interpolation_lockdown(arg0, 1);
+    setHandLockdown(arg0);
 }
 
 RECOMP_PATCH void func_global_asm_80618820(Actor *arg0) {
@@ -1150,17 +1158,17 @@ RECOMP_PATCH void func_global_asm_80618820(Actor *arg0) {
 
     getAnimationArg16(&sp1E);
     arg0->unk146_s16 &= ~sp1E;
-    set_actor_interpolation_lockdown(arg0, 1);
+    setHandLockdown(arg0);
 }
 
 RECOMP_PATCH void func_global_asm_8068A764(Actor *arg0, u8 arg1) {
     arg0->unk146_s16 |= 1 << arg1;
-    set_actor_interpolation_lockdown(arg0, 1);
+    setHandLockdown(arg0);
 }
 
 RECOMP_PATCH void func_global_asm_8068A784(Actor *arg0, u8 arg1) {
     arg0->unk146_s16 &= ~(1 << arg1);
-    set_actor_interpolation_lockdown(arg0, 1);
+    setHandLockdown(arg0);
 }
 
 tuple_f *func_global_asm_80612840(tuple_f *output, tuple_f a0, tuple_f a1);
@@ -1181,9 +1189,14 @@ typedef struct Struct80754AF0 {
 } Struct80754AF0;
 
 extern Struct80754AF0 D_global_asm_80754AF0[];
+extern Mtx D_2000180;
+typedef struct Struct807FD808 {
+    tuple_f position;
+    rgba unkC;
+} Struct807FD808;
 
 // @recomp: Solar Flare
-RECOMP_PATCH Gfx* func_global_asm_80701098(Gfx* dl, tuple_f arg1, rgb arg4, u8 arg5) {
+RECOMP_PATCH Gfx* func_global_asm_80701098(Gfx* dl, Struct807FD808 arg1, u8 arg5) {
     tuple_f sp1B4;
     tuple_f sp1A8;
     tuple_f sp19C;
@@ -1208,7 +1221,7 @@ RECOMP_PATCH Gfx* func_global_asm_80701098(Gfx* dl, tuple_f arg1, rgb arg4, u8 a
     u8 pushed_matrix_group = FALSE;
 
     spF0 = arg5 / 5.0;
-    func_global_asm_80612AD8(&sp160, arg1.x, arg1.y, arg1.z);
+    func_global_asm_80612AD8(&sp160, arg1.position.x, arg1.position.y, arg1.position.z);
     func_global_asm_80612AD8(&sp178, character_change_array->unk21C, character_change_array->unk220, character_change_array->unk224);
     func_global_asm_80612AD8(&sp16C, character_change_array->unk234, character_change_array->unk238, character_change_array->unk23C);
     func_global_asm_80612840(&spD0, sp16C, sp178);
@@ -1227,9 +1240,9 @@ RECOMP_PATCH Gfx* func_global_asm_80701098(Gfx* dl, tuple_f arg1, rgb arg4, u8 a
     } else {
         for (i = 0; i < 12; i++) {
             // Mtx Tag
-            cur_drawn_model_transform_id = MTXTAG_SOLAR_FLARE + i;
+            cur_drawn_model_transform_id = MTXTAG_SOLAR_FLARE;
             pushed_matrix_group = FALSE;
-            cur_model_transform_id_offset = 0;
+            cur_model_transform_id_offset = i;
             gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
             dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
             //
@@ -1259,9 +1272,9 @@ RECOMP_PATCH Gfx* func_global_asm_80701098(Gfx* dl, tuple_f arg1, rgb arg4, u8 a
             }
             gDPPipeSync(dl++);
             gDPSetPrimColor(dl++, 0, 0,
-                (arg4.red / 255.0) * D_global_asm_80754AF0[i].unk8.red * var_f24,
-                (arg4.green / 255.0) * D_global_asm_80754AF0[i].unk8.green * var_f24,
-                (arg4.blue / 255.0) * D_global_asm_80754AF0[i].unk8.blue * var_f24,
+                (arg1.unkC.red / 255.0) * D_global_asm_80754AF0[i].unk8.red * var_f24,
+                (arg1.unkC.green / 255.0) * D_global_asm_80754AF0[i].unk8.green * var_f24,
+                (arg1.unkC.blue / 255.0) * D_global_asm_80754AF0[i].unk8.blue * var_f24,
                 D_global_asm_80754AF0[i].unk8.alpha * var_f26 * spF0);
             dl = displayImage(dl,
                 D_global_asm_80754AF0[i].unkC + 0x4D,
@@ -1279,11 +1292,50 @@ RECOMP_PATCH Gfx* func_global_asm_80701098(Gfx* dl, tuple_f arg1, rgb arg4, u8 a
         }
         gDPPipeSync(dl++);
         if (var_f20 > 0.97) {
-            dl = func_global_asm_80703374(dl, arg4.red, arg4.green, arg4.blue, (var_f20 - 0.97) * 33.0 * 128.0);
+            dl = func_global_asm_80703374(dl, arg1.unkC.red, arg1.unkC.green, arg1.unkC.blue, (var_f20 - 0.97) * 33.0 * 128.0);
             gSPTexture(dl++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
             gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
 
         }
+    }
+    return dl;
+}
+
+extern u8 D_global_asm_80754BC0;
+
+extern Struct807FD808 D_global_asm_807FD808[] ;
+extern u8 D_global_asm_807FD838[][3];
+
+RECOMP_PATCH Gfx* func_global_asm_807007B8(Gfx* dl) {
+    s16 i;
+    u8* temp_v1;
+    u8 temp_v0;
+    Struct807FD808 *temp_t2;
+
+    if (D_global_asm_80754BC0 != 0) {
+        gDPPipeSync(dl++);
+        dl = func_global_asm_8070068C(dl);
+        gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+        gDPPipeSync(dl++);
+        gSPLoadGeometryMode(dl++, 0);
+        gSPSetGeometryMode(dl++, G_SHADE | G_SHADING_SMOOTH);
+        gDPSetCycleType(dl++, G_CYC_1CYCLE);
+        gDPSetTexturePersp(dl++, G_TP_PERSP);
+        gDPSetTextureFilter(dl++, G_TF_BILERP);
+        gSPTexture(dl++, 0x8000, 0x8000, 0, G_TX_RENDERTILE, G_ON);
+        gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
+        gDPSetRenderMode(dl++, G_RM_CLD_SURF, G_RM_CLD_SURF2);
+        gDPSetColorDither(dl++, G_CD_DISABLE);
+        gDPSetAlphaDither(dl++, G_AD_DISABLE);
+        for (i = 0; i < D_global_asm_80754BC0; i++) {
+            if (D_global_asm_807FD838[D_global_asm_807444FC ^ 1][i]) {
+                cur_drawn_model_transform_id = MTXTAG_SOLAR_FLARE + (0xC * i);
+                dl = func_global_asm_80701098(dl, D_global_asm_807FD808[i], D_global_asm_807FD838[D_global_asm_807444FC ^ 1][i]--);
+            }
+            
+        }
+        gDPSetColorDither(dl++, G_CD_MAGICSQ);
+        gDPSetAlphaDither(dl++, G_AD_PATTERN);
     }
     return dl;
 }
