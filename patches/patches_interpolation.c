@@ -6,7 +6,7 @@
 #include "patches_main.h"
 #include "patches_interpolation.h"
 
-#define INTERPOLATION_DEBUG 1
+#define INTERPOLATION_DEBUG 0
 
 RECOMP_DECLARE_EVENT(recomp_on_cutscene_play(s16 *cutscene, u8 *cutscene_bitfield));
 RECOMP_DECLARE_EVENT(recomp_on_autowalk());
