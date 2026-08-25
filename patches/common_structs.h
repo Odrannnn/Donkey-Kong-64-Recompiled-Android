@@ -184,6 +184,9 @@ struct struct806A57C0_3 {
     s32 unkC;
     struct806A57C0_3_sub10 unk10;
     Struct806A57C0_3* unkA0; // Used
+    u16 interpolation_id;
+    u8 padA6;
+    u8 initialized;
 };
 
 struct struct806A57C0_2 {

@@ -459,7 +459,7 @@ void func_global_asm_80611690(void *arg0);
 void func_global_asm_8061134C(void *arg0);
 extern Actor *gCurrentPlayer;
 extern u16 D_global_asm_80750AC8;
-s32 textbox_interpolation_id = 0;
+s32 textbox_interpolation_id = 1;
 s32 last_interp_id_frame = 0;
 extern s32 D_global_asm_8076AF10;
 
@@ -470,8 +470,8 @@ f32 func_global_asm_80612D1C(f32 arg0);
 Gfx* printStyledText(Gfx* dl, s16 style, s16 x, s16 y, u8* string, u32 extraBitfield);
 extern Actor *gCurrentActorPointer;
 
-s32 getTextInterpolationId(void) {
-    return MTXTAG_TEXT + (gCurrentActorPointer->unk54 * 1000) + (textbox_interpolation_id % 1000);
+s32 getTextInterpolationId(s32 id) {
+    return MTXTAG_TEXT + (gCurrentActorPointer->unk54 * 1000) + id;
 }
 
 RECOMP_PATCH void func_global_asm_806A370C(Gfx **arg0, AAD_global_asm_806A4DDC *arg1, Struct806A57C0_2 *arg2, Struct806A57C0_3 *arg3) {
@@ -493,10 +493,6 @@ RECOMP_PATCH void func_global_asm_806A370C(Gfx **arg0, AAD_global_asm_806A4DDC *
     f32 sp4C;
     u8 pushed_matrix_group = FALSE;
 
-    if (last_interp_id_frame != D_global_asm_8076AF10) {
-        textbox_interpolation_id = 0;
-        last_interp_id_frame = D_global_asm_8076AF10;
-    }
     dl = *arg0;
     one = 1.f;
     spE8.h = D_global_asm_8075A740[0];
@@ -538,14 +534,38 @@ RECOMP_PATCH void func_global_asm_806A370C(Gfx **arg0, AAD_global_asm_806A4DDC *
     guTranslateF(sp68, (((f64) arg1->unk44) + arg3->unk4) * 4.0, (((f64) arg1->unk48) + arg3->unk8) * 4.0, 0.0f);
     guMtxCatF(spA8, sp68, spA8);
     guMtxF2L(spA8, &temp_s1->unk8[D_global_asm_807444FC]);
-    gEXMatrixGroupSkipAll(dl++, getTextInterpolationId(), G_EX_PUSH, G_MTX_MODELVIEW, G_EX_EDIT_NONE);
-    textbox_interpolation_id++;
+    
+    if (arg3->initialized < 5) {
+        if (arg3->initialized == 0) {
+            arg3->initialized = TRUE;
+            arg3->interpolation_id = textbox_interpolation_id;
+            if (textbox_interpolation_id > 998) {
+                textbox_interpolation_id = 1;
+            } else {
+                textbox_interpolation_id++;
+            }
+        }
+        arg3->initialized++;
+        cur_drawn_model_skip_interpolation = TRUE;
+    }
+    // Push mtx group
+    cur_drawn_model_transform_id = getTextInterpolationId(arg3->interpolation_id);
+    cur_model_transform_id_offset = 0;
+    gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
+    cur_drawn_model_skip_interpolation = FALSE;
+    //
     gSPMatrix(dl++, &temp_s1->unk8[D_global_asm_807444FC], (G_MTX_NOPUSH | G_MTX_LOAD) | G_MTX_MODELVIEW);
     gDPPipeSync(dl++);
     gDPSetPrimColor(dl++, 0, 0, 0x28, 0x28, 0xFF, arg3->unk3);
     spE8.b = temp_s1->unk2;
     dl = printStyledText(dl, 6, 0, 0, (u8 *) (&spE8), 0);
-    gEXPopMatrixGroup(dl++, G_MTX_MODELVIEW); // @recomp: Mtx untag
+    // pop mtx
+    gSPPopMatrix(dl++, G_MTX_MODELVIEW);
+    if (pushed_matrix_group) {
+        dl = pop_model_matrix_group(dl);
+    }
+    //
     *arg0 = dl;
 }
 
