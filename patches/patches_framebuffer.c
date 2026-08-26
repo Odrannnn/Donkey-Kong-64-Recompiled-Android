@@ -111,18 +111,19 @@ RECOMP_PATCH void func_global_asm_8070A848(Struct8070A848 *arg0, Struct8070A848 
     Struct8070A848 *src = arg1;
     Struct8070A848 *dst = arg0;
 
-    for (i = 0; i < ((D_global_asm_80744490 * D_global_asm_80744494) / 16); i++) {
-        dst->unk0 = src->unk0 | 0x10001;
-        dst->unk4 = src->unk4 | 0x10001;
-        dst->unk8 = src->unk8 | 0x10001;
-        dst->unkC = src->unkC | 0x10001;
-        dst->unk10 = src->unk10 | 0x10001;
-        dst->unk14 = src->unk14 | 0x10001;
-        dst->unk18 = src->unk18 | 0x10001;
-        dst->unk1C = src->unk1C | 0x10001;
-        dst++;
-        src++;
-    }
+    // @recomp: Turn off this write
+    // for (i = 0; i < ((D_global_asm_80744490 * D_global_asm_80744494) / 16); i++) {
+    //     dst->unk0 = src->unk0 | 0x10001;
+    //     dst->unk4 = src->unk4 | 0x10001;
+    //     dst->unk8 = src->unk8 | 0x10001;
+    //     dst->unkC = src->unkC | 0x10001;
+    //     dst->unk10 = src->unk10 | 0x10001;
+    //     dst->unk14 = src->unk14 | 0x10001;
+    //     dst->unk18 = src->unk18 | 0x10001;
+    //     dst->unk1C = src->unk1C | 0x10001;
+    //     dst++;
+    //     src++;
+    // }
     if ((is_cutscene_active == 6) || (D_global_asm_807F5D84 == 0)) {
         addActorToTextOverlayRenderArray(rdpStoreFB, gCurrentActorPointer, 0);
     }
@@ -147,7 +148,7 @@ RECOMP_PATCH Gfx *func_global_asm_80629300(Gfx *dl) {
     if (D_global_asm_807F5D84 < 0) {
         D_global_asm_807F5D84++;
         if (D_global_asm_807F5D84 == 0) {
-            func_global_asm_8061134C(D_global_asm_807F5D80);
+            // func_global_asm_8061134C(D_global_asm_807F5D80);  // @recomp: Nothing is being stored here anymore, so we can get rid of this free
         }
     } else {
         if (D_global_asm_807F5D84 > 0) {
