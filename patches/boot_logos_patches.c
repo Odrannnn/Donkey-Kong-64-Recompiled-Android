@@ -57,6 +57,7 @@ RECOMP_PATCH Gfx* func_menu_8003292C(Gfx* dl) {
     spC0 = func_global_asm_806FD894(1);
 
     gEXEnable(dl++);
+    gEXSetRDRAMExtended(dl++, TRUE);
 
     gDPPipeSync(dl++);
     gSPDisplayList(dl++, &D_1000118);
@@ -224,6 +225,7 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
     //TODO: is waiting like this OK for linux? check this
     gDPPipeSync(gfxPos++);
     gEXEnable(gfxPos++);
+    gEXSetRDRAMExtended(gfxPos++, TRUE);
     gEXSetRectAspect(gfxPos++, G_EX_ASPECT_ADJUST);
     gDPSetColorImage(gfxPos++, G_IM_FMT_RGBA, G_IM_SIZ_16b, 320, 0x80034000);
     gDPSetScissor(gfxPos++, G_SC_NON_INTERLACE, 0, 0, 320, 240);

@@ -1116,23 +1116,7 @@ struct actor {
     Actor_unk0* unk0;
     ActorAnimationState* animation_state;
     u32* unk8; // Current bone array Pointer // TODO: Proper type
-    s16 unkC;
-    s16 unkE;
-    u32 unk10;
-    u32 unk14;
-    u32 unk18;
-    u32 unk1C;
-    u32 unk20;
-    f32 unk24;
-    u32 unk28;
-    f32 unk2C;
-    u32 unk30;
-    u32 unk34;
-    u32 unk38;
-    u32 unk3C;
-    u32 unk40;
-    u32 unk44;
-    u32 unk48;
+    f32 unkC[4][4];
     u32 unk4C;
     void *unk50;
     u32 unk54;

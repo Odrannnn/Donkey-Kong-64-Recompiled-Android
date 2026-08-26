@@ -332,6 +332,7 @@ extern Gfx *func_global_asm_8068C20C(Gfx *, u8);
 
 RECOMP_PATCH Gfx *func_global_asm_805FE4D4(Gfx *dl) {
     gEXEnable(dl++);
+    gEXSetRDRAMExtended(dl++, TRUE);
     // Frame delta
     int delta = getFrameDelta();
     if (delta == 0) {
@@ -341,7 +342,7 @@ RECOMP_PATCH Gfx *func_global_asm_805FE4D4(Gfx *dl) {
     // Interpolation
     dl = handle_interpolation(dl, MTXTAG_CAMERAPROJECTION, TRUE);
     // 
-    gEXSetNearClipping(dl++, FALSE);
+    // gEXSetNearClipping(dl++, FALSE);
     gEXSetTexcoordWrapPoint(dl++, 256 * 4, 256 * 4);
     gDPSetColorImage(dl++, 0, 2, D_global_asm_80744490, osVirtualToPhysical(D_global_asm_80744470[D_global_asm_807444FC]));
     return dl;
