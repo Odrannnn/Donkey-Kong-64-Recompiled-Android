@@ -424,13 +424,13 @@ RECOMP_PATCH void func_global_asm_8061D1FC(Actor* arg0) {
     }
     if (analog_cam_enabled() && get_analog_allowed()) {
         recomp_analog_camera_get(&dRStickX, &dRStickY);
-        dRStickX *= recomp_get_analog_cam_sensitivity() * -0.25f * getFrameDelta();
+        dRStickX *= recomp_get_analog_cam_sensitivity() * -0.5f * getFrameDelta();
         dRStickY *= recomp_get_analog_cam_sensitivity() * 1.0f * getFrameDelta();
         if (CaaD->unkF3 != 2) {
             if (dRStickX != 0.0f) {
                 CaaD->unkB0 = 0;
-                CaaD->unkB0 += dRStickX * (4096.0f / 360.0f);
-                arg0->y_rotation = CaaD->unkB0;
+                CaaD->unkB2 += dRStickX * (4096.0f / 360.0f);
+                arg0->y_rotation = CaaD->unkB2;
             }
             if (dRStickY != 0.0f) {
                 f32 ratio = (f32)CaaD->unkB8 / (f32)CaaD->unkA4;
