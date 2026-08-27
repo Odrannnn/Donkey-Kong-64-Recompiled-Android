@@ -78,7 +78,8 @@ static void add_general_options(recomp::config::Config &config) {
     static EnumOptionVector camera_type_options = {
         {dk64::CameraTypeMode::Free, "Free", "Free Cam"},
         {dk64::CameraTypeMode::Follow, "Follow", "Follow Cam"},
-        {dk64::CameraTypeMode::BetterFree, "BetterFree", "Better Free Cam"}
+        {dk64::CameraTypeMode::BetterFree, "BetterFree", "Better Free Cam"},
+        {dk64::CameraTypeMode::Analog, "Analog", "Analog Camera"}
     };
     config.add_enum_option(
         dk64::configkeys::general::camera_type,
@@ -86,6 +87,19 @@ static void add_general_options(recomp::config::Config &config) {
         "Changes the camera behavior.<br /><recomp-color primary>Free Cam</recomp-color>: Camera can be controlled via pressing C-Left and C-Right. The camera does not try to push itself behind the player.<br /><recomp-color primary>Follow Cam</recomp-color>: Similar to <recomp-color secondary>Free Cam</recomp-color>, but the camera tries to push itself behind the player.<br /><recomp-color primary>Better Free Cam</recomp-color>: Similar to <recomp-color secondary>Free Cam</recomp-color>, but instead of a button press turning the camera 45 degrees, holding the button moves the camera at 5 degrees per frame.",
         camera_type_options,
         dk64::CameraTypeMode::Free
+    );
+    config.add_number_option(
+        dk64::configkeys::general::analog_camera_sensitivity,
+        "Analog Camera Sensitivity",
+        "Sets the sensitivity of the right stick analog camera, if enabled.",
+        1, 10, 1, 0, false, 3
+    );
+    config.add_option_hidden_dependency(
+        dk64::configkeys::general::analog_camera_sensitivity,
+        dk64::configkeys::general::camera_type,
+        dk64::CameraTypeMode::Free,
+        dk64::CameraTypeMode::Follow,
+        dk64::CameraTypeMode::BetterFree
     );
     // Lightning Flashes
     static EnumOptionVector lightning_flash_options = {

@@ -198,6 +198,67 @@ RECOMP_PATCH u8 func_global_asm_80621174(s32 arg0, PlayerAdditionalActorData *ar
     // clang-format on
 }
 
+extern Actor *gCurrentPlayer;
+
+u8 analog_cam_enabled(void) {
+    return recomp_get_camera_type() == 3;
+}
+
+const u8 banned_analog_states[] = {
+    // First person
+    2,
+    3,
+    4,
+    5,
+    0x2C, // Throwing Orange
+    0x3C, // Crouching
+    0x5F, // Putting away gun
+    0x60, // Pulling out gun
+    0x62, // Aiming Gun
+    0x64, // Taking photo
+    0x65, // Taking photo (underwater)
+    0x67, // Instrument
+};
+
+u8 get_analog_allowed(void) {
+    u32 i;
+
+    if (!analog_cam_enabled()) {
+        return FALSE;
+    }
+    if (gameIsInDKTVMode()) {
+        return FALSE;
+    }
+    for (i = 0; i < sizeof(banned_analog_states); i++) {
+        if (banned_analog_states[i] == gCurrentPlayer->control_state) {
+            return FALSE;
+        }
+    }
+    return TRUE;
+}
+
+f32 recomp_apply_per_axis_deadzone(f32 value) {
+    const f32 per_axis_deadzone = 0.2f;
+    if (value > per_axis_deadzone) {
+        return (value - per_axis_deadzone) / (1.0f - per_axis_deadzone);
+    }
+    else if (value < -per_axis_deadzone) {
+        return (value + per_axis_deadzone) / (1.0f - per_axis_deadzone);
+    }
+    else {
+        return 0.0f;
+    }
+}
+
+void recomp_analog_camera_get(f32 *x, f32 *y) {
+    float input_x, input_y;
+    s32 inverted_x, inverted_y;
+    recomp_get_right_analog_inputs(&input_x, &input_y);
+    recomp_get_analog_inverted_axes(&inverted_x, &inverted_y);
+    *x = recomp_apply_per_axis_deadzone(input_x) * (inverted_x ? 1.0f : -1.0f);
+    *y = recomp_apply_per_axis_deadzone(input_y) * (inverted_y ? -1.0f : 1.0f);
+}
+
 typedef struct Struct807FD610 {
     s32 unk0; // Timer that ticks up once per frame
     f32 unk4; // Probably float
@@ -228,6 +289,9 @@ RECOMP_PATCH void func_global_asm_806EA200(void) {
     s32 invY = 0;
     s32 cam_type;
 
+    if (analog_cam_enabled()) {
+        return;
+    }
     cam_type = recomp_get_camera_type();
     if (cam_type == 2) {
         cooldown = 5;
@@ -253,6 +317,9 @@ RECOMP_PATCH void func_global_asm_806EA26C(void) {
     s32 invY = 0;
     s32 cam_type;
 
+    if (analog_cam_enabled()) {
+        return;
+    }
     cam_type = recomp_get_camera_type();
     if (cam_type == 2) {
         cooldown = 5;
@@ -270,95 +337,244 @@ RECOMP_PATCH void func_global_asm_806EA26C(void) {
     }
 }
 
-// extern Actor *gCurrentPlayer;
+void func_global_asm_8062217C(Actor*, s16);
+s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
+extern s32 D_global_asm_807FBB68;
 
-// u8 readMouseForCamera(void) {
-//     if (recomp_get_camera_type() != 3) {
-//         return FALSE;
-//     }
-//     if (gameIsInDKTVMode()) {
-//         return FALSE;
-//     }
-//     if ((gCurrentPlayer->control_state > 1) && (gCurrentPlayer->control_state < 6)) {
-//         return FALSE;
-//     }
-//     return TRUE;
-// }
+// @recomp: Zoom out
+RECOMP_PATCH void func_global_asm_806EA0A4(void) {
+    PlayerAdditionalActorData *PaaD; // TODO: Probably not actually PaaD
+    u16 temp;
+    u8 phi_a0;
 
-// void func_global_asm_8062217C(Actor*, s16);
-// RECOMP_PATCH void func_global_asm_8061D1FC(Actor* arg0) {
-//     CameraPaad* CaaD;
-//     f32 temp_f2;
-//     f32 var_f0;
-//     f32 var_f14;
-//     f32 dMouseX, dMouseY;
-//     f32 opp, adj, ang, dTheta, cosd, sind;
+    if (analog_cam_enabled()) {
+        return;
+    }
+    PaaD = extra_player_info_pointer->unk104->PaaD;
+    if ((D_global_asm_807FBB64 & 1) && !(D_global_asm_807FBB68 & 2)) {
+        phi_a0 = 2;
+    } else {
+        phi_a0 = 3;
+    }
+    if ((PaaD->unkEF) && ((D_global_asm_807FD610[cc_player_index].unk2C & (U_CBUTTONS | D_CBUTTONS)) == D_CBUTTONS) && ((PaaD->unkEE == phi_a0) || (PaaD->unkFC == 0))) {
+        PaaD->unkF0_u8[0] = PaaD->unkEF;
+        if (PaaD->unkEF < phi_a0) {
+            PaaD->unkEF++;
+        } else {
+            PaaD->unkEF = 1;
+        }
+        func_global_asm_8062217C(extra_player_info_pointer->unk104, PaaD->unkEF);
+        PaaD->unkEE = PaaD->unkEF;
+        if (PaaD->unkEF != PaaD->unkF0) {
+            temp = PaaD->unk8;
+            if ((((temp == 0)) || (temp >= 0x96)) && (PaaD->unkF0_u8[3] != 2)) {
+                playSound(0x27, 0x7FFF, 63.0f, 1.0f, 0, 0);
+            }
+        }
+        PaaD->unkF0_u8[1] = 0xB;
+        PaaD->unkF4_u8[2] = 0xF;
+    }
+}
 
-//     CaaD = arg0->CaaD;
-//     temp_f2 = D_global_asm_807FD610[CaaD->unkFB].unk2F * 0.5;
-//     if (!(CaaD->unkAC & 0x2000) && !(D_global_asm_807FBB64 & 0x40)) {
-//         if ((CaaD->unk8) && ((s32) CaaD->unk8 < 0x9B) && (CaaD->unkEF)) {
-//             if (( CaaD->unkA == 0) || ((s32)  CaaD->unkA >= 0x9B)) {
-//                 CaaD->unkF0 = CaaD->unkEE;
-//             }
-//             func_global_asm_8062217C(arg0, 1);
-//             CaaD->unkAC |= 8;
-//         } else {
-//             if ((CaaD->unkA) && ((s32) CaaD->unkA < 0x9B)) {
-//                 if (CaaD->unkEF) {
-//                     if ((CaaD->unkF0) && (CaaD->unkEF != CaaD->unkF0)) {
-//                         func_global_asm_8062217C(arg0, CaaD->unkF0);
-//                     }
-//                     CaaD->unkAC &= ~8;
-//                 }
-//             }
-//         }
-//     }
-//     if (temp_f2 > 20.0f) {
-//         var_f14 = temp_f2;
-//     } else {
-//         if (temp_f2 < -20.0f) {
-//             var_f0 = temp_f2;
-//         } else {
-//             var_f0 = 0.0f;
-//         }
-//         var_f14 = var_f0;
-//     }
-//     CaaD->unk98 = ((var_f14 - CaaD->unk98) * 0.05) + CaaD->unk98;
-//     CaaD->unkA0 += ((CaaD->unkA4 - CaaD->unkA0) * 0.2);
-//     if (CaaD->unkAC & 0x10) {
-//         arg0->distance_from_floor += ((300.0f - arg0->distance_from_floor) * 0.2);
-//     } else {
-//         arg0->distance_from_floor += ((CaaD->unkB8 - arg0->distance_from_floor) * 0.2);
-//     }
-//     if (readMouseForCamera()) {
-//         recomp_get_mouse_deltas(&dMouseX, &dMouseY);
-//         if (CaaD->unkF3 != 2) {
-//             if (dMouseX != 0.0f) {
-//                 CaaD->unkB0 = 0;
-//                 CaaD->unkB0 += (dMouseX / 12.0f) * (4096.0f / 360.0f);
-//             }
-//         }
-//     }
-//     if ((CaaD->unkB0) && (CaaD->unkF3 != 2)) {
-//         if (CaaD->unkB0 > 0) {
-//             CaaD->unkB0 -= 9;
-//             CaaD->unkB2 += 0x66;
-//             if (CaaD->unkB0 < 0) {
-//                 CaaD->unkB0 = 0;
-//             }
-//         } else {
-//             CaaD->unkB0 += 9;
-//             CaaD->unkB2 -= 0x66;
-//             if (CaaD->unkB0 > 0) {
-//                 CaaD->unkB0 = 0;
-//             }
-//         }
-//     } else if (CaaD->unkF3 == 2) {
-//         CaaD->unkB0 = 0;
-//         CaaD->unkF1 = 0;
-//     }
-// }
+void func_global_asm_8062217C(Actor*, s16);
+int getFrameDelta(void);
+RECOMP_PATCH void func_global_asm_8061D1FC(Actor* arg0) {
+    CameraPaad* CaaD;
+    f32 temp_f2;
+    f32 var_f0;
+    f32 var_f14;
+    f32 dRStickX, dRStickY, ratio;
+
+    CaaD = arg0->CaaD;
+    temp_f2 = D_global_asm_807FD610[CaaD->unkFB].unk2F * 0.5;
+    if (!(CaaD->unkAC & 0x2000) && !(D_global_asm_807FBB64 & 0x40)) {
+        if ((CaaD->unk8) && ((s32) CaaD->unk8 < 0x9B) && (CaaD->unkEF)) {
+            if (( CaaD->unkA == 0) || ((s32)  CaaD->unkA >= 0x9B)) {
+                CaaD->unkF0 = CaaD->unkEE;
+            }
+            func_global_asm_8062217C(arg0, 1);
+            CaaD->unkAC |= 8;
+        } else {
+            if ((CaaD->unkA) && ((s32) CaaD->unkA < 0x9B)) {
+                if (CaaD->unkEF) {
+                    if ((CaaD->unkF0) && (CaaD->unkEF != CaaD->unkF0)) {
+                        func_global_asm_8062217C(arg0, CaaD->unkF0);
+                    }
+                    CaaD->unkAC &= ~8;
+                }
+            }
+        }
+    }
+    if (temp_f2 > 20.0f) {
+        var_f14 = temp_f2;
+    } else {
+        if (temp_f2 < -20.0f) {
+            var_f0 = temp_f2;
+        } else {
+            var_f0 = 0.0f;
+        }
+        var_f14 = var_f0;
+    }
+    CaaD->unk98 = ((var_f14 - CaaD->unk98) * 0.05) + CaaD->unk98;
+    CaaD->unkA0 += ((CaaD->unkA4 - CaaD->unkA0) * 0.2);
+    if (CaaD->unkAC & 0x10) {
+        arg0->distance_from_floor += ((300.0f - arg0->distance_from_floor) * 0.2);
+    } else {
+        arg0->distance_from_floor += ((CaaD->unkB8 - arg0->distance_from_floor) * 0.2);
+    }
+    if (analog_cam_enabled() && get_analog_allowed()) {
+        recomp_analog_camera_get(&dRStickX, &dRStickY);
+        dRStickX *= recomp_get_analog_cam_sensitivity() * -1.0f * getFrameDelta();
+        dRStickY *= recomp_get_analog_cam_sensitivity() * 1.0f * getFrameDelta();
+        if (CaaD->unkF3 != 2) {
+            if (dRStickX != 0.0f) {
+                CaaD->unkB0 = 0;
+                CaaD->unkB0 += dRStickX * (4096.0f / 360.0f);
+                arg0->y_rotation = CaaD->unkB0;
+            }
+            if (dRStickY != 0.0f) {
+                f32 ratio = (f32)CaaD->unkB8 / (f32)CaaD->unkA4;
+                CaaD->unkA4 += dRStickY;
+                CaaD->unkA4 = MIN(CaaD->unkA4, 300);
+                CaaD->unkB8 = CaaD->unkA4 * ratio;
+            }
+        }
+    }
+    if ((CaaD->unkB0) && (CaaD->unkF3 != 2)) {
+        if (CaaD->unkB0 > 0) {
+            CaaD->unkB0 -= 9;
+            CaaD->unkB2 += 0x66;
+            if (CaaD->unkB0 < 0) {
+                CaaD->unkB0 = 0;
+            }
+        } else {
+            CaaD->unkB0 += 9;
+            CaaD->unkB2 -= 0x66;
+            if (CaaD->unkB0 > 0) {
+                CaaD->unkB0 = 0;
+            }
+        }
+    } else if (CaaD->unkF3 == 2) {
+        CaaD->unkB0 = 0;
+        CaaD->unkF1 = 0;
+    }
+}
+
+s32 func_global_asm_8062133C(Actor*, void*, f32*, f32*, f32*, f32);
+void func_global_asm_80622334(Actor*, s16);
+u8 func_global_asm_80671E00(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 *arg4, s16 *arg5, u8 arg6, u16 arg7);
+extern s32 D_global_asm_807FBB68;
+extern u32 global_properties_bitfield;
+
+RECOMP_PATCH void func_global_asm_80620628(Actor* arg0, s32 arg1, s16 arg2, u8 arg3) {
+    CameraPaad* temp_s1;
+    f32 temp_f24;
+    s16 spBE;
+    s16 temp_s0;
+    s16 spBA;
+    s16 spB8;
+    f32 spB4;
+    f32 spB0;
+    f32 spAC;
+    s16 spAA;
+    u8 var_s3;
+    u8 spA8;
+    u8 var_s4;
+    u8 spA6;
+    u8 spA5;
+    s16 spA2;
+    f32 var_f30;
+    Actor *temp_v1;
+
+    temp_s1 = arg0->CaaD;
+    temp_v1 = temp_s1->unk0;
+    spBE = 0;
+    spB8 = 0xFFF;
+    spBA = 0;
+    temp_s1->unkB2 = arg2;
+    spAA = temp_s1->unkB2;
+    spA5 = 0;
+    spA6 = 0;
+    spA2 = 0x80;
+    var_f30 = 1.0f;
+    if (temp_s1->unkAC & 0x80000) return;
+    if (temp_s1->unkAC & 0x12000) return;
+    if ((temp_s1->unkF3 != 1) && (temp_s1->unkF3 != 5)) return;
+    if (D_global_asm_807FBB68 & 2) return;
+    if (temp_s1->unkFF >= 4) return;
+    if ((temp_v1->unk58 == 5) && (character_change_array[temp_s1->unkFB].unk2C0 != 1)) {
+        var_f30 = 0.333f;
+    }
+    if (!analog_cam_enabled() || !get_analog_allowed()) {
+        func_global_asm_8062217C(arg0, 1);
+        temp_s1->unkB8 = 10.0f;
+        arg0->distance_from_floor = 10.0f;
+        temp_s1->unkA0 = 5.0f;
+    }
+    temp_f24 = var_f30 * 100.0f;
+    temp_s1->unkAC |= 0x80000;
+    do {
+        spA8 = FALSE;
+        var_s3 = func_global_asm_8062133C(arg0, temp_s1->unk0, &spB4, &spB0, &spAC, -1.0f) == 1;
+        while (
+            (temp_s1->unkA0 < temp_f24) &&
+            (!var_s3) &&
+            (
+                var_s4 = func_global_asm_80671E00(spB4, spB0, spAC, 10.0f * var_f30, &spBA, &spB8, 1U, 0xBCU),
+                !var_s4
+            )
+        ) {
+            temp_s0 = temp_s1->unkB2;
+            temp_s1->unkA0 += 10.0f * var_f30;
+            arg0->distance_from_floor += var_f30 * 3.0f;
+            var_s3 = func_global_asm_8062133C(arg0, temp_s1->unk0, &spB4, &spB0, &spAC, -1.0f) == 1;
+            temp_s1->unkB2 = temp_s0;
+        }
+        if (var_s4) {
+            temp_s1->unkA0 -= (var_f30 * 10.0f);
+            arg0->distance_from_floor -= var_f30 * 3.0f;
+        }
+        if (((var_f30 * 60.0f) < temp_s1->unkA0) && (!var_s3)) {
+            spA5 = 1;
+        } else if (((var_s4) || (var_s3)) && (spBE < 0x1000)) {
+            spA8 = TRUE;
+            temp_s1->unkB2 = (((spA6 ? -1 : 1) * spA2) + spAA) & 0xFFF;
+            spA6 ^= 1;
+            if (!spA6) {
+                spA2 += 0x80;
+            }
+            temp_s1->unkA0 = 5.0f;
+            temp_s1->unkB8 = 10.0f;
+            arg0->distance_from_floor = 10.0f;
+            spBE += 0x80;
+        }
+    } while (spA8);
+    if ((spA5) || ((spBE < 0x1000) && (!var_s3))) {
+        temp_s1->unkA4 = temp_s1->unkA0;
+        func_global_asm_80622334(arg0, temp_s1->unkA0);
+    } else {
+        temp_s1->unkFF += arg3;
+        spB4 = character_change_array->unk21C;
+        spB0 = character_change_array->unk220;
+        spAC = character_change_array->unk224;
+        if (!analog_cam_enabled() || !get_analog_allowed()) {
+            func_global_asm_8062217C(arg0, 1);
+        }
+        temp_s1->unkA0 = temp_s1->unkA4;
+        arg0->distance_from_floor = temp_s1->unkB8;
+        temp_s1->unkB2 = spAA;
+    }
+    temp_s1->unkB0 = 0;
+    temp_s1->unkAC |= 0x100000;
+    temp_s1->unk38 = spB4;
+    temp_s1->unk3C = spB0;
+    temp_s1->unk40 = spAC;
+    temp_s1->unkEE = temp_s1->unkEF;
+    temp_s1->unkAC &= ~0x80000;
+    temp_s1->unkC = -32768.0f;
+    global_properties_bitfield |= 0x2000;
+    arg0->unkB8 = 0.0f;
+}
 
 extern Actor *gCurrentActorPointer;
 extern s16 D_global_asm_80753B34[];
@@ -464,7 +680,6 @@ RECOMP_PATCH void func_global_asm_806EA628(void) {
 Gfx *func_menu_8002F980(Gfx *, MenuAdditionalActorData *, u8 **, s8, s32 *, s32, f32 *, f32, s32);
 s32 func_menu_800317E8(MenuAdditionalActorData *arg0, f32 arg1, f32 arg2, f32 *arg3, f32 *arg4, s32 arg5, s8 arg6, f32 arg7);
 Gfx* printStyledText(Gfx* dl, s16 style, s16 x, s16 y, u8* string, u32 extraBitfield);
-s16 playSound(s16 arg0, s32 arg1, f32 arg2, f32 arg3, u8 arg4, u8 arg5);
 void func_menu_8002FD38(MenuAdditionalActorData*, s32, s32);
 void func_menu_8002FC1C(Actor *, MenuAdditionalActorData *, s32);
 void func_menu_8002FE08(MenuAdditionalActorData*, s32);

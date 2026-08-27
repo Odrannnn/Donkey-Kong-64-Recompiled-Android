@@ -70,7 +70,7 @@ namespace dk64 {
         Free,
         Follow,
         BetterFree,
-        Mouse
+        Analog
     };
 
     CameraTypeMode get_camera_type();

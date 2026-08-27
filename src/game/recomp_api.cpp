@@ -136,7 +136,7 @@ extern "C" void recomp_get_camera_type(uint8_t* rdram, recomp_context* ctx) {
         case dk64::CameraTypeMode::BetterFree:
             _return(ctx, 2);
             return;
-        case dk64::CameraTypeMode::Mouse:
+        case dk64::CameraTypeMode::Analog:
             _return(ctx, 3);
             return;
     }

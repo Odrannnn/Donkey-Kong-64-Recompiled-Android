@@ -1260,7 +1260,6 @@ RECOMP_PATCH Gfx* func_global_asm_80701098(Gfx* dl, Struct807FD808 arg1, u8 arg5
     } else {
         for (i = 0; i < 12; i++) {
             // Mtx Tag
-            cur_drawn_model_transform_id = MTXTAG_SOLAR_FLARE;
             pushed_matrix_group = FALSE;
             cur_model_transform_id_offset = i;
             gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
@@ -1358,4 +1357,110 @@ RECOMP_PATCH Gfx* func_global_asm_807007B8(Gfx* dl) {
         gDPSetAlphaDither(dl++, G_AD_PATTERN);
     }
     return dl;
+}
+
+typedef struct {
+    s16 unk0;
+    s16 unk2;
+    s16 *unk4;
+    s16 *unk8;
+    u8 unkC[0x90 - 0xC];
+    Mtx unk90[15][2]; // Not sure on whether it's 15 or not
+    u8 unk810[0x10]; // TODO: How many elements?
+    u8 unk820[32];
+} AAD_critter_8002904C;
+extern u16* D_critter_8002A1C8[];
+extern u16 D_critter_8002A1CC;
+extern u16 D_critter_8002A1CE;
+extern f32 func_global_asm_80612794(s16 arg0);
+u8 line_index = 0;
+
+// @recomp: DK Rap Lyrics
+RECOMP_PATCH Gfx *func_critter_80028A9C(Gfx *dl, AAD_critter_8002904C *arg1, u8 *arg2, u8 arg3) {
+    f32 sp98[4][4];
+    f32 sp58[4][4];
+    u8 sp57 = 100;
+    f32 sp50;
+    s16 temp_t1;
+    s16 sp4C;
+    u8 pushed_matrix_group = FALSE;
+    s32 shift;
+    s32 arr_shift;
+
+    guMtxIdentF(sp98);
+    if (arg1->unk810[arg3]) {
+        sp50 = arg1->unk810[arg3] / 12.0f;
+        arg1->unk810[arg3]--;
+        temp_t1 = arg1->unk8[arg3] - arg1->unk4[arg3];
+        guTranslateF(sp98, -temp_t1, -26.0f, 0.0f);
+        guScaleF(sp58,
+            (func_global_asm_80612794(sp50 * 2048.0f) * 0.5) + 1.0,
+            (func_global_asm_80612794(sp50 * 2048.0f) * 0.8) + 1.0,
+            1.0f);
+        guMtxCatF(sp98, sp58, sp98);
+        guTranslateF(sp58, temp_t1, 26.0f, 0.0f);
+        guMtxCatF(sp98, sp58, sp98);
+        sp57 = (func_global_asm_80612794(sp50 * 2048.0f) * 127.0f) + 128.0f;
+    }
+    guTranslateF(sp58, arg1->unk4[arg3], arg1->unk0, 0.0f);
+    guMtxCatF(sp98, sp58, sp98);
+    guMtxF2L(sp98, &arg1->unk90[arg3][D_global_asm_807444FC]);
+    gSPMatrix(dl++, &arg1->unk90[arg3][D_global_asm_807444FC], G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);
+    gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, sp57);
+    // Mtx Tag
+    cur_drawn_model_transform_id = MTXTAG_RAP_LYRICS + (line_index * 15);
+    cur_model_transform_id_offset = arg3;
+    gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    dl = set_model_matrix_group(dl, NULL, FALSE, &pushed_matrix_group);
+    //
+    dl = printStyledText(dl, 6, 0, 0, arg2, 0U);
+    // Mtx untag
+    gSPPopMatrix(dl++, G_MTX_MODELVIEW);
+    if (pushed_matrix_group) {
+        dl = pop_model_matrix_group(dl);
+    }
+    //
+    return dl;
+}
+
+typedef struct Struct8002A1C0 {
+    u8 unk0[0x20];
+} Struct8002A1C0;
+
+extern s16 D_global_asm_80744490;
+extern Struct8002A1C0 *D_critter_8002A1C0;
+extern Actor *D_critter_8002A1C4;
+extern Actor *gLastSpawnedActor;
+void _free(void *);
+char *_strcpy(char *,const char *);
+s32 spawnActor(Actors actorIndex, s32 modelIndex);
+s16 func_critter_800288A8(AAD_critter_8002904C *arg0, u8 *arg1, s16 arg2);
+
+RECOMP_PATCH void func_critter_80028EE8(u8 arg0, s32 arg1, s16 arg2, u8 arg3, u16 arg5, u16 arg6) {
+    AAD_critter_8002904C *aaD;
+    s16 sp2A;
+    s16 i;
+
+    sp2A = (D_global_asm_80744490 - getCenterOfString(arg0, &D_critter_8002A1C0[arg3].unk0[0])) * 2;
+    if (D_critter_8002A1C4 != NULL) {
+        aaD = D_critter_8002A1C4->AAD_as_array[0];
+        _free(aaD->unk8);
+        _free(aaD->unk4);
+    } else {
+        spawnActor(ACTOR_DK_RAP_CONTROLLER, 0);
+        aaD = gLastSpawnedActor->AAD_as_array[0];
+        aaD->unk0 = arg2 * 4;
+        D_critter_8002A1C4 = gLastSpawnedActor;
+        D_critter_8002A1C4->unkEC = 0;
+        line_index = 0;
+    }
+    D_critter_8002A1C4->x_position = func_critter_800288A8(aaD, &D_critter_8002A1C0[arg3].unk0[0], sp2A);
+    D_critter_8002A1C4->unkEE = 0;
+    D_critter_8002A1C4->unk168 = arg6 + 0xE;
+    _strcpy(&aaD->unk820[0], &D_critter_8002A1C0[arg3].unk0[0]);
+    line_index++;
+    for (i = 1; i < 0x10; i++) {
+        aaD->unk810[i] = 0;
+    }
+    aaD->unk810[0] = 0xC;
 }
