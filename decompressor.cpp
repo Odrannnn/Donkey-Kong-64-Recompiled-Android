@@ -59,25 +59,6 @@ std::vector<uint8_t> gzipDecompress(const std::vector<uint8_t>& compressedData) 
     return decompressedData;
 }
 
-std::array<uint8_t, 4> convertChunk(const std::array<uint8_t, 4>& chunk, bool byteSwapped, bool wordSwapped) {
-    std::array<uint8_t, 4> output = chunk;
-    if (byteSwapped) {
-        // v64 format -> reverses uint16_t byte order
-        output[0] = chunk[1];
-        output[1] = chunk[0];
-        output[2] = chunk[3];
-        output[3] = chunk[2];
-    }
-    if (wordSwapped) {
-        // n64 format -> reverses uint32_t byte order
-        output[0] = chunk[3];
-        output[1] = chunk[2];
-        output[2] = chunk[1];
-        output[3] = chunk[0];
-    }
-    return output;
-}
-
 void readAndDecompressOverlays(std::fstream& fr, std::vector<Overlay>& overlays) {
     for (auto& x : overlays) {
         x.codeCompressedSize = x.dataROMAddress - x.codeROMAddress;
