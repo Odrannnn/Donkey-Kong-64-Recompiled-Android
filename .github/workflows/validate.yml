@@ -322,6 +322,7 @@ jobs:
           Move-Item -Path "cmake-build/dxcompiler.dll" -Destination "dxcompiler.dll"
           Move-Item -Path "cmake-build/dxil.dll" -Destination "dxil.dll"
           Move-Item -Path "cmake-build/SDL2.dll" -Destination "SDL2.dll"
+          Move-Item -Path "cmake-build/libcurl.dll" -Destination "libcurl.dll"
           Move-Item -Path "cmake-build/DK64Recompiled.pdb" -Destination "DK64Recompiled.pdb"
       - name: Archive DK64Recomp
         uses: actions/upload-artifact@v4
@@ -332,6 +333,7 @@ jobs:
             dxcompiler.dll
             dxil.dll
             SDL2.dll
+            libcurl.dll
             assets/
             recompcontrollerdb.txt
       - name: Archive Debug Files
