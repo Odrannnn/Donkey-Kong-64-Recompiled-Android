@@ -373,7 +373,7 @@ jobs:
       - name: Homebrew Setup
         run: |
           brew install ninja
-          brew install curl
+          arch -x86_64 brew install curl
           brew uninstall --ignore-dependencies libpng freetype
       - name: MacPorts Setup
         uses: melusina-org/setup-macports@v1
