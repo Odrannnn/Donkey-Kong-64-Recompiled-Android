@@ -4,7 +4,7 @@
 #include "recompinput/recompinput.h"
 #include "donk_sound.h"
 #include "donk_draw.h"
-#include "banjo_support.h"
+#include "donk_support.h"
 #include "ultramodern/config.hpp"
 #include "librecomp/files.hpp"
 #include "librecomp/config.hpp"
@@ -85,7 +85,7 @@ static void add_general_options(recomp::config::Config &config) {
     config.add_enum_option(
         dk64::configkeys::general::camera_type,
         "Camera Type",
-        "Changes the camera behavior.<br /><recomp-color primary>Free Cam</recomp-color>: Camera can be controlled via pressing C-Left and C-Right. The camera does not try to push itself behind the player.<br /><recomp-color primary>Follow Cam</recomp-color>: Similar to <recomp-color secondary>Free Cam</recomp-color>, but the camera tries to push itself behind the player.<br /><recomp-color primary>Better Free Cam</recomp-color>: Similar to <recomp-color secondary>Free Cam</recomp-color>, but instead of a button press turning the camera 45 degrees, holding the button moves the camera at 5 degrees per frame.",
+        "Changes the camera behavior.<br /><recomp-color primary>Free Cam</recomp-color>: Camera can be controlled via pressing C-Left and C-Right. The camera does not try to push itself behind the player.<br /><recomp-color primary>Follow Cam</recomp-color>: Similar to <recomp-color secondary>Free Cam</recomp-color>, but the camera tries to push itself behind the player.<br /><recomp-color primary>Better Free Cam</recomp-color>: Similar to <recomp-color secondary>Free Cam</recomp-color>, but instead of a button press turning the camera 45 degrees, holding the button moves the camera at 5 degrees per frame.<br /><recomp-color primary>Analog Camera</recomp-color>: Control of the camera is controlled by your right analogue stick. It is advised that C-Up is remapped to something outside your right analogue stick in order to have a good time with this.",
         camera_type_options,
         dk64::CameraTypeMode::Free
     );
@@ -219,7 +219,7 @@ static void add_graphics_options(recomp::config::Config &config) {
     config.add_percent_number_option(
         dk64::configkeys::graphics::draw_distance,
         "Draw Distance",
-        "Controls the overall volume of background music.",
+        "Controls the draw distance within the game from 0% (vanilla) to 100% (10x vanilla). Some objects do not get a draw distance increase for technical reasons.",
         0.0f
     );
 }

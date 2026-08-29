@@ -40,8 +40,8 @@
 #include "donk_config.h"
 #include "donk_sound.h"
 #include "donk_draw.h"
-#include "banjo_support.h"
-#include "banjo_game.h"
+#include "donk_support.h"
+#include "donk_game.h"
 #include "donk_launcher.h"
 #include "recomp_data.h"
 #include "ovl_patches.hpp"
@@ -125,7 +125,7 @@ std::unique_ptr<ultramodern::renderer::RendererContext> create_pacing_render_con
 
 #include "../../lib/rt64/src/contrib/stb/stb_image.h"
 
-const std::string version_string = "0.1.0";
+const std::string version_string = "1.0.0";
 
 template<typename... Ts>
 void exit_error(const char* str, Ts ...args) {
