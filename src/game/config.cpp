@@ -4,7 +4,7 @@
 #include "recompinput/recompinput.h"
 #include "donk_sound.h"
 #include "donk_draw.h"
-#include "banjo_support.h"
+#include "donk_support.h"
 #include "ultramodern/config.hpp"
 #include "librecomp/files.hpp"
 #include "librecomp/config.hpp"

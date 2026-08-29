@@ -1,5 +1,5 @@
-#ifndef __BANJO_GAME_H__
-#define __BANJO_GAME_H__
+#ifndef __DONK_GAME_H__
+#define __DONK_GAME_H__
 
 #include <cstdint>
 #include <span>

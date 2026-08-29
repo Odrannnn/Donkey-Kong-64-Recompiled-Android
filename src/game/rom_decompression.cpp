@@ -5,7 +5,7 @@
 #include "miniz.h"
 
 #include "librecomp/game.hpp"
-#include "banjo_game.h"
+#include "donk_game.h"
 
 #ifdef _MSC_VER
 inline uint32_t byteswap(uint32_t val) {
