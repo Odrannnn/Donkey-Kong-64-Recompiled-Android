@@ -418,7 +418,7 @@ jobs:
           
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_MAKE_PROGRAM=ninja -G Ninja -S . -B cmake-build \
           -DPATCHES_LD=/opt/local/bin/ld.lld-mp-18 -DCMAKE_AR=/opt/local/bin/llvm-ar-mp-18 -DPATCHES_C_COMPILER=/opt/local/bin/clang-mp-18 \
-          -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+          -DCMAKE_OSX_ARCHITECTURES="arm64" \
           -DCMAKE_OSX_DEPLOYMENT_TARGET="14.0" \
           -DCURL_ROOT="$(brew --prefix curl)"
           
