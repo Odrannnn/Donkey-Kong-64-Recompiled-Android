@@ -318,12 +318,23 @@ jobs:
           SDL2_VERSION: ${{ inputs.SDL2_VERSION }}
       - name: Prepare Archive
         run: |
-          Move-Item -Path "cmake-build/DK64Recompiled.exe" -Destination "DK64Recompiled.exe"
-          Move-Item -Path "cmake-build/dxcompiler.dll" -Destination "dxcompiler.dll"
-          Move-Item -Path "cmake-build/dxil.dll" -Destination "dxil.dll"
-          Move-Item -Path "cmake-build/SDL2.dll" -Destination "SDL2.dll"
-          Move-Item -Path "cmake-build/libcurl.dll" -Destination "libcurl.dll"
-          Move-Item -Path "cmake-build/DK64Recompiled.pdb" -Destination "DK64Recompiled.pdb"
+          function Copy-Artifact {
+              param($FileName, $Destination)
+              $file = Get-ChildItem -Path "cmake-build" -Recurse -Filter $FileName | Select-Object -First 1
+              if ($file) {
+                  Copy-Item $file.FullName -Destination $Destination -Force
+                  Write-Host "Found and copied: $($file.FullName) -> $Destination"
+              } else {
+                  Write-Error "Critical: Could not find '$FileName' anywhere in cmake-build/"
+                  exit 1
+              }
+          }
+          Copy-Artifact -Path "cmake-build/DK64Recompiled.exe" -Destination "DK64Recompiled.exe"
+          Copy-Artifact -Path "cmake-build/dxcompiler.dll" -Destination "dxcompiler.dll"
+          Copy-Artifact -Path "cmake-build/dxil.dll" -Destination "dxil.dll"
+          Copy-Artifact -Path "cmake-build/SDL2.dll" -Destination "SDL2.dll"
+          Copy-Artifact -Path "cmake-build/libcurl.dll" -Destination "libcurl.dll"
+          Copy-Artifact -Path "cmake-build/DK64Recompiled.pdb" -Destination "DK64Recompiled.pdb"
       - name: Archive DK64Recomp
         uses: actions/upload-artifact@v4
         with:
@@ -407,7 +418,9 @@ jobs:
           
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_MAKE_PROGRAM=ninja -G Ninja -S . -B cmake-build \
           -DPATCHES_LD=/opt/local/bin/ld.lld-mp-18 -DCMAKE_AR=/opt/local/bin/llvm-ar-mp-18 -DPATCHES_C_COMPILER=/opt/local/bin/clang-mp-18 \
-          -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64"
+          -DCMAKE_OSX_ARCHITECTURES="x86_64;arm64" \
+          -DCURL_ROOT="$(brew --prefix curl)"
+          
           cmake --build cmake-build --config ${{ matrix.type }} --target DK64Recompiled -j $(sysctl -n hw.ncpu)
       - name: Prepare Archive
         run: |
