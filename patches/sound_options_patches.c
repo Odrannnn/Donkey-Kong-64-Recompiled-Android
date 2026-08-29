@@ -648,14 +648,14 @@ RECOMP_PATCH void func_global_asm_806EA628(void) {
         if (!invY) stick_y = -stick_y;
         if (stick_x == 0) {
             if (dGyroX != 0.0f) {
-                stick_x = dGyroX;
+                stick_x = -dGyroX;
             } else if (dMouseX != 0.0f) {
                 stick_x = dMouseX;
             }
         }
         if (stick_y == 0) {
             if (dGyroY != 0.0f) {
-                stick_y = dGyroY;
+                stick_y = -dGyroY;
             } else if (dMouseY != 0.0f) {
                 stick_y = dMouseY;
             }
