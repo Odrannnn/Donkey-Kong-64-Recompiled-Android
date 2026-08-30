@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+      - workflow-fixes
   pull_request:
     types: [opened, synchronize]
 jobs:
