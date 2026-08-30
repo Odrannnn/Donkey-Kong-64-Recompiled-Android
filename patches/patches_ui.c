@@ -2112,18 +2112,18 @@ RECOMP_PATCH Gfx* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
                 y = (temp_v0_2->unkA * 4) + (s32)(var_f0 * temp_v0_2->unk4) + (temp_v0_2->unkE * 4);
                 y += (sp15C->unkC[j] * 4);
                 update_alignment = FALSE;
-                if (x > (240 * 4)) {
+                if (x > (200 * 4)) {
                     dl = alignHUD(dl, ALIGN_RIGHT);
                     update_alignment = TRUE;
-                } else if (x < (80 * 4)) {
+                } else if (x < (120 * 4)) {
                     dl = alignHUD(dl, ALIGN_LEFT);
                     update_alignment = TRUE;
                 }
                 dl = printStyledText(dl, 1, x, y, temp_v0_2->unk11, 1U);
                 if (update_alignment) {
-                    if (x > (240 * 4)) {
+                    if (x > (200 * 4)) {
                         dl = popHUD(dl, ALIGN_RIGHT);
-                    } else if (x < (80 * 4)) {
+                    } else if (x < (120 * 4)) {
                         dl = popHUD(dl, ALIGN_LEFT);
                     }
                 }
