@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - main
-      - workflow-fixes # Use this branch to test github workflow changes
   pull_request:
     types: [opened, synchronize]
 jobs:
