@@ -14,3 +14,4 @@ ports:
     select: universal
   - name: clang-18
   - name: llvm-18
+  - name: zlib

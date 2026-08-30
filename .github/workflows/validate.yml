@@ -329,12 +329,13 @@ jobs:
                   exit 1
               }
           }
-          Copy-Artifact -Path "cmake-build/DK64Recompiled.exe" -Destination "DK64Recompiled.exe"
-          Copy-Artifact -Path "cmake-build/dxcompiler.dll" -Destination "dxcompiler.dll"
-          Copy-Artifact -Path "cmake-build/dxil.dll" -Destination "dxil.dll"
-          Copy-Artifact -Path "cmake-build/SDL2.dll" -Destination "SDL2.dll"
-          Copy-Artifact -Path "cmake-build/libcurl.dll" -Destination "libcurl.dll"
-          Copy-Artifact -Path "cmake-build/DK64Recompiled.pdb" -Destination "DK64Recompiled.pdb"
+          Copy-Artifact -FileName "DK64Recompiled.exe" -Destination "DK64Recompiled.exe"
+          Copy-Artifact -FileName "dxcompiler.dll" -Destination "dxcompiler.dll"
+          Copy-Artifact -FileName "dxil.dll" -Destination "dxil.dll"
+          Copy-Artifact -FileName "SDL2.dll" -Destination "SDL2.dll"
+          Copy-Artifact -FileName "libcurl.dll" -Destination "libcurl.dll"
+          Copy-Artifact -FileName "zlib1.dll" -Destination "zlib1.dll"
+          Copy-Artifact -FileName "DK64Recompiled.pdb" -Destination "DK64Recompiled.pdb"
       - name: Archive DK64Recomp
         uses: actions/upload-artifact@v4
         with:
@@ -345,6 +346,7 @@ jobs:
             dxil.dll
             SDL2.dll
             libcurl.dll
+            zlib1.dll
             assets/
             recompcontrollerdb.txt
       - name: Archive Debug Files
@@ -353,12 +355,12 @@ jobs:
           name: DK64Recompiled-PDB-${{ matrix.type }}
           path: |
             DK64Recompiled.pdb
-  build-macos:
+  build-macos-arm:
     runs-on: macos-14
     strategy:
       matrix:
         type: [ Debug, Release ]
-    name: macos (x64, arm64, ${{ matrix.type }})
+    name: macos (arm64, ${{ matrix.type }})
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -369,7 +371,7 @@ jobs:
       - name: ccache
         uses: hendrikmuhs/ccache-action@v1.2
         with:
-          key: ${{ runner.os }}-dk64-ccache-${{ matrix.type }}
+          key: ${{ runner.os }}-dk64-ccache-${{ matrix.type }}-arm64
       - name: Homebrew Setup
         run: |
           brew install ninja
@@ -430,5 +432,5 @@ jobs:
       - name: Archive DK64Recomp
         uses: actions/upload-artifact@v4
         with:
-          name: DK64Recompiled-${{ runner.os }}-${{ matrix.type }}
+          name: DK64Recompiled-${{ runner.os }}-ARM64-${{ matrix.type }}
           path: DK64Recompiled.zip
