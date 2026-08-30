@@ -6,6 +6,8 @@
     <uses-feature android:name="android.hardware.vulkan.version" android:required="false" />
     <application
         android:label="DK64 Recompiled (Dev)"
+        android:icon="@drawable/dk64_recompiled_icon"
+        android:roundIcon="@drawable/dk64_recompiled_icon"
         android:theme="@android:style/Theme.Material.Light.NoActionBar"
         android:allowBackup="false"
         android:supportsRtl="true">

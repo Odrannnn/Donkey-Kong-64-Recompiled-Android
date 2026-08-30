@@ -1,5 +1,12 @@
 # DK64 Recompiled — experimental Android fork
 
+> [!CAUTION]
+> **AI-GENERATED AND AI-ASSISTED ANDROID PORT — UNOFFICIAL AND UNAFFILIATED**
+>
+> This Android port contains AI-generated code and was developed with AI assistance. It is an independent, unofficial project, **not affiliated with, endorsed by, or supported by Rainchus or the upstream DK64 Recompiled / N64: Recompiled maintainers**.
+>
+> This disclosure applies to the Android-port changes, not the original upstream code or artwork, whose authorship and notices are retained. Please report Android-port issues [in this fork](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/issues), not to upstream. Full gameplay and all-device compatibility are not established.
+
 This fork adds the Android ARM64 port in **[android-port/](android-port/README.md)**. It is based on upstream **1.0.1** and is independent of the upstream maintainers. The Android changes were developed with AI assistance; validation limits and known issues are recorded in [the port notes](android-port/PORT-NOTES.md).
 
 - Tested on a Lenovo TB520FU (Snapdragon 8 Gen 3 / Adreno 750, Android 16) and Poco F8 Ultra (Adreno 840).
@@ -11,7 +18,9 @@ This fork adds the Android ARM64 port in **[android-port/](android-port/README.m
 
 ## Android download
 
-Download **[Android dev7](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev7)** for ARM64 devices. Supply your own supported original US ROM.
+Download **[Android dev8](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev8)** for ARM64 devices. Supply your own supported original US ROM.
+
+Dev8 adds the original DK64 Recompiled banana app icon, with [its attribution and original notices](android-port/android/ICON-NOTICE.md), and prominent AI/unaffiliated-project disclosures. It retains dev7's Turnip compatibility mode and native libraries. Reusing upstream artwork does not imply endorsement or affiliation.
 
 **Graphics driver warning:** the system Vulkan driver may cause a black screen or crash. Compatible Qualcomm Adreno devices may require an imported Turnip driver. Turnip is not compatible with every GPU and is not bundled. The launcher displays this warning before Launch game.
 

@@ -75,3 +75,10 @@ An official Khronos Android validation layer was downloaded into ignored `.local
 - Includes the previously local dev5 native companion-bundle importer, recovery journal and optional-mod INTERNET permission. Native companion execution remains unverified; no co-op or Archipelago implementation is included in this release.
 - The downloadable Release APK is non-debuggable and retains the existing signing certificate for in-place updates. Phone UI verification used the Debug variant; the separate Release packaging has not received a fresh on-device gameplay test. ROMs, user-imported drivers, mods, private signing material and validation layers are excluded.
 - See `GRAPHICS-DIAGNOSTICS.md` for the detailed test record. The earlier dev4/dev5 sections above are historical snapshots.
+
+## Android dev8 release — 2026-08-30
+
+- Version `1.0.1-android-dev8`, version code 7. Regular GitHub release, not a prerelease. The package remains `io.github.dk64port` and retains the existing signing identity for updates.
+- Uses an unchanged copy of upstream `icons/app.png` for the launcher and round-icon reference. The original SVG and its embedded attribution metadata are packaged with `android/ICON-NOTICE.md`. The icon is not AI-generated.
+- Adds a prominent disclosure to the GitHub and Android-port READMEs and release notes: the Android port contains AI-generated and AI-assisted changes and is not affiliated with, endorsed by, or supported by the upstream maintainers. Original upstream authorship, artwork and notices are retained.
+- No Java gameplay/launcher behavior, native renderer, shader, driver-selection or compatibility-mode changes. Verification for this update covers release packaging, icon inclusion, signing and comparison against dev7's native libraries. It does not add new on-device gameplay evidence; the phone's active session is left untouched.

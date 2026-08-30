@@ -1,5 +1,12 @@
 # DK64 Recompiled — experimental Android port
 
+> [!CAUTION]
+> **AI-GENERATED AND AI-ASSISTED ANDROID PORT — UNOFFICIAL AND UNAFFILIATED**
+>
+> This Android port contains AI-generated code and was developed with AI assistance. It is an independent, unofficial project, **not affiliated with, endorsed by, or supported by Rainchus or the upstream DK64 Recompiled / N64: Recompiled maintainers**.
+>
+> This disclosure applies to the Android-port changes, not the original upstream code or artwork, whose authorship and notices are retained. Please report Android-port issues [in this fork](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/issues), not to upstream. Full gameplay and all-device compatibility are not established.
+
 Local Android port of [Rainchus/Donkey-Kong-64-Recompiled 1.0.1](https://github.com/Rainchus/Donkey-Kong-64-Recompiled/releases/tag/1.0.1), targeting ARM64 tablets. **Development build: the intro and early gameplay render with Turnip; full gameplay is still being tested.** No ROM or Turnip driver is bundled.
 
 Published source fork: [Odrannnn/Donkey-Kong-64-Recompiled-Android](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android), default branch `codex/android-port`. The public fork keeps upstream history and contains this Android project under `android-port/`. Initial source publication: `8e952a56021f83ec56a0f642f3f3655ff04a413b`. The separate local publication checkout is `.local/github-publish`; the current workspace and tablet installation were not moved or replaced.
@@ -18,7 +25,7 @@ Tested driver: KIMCHI's regular [Turnip v26.0.0 R8](https://github.com/K11MCH1/A
 
 **Graphics driver warning:** the system Vulkan driver may cause a black screen or crash. A compatible Turnip driver may be required on supported Qualcomm Adreno GPUs. Turnip is not compatible with every GPU and is imported separately; custom-driver import requires Android 9 or newer. The same warning is displayed above **Launch game** in the app.
 
-1. Download **[Android dev7](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev7)**, or build it below. This is a regular GitHub release. The signed APK uses the same certificate as earlier builds so those installations can update without uninstalling. Save your progress before updating; installation closes the running game.
+1. Download **[Android dev8](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev8)**, or build it below. This is a regular GitHub release. The signed APK uses the same certificate as earlier builds so those installations can update without uninstalling. Save your progress before updating; installation closes the running game.
 2. Choose **Import US DK64 ROM** and select your own original US ROM. `.z64`, `.n64` and `.v64` byte orders are supported; validation uses the normalized SHA-1, not the extension. Existing user files are never modified.
 3. To try Turnip, choose **Import graphics driver ZIP** and select a trusted ARM64 driver package compatible with the tablet's GPU and Android version. Standard `meta.json` / `libraryName` packages are supported. ZIPs without metadata must have an unambiguous `libvulkan_freedreno.so`, `vulkan.freedreno.so` or `libvulkan.so`.
 4. Press **Launch game**. The selected driver applies to the new game process. The launcher shows the selection and the last initialized GPU separately.
@@ -78,6 +85,8 @@ The Gradle wrapper packages prebuilt native libraries from `.local/game-arm64`; 
 For the non-debuggable release variant, run `./tools/Build-Android.ps1 -Variant Release` (plus `-PythonPath` if needed). Its output is `android/app/build/outputs/apk/release/app-release.apk`. This release configuration deliberately reuses the local development signing identity so existing testers can update. Keep that private keystore backed up and outside Git. A build made on another machine normally has a different signing certificate.
 
 ## Diagnostics and maintenance
+
+Dev8 uses the original DK64 Recompiled banana app icon and adds prominent AI/unaffiliated-project disclosures. The icon is reused unchanged, with attribution in [android/ICON-NOTICE.md](android/ICON-NOTICE.md); it is not AI-generated. Dev7's graphics settings and native libraries are unchanged.
 
 Dev7 adds a **Turnip compatibility mode** toggle with an Adreno 840 information box. It enables system-memory rendering (`sysmem`), which resolved the water corruption in the user's Poco F8 Ultra tests with Turnip Gen8 V30 and V35. Existing dev6 sysmem selections stay enabled; new installations default to Off. Changes apply on the next game launch, and other diagnostic modes remain under Advanced Turnip diagnostics. The exact cause and performance impact remain unconfirmed. See [GRAPHICS-DIAGNOSTICS.md](GRAPHICS-DIAGNOSTICS.md) for the evidence and limits.
 

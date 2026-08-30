@@ -10,8 +10,8 @@ android {
         applicationId 'io.github.dk64port'
         minSdk 26
         targetSdk 35
-        versionCode 6
-        versionName '1.0.1-android-dev7'
+        versionCode 7
+        versionName '1.0.1-android-dev8'
         ndk { abiFilters 'arm64-v8a' }
     }
     compileOptions {
@@ -64,6 +64,8 @@ tasks.register('stageAssets', Sync) {
     from('../../upstream/assets') { into 'assets' }
     from '../../upstream/recompcontrollerdb.txt'
     from('../../upstream/LICENSE') { into 'licenses/DK64-Recompiled' }
+    from('../ICON-NOTICE.md') { into 'licenses/DK64-icon' }
+    from('../../upstream/icons/app.svg') { into 'licenses/DK64-icon' }
     from('../../.local/deps/adrenotools/LICENSE') { into 'licenses/AdrenoTools' }
     from('../../.local/deps/adrenotools/lib/linkernsbypass/LICENSE') { into 'licenses/liblinkernsbypass' }
     from('../../.local/deps/SDL/LICENSE.txt') { into 'licenses/SDL' }
