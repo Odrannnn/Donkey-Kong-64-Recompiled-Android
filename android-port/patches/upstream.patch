@@ -1,0 +1,245 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 14db898..78e4567 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -1,10 +1,12 @@
+ cmake_minimum_required(VERSION 3.20)
+ 
++if(NOT ANDROID AND NOT DEFINED ANDROID_ABI)
+ if(NOT DEFINED ENV{VCPKG_ROOT})
+     set(ENV{VCPKG_ROOT} ${CMAKE_SOURCE_DIR}/lib/vcpkg)
+ endif()
+ 
+ include($ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake)
++endif()
+ 
+ if (APPLE)
+     set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0" CACHE STRING "Minimum OS X deployment version")
+@@ -15,6 +17,18 @@ set(CMAKE_C_STANDARD 17)
+ set(CMAKE_CXX_STANDARD 20)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_CXX_EXTENSIONS OFF)
++if(ANDROID)
++    set(CMAKE_POSITION_INDEPENDENT_CODE ON)
++    find_package(SDL2 REQUIRED)
++    find_package(Python3 COMPONENTS Interpreter REQUIRED)
++    set(DK64_FILE_TO_C ${Python3_EXECUTABLE} "${CMAKE_SOURCE_DIR}/../tools/file_to_c.py")
++    set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
++    set(ZSTD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
++    set(ZSTD_BUILD_DICTBUILDER OFF CACHE BOOL "" FORCE)
++    add_compile_definitions(PLUME_SDL_VULKAN_ENABLED RT64_SDL_WINDOW_VULKAN)
++else()
++    set(DK64_FILE_TO_C file_to_c)
++endif()
+ # set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+ 
+@@ -114,6 +128,7 @@ target_sources(PatchesLib PRIVATE
+ set_source_files_properties(${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c PROPERTIES COMPILE_FLAGS -fno-strict-aliasing)
+ 
+ # Build patches elf
++if(NOT ANDROID)
+ if(NOT DEFINED PATCHES_C_COMPILER)
+     set(PATCHES_C_COMPILER clang)
+ endif()
+@@ -130,7 +145,7 @@ add_custom_target(PatchesBin
+ 
+ # Generate patches_bin.c from patches.bin
+ add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c
+-    COMMAND file_to_c ${CMAKE_SOURCE_DIR}/patches/patches.bin bk_patches_bin ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.h
++    COMMAND ${DK64_FILE_TO_C} ${CMAKE_SOURCE_DIR}/patches/patches.bin bk_patches_bin ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.h
+     DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.bin
+ )
+ 
+@@ -146,8 +161,24 @@ add_custom_command(OUTPUT
+                    DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.elf
+ )
+ 
+-# Main executable
+-add_executable(DK64Recompiled)
++endif()
++
++# SDLActivity loads libmain.so and calls SDL_main.
++if(ANDROID)
++    add_library(DK64Recompiled SHARED)
++    add_subdirectory(${CMAKE_SOURCE_DIR}/../.local/deps/adrenotools ${CMAKE_BINARY_DIR}/adrenotools)
++    add_library(dk64vulkan SHARED ${CMAKE_SOURCE_DIR}/../platform/vulkan_bridge.cpp)
++    target_link_libraries(DK64Recompiled PRIVATE adrenotools dk64vulkan)
++    add_dependencies(DK64Recompiled main_hook file_redirect_hook gsl_alloc_hook hook_impl)
++    target_sources(DK64Recompiled PRIVATE ${CMAKE_SOURCE_DIR}/../platform/android_driver.cpp)
++    set_target_properties(DK64Recompiled PROPERTIES OUTPUT_NAME main)
++    target_link_libraries(DK64Recompiled PRIVATE SDL2::SDL2 android log vulkan)
++    target_include_directories(DK64Recompiled PRIVATE ${SDL2_INCLUDE_DIRS})
++    target_sources(DK64Recompiled PRIVATE ${CMAKE_SOURCE_DIR}/../platform/android_bridge.cpp)
++    target_include_directories(DK64Recompiled PRIVATE ${CMAKE_SOURCE_DIR}/../platform)
++else()
++    add_executable(DK64Recompiled)
++endif()
+ 
+ set (SOURCES
+     ${CMAKE_SOURCE_DIR}/src/main/launcher_animation.cpp
+@@ -186,7 +217,7 @@ target_include_directories(DK64Recompiled PRIVATE
+ 
+ # Generate icon_bytes.c from the app icon PNG.
+ add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.c ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.h
+-    COMMAND file_to_c ${CMAKE_SOURCE_DIR}/icons/app.png icon_bytes ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.c ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.h
++    COMMAND ${DK64_FILE_TO_C} ${CMAKE_SOURCE_DIR}/icons/app.png icon_bytes ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.c ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.h
+     DEPENDS ${CMAKE_SOURCE_DIR}/icons/app.png
+ )
+ 
+@@ -319,7 +350,7 @@ set (DXC_CS_OPTS "${DXC_COMMON_OPTS}" "-E" "CSMain" "-T cs_6_0")
+ set (DXC_GS_OPTS "${DXC_COMMON_OPTS}" "-E" "GSMain" "-T gs_6_0")
+ set (DXC_RT_OPTS "${DXC_COMMON_OPTS}" "-D" "RT_SHADER" "-T" "lib_6_3" "-fspv-target-env=vulkan1.1spirv1.4" "-fspv-extension=SPV_KHR_ray_tracing" "-fspv-extension=SPV_EXT_descriptor_indexing")
+ 
+-if (${WIN32})
++if (CMAKE_HOST_WIN32)
+     set (DXC "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxc.exe")
+     add_compile_definitions(NOMINMAX)
+ else()
+@@ -368,7 +399,7 @@ foreach(NRM_FILE ${NRM_FILES})
+ 
+     add_custom_command(
+         OUTPUT ${OUT_C} ${OUT_H}
+-        COMMAND file_to_c ${NRM_FILE} ${NRM_NAME} ${OUT_C} ${OUT_H}
++        COMMAND ${DK64_FILE_TO_C} ${NRM_FILE} ${NRM_NAME} ${OUT_C} ${OUT_H}
+         DEPENDS ${NRM_FILE}
+     )
+ 
+diff --git a/lib/SlotMap/slot_map.h b/lib/SlotMap/slot_map.h
+index 467c01b..833c887 100644
+--- a/lib/SlotMap/slot_map.h
++++ b/lib/SlotMap/slot_map.h
+@@ -48,7 +48,16 @@
+ #else
+ // Posix
+ #include <stdlib.h>
++#if defined(__ANDROID__)
++static inline void* slot_map_android_alloc(size_t sizeInBytes, size_t alignment) {
++    void* ptr = nullptr;
++    if (posix_memalign(&ptr, alignment, sizeInBytes) != 0) return nullptr;
++    return ptr;
++}
++#define SLOT_MAP_ALLOC(sizeInBytes, alignment) slot_map_android_alloc(sizeInBytes, alignment)
++#else
+ #define SLOT_MAP_ALLOC(sizeInBytes, alignment) aligned_alloc(alignment, sizeInBytes)
++#endif
+ #define SLOT_MAP_FREE(ptr) free(ptr)
+ #endif
+ 
+diff --git a/src/main/main.cpp b/src/main/main.cpp
+index ec03f76..973de98 100644
+--- a/src/main/main.cpp
++++ b/src/main/main.cpp
+@@ -14,7 +14,9 @@
+ #include "ultramodern/ultra64.h"
+ #include "ultramodern/ultramodern.hpp"
+ #include "ultramodern/config.hpp"
++#if !defined(__ANDROID__)
+ #define SDL_MAIN_HANDLED
++#endif
+ #ifdef _WIN32
+ #include "SDL.h"
+ #else
+@@ -46,6 +48,11 @@
+ #include "recomp_data.h"
+ #include "ovl_patches.hpp"
+ #include "theme.h"
++#if defined(__ANDROID__)
++#include "android_bridge.h"
++#include <unistd.h>
++#include <android/log.h>
++#endif
+ #include "librecomp/game.hpp"
+ #include "librecomp/mods.hpp"
+ #include "librecomp/helpers.hpp"
+@@ -144,7 +151,7 @@ ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
+     SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
+     SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
+ 
+-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC) > 0) {
++    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMECONTROLLER | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC) < 0) {
+         exit_error("Failed to initialize SDL2: %s\n", SDL_GetError());
+     }
+ 
+@@ -220,6 +227,9 @@ SDL_Window* window;
+ 
+ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::gfx_data_t) {
+     uint32_t flags = SDL_WINDOW_RESIZABLE;
++#if defined(__ANDROID__)
++    flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
++#endif
+ 
+ #if defined(__APPLE__)
+     flags |= SDL_WINDOW_METAL;
+@@ -241,7 +251,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
+     bool choose_kazooie_icon = (rand() % 2 == 0);
+     HICON new_icon = LoadIcon(GetModuleHandle(NULL), choose_kazooie_icon ? MAKEINTRESOURCE(APP_ICON_K) : MAKEINTRESOURCE(APP_ICON_B));
+     SendMessage(wmInfo.info.win.window, WM_SETICON, ICON_SMALL2, (LPARAM)(new_icon));
+-#elif defined(__linux__)
++#elif defined(__linux__) && !defined(__ANDROID__)
+     SetImageAsIcon("icons/app.png", window);
+ #endif
+ 
+@@ -402,6 +412,7 @@ bool reset_audio(uint32_t output_freq) {
+     audio_device = SDL_OpenAudioDevice(nullptr, false, &spec_desired, nullptr, 0);
+     if (audio_device == 0) {
+         std::string audio_error = std::string("No audio device could be found. Please make sure an audio device is available.\nError opening audio device: ") + std::string(SDL_GetError());
++        fprintf(stderr, "%s\n", audio_error.c_str());
+         recompui::message_box(audio_error.c_str());
+         return false;
+     }
+@@ -680,6 +691,25 @@ void on_launcher_init(recompui::LauncherMenu *menu) {
+ #define REGISTER_FUNC(name) recomp::overlays::register_base_export(#name, name)
+ 
+ int main(int argc, char** argv) {
++#if defined(__ANDROID__)
++    if (argc != 8) {
++        __android_log_print(ANDROID_LOG_ERROR, "DK64", "Unexpected SDL argument count: %d", argc);
++        return EXIT_FAILURE;
++    }
++    SDL_setenv("APP_PROGRAM_PATH", argv[1], 1);
++    SDL_setenv("APP_FOLDER_PATH", argv[2], 1);
++    std::filesystem::current_path(argv[1]);
++    const auto log_path = std::filesystem::path{argv[2]} / "native.log";
++    if (freopen(log_path.c_str(), "w", stdout)) {
++        dup2(fileno(stdout), fileno(stderr));
++        setvbuf(stdout, nullptr, _IOLBF, 0);
++        setvbuf(stderr, nullptr, _IONBF, 0);
++    }
++    fprintf(stdout, "Starting DK64 Android: program=%s data=%s\n", argv[1], argv[2]);
++    if (!dk64_android_initialize_graphics(argv[2], argv[3], argv[4], argv[5], argv[6], argv[7])) {
++        return EXIT_FAILURE;
++    }
++#endif
+     (void)argc;
+     (void)argv;
+     recomp::Version project_version{};
+@@ -781,6 +811,16 @@ int main(int argc, char** argv) {
+         recomp::register_game(game);
+     }
+ 
++#if defined(__ANDROID__)
++    // ROM is imported through Android DocumentsUI before entering SDLActivity.
++    std::u8string imported_game_id = supported_games.front().game_id;
++    auto rom_result = recomp::select_rom(std::filesystem::path{argv[2]} / "imported.z64", imported_game_id);
++    if (rom_result != recomp::RomValidationError::Good) {
++        fprintf(stderr, "Android ROM import failed: %d\n", static_cast<int>(rom_result));
++        return EXIT_FAILURE;
++    }
++#endif
++
+     REGISTER_FUNC(recomp_get_window_resolution);
+     REGISTER_FUNC(recomp_get_target_aspect_ratio);
+     REGISTER_FUNC(recomp_get_target_framerate);
+@@ -840,7 +880,11 @@ int main(int argc, char** argv) {
+ 
+     ultramodern::input::callbacks_t input_callbacks{
+         .poll_input = recompinput::poll_inputs,
++#if defined(__ANDROID__)
++        .get_input = dk64_android_get_input,
++#else
+         .get_input = recompinput::profiles::get_n64_input,
++#endif
+         .set_rumble = recompinput::set_rumble,
+         .get_connected_device_info = get_connected_device_info,
+     };

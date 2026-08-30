@@ -1,3 +1,31 @@
+# DK64 Recompiled — experimental Android fork
+
+This fork adds the Android ARM64 port in **[android-port/](android-port/README.md)**. It is based on upstream **1.0.1** and is independent of the upstream maintainers. The Android changes were developed with AI assistance; validation limits and known issues are recorded in [the port notes](android-port/PORT-NOTES.md).
+
+- Tested on a Lenovo TB520FU (Snapdragon 8 Gen 3 / Adreno 750, Android 16).
+- The intro and early gameplay render with an imported compatible Turnip driver; the user confirms Tag Anywhere works in-game.
+- Includes ROM import, touch controls, per-app graphics-driver import, and Android mod import/enable/disable/remove controls.
+- Full gameplay, save persistence, lifecycle behavior and the final native mod-button handoff still need broader device testing.
+- Archipelago and LAN co-op are **not implemented**; their feasibility notes are included separately.
+
+**No ROM, generated game sources, imported driver, signing key or APK is added by this Android-port commit.** Supply your own supported original US ROM to generate and build the game locally. This fork keeps the upstream license and dependency attribution; it does not submit AI-generated code to upstream.
+
+## Get the Android sources
+
+```sh
+git clone --branch codex/android-port https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android.git DK64-Android
+cd DK64-Android/android-port
+python tools/bootstrap_sources.py
+```
+
+Then follow **[the Windows/WSL Android build instructions](android-port/README.md#build-on-windows)**. The maintained Android project, platform integration, tools, six dependency patches and lock file are all under `android-port`. The lock file restores 41 pinned repositories into ignored local directories. The desktop source tree below remains at the upstream base revision; Android-specific changes to it are maintained as reproducible patches.
+
+Validation for this source snapshot: ARM64 native build and APK checks, 19 mod archive/storage checks, 12 driver archive checks, and real Tag Anywhere loading on the tablet. Host checks are not a substitute for complete gameplay testing. No GitHub Actions build or downloadable release is claimed by this source publication; the inherited desktop workflows require upstream-only build inputs.
+
+---
+
+## Original upstream documentation
+
 # Donkey Kong 64: Recompiled
 Donkey Kong 64: Recompiled is a project that uses [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) to **statically recompile** Donkey Kong 64 into a native port with many new features and enhancements. This project uses [RT64](https://github.com/rt64/rt64) as the rendering engine to provide some of these enhancements.
 

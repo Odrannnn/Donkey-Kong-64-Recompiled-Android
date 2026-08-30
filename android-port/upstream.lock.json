@@ -1,0 +1,216 @@
+{
+  "schema": 1,
+  "repositories": [
+    {
+      "path": "upstream",
+      "url": "https://github.com/Rainchus/Donkey-Kong-64-Recompiled.git",
+      "commit": "c6730d2f244d7b2d9d8c47c94c2eecfa1bfb1a43",
+      "patch": "patches/upstream.patch"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime",
+      "url": "https://github.com/Killklli/N64ModernRuntime",
+      "commit": "45bd0180f85c89c19ae45d30190be54c9d577904",
+      "patch": "patches/upstream__lib__N64ModernRuntime.patch"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/N64Recomp",
+      "url": "https://github.com/N64Recomp/N64Recomp",
+      "commit": "81213c1831fab2521a6a5459c67b63437d67e253"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/N64Recomp/lib/ELFIO",
+      "url": "https://github.com/serge1/ELFIO",
+      "commit": "ad8b641f9682b6091ba8b9f7c8152255c1a2c803"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/N64Recomp/lib/fmt",
+      "url": "https://github.com/fmtlib/fmt",
+      "commit": "407c905e45ad75fc29bf0f9bb7c5c2fd3475976f"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/N64Recomp/lib/rabbitizer",
+      "url": "https://github.com/Decompollaborate/rabbitizer",
+      "commit": "e0d8003047938e2ec3697eaf8d61a84d11d17b43"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/N64Recomp/lib/sljit",
+      "url": "https://github.com/zherczeg/sljit",
+      "commit": "f6326087b3404efb07c6d3deed97b3c3b8098c0c"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/N64Recomp/lib/tomlplusplus",
+      "url": "https://github.com/marzer/tomlplusplus",
+      "commit": "1f7884e59165e517462f922e7b6de131bd9844f3"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/thirdparty/miniz",
+      "url": "https://github.com/richgel999/miniz",
+      "commit": "8573fd7cd6f49b262a0ccc447f3c6acfc415e556"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/thirdparty/o1heap",
+      "url": "https://github.com/N64Recomp/o1heap",
+      "commit": "a124b850791db2a33f7354d2b0aa7da821cef6f5"
+    },
+    {
+      "path": "upstream/lib/N64ModernRuntime/thirdparty/xxHash",
+      "url": "https://github.com/Cyan4973/xxHash.git",
+      "commit": "ac3a25da3d957d9ef3e4114d9f8332d34ce83a46"
+    },
+    {
+      "path": "upstream/lib/RecompFrontend",
+      "url": "https://github.com/Killklli/RecompFrontend",
+      "commit": "6d187f7964a44801a4095287acc23a043033aff3",
+      "patch": "patches/upstream__lib__RecompFrontend.patch"
+    },
+    {
+      "path": "upstream/lib/RecompFrontend/recompui/lib/RmlUi",
+      "url": "https://github.com/mikke89/RmlUi",
+      "commit": "7a06f27db04fe5d13a5dacc19b2b4544673a4eca"
+    },
+    {
+      "path": "upstream/lib/RecompFrontend/recompui/lib/freetype-windows-binaries",
+      "url": "https://github.com/ubawurinna/freetype-windows-binaries/",
+      "commit": "9124a2073f3a7055726be46bab1d54bf14f68f63"
+    },
+    {
+      "path": "upstream/lib/RecompFrontend/recompui/lib/lunasvg",
+      "url": "https://github.com/sammycage/lunasvg",
+      "commit": "83c58df8103dc7dca423dfd824992af94d49bed6"
+    },
+    {
+      "path": "upstream/lib/dk64_decomp",
+      "url": "https://gitlab.com/dk64_decomp/dk64",
+      "commit": "2431154b417d4e80a6bfaf38291213c059be59f7"
+    },
+    {
+      "path": "upstream/lib/rt64",
+      "url": "https://github.com/rt64/rt64",
+      "commit": "cc6d137a3cca95faa018f24ebb5ca765dbfa7cf2",
+      "patch": "patches/upstream__lib__rt64.patch"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/ddspp",
+      "url": "https://github.com/redorav/ddspp.git",
+      "commit": "21ca0c4319dfd5a161c5f2a0c406e8f60194ea6c"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/dxc",
+      "url": "https://github.com/rt64/dxc-bin",
+      "commit": "cc15e715ee378a4f675b335bd1071ff105873fc8"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/hlslpp",
+      "url": "https://github.com/redorav/hlslpp",
+      "commit": "6f5274c66132e8f951c400103d897582b8f21491"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/im3d",
+      "url": "https://github.com/john-chapman/im3d",
+      "commit": "d03941725fd0bd08c78c46e3e5b0265526e9d060"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/imgui",
+      "url": "https://github.com/ocornut/imgui",
+      "commit": "277ae93c41314ba5f4c7444f37c4319cdf07e8cf"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/implot",
+      "url": "https://github.com/epezent/implot",
+      "commit": "f156599faefe316f7dd20fe6c783bf87c8bb6fd9"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/mupen64plus-core",
+      "url": "https://github.com/mupen64plus/mupen64plus-core",
+      "commit": "860fac3fbae94194a392c1d9857e185eda6d083e"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/mupen64plus-win32-deps",
+      "url": "https://github.com/mupen64plus/mupen64plus-win32-deps",
+      "commit": "de8111fdcb89144abc16c85650ce4e21e028bfb5"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/nativefiledialog-extended",
+      "url": "https://github.com/btzy/nativefiledialog-extended",
+      "commit": "17b6e8ce219c0677f94b63636abb9296b28841ca",
+      "patch": "patches/upstream__lib__rt64__src__contrib__nativefiledialog-extended.patch"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/plume",
+      "url": "https://github.com/renderbag/plume.git",
+      "commit": "d890ac899e505fb30040e037a4037cdeca68f033",
+      "patch": "patches/upstream__lib__rt64__src__contrib__plume.patch"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/plume/contrib/D3D12MemoryAllocator",
+      "url": "https://github.com/GPUOpen-LibrariesAndSDKs/D3D12MemoryAllocator",
+      "commit": "9ef66bc14edd10dee0de3a545b98578363552f66"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/plume/contrib/Vulkan-Headers",
+      "url": "https://github.com/KhronosGroup/Vulkan-Headers",
+      "commit": "2fa203425eb4af9dfc6b03f97ef72b0b5bcb8350"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/plume/contrib/VulkanMemoryAllocator",
+      "url": "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator",
+      "commit": "29b35ea4232688c0f42cdff0c10848290760a417"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/plume/contrib/volk",
+      "url": "https://github.com/zeux/volk",
+      "commit": "be3dbd49bf77052665e96b6c7484af855e7e5f67"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/re-spirv",
+      "url": "https://github.com/rt64/re-spirv",
+      "commit": "5d6b756ee62760f71b65d37e41a0b5a3dab90507"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/re-spirv/external/SPIRV-Headers",
+      "url": "https://github.com/KhronosGroup/SPIRV-Headers",
+      "commit": "f013f08e4455bcc1f0eed8e3dd5e2009682656d9"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/spirv-cross",
+      "url": "https://github.com/KhronosGroup/SPIRV-Cross.git",
+      "commit": "6173e24b31f09a0c3217103a130e74c4ddec14a6"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/stb",
+      "url": "https://github.com/nothings/stb",
+      "commit": "ae721c50eaf761660b4f90cc590453cdb0c2acd0"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/xxHash",
+      "url": "https://github.com/Cyan4973/xxHash",
+      "commit": "1864a50c9b5cf8500d8e9e61ed92aa0dd3772750"
+    },
+    {
+      "path": "upstream/lib/rt64/src/contrib/zstd",
+      "url": "https://github.com/facebook/zstd",
+      "commit": "0ff651dd876823b99fa5c5f53292be28381aee9b"
+    },
+    {
+      "path": ".local/deps/SDL",
+      "url": "https://github.com/libsdl-org/SDL.git",
+      "commit": "5d249570393f7a37e037abf22cd6012a4cc56a71"
+    },
+    {
+      "path": ".local/deps/freetype",
+      "url": "https://github.com/freetype/freetype.git",
+      "commit": "42608f77f20749dd6ddc9e0536788eaad70ea4b5"
+    },
+    {
+      "path": ".local/deps/adrenotools",
+      "url": "https://github.com/bylaws/libadrenotools.git",
+      "commit": "8fae8ce254dfc1344527e05301e43f37dea2df80"
+    },
+    {
+      "path": ".local/deps/adrenotools/lib/linkernsbypass",
+      "url": "https://github.com/bylaws/liblinkernsbypass/",
+      "commit": "aa3975893d83ef1bc84c321ec60c65fbf1287887"
+    }
+  ]
+}

@@ -1,0 +1,65 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'io.github.dk64port'
+    compileSdk 35
+    ndkVersion '27.3.13750724'
+    defaultConfig {
+        applicationId 'io.github.dk64port'
+        minSdk 26
+        targetSdk 35
+        versionCode 2
+        versionName '1.0.1-android-dev3'
+        ndk { abiFilters 'arm64-v8a' }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    packagingOptions { jniLibs { useLegacyPackaging true } }
+    sourceSets.main {
+        java.srcDir '../../.local/deps/SDL/android-project/app/src/main/java'
+        jniLibs.srcDir layout.buildDirectory.dir('generated/jniLibs')
+        assets.srcDir layout.buildDirectory.dir('generated/assets')
+    }
+}
+
+// Native compilation is owned by tools/Build-Android.ps1, using one CMake tree
+// shared with command-line development instead of compiling the game twice.
+tasks.register('stageNativeLibraries', Sync) {
+    into layout.buildDirectory.dir('generated/jniLibs/arm64-v8a')
+    from '../../.local/game-arm64/libmain.so'
+    from '../../.local/prefix-arm64/lib/libSDL2.so'
+    from '../../.local/game-arm64/libc++_shared.so'
+    from '../../.local/game-arm64/libdk64vulkan.so'
+    from '../../.local/game-arm64/libhook_impl.so'
+    from '../../.local/game-arm64/libmain_hook.so'
+    from '../../.local/game-arm64/libfile_redirect_hook.so'
+    from '../../.local/game-arm64/libgsl_alloc_hook.so'
+    if (project.hasProperty('vulkanValidation')) {
+        from '../../.local/validation-layers/android-binaries-1.4.357.0/arm64-v8a/libVkLayer_khronos_validation.so'
+    }
+    doFirst {
+        ['../../.local/game-arm64/libmain.so', '../../.local/prefix-arm64/lib/libSDL2.so',
+         '../../.local/game-arm64/libc++_shared.so', '../../.local/game-arm64/libdk64vulkan.so',
+         '../../.local/game-arm64/libhook_impl.so', '../../.local/game-arm64/libmain_hook.so',
+         '../../.local/game-arm64/libfile_redirect_hook.so', '../../.local/game-arm64/libgsl_alloc_hook.so'].each {
+            if (!file(it).isFile()) throw new GradleException("Missing native input ${it}; run tools/Build-Android.ps1")
+        }
+    }
+}
+tasks.register('stageAssets', Sync) {
+    into layout.buildDirectory.dir('generated/assets/program')
+    from('../../upstream/assets') { into 'assets' }
+    from '../../upstream/recompcontrollerdb.txt'
+    from('../../upstream/LICENSE') { into 'licenses/DK64-Recompiled' }
+    from('../../.local/deps/adrenotools/LICENSE') { into 'licenses/AdrenoTools' }
+    from('../../.local/deps/adrenotools/lib/linkernsbypass/LICENSE') { into 'licenses/liblinkernsbypass' }
+    from('../../.local/deps/SDL/LICENSE.txt') { into 'licenses/SDL' }
+    from('../../PORT-NOTES.md') { into 'licenses' }
+}
+tasks.named('preBuild') {
+    dependsOn 'stageNativeLibraries', 'stageAssets'
+}

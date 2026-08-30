@@ -1,0 +1,218 @@
+diff --git a/lib/SlotMap/slot_map.h b/lib/SlotMap/slot_map.h
+index 467c01b..833c887 100644
+--- a/lib/SlotMap/slot_map.h
++++ b/lib/SlotMap/slot_map.h
+@@ -48,7 +48,16 @@
+ #else
+ // Posix
+ #include <stdlib.h>
++#if defined(__ANDROID__)
++static inline void* slot_map_android_alloc(size_t sizeInBytes, size_t alignment) {
++    void* ptr = nullptr;
++    if (posix_memalign(&ptr, alignment, sizeInBytes) != 0) return nullptr;
++    return ptr;
++}
++#define SLOT_MAP_ALLOC(sizeInBytes, alignment) slot_map_android_alloc(sizeInBytes, alignment)
++#else
+ #define SLOT_MAP_ALLOC(sizeInBytes, alignment) aligned_alloc(alignment, sizeInBytes)
++#endif
+ #define SLOT_MAP_FREE(ptr) free(ptr)
+ #endif
+ 
+diff --git a/recompinput/CMakeLists.txt b/recompinput/CMakeLists.txt
+index 899372b..0488ca1 100644
+--- a/recompinput/CMakeLists.txt
++++ b/recompinput/CMakeLists.txt
+@@ -42,7 +42,7 @@ target_include_directories(recompinput PRIVATE
+ 
+ if (WIN32)
+     target_include_directories(recompinput PRIVATE ${sdl2_SOURCE_DIR}/include)
+-elseif (APPLE OR CMAKE_SYSTEM_NAME MATCHES "Linux")
++elseif (APPLE OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+     target_include_directories(recompinput PRIVATE ${SDL2_INCLUDE_DIRS})
+ endif()
+ 
+diff --git a/recompui/CMakeLists.txt b/recompui/CMakeLists.txt
+index a714ce5..81fd3ef 100644
+--- a/recompui/CMakeLists.txt
++++ b/recompui/CMakeLists.txt
+@@ -24,6 +24,10 @@ endif()
+ 
+ set(RML_BACKEND_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/lib/RmlUi/Backends/RmlUi_Platform_SDL.cpp)
+ 
++if(ANDROID)
++    list(FILTER COMPOSITES_CXX_SOURCES EXCLUDE REGEX "ui_mod_discovery_.*\\.cpp$")
++endif()
++
+ # Define the library
+ add_library(recompui STATIC
+     ${API_CXX_SOURCES}
+@@ -98,15 +102,21 @@ target_include_directories(recompui PUBLIC
+ 
+ build_vertex_shader(recompui "shaders/InterfaceVS.hlsl" "shaders/InterfaceVS.hlsl")
+ build_pixel_shader(recompui "shaders/InterfacePS.hlsl" "shaders/InterfacePS.hlsl")
++if(ANDROID)
++    set_source_files_properties(src/renderer/ui_renderer.cpp PROPERTIES OBJECT_DEPENDS
++        "${CMAKE_BINARY_DIR}/shaders/InterfaceVS.hlsl.spirv.h;${CMAKE_BINARY_DIR}/shaders/InterfacePS.hlsl.spirv.h")
++endif()
+ 
+ # Find curl package from vcpkg
+-find_package(CURL REQUIRED)
++if(NOT ANDROID)
++    find_package(CURL REQUIRED)
++endif()
+ 
+ target_include_directories(recompui PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/include/recompui")
+ 
+ if (WIN32)
+     target_include_directories(recompui PRIVATE ${sdl2_SOURCE_DIR}/include)
+-elseif (APPLE OR CMAKE_SYSTEM_NAME MATCHES "Linux")
++elseif (APPLE OR CMAKE_SYSTEM_NAME MATCHES "Linux|Android")
+     target_include_directories(recompui PRIVATE ${SDL2_INCLUDE_DIRS})
+ endif()
+ 
+@@ -123,5 +133,5 @@ target_link_libraries(recompui PUBLIC
+     RmlUi::Debugger
+     lunasvg
+     miniz
+-    CURL::libcurl
++    $<$<NOT:$<BOOL:${ANDROID}>>:CURL::libcurl>
+ )
+diff --git a/recompui/src/composites/ui_mod_menu.cpp b/recompui/src/composites/ui_mod_menu.cpp
+index 19f761c..17e9c73 100644
+--- a/recompui/src/composites/ui_mod_menu.cpp
++++ b/recompui/src/composites/ui_mod_menu.cpp
+@@ -287,9 +287,15 @@ void ModMenu::refresh_mods(bool scan_mods) {
+     create_mod_list();
+ }
+ 
++#if defined(__ANDROID__)
++extern "C" void dk64_android_open_mod_manager(bool install);
++#endif
++
+ void ModMenu::open_mods_folder() {
+     std::filesystem::path mods_directory = recomp::mods::get_mods_directory();
+-#if defined(WIN32)
++#if defined(__ANDROID__)
++    dk64_android_open_mod_manager(false);
++#elif defined(WIN32)
+     std::wstring path_wstr = mods_directory.wstring();
+     ShellExecuteW(NULL, L"open", path_wstr.c_str(), NULL, NULL, SW_SHOWDEFAULT);
+ #elif defined(__linux__)
+@@ -304,6 +310,9 @@ void ModMenu::open_mods_folder() {
+ }
+ 
+ void ModMenu::open_install_dialog() {
++#if defined(__ANDROID__)
++    dk64_android_open_mod_manager(true);
++#else
+     recompui::file::open_file_dialog_multiple([](bool success, const std::list<std::filesystem::path>& paths) {
+         if (success) {
+             ContextId old_context = recompui::try_close_current_context();
+@@ -315,12 +324,15 @@ void ModMenu::open_install_dialog() {
+             }
+         }
+     });
++#endif
+ }
+ 
+ void ModMenu::open_mod_downloads() {
++#if !defined(__ANDROID__)
+     if (mod_downloads_panel) {
+         mod_downloads_panel->show();
+     }
++#endif
+ }
+ 
+ void ModMenu::mod_toggled(bool enabled) {
+@@ -646,7 +658,10 @@ void ModMenu::process_event(const Event &e) {
+             mod_scan_queued = false;
+         }
+         if (ultramodern::is_game_started()) {
++#if !defined(__ANDROID__)
++            // Android hands off to its manager after closing the current game session.
+             install_mods_button->set_enabled(false);
++#endif
+             if (mod_downloads_button != nullptr) {
+                 mod_downloads_button->set_enabled(false);
+             }
+@@ -729,7 +744,11 @@ ModMenu::ModMenu(ResourceId rid, Element *parent) : Element(rid, parent) {
+         footer_container->set_border_bottom_right_radius(16.0f);
+         {
+             Button* configure_button = mod_details_panel->get_configure_button();
++#if defined(__ANDROID__)
++            const bool has_discovery = false;
++#else
+             bool has_discovery = !get_discovery_url().empty();
++#endif
+ 
+             install_mods_button = context.create_element<Button>(footer_container, "Install Mods", recompui::ButtonStyle::Primary);
+             install_mods_button->add_pressed_callback([this](){ open_install_dialog(); });
+@@ -747,7 +766,11 @@ ModMenu::ModMenu(ResourceId rid, Element *parent) : Element(rid, parent) {
+             refresh_button = context.create_element<IconButton>(footer_container, "icons/Reset.svg", recompui::ButtonStyle::Secondary, recompui::IconButtonSize::XLarge);
+             refresh_button->add_pressed_callback([this](){ refresh_mods(true); });
+ 
++#if defined(__ANDROID__)
++            mods_folder_button = context.create_element<Button>(footer_container, "Manage Mods", recompui::ButtonStyle::Tertiary);
++#else
+             mods_folder_button = context.create_element<Button>(footer_container, "Open Mods Folder", recompui::ButtonStyle::Tertiary);
++#endif
+             mods_folder_button->add_pressed_callback([this](){ open_mods_folder(); });
+         } // footer_container
+     } // this
+@@ -757,10 +780,12 @@ ModMenu::ModMenu(ResourceId rid, Element *parent) : Element(rid, parent) {
+     mod_entry_floating_view->set_position(Position::Absolute);
+     mod_entry_floating_view->set_selected(true);
+ 
++    #if !defined(__ANDROID__)
+     // Create the mod discovery panel
+     printf("Creating mod discovery panel\n");
+     mod_downloads_panel = context.create_element<ModDownloadsPanel>(this);
+     printf("Mod discovery panel created: %p\n", mod_downloads_panel);
++    #endif
+ 
+     context.close();
+     create_mod_config_modal();
+diff --git a/recompui/src/renderer/ui_renderer.cpp b/recompui/src/renderer/ui_renderer.cpp
+index 556df18..fb9baa1 100644
+--- a/recompui/src/renderer/ui_renderer.cpp
++++ b/recompui/src/renderer/ui_renderer.cpp
+@@ -163,10 +163,12 @@ public:
+         device_ = device;
+ 
+         // Enable 4X MSAA if supported by the device.
++#if !defined(__ANDROID__)
+         const plume::RenderSampleCounts desired_sample_count = plume::RenderSampleCount::COUNT_8;
+         if (device_->getSampleCountsSupported(SwapChainFormat) & desired_sample_count) {
+             multisampling_.sampleCount = desired_sample_count;
+         }
++#endif
+ 
+         vertex_buffer_.flags_ = plume::RenderBufferFlag::VERTEX;
+         index_buffer_.flags_ = plume::RenderBufferFlag::INDEX;
+diff --git a/recompui/src/util/file.cpp b/recompui/src/util/file.cpp
+index 7ee84ed..357a740 100644
+--- a/recompui/src/util/file.cpp
++++ b/recompui/src/util/file.cpp
+@@ -83,6 +83,9 @@ namespace recompui {
+         }
+ 
+         CoTaskMemFree(known_path);
++#elif defined(__ANDROID__)
++        if (const char* folder = getenv("APP_FOLDER_PATH")) return folder;
++        return std::filesystem::path{SDL_AndroidGetInternalStoragePath()} / "data";
+ #elif defined(__linux__) || defined(__APPLE__)
+         // check for APP_FOLDER_PATH env var
+         if (getenv("APP_FOLDER_PATH") != nullptr) {
+@@ -115,7 +118,10 @@ namespace recompui {
+     }
+ 
+     std::filesystem::path file::get_program_path() {
+-#if defined(__APPLE__)
++#if defined(__ANDROID__)
++        if (const char* program = getenv("APP_PROGRAM_PATH")) return program;
++        return std::filesystem::path{SDL_AndroidGetInternalStoragePath()} / "program";
++#elif defined(__APPLE__)
+         return file::apple::get_bundle_resource_directory();
+ #elif defined(__linux__) && defined(RECOMP_FLATPAK)
+         return "/app/bin";

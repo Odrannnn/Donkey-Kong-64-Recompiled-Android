@@ -1,0 +1,28 @@
+# Local source checkouts are pinned in upstream.lock.json.
+/upstream/
+/reference-banjo/
+/.local/
+/artifacts/
+**/.gradle/
+**/.cxx/
+**/build/
+**/local.properties
+*.z64
+*.n64
+*.v64
+*.rom
+*.apk
+*.aab
+*.jks
+*.keystore
+
+
+# Local credentials, compiler products and editor state.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.class
+*.pyc
+__pycache__/

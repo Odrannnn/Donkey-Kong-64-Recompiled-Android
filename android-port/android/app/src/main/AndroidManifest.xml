@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Optional so the diagnostic can explain why a device is unsupported. -->
+    <uses-feature android:name="android.hardware.vulkan.version" android:required="false" />
+    <application
+        android:label="DK64 Recompiled (Dev)"
+        android:theme="@android:style/Theme.Material.Light.NoActionBar"
+        android:allowBackup="false"
+        android:supportsRtl="true">
+        <activity android:name=".MainActivity" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".ModActivity" android:exported="false"
+            android:launchMode="singleTop"
+            android:enableOnBackInvokedCallback="false"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode|navigation|density" />
+        <activity android:name=".GameActivity"
+            android:exported="false"
+            android:process=":game"
+            android:screenOrientation="sensorLandscape"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|uiMode|navigation|density"
+            android:launchMode="singleTask" />
+    </application>
+</manifest>

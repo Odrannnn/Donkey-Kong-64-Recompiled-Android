@@ -1,0 +1,283 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 0789c20..4cd8ae4 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -17,7 +17,11 @@ string(COMPARE EQUAL ${CMAKE_SYSTEM_NAME} "Linux" IS_LINUX)
+ 
+ # Project options
+ include(CMakeDependentOption)
+-cmake_dependent_option(PLUME_SDL_VULKAN_ENABLED "Enable SDL Vulkan integration" OFF IS_LINUX OFF)
++if(ANDROID)
++    option(PLUME_SDL_VULKAN_ENABLED "Enable SDL Vulkan integration" ON)
++else()
++    cmake_dependent_option(PLUME_SDL_VULKAN_ENABLED "Enable SDL Vulkan integration" OFF IS_LINUX OFF)
++endif()
+ cmake_dependent_option(PLUME_D3D12_AGILITY_SDK_ENABLED "Enable D3D12 Agility SDK" OFF WIN32 OFF)
+ cmake_dependent_option(PLUME_APPLE_RETINA_ENABLED "Enable Apple Retina display support" ON APPLE ON)
+ option(PLUME_BUILD_EXAMPLES "Build example applications" OFF)
+@@ -89,7 +93,7 @@ if(WIN32)
+     )
+ endif()
+ 
+-if(PLUME_SDL_VULKAN_ENABLED)
++if(PLUME_SDL_VULKAN_ENABLED OR CMAKE_SYSTEM_NAME MATCHES "Android")
+     target_compile_definitions(plume PUBLIC PLUME_SDL_VULKAN_ENABLED)
+     target_include_directories(plume PUBLIC ${SDL2_INCLUDE_DIRS})
+ endif()
+diff --git a/plume_render_interface_types.h b/plume_render_interface_types.h
+index 9dcfedf..d6153a5 100644
+--- a/plume_render_interface_types.h
++++ b/plume_render_interface_types.h
+@@ -37,10 +37,10 @@ namespace plume {
+ #if defined(_WIN64)
+     // Native HWND handle to the target window.
+     typedef HWND RenderWindow;
+-#elif defined(__ANDROID__)
+-    typedef ANativeWindow* RenderWindow;
+ #elif defined(PLUME_SDL_VULKAN_ENABLED)
+     typedef SDL_Window *RenderWindow;
++#elif defined(__ANDROID__)
++    typedef ANativeWindow* RenderWindow;
+ #elif defined(__linux__)
+     struct RenderWindow {
+         Display* display;
+diff --git a/plume_vulkan.cpp b/plume_vulkan.cpp
+index f1dd503..ca27457 100644
+--- a/plume_vulkan.cpp
++++ b/plume_vulkan.cpp
+@@ -11,6 +11,7 @@
+ #include "plume_vulkan.h"
+ 
+ #include <algorithm>
++#include <atomic>
+ #include <cmath>
+ #include <climits>
+ #include <unordered_map>
+@@ -19,7 +20,7 @@
+ #   include "render/plume_dlss.h"
+ #endif
+ 
+-#ifndef NDEBUG
++#if !defined(NDEBUG) || defined(__ANDROID__)
+ #   define VULKAN_VALIDATION_LAYER_ENABLED
+ #   define VULKAN_OBJECT_NAMES_ENABLED
+ #endif
+@@ -28,6 +29,21 @@
+ // - Fix resource pools.
+ 
+ namespace plume {
++    static std::atomic<VulkanLoaderInitializeCallback> g_vulkanLoaderInitializeCallback{nullptr};
++    static std::atomic<VulkanPhysicalDeviceObserver> g_vulkanPhysicalDeviceObserver{nullptr};
++
++    void SetVulkanLoaderInitializeCallback(VulkanLoaderInitializeCallback callback) {
++        g_vulkanLoaderInitializeCallback.store(callback, std::memory_order_release);
++    }
++
++    void SetVulkanPhysicalDeviceObserver(VulkanPhysicalDeviceObserver observer) {
++        g_vulkanPhysicalDeviceObserver.store(observer, std::memory_order_release);
++    }
++
++#if defined(__ANDROID__)
++    static std::atomic<bool> g_androidSurfaceReady{true};
++#endif
++
+     // Backend constants.
+ 
+     // Required buffer alignment for acceleration structures.
+@@ -51,7 +67,9 @@ namespace plume {
+ #   if defined(_WIN64)
+         VK_KHR_WIN32_SURFACE_EXTENSION_NAME,
+ #   elif defined(__ANDROID__)
++#   if !defined(PLUME_SDL_VULKAN_ENABLED)
+         VK_KHR_ANDROID_SURFACE_EXTENSION_NAME,
++#   endif
+ #   elif defined(__linux__)
+ #   if !defined(PLUME_SDL_VULKAN_ENABLED)
+         VK_KHR_XLIB_SURFACE_EXTENSION_NAME,
+@@ -2197,6 +2215,16 @@ namespace plume {
+         // Check if the format we requested is part of the supported surface formats.
+         std::vector<VkSurfaceFormatKHR> compatibleSurfaceFormats;
+         VkFormat requestedFormat = toVk(desc.format);
++#if defined(__ANDROID__)
++        // Android drivers may not expose the desktop-preferred RT64 swapchain
++        // format. Use the native surface format rather than leaving the swapchain
++        // format undefined or failing construction before resize().
++        if (surfaceFormatCount == 0) {
++            fprintf(stderr, "No surface formats were found.\n");
++            return;
++        }
++        pickedSurfaceFormat = surfaceFormats[0];
++#else
+         for (uint32_t i = 0; i < surfaceFormatCount; i++) {
+             if (surfaceFormats[i].format == requestedFormat) {
+                 compatibleSurfaceFormats.emplace_back(surfaceFormats[i]);
+@@ -2220,6 +2248,7 @@ namespace plume {
+         if (pickedSurfaceFormat.format == VK_FORMAT_UNDEFINED) {
+             pickedSurfaceFormat = compatibleSurfaceFormats[0];
+         }
++#endif
+ 
+         // Sets the required presentation mode.
+         setVsyncEnabled(true);
+@@ -2310,6 +2339,11 @@ namespace plume {
+     }
+ 
+     bool VulkanSwapChain::resize() {
++#if defined(__ANDROID__)
++        if (!g_androidSurfaceReady.load(std::memory_order_acquire)) {
++            return false;
++        }
++#endif
+         getWindowSize(width, height);
+ 
+         // Don't recreate the swap chain at all if the window doesn't have a valid size.
+@@ -2320,9 +2354,43 @@ namespace plume {
+         // Destroy any image view references to the current swap chain.
+         releaseImageViews();
+ 
++#if defined(__ANDROID__) && defined(PLUME_SDL_VULKAN_ENABLED)
++        // Android can destroy and recreate the underlying native window while
++        // keeping the same SDL_Window alive (for example when DocumentsUI is
++        // opened for mod installation). A VkSurfaceKHR is tied to the old
++        // native window, so rebuilding only the swapchain can leave rendering
++        // stuck on an abandoned BufferQueue. SDL/Android allows only one active
++        // Vulkan surface connection to the SurfaceView, so destroy the old
++        // surface before asking SDL for a replacement. If creation fails, leave
++        // surface == VK_NULL_HANDLE and vk == VK_NULL_HANDLE so the next resize
++        // attempt can retry instead of becoming permanently unrecoverable.
++        releaseSwapChain();
++        VulkanInterface *renderInterface = commandQueue->device->renderInterface;
++        if (surface != VK_NULL_HANDLE) {
++            vkDestroySurfaceKHR(renderInterface->instance, surface, nullptr);
++            surface = VK_NULL_HANDLE;
++        }
++
++        SDL_bool sdlRes = SDL_Vulkan_CreateSurface(desc.renderWindow, renderInterface->instance, &surface);
++        if (sdlRes == SDL_FALSE) {
++            fprintf(stderr, "SDL_Vulkan_CreateSurface failed during Android resize with error %s.\n", SDL_GetError());
++            surface = VK_NULL_HANDLE;
++            return false;
++        }
++#endif
++
+         // Query surface capabilities to get the valid extent bounds.
+         VkSurfaceCapabilitiesKHR surfaceCapabilities = {};
+         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(commandQueue->device->physicalDevice, surface, &surfaceCapabilities);
++#if defined(__ANDROID__)
++        // Android's currentExtent is authoritative for the native surface. SDL's
++        // window size can temporarily disagree around Activity/inset changes.
++        if (surfaceCapabilities.currentExtent.width != UINT32_MAX &&
++            surfaceCapabilities.currentExtent.height != UINT32_MAX) {
++            width = surfaceCapabilities.currentExtent.width;
++            height = surfaceCapabilities.currentExtent.height;
++        }
++#endif
+ 
+         // Clamp the extent to the surface capabilities' min/max bounds.
+         // This is required because the window size may differ from the valid surface extent
+@@ -2371,6 +2439,18 @@ namespace plume {
+         }
+ 
+         desc.textureCount = retrievedImageCount;
++#if defined(__ANDROID__)
++        switch (pickedSurfaceFormat.format) {
++        case VK_FORMAT_B8G8R8A8_UNORM:
++            desc.format = RenderFormat::B8G8R8A8_UNORM;
++            break;
++        case VK_FORMAT_R8G8B8A8_UNORM:
++            desc.format = RenderFormat::R8G8B8A8_UNORM;
++            break;
++        default:
++            break;
++        }
++#endif
+ 
+         std::vector<VkImage> images(desc.textureCount);
+         res = vkGetSwapchainImagesKHR(commandQueue->device->vk, vk, &desc.textureCount, images.data());
+@@ -2401,6 +2481,11 @@ namespace plume {
+     }
+ 
+     bool VulkanSwapChain::needsResize() const {
++#if defined(__ANDROID__)
++        if (!g_androidSurfaceReady.load(std::memory_order_acquire)) {
++            return true;
++        }
++#endif
+         uint32_t windowWidth, windowHeight;
+         getWindowSize(windowWidth, windowHeight);
+         return (vk == VK_NULL_HANDLE) || (windowWidth != width) || (windowHeight != height) || (requiredPresentMode != createdPresentMode);
+@@ -2443,6 +2528,11 @@ namespace plume {
+     }
+ 
+     bool VulkanSwapChain::isEmpty() const {
++#if defined(__ANDROID__)
++        if (!g_androidSurfaceReady.load(std::memory_order_acquire)) {
++            return true;
++        }
++#endif
+         return (vk == VK_NULL_HANDLE) || (width == 0) || (height == 0);
+     }
+ 
+@@ -3828,6 +3918,9 @@ namespace plume {
+ 
+         // Store properties.
+         vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
++        if (const auto observer = g_vulkanPhysicalDeviceObserver.load(std::memory_order_acquire)) {
++            observer(physicalDeviceProperties);
++        }
+ 
+         // Check for supported features.
+         void *featuresChain = nullptr;
+@@ -4464,7 +4557,8 @@ namespace plume {
+ #else
+     VulkanInterface::VulkanInterface() {
+ #endif
+-        VkResult res = volkInitialize();
++        const auto loaderInitialize = g_vulkanLoaderInitializeCallback.load(std::memory_order_acquire);
++        VkResult res = loaderInitialize ? loaderInitialize() : volkInitialize();
+         if (res != VK_SUCCESS) {
+             fprintf(stderr, "volkInitialize failed with error code 0x%X.\n", res);
+             return;
+@@ -4639,3 +4733,9 @@ namespace plume {
+     }
+ #endif
+ };
++
++#if defined(__ANDROID__)
++extern "C" void plume_set_android_surface_ready(int ready) {
++    plume::g_androidSurfaceReady.store(ready != 0, std::memory_order_release);
++}
++#endif
+diff --git a/plume_vulkan.h b/plume_vulkan.h
+index 0a1edbe..49616c7 100644
+--- a/plume_vulkan.h
++++ b/plume_vulkan.h
+@@ -16,9 +16,11 @@
+ 
+ #if defined(_WIN64)
+ #define VK_USE_PLATFORM_WIN32_KHR
++#elif defined(PLUME_SDL_VULKAN_ENABLED)
++// SDL creates the platform surface for Vulkan; do not force the Android surface path while using SDL.
+ #elif defined(__ANDROID__)
+ #define VK_USE_PLATFORM_ANDROID_KHR
+-#elif defined(__linux__) && !defined(PLUME_SDL_VULKAN_ENABLED)
++#elif defined(__linux__)
+ #define VK_USE_PLATFORM_XLIB_KHR
+ #elif defined(__APPLE__)
+ #define VK_USE_PLATFORM_METAL_EXT
+@@ -42,6 +44,15 @@
+ #endif
+ 
+ namespace plume {
++    // Optional host hooks for applications that provide their own Vulkan loader.
++    // Register these before creating a VulkanInterface. Passing nullptr restores
++    // Plume's default behavior.
++    using VulkanLoaderInitializeCallback = VkResult (*)();
++    using VulkanPhysicalDeviceObserver = void (*)(const VkPhysicalDeviceProperties &properties);
++
++    void SetVulkanLoaderInitializeCallback(VulkanLoaderInitializeCallback callback);
++    void SetVulkanPhysicalDeviceObserver(VulkanPhysicalDeviceObserver observer);
++
+     struct VulkanCommandQueue;
+     struct VulkanDevice;
+     struct VulkanInterface;
