@@ -644,8 +644,6 @@ RECOMP_PATCH void func_global_asm_806EA628(void) {
         recomp_get_first_person_inverted_axes(&invX, &invY);
         recomp_get_mouse_deltas(&dMouseX, &dMouseY);
         recomp_get_gyro_deltas(&dGyroY, &dGyroX);
-        if (invX) stick_x = -stick_x;
-        if (!invY) stick_y = -stick_y;
         if (stick_x == 0) {
             if (dGyroX != 0.0f) {
                 stick_x = -dGyroX;
@@ -660,6 +658,8 @@ RECOMP_PATCH void func_global_asm_806EA628(void) {
                 stick_y = dMouseY;
             }
         }
+        if (invX) stick_x = -stick_x;
+        if (!invY) stick_y = -stick_y;
         temp_a0 = extra_player_info_pointer->unk104->additional_actor_data;
         temp_v1 = &temp_a0->unkB2;
         *temp_v1 -= (stick_x * 0.08 * func_global_asm_806EA2D8() * 4096.0) / 360.0;
