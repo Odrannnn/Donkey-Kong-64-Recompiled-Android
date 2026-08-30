@@ -346,6 +346,7 @@ jobs:
             dxil.dll
             SDL2.dll
             libcurl.dll
+            zlib1.dll
             assets/
             recompcontrollerdb.txt
       - name: Archive Debug Files
@@ -431,7 +432,7 @@ jobs:
       - name: Archive DK64Recomp
         uses: actions/upload-artifact@v4
         with:
-          name: DK64Recompiled-${{ runner.os }}-${{ matrix.type }}
+          name: DK64Recompiled-${{ runner.os }}-ARM64-${{ matrix.type }}
           path: DK64Recompiled.zip
   build-macos-x64:
     runs-on: macos-15-intel
@@ -510,5 +511,5 @@ jobs:
       - name: Archive DK64Recomp
         uses: actions/upload-artifact@v4
         with:
-          name: DK64Recompiled-${{ runner.os }}-${{ matrix.type }}
+          name: DK64Recompiled-${{ runner.os }}-X64-${{ matrix.type }}
           path: DK64Recompiled.zip
