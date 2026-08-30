@@ -334,7 +334,7 @@ jobs:
           Copy-Artifact -FileName "dxil.dll" -Destination "dxil.dll"
           Copy-Artifact -FileName "SDL2.dll" -Destination "SDL2.dll"
           Copy-Artifact -FileName "libcurl.dll" -Destination "libcurl.dll"
-          Copy-Artifact -FileName "z.dll" -Destination "z.dll"
+          Copy-Artifact -FileName "zlib1.dll" -Destination "zlib1.dll"
           Copy-Artifact -FileName "DK64Recompiled.pdb" -Destination "DK64Recompiled.pdb"
       - name: Archive DK64Recomp
         uses: actions/upload-artifact@v4
