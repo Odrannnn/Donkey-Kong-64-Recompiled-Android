@@ -10,13 +10,22 @@ android {
         applicationId 'io.github.dk64port'
         minSdk 26
         targetSdk 35
-        versionCode 2
-        versionName '1.0.1-android-dev3'
+        versionCode 3
+        versionName '1.0.1-android-dev4'
         ndk { abiFilters 'arm64-v8a' }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
+    }
+    buildTypes {
+        release {
+            // Retain the existing local development certificate so early testers can update
+            // without uninstalling. Keep its private keystore outside the repository.
+            signingConfig signingConfigs.debug
+            debuggable false
+            minifyEnabled false
+        }
     }
     packagingOptions { jniLibs { useLegacyPackaging true } }
     sourceSets.main {
@@ -59,6 +68,14 @@ tasks.register('stageAssets', Sync) {
     from('../../.local/deps/adrenotools/lib/linkernsbypass/LICENSE') { into 'licenses/liblinkernsbypass' }
     from('../../.local/deps/SDL/LICENSE.txt') { into 'licenses/SDL' }
     from('../../PORT-NOTES.md') { into 'licenses' }
+    from('../../upstream.lock.json') { into 'licenses' }
+    def sourceLock = new groovy.json.JsonSlurper().parse(file('../../upstream.lock.json'))
+    sourceLock.repositories.each { dependency ->
+        from('../../' + dependency.path) {
+            include 'LICENSE*', 'COPYING*', 'NOTICE*', 'docs/FTL.TXT', 'docs/GPLv2.TXT', 'docs/LICENSE.TXT'
+            into 'licenses/dependencies/' + dependency.path.replace('/', '__').replace('.local__', '')
+        }
+    }
 }
 tasks.named('preBuild') {
     dependsOn 'stageNativeLibraries', 'stageAssets'

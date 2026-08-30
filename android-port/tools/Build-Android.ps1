@@ -1,6 +1,7 @@
 param(
     [string]$SdkPath = "$env:LOCALAPPDATA/Android/Sdk",
     [string]$PythonPath = 'python',
+    [ValidateSet('Debug', 'Release')][string]$Variant = 'Debug',
     [switch]$NativeOnly
 )
 $ErrorActionPreference = 'Stop'
@@ -25,6 +26,6 @@ if ($LASTEXITCODE -ne 0) { throw 'Native compilation failed.' }
 Copy-Item -LiteralPath "$ndk/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/aarch64-linux-android/libc++_shared.so" -Destination $build
 if (-not $NativeOnly) {
     $env:ANDROID_HOME = $SdkPath
-    & "$root/android/gradlew.bat" --no-daemon -p "$root/android" :app:assembleDebug
+    & "$root/android/gradlew.bat" --no-daemon -p "$root/android" ":app:assemble$Variant"
     if ($LASTEXITCODE -ne 0) { throw 'APK packaging failed.' }
 }

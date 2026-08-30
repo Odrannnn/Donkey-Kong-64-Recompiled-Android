@@ -14,7 +14,9 @@ Tested driver: KIMCHI's regular [Turnip v26.0.0 R8](https://github.com/K11MCH1/A
 
 ## Use the development APK
 
-1. Build as below, then install `android/app/build/outputs/apk/debug/app-debug.apk`. Prebuilt APKs are not included in this source commit. Updates using the same local debug signing key preserve app data.
+**Graphics driver warning:** the system Vulkan driver may cause a black screen or crash. A compatible Turnip driver may be required on supported Qualcomm Adreno GPUs. Turnip is not compatible with every GPU and is imported separately; custom-driver import requires Android 9 or newer. The same warning is displayed above **Launch game** in the app.
+
+1. Download **[Android dev4 (experimental prerelease)](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev4)**, or build it below. The signed APK uses the same certificate as the earlier local development builds so those installations can update without uninstalling.
 2. Choose **Import US DK64 ROM** and select your own original US ROM. `.z64`, `.n64` and `.v64` byte orders are supported; validation uses the normalized SHA-1, not the extension. Existing user files are never modified.
 3. To try Turnip, choose **Import graphics driver ZIP** and select a trusted ARM64 driver package compatible with the tablet's GPU and Android version. Standard `meta.json` / `libraryName` packages are supported. ZIPs without metadata must have an unambiguous `libvulkan_freedreno.so`, `vulkan.freedreno.so` or `libvulkan.so`.
 4. Press **Launch game**. The selected driver applies to the new game process. The launcher shows the selection and the last initialized GPU separately.
@@ -67,7 +69,11 @@ The normalized US ROM SHA-1 is `cf806ff2603640a748fca5026ded28802f1f4a50`. Recom
 
 The Gradle wrapper packages prebuilt native libraries from `.local/game-arm64`; running Gradle alone does **not** rebuild C++. Use `Build-Android.ps1` after native source edits. The output is `android/app/build/outputs/apk/debug/app-debug.apk`. Python and SDK paths can be supplied explicitly to the build scripts. Keep the local debug signing key if you want future builds to update this installation without uninstalling it.
 
+For the non-debuggable prerelease variant, run `./tools/Build-Android.ps1 -Variant Release` (plus `-PythonPath` if needed). Its output is `android/app/build/outputs/apk/release/app-release.apk`. This early-release configuration deliberately reuses the local development signing identity so existing testers can update. Keep that private keystore backed up and outside Git. A build made on another machine normally has a different signing certificate.
+
 ## Diagnostics and maintenance
+
+The `run-as` commands below require the **Debug** variant; they are unavailable in the non-debuggable prerelease APK. Launcher status and system crash reports remain available.
 
 ```powershell
 $adb = "$env:LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe"

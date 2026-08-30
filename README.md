@@ -8,6 +8,14 @@ This fork adds the Android ARM64 port in **[android-port/](android-port/README.m
 
 **No ROM or generated game sources is added by this Android-port commit.** Supply your own supported original US ROM to generate and build the game locally. This fork keeps the upstream license and dependency attribution; it does not submit AI-generated code to upstream.
 
+## Android download
+
+Download **[Android dev4 — experimental prerelease](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev4)** for ARM64 devices. Supply your own supported original US ROM.
+
+**Graphics driver warning:** the system Vulkan driver may cause a black screen or crash. Compatible Qualcomm Adreno devices may require an imported Turnip driver. Turnip is not compatible with every GPU and is not bundled. The launcher displays this warning before Launch game.
+
+The APK is non-debuggable, with the existing development signing identity retained for update compatibility. Read the release notes for requirements and testing limitations.
+
 ## Get the Android sources
 
 ```sh
@@ -18,7 +26,7 @@ python tools/bootstrap_sources.py
 
 Then follow **[the Windows/WSL Android build instructions](android-port/README.md#build-on-windows)**. The maintained Android project, platform integration, tools, six dependency patches and lock file are all under `android-port`. The lock file restores 41 pinned repositories into ignored local directories. The desktop source tree below remains at the upstream base revision; Android-specific changes to it are maintained as reproducible patches.
 
-Validation for this source snapshot: ARM64 native build and APK checks, 19 mod archive/storage checks, 12 driver archive checks, and real Tag Anywhere loading on the tablet. Host checks are not a substitute for complete gameplay testing. No GitHub Actions build or downloadable release is claimed by this source publication; the inherited desktop workflows require upstream-only build inputs.
+Validation for this source snapshot: ARM64 native build and APK checks, 19 mod archive/storage checks, 12 driver archive checks, and real Tag Anywhere loading on the tablet. Host checks are not a substitute for complete gameplay testing. The Android prerelease is built locally from its tagged sources; no GitHub Actions build is claimed. The inherited desktop workflows require upstream-only build inputs.
 
 ---
 

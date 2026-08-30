@@ -47,3 +47,12 @@ The user subsequently confirmed that Tag Anywhere works fine in-game. LAN campai
 Test driver: KIMCHI's regular `Turnip_v26.0.0_R8.zip` from [this release](https://github.com/K11MCH1/AdrenoToolsDrivers/releases/tag/v26.0.0-rc08), downloaded separately and checked against the release asset SHA-256 `e634db0f929e2205e95511c769071817d0390180ec72c8e690bc76375e813715`. Imported through Android DocumentsUI using the same path available to users. No Turnip library is packaged in the APK.
 
 An official Khronos Android validation layer was downloaded into ignored `.local/validation-layers` for diagnosis. Normal APKs exclude it. For local diagnosis only, the matching layer can be packaged using Gradle `-PvulkanValidation`; the development Android Plume build discovers it if present. Do not distribute diagnostic layers or user-imported Turnip files accidentally.
+
+## Android dev4 prerelease — 2026-08-30
+
+- Added a persistent, high-contrast warning above Launch game: the system Vulkan driver may fail with a black screen/crash, and a compatible Turnip driver may be required on supported Adreno GPUs. It also explains the Android 9 requirement for custom-driver import.
+- Version `1.0.1-android-dev4`, version code 3. The `Release` Gradle variant is non-debuggable and signed with the existing local development certificate to preserve update compatibility. No private signing material is distributed. Debug builds remain available for `run-as` diagnostics.
+- Packaged the pinned dependencies' available root license/copyright/notice files, FreeType notices, and source lock metadata alongside the existing attribution. The APK includes 43 dependency notice files.
+- Verified native/Gradle build, release lint checks, APK architecture/content and 16 KiB alignment, warning presence in packaged code, and valid APK signing with the same certificate as dev3. All 19 mod archive/storage checks and 12 driver checks pass.
+- Previous tablet evidence covers Turnip initialization, intro/early gameplay and user-confirmed Tag Anywhere behavior. The dev4 warning and release packaging have not received a fresh on-device gameplay test; the active game session was left untouched. Full gameplay/save/lifecycle coverage and the final native mod-menu handoff remain incomplete.
+- Publication is an experimental GitHub prerelease, with an APK and SHA-256 checksum; ROMs, imported graphics drivers, signing keys and third-party mods are excluded.

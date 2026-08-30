@@ -60,6 +60,14 @@ public final class MainActivity extends Activity {
             startActivityForResult(intent, PICK_ROM);
         });
         column.addView(pick);
+        TextView driverWarning = new TextView(this);
+        driverWarning.setText("Graphics driver warning\nThe system Vulkan driver may not work and can cause a black screen or crash. A compatible Turnip driver may be required on supported Qualcomm Adreno GPUs. Use Import graphics driver ZIP below. Turnip is not compatible with every GPU; custom-driver import requires Android 9 or newer.");
+        driverWarning.setTextSize(16);
+        driverWarning.setTextColor(android.graphics.Color.rgb(92, 52, 0));
+        driverWarning.setBackgroundColor(android.graphics.Color.rgb(255, 243, 205));
+        int warningPadding = (int)(12 * getResources().getDisplayMetrics().density);
+        driverWarning.setPadding(warningPadding, warningPadding, warningPadding, warningPadding);
+        column.addView(driverWarning);
         play = new Button(this);
         play.setText("Launch game");
         play.setEnabled(false);
