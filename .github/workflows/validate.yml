@@ -334,6 +334,7 @@ jobs:
           Copy-Artifact -FileName "dxil.dll" -Destination "dxil.dll"
           Copy-Artifact -FileName "SDL2.dll" -Destination "SDL2.dll"
           Copy-Artifact -FileName "libcurl.dll" -Destination "libcurl.dll"
+          Copy-Artifact -FileName "z.dll" -Destination "z.dll"
           Copy-Artifact -FileName "DK64Recompiled.pdb" -Destination "DK64Recompiled.pdb"
       - name: Archive DK64Recomp
         uses: actions/upload-artifact@v4
@@ -497,7 +498,7 @@ jobs:
           
           cmake -DCMAKE_BUILD_TYPE=${{ matrix.type }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_C_COMPILER_LAUNCHER=ccache -DCMAKE_MAKE_PROGRAM=ninja -G Ninja -S . -B cmake-build \
           -DPATCHES_LD=/opt/local/bin/ld.lld-mp-18 -DCMAKE_AR=/opt/local/bin/llvm-ar-mp-18 -DPATCHES_C_COMPILER=/opt/local/bin/clang-mp-18 \
-          -DCMAKE_OSX_ARCHITECTURES="x84_64" \
+          -DCMAKE_OSX_ARCHITECTURES="x86_64" \
           -DCMAKE_OSX_DEPLOYMENT_TARGET="15.0" \
           -DCURL_ROOT="$(brew --prefix curl)"
           
