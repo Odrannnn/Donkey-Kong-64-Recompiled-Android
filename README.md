@@ -5,10 +5,8 @@ This fork adds the Android ARM64 port in **[android-port/](android-port/README.m
 - Tested on a Lenovo TB520FU (Snapdragon 8 Gen 3 / Adreno 750, Android 16).
 - The intro and early gameplay render with an imported compatible Turnip driver; the user confirms Tag Anywhere works in-game.
 - Includes ROM import, touch controls, per-app graphics-driver import, and Android mod import/enable/disable/remove controls.
-- Full gameplay, save persistence, lifecycle behavior and the final native mod-button handoff still need broader device testing.
-- Archipelago and LAN co-op are **not implemented**; their feasibility notes are included separately.
 
-**No ROM, generated game sources, imported driver, signing key or APK is added by this Android-port commit.** Supply your own supported original US ROM to generate and build the game locally. This fork keeps the upstream license and dependency attribution; it does not submit AI-generated code to upstream.
+**No ROM or generated game sources is added by this Android-port commit.** Supply your own supported original US ROM to generate and build the game locally. This fork keeps the upstream license and dependency attribution; it does not submit AI-generated code to upstream.
 
 ## Get the Android sources
 
