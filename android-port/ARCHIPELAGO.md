@@ -2,6 +2,8 @@
 
 Status: researched on 2026-08-30; **Archipelago is not implemented or playable in this Android port**. No compatible released DK64 recomp Archipelago mod was found in the repositories and releases checked. Android mod management was subsequently added in dev3; the Archipelago-specific work below remains outstanding.
 
+Later local dev5 development adds generic Android native-companion ZIP import and Internet permission, with host package/recovery tests. The findings below describe the earlier baseline; this installer work does not implement an Archipelago client or prove native companion execution on the tablet.
+
 ## Feasibility
 
 A dedicated DK64 recomp mod, paired with an Android-compatible Archipelago client, is a plausible route. The existing mod runtime is a foundation, not a complete integration. This would be a substantial game-logic port as well as a networking feature.

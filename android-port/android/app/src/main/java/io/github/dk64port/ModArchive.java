@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.*;
 import java.util.*;
 import java.util.zip.*;
+import org.json.JSONException;
 
 /** Private staging only. No archive path is ever used as a destination path. */
 final class ModArchive {
@@ -15,6 +16,7 @@ final class ModArchive {
         final Path file;
         final String filename;
         final byte[] manifest;
+        final Map<String, Path> libraries = new LinkedHashMap<>();
         Candidate(Path file, String filename, byte[] manifest) {
             this.file = file; this.filename = filename; this.manifest = manifest;
         }
@@ -24,6 +26,7 @@ final class ModArchive {
         byte[] manifest;
         boolean textures;
         final List<String> mods = new ArrayList<>();
+        final List<String> libraries = new ArrayList<>();
     }
     static boolean isMod(String name) {
         String lower = name.toLowerCase(Locale.ROOT);
@@ -45,7 +48,7 @@ final class ModArchive {
             output.write(buffer, 0, count);
         }
     }
-    static Candidate prepare(InputStream input, String name, Path staging) throws IOException {
+    static Candidate prepare(InputStream input, String name, Path staging) throws IOException, JSONException {
         checkFilename(name);
         if (!isMod(name) && !name.toLowerCase(Locale.ROOT).endsWith(".zip")) {
             throw new IOException("Choose a .nrm, .rtz or mod ZIP. ROMs, drivers and .apworld files are not recomp mods.");
@@ -55,8 +58,13 @@ final class ModArchive {
             copyBounded(input, output, MAX_INPUT);
         }
         Budget budget = new Budget();
-        Scan scan = scan(source, budget);
-        if (isMod(name)) return candidate(source, name, scan);
+        Scan scan = scan(source, budget, !isMod(name));
+        if (isMod(name)) {
+            Candidate candidate = candidate(source, name, scan);
+            if (!NativeMod.libraries(candidate.manifest).isEmpty())
+                throw new IOException("Import the Android ZIP containing this .nrm and its native .so bridge together.");
+            return candidate;
+        }
         if (scan.mods.size() != 1) {
             throw new IOException("The ZIP must contain exactly one .nrm or .rtz. For a multi-mod bundle, import its mods separately.");
         }
@@ -68,7 +76,25 @@ final class ModArchive {
                 OutputStream output = Files.newOutputStream(extracted, StandardOpenOption.CREATE_NEW)) {
             copyBounded(stream, output, MAX_INPUT);
         }
-        return candidate(extracted, filename, scan(extracted, budget));
+        Candidate candidate = candidate(extracted, filename, scan(extracted, budget, false));
+        Set<String> expected = NativeMod.libraries(candidate.manifest);
+        String parent = entryName.substring(0, entryName.length() - filename.length());
+        Set<String> expectedPaths = new HashSet<>();
+        for (String library : expected) expectedPaths.add(parent + library);
+        if (!expectedPaths.equals(new HashSet<>(scan.libraries)))
+            throw new IOException("ZIP must contain exactly the declared Android .so bridge beside the .nrm, with no extra native libraries.");
+        try (ZipFile zip = new ZipFile(source.toFile())) {
+            for (String library : expected) {
+                Path target = staging.resolve(library); // Name validated by NativeMod, never an archive path.
+                try (InputStream stream = zip.getInputStream(zip.getEntry(parent + library));
+                        OutputStream output = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW)) {
+                    copyBounded(stream, output, NativeMod.MAX_LIBRARY);
+                }
+                NativeMod.validate(target);
+                candidate.libraries.put(library, target);
+            }
+        }
+        return candidate;
     }
     private static Candidate candidate(Path file, String name, Scan scan) throws IOException {
         if (scan.manifest == null && (!name.toLowerCase(Locale.ROOT).endsWith(".rtz") || !scan.textures)) {
@@ -90,7 +116,7 @@ final class ModArchive {
             }
         }
     }
-    private static Scan scan(Path source, Budget budget) throws IOException {
+    private static Scan scan(Path source, Budget budget, boolean allowCompanions) throws IOException {
         Scan result = new Scan();
         Set<String> seen = new HashSet<>();
         try (ZipFile zip = new ZipFile(source.toFile())) {
@@ -107,7 +133,10 @@ final class ModArchive {
                 if (!seen.add(name.toLowerCase(Locale.ROOT))) throw new IOException("Duplicate path in mod package.");
                 String lower = name.toLowerCase(Locale.ROOT);
                 if (lower.endsWith(".dll") || lower.endsWith(".dylib") || lower.endsWith(".so") || lower.contains(".so.")) {
-                    throw new IOException("Native-library mod packages are not supported by this importer yet. Desktop libraries cannot run on Android.");
+                    if (!allowCompanions || !name.endsWith(".so") || entry.isDirectory())
+                        throw new IOException("Use an Android ZIP with the .so beside the .nrm. Embedded, desktop and versioned native libraries are unsupported.");
+                    if (entry.getSize() > NativeMod.MAX_LIBRARY) throw new IOException("Native bridge is too large.");
+                    result.libraries.add(name);
                 }
                 if (entry.isDirectory()) continue;
                 if (entry.getSize() < 0 || entry.getSize() > MAX_EXPANDED - budget.bytes) throw new IOException("Expanded mod package is too large.");

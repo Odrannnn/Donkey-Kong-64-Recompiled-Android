@@ -7,6 +7,7 @@ import subprocess
 import xml.etree.ElementTree as ET
 
 parser = argparse.ArgumentParser()
+parser.add_argument("--serial", help="Explicit ADB device serial; use when phone and tablet are both connected")
 parser.add_argument("action", choices=["inspect", "tap", "screenshot"])
 parser.add_argument("value", nargs="?")
 args = parser.parse_args()
@@ -14,7 +15,8 @@ sdk = Path(os.environ.get("ANDROID_HOME", Path(os.environ.get("LOCALAPPDATA", ""
 adb = str(sdk / "platform-tools/adb.exe")
 
 def run(*command):
-    return subprocess.check_output([adb, *command])
+    target = ["-s", args.serial] if args.serial else []
+    return subprocess.check_output([adb, *target, *command], timeout=30)
 
 if args.action == "screenshot":
     if not args.value:

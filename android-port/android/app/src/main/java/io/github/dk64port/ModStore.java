@@ -11,14 +11,20 @@ final class ModStore {
     final File filesDirectory;
     final Path directory;
     private final Path configPath;
+    private final ModTransaction transaction;
     static final class Mod {
         final Path file;
         final String id, name, version, error;
         final boolean defaultEnabled;
+        final Set<String> libraries;
         boolean enabled;
         Mod(Path file, String id, String name, String version, boolean defaultEnabled, String error) {
+            this(file, id, name, version, defaultEnabled, error, Collections.emptySet());
+        }
+        Mod(Path file, String id, String name, String version, boolean defaultEnabled, String error, Set<String> libraries) {
             this.file = file; this.id = id; this.name = name; this.version = version;
             this.defaultEnabled = defaultEnabled; this.error = error;
+            this.libraries = libraries;
         }
     }
     static final class Pending implements AutoCloseable {
@@ -31,10 +37,16 @@ final class ModStore {
         @Override public void close() throws IOException { DriverArchive.removePrivateTree(staging); }
     }
     ModStore(File filesDirectory) throws IOException {
+        this(filesDirectory, null);
+    }
+    ModStore(File filesDirectory, ModTransaction.Checkpoint checkpoint) throws IOException {
         this.filesDirectory = filesDirectory;
         directory = new File(filesDirectory, "data/mods").toPath();
         configPath = new File(filesDirectory, "data/mods.json").toPath();
         Files.createDirectories(directory);
+        if (!Files.isDirectory(directory, LinkOption.NOFOLLOW_LINKS)) throw new IOException("Invalid mods directory.");
+        transaction = new ModTransaction(filesDirectory, directory, checkpoint);
+        transaction.recover();
     }
     Pending prepare(InputStream input, String filename) throws Exception {
         Path stagingRoot = new File(filesDirectory, "mod-staging").toPath();
@@ -69,13 +81,10 @@ final class ModStore {
         if (!version.matches(versionPattern) || !minimum.matches(versionPattern)) throw new IOException("Invalid version in mod manifest.");
         JSONArray authors = json.getJSONArray("authors");
         for (int i = 0; i < authors.length(); i++) if (!(authors.get(i) instanceof String)) throw new IOException("Invalid mod authors.");
-        Object libraries = json.opt("native_libraries");
-        if (libraries != null && (!(libraries instanceof JSONObject) || ((JSONObject)libraries).length() != 0)) {
-            throw new IOException("This mod requires native libraries. Android native-mod packages are not supported by this importer yet.");
-        }
+        Set<String> libraries = NativeMod.libraries(bytes);
         Object enabled = json.opt("enabled_by_default");
         if (enabled != null && !(enabled instanceof Boolean)) throw new IOException("Invalid enabled_by_default field.");
-        return new Mod(path, id, name, version, enabled == null || (Boolean)enabled, null);
+        return new Mod(path, id, name, version, enabled == null || (Boolean)enabled, null, libraries);
     }
     List<Mod> list() throws Exception {
         JSONObject config = readConfig();
@@ -86,7 +95,14 @@ final class ModStore {
             for (Path path : entries) {
                 if (!ModArchive.isMod(path.getFileName().toString()) || !Files.isRegularFile(path, LinkOption.NOFOLLOW_LINKS)) continue;
                 Mod mod;
-                try { mod = describe(path, path.getFileName().toString(), ModArchive.readManifest(path)); }
+                try {
+                    mod = describe(path, path.getFileName().toString(), ModArchive.readManifest(path));
+                    for (String library : mod.libraries) if (!Files.isRegularFile(directory.resolve(library), LinkOption.NOFOLLOW_LINKS)) {
+                        mod = new Mod(path, mod.id, mod.name, mod.version, mod.defaultEnabled,
+                            "Missing native bridge. Reimport the complete Android ZIP.", mod.libraries);
+                        break;
+                    }
+                }
                 catch (Exception error) { mod = new Mod(path, "", path.getFileName().toString(), "", false, error.getMessage()); }
                 mod.enabled = mod.error == null && (enabled.contains(mod.id) || (!order.contains(mod.id) && mod.defaultEnabled));
                 mods.add(mod);
@@ -102,15 +118,37 @@ final class ModStore {
     void install(Pending pending) throws Exception {
         List<Mod> installed = list();
         Path target = directory.resolve(pending.candidate.filename);
+        Mod previous = null;
         int matching = 0;
-        for (Mod mod : installed) if (mod.id.equals(pending.mod.id)) { target = mod.file; matching++; }
+        for (Mod mod : installed) if (mod.id.equals(pending.mod.id)) { target = mod.file; previous = mod; matching++; }
         if (matching > 1) throw new IOException("Duplicate installed mod IDs. Remove duplicate versions first.");
         if (matching == 1 && !target.toString().endsWith(pending.candidate.filename.substring(pending.candidate.filename.length() - 4))) {
             throw new IOException("This update changes the mod container type. Remove the old version first.");
         }
         if (Files.exists(target) && matching == 0) throw new IOException("A different mod already uses that filename. Rename your import or remove that file first.");
-        // One mod per transaction: atomic replacement leaves either the old or the new complete archive.
-        Files.move(pending.candidate.file, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        if (!pending.mod.libraries.equals(pending.candidate.libraries.keySet())) throw new IOException("Incomplete native bundle.");
+        Set<String> oldLibraries = previous == null ? Collections.emptySet() : previous.libraries;
+        Set<String> affectedLibraries = new LinkedHashSet<>(oldLibraries);
+        affectedLibraries.addAll(pending.mod.libraries);
+        checkLibraryOwnership(affectedLibraries, previous, installed);
+        for (String name : pending.mod.libraries) {
+            NativeMod.validate(pending.candidate.libraries.get(name));
+            if (!oldLibraries.contains(name) && Files.exists(directory.resolve(name), LinkOption.NOFOLLOW_LINKS))
+                throw new IOException("A native library with this filename already exists. It will not be overwritten: " + name);
+        }
+        Set<String> newNames = new HashSet<>(pending.mod.libraries);
+        newNames.add(target.getFileName().toString());
+        try (DirectoryStream<Path> entries = Files.newDirectoryStream(directory)) {
+            for (Path entry : entries) for (String name : newNames) {
+                String existing = entry.getFileName().toString();
+                if (!existing.equals(name) && existing.equalsIgnoreCase(name)) throw new IOException("Case-conflicting installed filename: " + name);
+            }
+        }
+        Map<String, Path> replacements = new LinkedHashMap<>(pending.candidate.libraries);
+        replacements.put(target.getFileName().toString(), pending.candidate.file);
+        Set<String> removals = new LinkedHashSet<>(oldLibraries);
+        removals.removeAll(pending.mod.libraries);
+        transaction.apply(replacements, removals);
     }
     void setEnabled(Mod mod, boolean enabled) throws Exception {
         checkedPath(mod.file);
@@ -124,8 +162,24 @@ final class ModStore {
         config.put("mod_order", new JSONArray(order));
         writeConfig(config);
     }
-    void remove(Mod mod) throws IOException {
-        Files.delete(checkedPath(mod.file)); // Keep saves, per-mod settings and remembered activation state.
+    private static void checkLibraryOwnership(Set<String> libraries, Mod owner, List<Mod> installed) throws IOException {
+        for (Mod other : installed) {
+            if (owner != null && other.file.equals(owner.file)) continue;
+            for (String library : libraries) for (String occupied : other.libraries)
+                if (library.equalsIgnoreCase(occupied)) throw new IOException("Native bridge filename is also used by " + other.name + ". Shared companion files are unsupported.");
+        }
+    }
+    void remove(Mod mod) throws Exception {
+        Path file = checkedPath(mod.file);
+        List<Mod> installed = list();
+        Mod current = null;
+        for (Mod candidate : installed) if (candidate.file.equals(file)) current = candidate;
+        if (current == null) throw new IOException("Mod is no longer installed.");
+        // If metadata is corrupt, delete only the selected archive; never guess ownership of a .so.
+        checkLibraryOwnership(current.libraries, current, installed);
+        Set<String> removals = new LinkedHashSet<>(current.libraries);
+        removals.add(file.getFileName().toString());
+        transaction.apply(Collections.emptyMap(), removals); // Keep saves and per-mod configuration.
     }
     private Path checkedPath(Path path) throws IOException {
         if (!path.toAbsolutePath().normalize().getParent().equals(directory.toAbsolutePath().normalize())

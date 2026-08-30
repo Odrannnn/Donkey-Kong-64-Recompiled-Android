@@ -11,8 +11,10 @@ New-Item -ItemType Directory -Force $classes, $scratch | Out-Null
 $localJson = Join-Path $root '.local/mod-tests/json.jar'
 Copy-Item -LiteralPath $JsonJar -Destination $localJson -Force
 $JsonJar = $localJson
-$sources = @('DriverArchive', 'ModSession', 'ModArchive', 'ModStore') | ForEach-Object { "$root/android/app/src/main/java/io/github/dk64port/$_.java" }
-& "$JavaHome/bin/javac.exe" -cp $JsonJar -d $classes @sources "$root/tools/tests/ModImportTest.java"
+$sources = @('DriverArchive', 'ModSession', 'NativeMod', 'ModTransaction', 'ModArchive', 'ModStore') | ForEach-Object { "$root/android/app/src/main/java/io/github/dk64port/$_.java" }
+& "$JavaHome/bin/javac.exe" -cp $JsonJar -d $classes @sources "$root/tools/tests/ModImportTest.java" "$root/tools/tests/NativeModImportTest.java"
 if ($LASTEXITCODE -ne 0) { throw 'Mod import test compilation failed.' }
 & "$JavaHome/bin/java.exe" -cp "$classes;$JsonJar" io.github.dk64port.ModImportTest $scratch
 if ($LASTEXITCODE -ne 0) { throw 'Mod import tests failed.' }
+& "$JavaHome/bin/java.exe" -cp "$classes;$JsonJar" io.github.dk64port.NativeModImportTest $scratch
+if ($LASTEXITCODE -ne 0) { throw 'Native mod bundle tests failed.' }

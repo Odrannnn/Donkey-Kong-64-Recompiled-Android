@@ -12,7 +12,7 @@ All source revisions, including nested dependencies, are pinned in `upstream.loc
 - [AdrenoTools](https://github.com/bylaws/libadrenotools): Billy Laws and contributors, BSD-2-Clause; revision `8fae8ce254dfc1344527e05301e43f37dea2df80`. Its nested liblinkernsbypass is pinned as well. Only the custom-driver loading feature is used; no GPU overclocking or system-driver replacement.
 - SDL 2.32.10 and FreeType 2.13.3; see their source licenses.
 
-Upstream DK64's contribution guidance disallows AI-generated contributions. This independent Android fork contains AI-assisted changes. No upstream contribution or PR has been submitted; it is not an official Android release of the upstream project. Retain all applicable notices and review licenses before redistribution. Nintendo game assets are not provided here; the user supplies their own supported ROM.
+Upstream DK64's contribution guidance disallows AI-generated contributions. At the user's request, the Android sources were published in the independent [Odrannnn/Donkey-Kong-64-Recompiled-Android fork](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android), with AI assistance and verification limits disclosed. No upstream contribution or PR has been submitted. Retain all applicable notices and review licenses before redistribution. Nintendo game assets are not provided here; the user supplies their own supported ROM.
 
 ## Android changes
 
@@ -24,7 +24,7 @@ Upstream DK64's contribution guidance disallows AI-generated contributions. This
 - Optional trusted driver ZIP import with atomic selection, bounded private extraction and system-driver recovery.
 - AdrenoTools loader support. A small `libdk64vulkan.so` dispatch bridge lets SDL obtain exactly the same `vkGetInstanceProcAddr` used by RT64/Volk, including Vulkan surface creation. Driver/library handles live for the game process lifetime.
 - Extracted native libraries (`useLegacyPackaging`) as required by AdrenoTools' hook-library API. All built native load segments target 16 KiB alignment.
-- Android mod manager with DocumentsUI import, manifest/ZIP checks, atomic single-mod updates, activation controls and removal that preserves saves/settings. Native mod-folder/install buttons route to this manager after a close-game prompt. A file lock excludes simultaneous runtime and manager access. Native companion-library imports are not supported yet.
+- Android mod manager with DocumentsUI import, manifest/ZIP checks, recoverable bundle updates, activation controls and removal that preserves saves/settings. Native mod-folder/install buttons route to this manager after a close-game prompt. A file lock excludes simultaneous runtime and manager access. Dev7 includes the native companion-library imports described in the dev5 record below.
 
 ## Verification record — 2026-08-30
 
@@ -56,3 +56,22 @@ An official Khronos Android validation layer was downloaded into ignored `.local
 - Verified native/Gradle build, release lint checks, APK architecture/content and 16 KiB alignment, warning presence in packaged code, and valid APK signing with the same certificate as dev3. All 19 mod archive/storage checks and 12 driver checks pass.
 - Previous tablet evidence covers Turnip initialization, intro/early gameplay and user-confirmed Tag Anywhere behavior. The dev4 warning and release packaging have not received a fresh on-device gameplay test; the active game session was left untouched. Full gameplay/save/lifecycle coverage and the final native mod-menu handoff remain incomplete.
 - Publication is an experimental GitHub prerelease, with an APK and SHA-256 checksum; ROMs, imported graphics drivers, signing keys and third-party mods are excluded.
+
+## Local dev5 native companion bundle support — 2026-08-30
+
+- Co-op packaging direction: platform-specific ZIP with an unchanged `.nrm` plus its declared Android ARM64 `.so` or Windows x64 `.dll` beside it. The user explicitly requires no runtime mod-loader changes. The existing runtime loader, manifest parser and loader header have no changes for this work.
+- Android importer/manager accepts one declared Android bridge per ZIP, checks ARM64 ELF structure and 16 KiB load alignment, rejects undeclared/embedded/desktop native libraries and filename conflicts, and manages the companion during update/removal. Native code is not executed during import, and validation does not establish trust or runtime compatibility.
+- Journaled installation restores the previous complete file set after a process interruption. GameActivity performs recovery under the existing cross-process mod lock before native startup. Tests cover interruption at every file replacement for a renamed bridge update, initial install and removal. These are process-interruption checks, not a guarantee against storage hardware failure or sudden power loss.
+- Local version `1.0.1-android-dev5`, version code 4; debug APK built and signature verified with the existing development certificate. Added `INTERNET` permission for optional LAN mods, no discovery/location permission. No networking service, co-op bridge or multiplayer gameplay has been implemented or bundled.
+- All 19 existing mod/store checks, 19 new native-bundle checks and 12 driver archive checks pass. Native fixtures are structural test data and were never executed. Native compilation/Gradle packaging and APK ARM64/content/16 KiB checks pass.
+- Full `lintDebug` reports 27 errors, all in unchanged SDL Java files (Bluetooth/audio/vibration permissions and a broadcast-receiver flag). No new importer errors are reported. These SDL findings remain unresolved; no lint suppression or unrelated permission grants were added.
+- This development APK has not been installed on the tablet or published to GitHub. On-device native companion loading and Windows runtime compatibility remain unverified. Existing game sessions and the dev4 GitHub release are unchanged.
+
+## Android dev7 release — 2026-08-30
+
+- Version `1.0.1-android-dev7`, version code 6. Published as a regular GitHub release, not a prerelease, at the user's request. This release status does not establish complete gameplay or device compatibility.
+- Adds a persistent **Turnip compatibility mode** toggle and Adreno 840 information box. It selects `TU_DEBUG=sysmem` before loading the custom driver. Existing dev6 selections are retained; new installations default to Off. Other isolated driver experiments remain under Advanced Turnip diagnostics. No system-driver settings, game assets, native shaders or renderer algorithms were changed for this workaround.
+- The user reports that this mode removes flashing/speckled water on Poco F8 Ultra / Adreno 840 with Turnip Gen8 V30 and V35. ADB verified the V30 custom-driver launch and sysmem flags. Dev7 was installed on the phone, and its launcher controls, V35 selection and retained compatibility choice were checked. This is a user-confirmed workaround, not a confirmed root-cause diagnosis. Performance, long-session behavior and other GPUs remain unverified.
+- Includes the previously local dev5 native companion-bundle importer, recovery journal and optional-mod INTERNET permission. Native companion execution remains unverified; no co-op or Archipelago implementation is included in this release.
+- The downloadable Release APK is non-debuggable and retains the existing signing certificate for in-place updates. Phone UI verification used the Debug variant; the separate Release packaging has not received a fresh on-device gameplay test. ROMs, user-imported drivers, mods, private signing material and validation layers are excluded.
+- See `GRAPHICS-DIAGNOSTICS.md` for the detailed test record. The earlier dev4/dev5 sections above are historical snapshots.

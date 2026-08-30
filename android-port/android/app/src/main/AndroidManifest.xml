@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- LAN sockets used by optional native companion mods. No discovery/location permission. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- Optional so the diagnostic can explain why a device is unsupported. -->
     <uses-feature android:name="android.hardware.vulkan.version" android:required="false" />
     <application

@@ -37,7 +37,7 @@ public final class ModActivity extends Activity {
         TextView title = new TextView(this);
         title.setText("Manage Mods"); title.setTextSize(28); column.addView(title);
         TextView note = new TextView(this);
-        note.setText("Import trusted DK64 recomp .nrm mods, .rtz texture packs, or a ZIP containing one mod. Mods run code inside the app. Desktop native-library mods and .apworld files are not supported.\n\nChanges apply on the next game launch. In-game Mods still provides ordering, options and dependency details; required dependencies can be enabled automatically by the game.");
+        note.setText("Import trusted DK64 recomp .nrm mods, .rtz texture packs, or an Android ZIP containing one mod and its declared ARM64 .so bridge. Mods run code with this app's access, including networking. Windows DLLs, embedded native libraries and .apworld files are not supported.\n\nChanges apply on the next game launch. In-game Mods still provides ordering, options and dependency details; required dependencies can be enabled automatically by the game.");
         column.addView(note);
         importButton = button(column, "Import mod file", this::pickMod);
         refreshButton = button(column, "Refresh installed mods", () -> perform("Reading mods…", store -> "Installed mods refreshed."));
@@ -118,7 +118,7 @@ public final class ModActivity extends Activity {
             .setNegativeButton("Cancel", null)
             .setNeutralButton("Remove", (d, which) -> new AlertDialog.Builder(this)
                 .setTitle("Remove " + mod.name + "?")
-                .setMessage("Only the installed mod file will be removed. Saves, mod settings and the original downloaded file will be kept.")
+                .setMessage("The installed mod and its declared companion bridge will be removed. Saves, mod settings and the original downloaded file will be kept. If the manifest is corrupt, only the mod archive can be removed safely.")
                 .setNegativeButton("Cancel", null)
                 .setPositiveButton("Remove", (confirm, button) -> perform("Removing mod…", store -> {
                     store.remove(mod); return "Removed " + mod.name + ". Saves and settings kept.";
@@ -161,6 +161,7 @@ public final class ModActivity extends Activity {
                     new AlertDialog.Builder(this).setTitle(replaces ? "Update installed mod?" : "Install mod?")
                         .setMessage(pending.mod.name + "\nVersion: " + pending.mod.version + "\n\n"
                             + (replaces ? "The installed version will be replaced. " : "")
+                            + (pending.mod.libraries.isEmpty() ? "" : "Includes native code: " + String.join(", ", pending.mod.libraries) + ". It runs with the app's permissions and is not sandboxed separately. ")
                             + "Install only if you trust the source. Game compatibility and dependencies are checked by the runtime at launch.")
                         .setPositiveButton(replaces ? "Update" : "Install", (d, which) -> finishImport(true))
                         .setNegativeButton("Cancel", (d, which) -> finishImport(false))

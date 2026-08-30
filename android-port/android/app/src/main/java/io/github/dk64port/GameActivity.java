@@ -20,14 +20,24 @@ public final class GameActivity extends SDLActivity {
     private static native void nativeSurfaceReady(boolean ready);
     @Override protected String[] getLibraries() { return new String[] { "c++_shared", "SDL2", "main" }; }
     @Override public void loadLibraries() {
-        try { modSession = ModSession.acquire(getFilesDir()); }
-        catch (java.io.IOException error) { throw new UnsatisfiedLinkError("Mod manager is busy. Finish the import before launching the game."); }
+        try {
+            modSession = ModSession.acquire(getFilesDir());
+            new ModStore(getFilesDir()); // Recover interrupted bundle installation before starting native code.
+        } catch (java.io.IOException error) {
+            throw new UnsatisfiedLinkError("Cannot prepare mods: " + error.getMessage());
+        }
         super.loadLibraries();
     }
     @Override protected String[] getArguments() {
         DriverStore.Selection driver;
         try { driver = DriverStore.selected(this); }
         catch (Exception error) { driver = new DriverStore.Selection("", "", "System driver (invalid selection)"); }
+        // SDL calls getArguments after loading its native library and before entering
+        // the game's main(), which opens Turnip. Its environment is read at startup.
+        String turnipFlags = GraphicsDiagnostics.flags(this, !driver.directory.isEmpty());
+        SDLActivity.nativeSetenv("TU_DEBUG", turnipFlags);
+        android.util.Log.i("DK64Graphics", "Launch diagnostics: TU_DEBUG=" + turnipFlags
+            + "; customDriver=" + !driver.directory.isEmpty());
         return new String[] { new File(getFilesDir(), "program").getAbsolutePath(),
             new File(getFilesDir(), "data").getAbsolutePath(), getApplicationInfo().nativeLibraryDir,
             getCodeCacheDir().getAbsolutePath(), driver.directory, driver.library, driver.label };

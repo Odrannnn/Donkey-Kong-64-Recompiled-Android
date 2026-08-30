@@ -28,6 +28,9 @@ public final class MainActivity extends Activity {
     private TextView exitStatus;
     private Button importDriver;
     private Button systemDriver;
+    private Button graphicsDiagnostics;
+    private Switch turnipCompatibility;
+    private boolean updatingGraphicsControls;
     private boolean assetsReady;
 
     @Override public void onCreate(Bundle state) {
@@ -103,6 +106,35 @@ public final class MainActivity extends Activity {
         systemDriver.setText("Use system driver");
         systemDriver.setOnClickListener(view -> { DriverStore.useSystem(this); updateDriverStatus(); });
         column.addView(systemDriver);
+        turnipCompatibility = new Switch(this);
+        turnipCompatibility.setText("Turnip compatibility mode");
+        turnipCompatibility.setTextSize(18);
+        turnipCompatibility.setPadding(warningPadding, warningPadding, warningPadding, warningPadding);
+        turnipCompatibility.setOnCheckedChangeListener((button, enabled) -> {
+            if (updatingGraphicsControls) return;
+            try {
+                // Reuse the dev6 setting so an existing sysmem workaround stays enabled.
+                GraphicsDiagnostics.select(this, enabled ? GraphicsDiagnostics.COMPATIBILITY_MODE
+                    : GraphicsDiagnostics.DEFAULT_MODE);
+                Toast.makeText(this, "Saved for the next game launch. The running game is unchanged.", Toast.LENGTH_LONG).show();
+            } catch (IOException error) { showError(error); }
+            // Restore the persisted state even if saving failed.
+            updateDriverStatus();
+        });
+        column.addView(turnipCompatibility);
+        TextView compatibilityInfo = new TextView(this);
+        compatibilityInfo.setText("Adreno 840 graphics workaround\nMay fix flashing, speckled water or other graphical glitches when using Turnip on Adreno 840 devices. Reported to fix water on Poco F8 Ultra with Turnip Gen8 V30 and V35.\n\nUses system-memory rendering (sysmem). Performance may vary. Leave off if graphics already work correctly. Your choice is saved and applies on the next game launch. Only affects this app with an imported Turnip driver; it does not change the system driver.");
+        compatibilityInfo.setTextSize(16);
+        compatibilityInfo.setTextColor(android.graphics.Color.rgb(22, 58, 89));
+        compatibilityInfo.setBackgroundColor(android.graphics.Color.rgb(230, 242, 255));
+        compatibilityInfo.setPadding(warningPadding, warningPadding, warningPadding, warningPadding);
+        column.addView(compatibilityInfo);
+        graphicsDiagnostics = new Button(this);
+        graphicsDiagnostics.setOnClickListener(view -> showGraphicsDiagnostics());
+        column.addView(graphicsDiagnostics);
+        TextView diagnosticsNote = new TextView(this);
+        diagnosticsNote.setText("Advanced troubleshooting only. Other test modes replace compatibility mode; they are not combined. May reduce performance. Applies on the next game launch. Off restores driver defaults. Ignored when using the system driver.");
+        column.addView(diagnosticsNote);
         exitStatus = new TextView(this);
         column.addView(exitStatus);
         ScrollView scroll = new ScrollView(this);
@@ -181,7 +213,28 @@ public final class MainActivity extends Activity {
         });
     }
 
+    private void showGraphicsDiagnostics() {
+        final int[] selection = { GraphicsDiagnostics.selected(this) };
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("Advanced Turnip diagnostics — next launch")
+            .setSingleChoiceItems(GraphicsDiagnostics.LABELS, selection[0],
+                (dialog, which) -> selection[0] = which)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Save", (dialog, which) -> {
+                try {
+                    GraphicsDiagnostics.select(this, selection[0]);
+                    updateDriverStatus();
+                    Toast.makeText(this, "Saved for the next game launch. The running game is unchanged.", Toast.LENGTH_LONG).show();
+                } catch (IOException error) { showError(error); }
+            }).show();
+    }
+
     private void updateDriverStatus() {
+        int graphicsMode = GraphicsDiagnostics.selected(this);
+        updatingGraphicsControls = true;
+        turnipCompatibility.setChecked(graphicsMode == GraphicsDiagnostics.COMPATIBILITY_MODE);
+        updatingGraphicsControls = false;
+        graphicsDiagnostics.setText("Advanced Turnip diagnostics: " + GraphicsDiagnostics.LABELS[graphicsMode]);
         String text;
         try { text = "Selected graphics driver: " + DriverStore.selected(this).label; }
         catch (Exception error) { text = "Saved driver is invalid. Use system driver or import another ZIP."; }

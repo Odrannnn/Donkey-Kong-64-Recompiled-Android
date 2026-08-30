@@ -2,6 +2,8 @@
 
 Local Android port of [Rainchus/Donkey-Kong-64-Recompiled 1.0.1](https://github.com/Rainchus/Donkey-Kong-64-Recompiled/releases/tag/1.0.1), targeting ARM64 tablets. **Development build: the intro and early gameplay render with Turnip; full gameplay is still being tested.** No ROM or Turnip driver is bundled.
 
+Published source fork: [Odrannnn/Donkey-Kong-64-Recompiled-Android](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android), default branch `codex/android-port`. The public fork keeps upstream history and contains this Android project under `android-port/`. Initial source publication: `8e952a56021f83ec56a0f642f3f3655ff04a413b`. The separate local publication checkout is `.local/github-publish`; the current workspace and tablet installation were not moved or replaced.
+
 ## Current status
 
 The native game and Android APK compile. ROM import, private asset storage and the touch overlay have run on a Lenovo TB520FU (Snapdragon 8 Gen 3 / Adreno 750, Android 16).
@@ -16,7 +18,7 @@ Tested driver: KIMCHI's regular [Turnip v26.0.0 R8](https://github.com/K11MCH1/A
 
 **Graphics driver warning:** the system Vulkan driver may cause a black screen or crash. A compatible Turnip driver may be required on supported Qualcomm Adreno GPUs. Turnip is not compatible with every GPU and is imported separately; custom-driver import requires Android 9 or newer. The same warning is displayed above **Launch game** in the app.
 
-1. Download **[Android dev4 (experimental prerelease)](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev4)**, or build it below. The signed APK uses the same certificate as the earlier local development builds so those installations can update without uninstalling.
+1. Download **[Android dev7](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev7)**, or build it below. This is a regular GitHub release. The signed APK uses the same certificate as earlier builds so those installations can update without uninstalling. Save your progress before updating; installation closes the running game.
 2. Choose **Import US DK64 ROM** and select your own original US ROM. `.z64`, `.n64` and `.v64` byte orders are supported; validation uses the normalized SHA-1, not the extension. Existing user files are never modified.
 3. To try Turnip, choose **Import graphics driver ZIP** and select a trusted ARM64 driver package compatible with the tablet's GPU and Android version. Standard `meta.json` / `libraryName` packages are supported. ZIPs without metadata must have an unambiguous `libvulkan_freedreno.so`, `vulkan.freedreno.so` or `libvulkan.so`.
 4. Press **Launch game**. The selected driver applies to the new game process. The launcher shows the selection and the last initialized GPU separately.
@@ -28,21 +30,25 @@ Touch controls include an analog stick, A/B/Z/L/R, C buttons and Start. **Touch*
 
 ## Mods on Android
 
+**Dev7 includes native companion ZIP installation**, introduced in local dev5 and host-tested. The previous dev4 release rejects native packages. Co-op itself is not implemented, and native companion execution on a device has not been verified yet. No runtime mod-loader changes are made for this support.
+
 Choose **Manage Mods** on the Android launcher, then **Import mod file**. The Android document picker can read Downloads and other document providers without granting access to the app's private directory. Supported imports are DK64 `.nrm` mods, `.rtz` texture packs, or a ZIP containing exactly one such file (including a nested folder). Review the mod name/version and confirm **Install** or **Update**. For a ZIP containing multiple mods, import the individual `.nrm`/`.rtz` files separately.
 
-Tap an installed mod to **Enable**, **Disable** or **Remove** it. Removal keeps saves, mod settings and your original download. Updates match the manifest ID and atomically replace the existing archive. The native game's Mods menu still handles mod options, ordering, compatibility errors and dependency details. Dependencies required by another enabled mod may be enabled automatically by the runtime.
+Tap an installed mod to **Enable**, **Disable** or **Remove** it. Removal keeps saves, mod settings and your original download. Updates match the manifest ID. Dev5 installs/replaces/removes the archive and declared native bridge as a recoverable transaction; startup restores the previous complete installation if a process interruption left it unfinished. The native game's Mods menu still handles mod options, ordering, compatibility errors and dependency details. Dependencies required by another enabled mod may be enabled automatically by the runtime.
 
 The in-game **Install Mods** button routes to Android import, and **Open Mods Folder** is replaced by **Manage Mods**. These routes prompt you to close the game session first; save before confirming. Changes apply on the next launch. A cross-process file lock prevents replacing mod files or editing `mods.json` while the game is running, including while it is in the background.
 
-Import only trusted mods: they execute code inside this app. The importer rejects unsafe/duplicate paths, corrupt entries, wrong-game manifests, native-library packages, `.offline.nrm` files and non-mod formats such as `.apworld`. Desktop native libraries cannot run on Android; importing Android-native companion libraries is not implemented yet. Limits are 512 MiB for the selected file, 2 GiB total expanded contents across the outer/inner archives, 32,768 entries and 256 KiB for `mod.json`. Full mod API/version/content compatibility is checked by the runtime at launch; passing import checks does not guarantee gameplay compatibility.
+Import only trusted mods: they execute code with this app's permissions, including networking in dev5. The importer rejects unsafe/duplicate paths, corrupt entries, wrong-game manifests, `.offline.nrm` files and non-mod formats such as `.apworld`. Windows DLLs, macOS libraries and native libraries embedded inside `.nrm` are rejected. Limits are 512 MiB for the selected file, 2 GiB total expanded contents across the outer/inner archives, 32,768 entries and 256 KiB for `mod.json`. Full mod API/version/content compatibility is checked by the runtime at launch; passing import checks does not guarantee gameplay compatibility or make an untrusted mod safe.
+
+For a native companion mod, import an **Android ZIP containing one `.nrm` and one declared ARM64 `.so` beside it**, optionally together in a nested folder. The existing `native_libraries` manifest maps the library stem to exported functions; e.g. `"native_libraries": {"dk64_coop_bridge": ["bridge_ping"]}` requires `dk64_coop_bridge.so`. The example is a packaging illustration, not an available co-op mod. Keep the library self-contained apart from public Android NDK dependencies/the app's C++ runtime; match the runtime's native API and build 16 KiB-aligned load segments. The `.so` limit is 64 MiB. Libraries are never executed during import. Missing, undeclared, conflicting or shared companion filenames are refused. Import a complete ZIP for updates, and close the game before replacing native libraries on either platform. If a mod manifest becomes corrupt, removal deletes only its archive because native-file ownership cannot be established safely.
 
 The tablet's native log confirms import and loading of `dk64_tag_anywhere.nrm`, followed by game startup with Turnip. Its gameplay behavior has not been independently verified. No third-party mod or test fixture is bundled in the APK.
 
-The initial dev3 mod-manager build was installed on the test tablet. The final locally built dev3 APK additionally keeps the native **Install Mods** button enabled during gameplay (it uses the close-game prompt) and retains the mod-storage lock until the game process exits. Those last adjustments were built and checked but not reinstalled while the user was playing. The complete native-button handoff and on-device toggle/removal sequence still need verification. Tap **Touch** to hide the controller overlay if it covers native menu controls.
+The initial dev3 mod-manager build is installed on the tablet. The final downloadable dev3 APK additionally keeps the native **Install Mods** button enabled during gameplay (it uses the close-game prompt) and retains the mod-storage lock until the game process exits. Those last adjustments were built and checked but not reinstalled while the user was playing. The complete native-button handoff and on-device toggle/removal sequence still need verification. Tap **Touch** to hide the controller overlay if it covers native menu controls.
 
 ## Build on Windows
 
-Run these commands from this `android-port` directory. Adjust the example ROM, JDK and WSL paths to your checkout. This wrapper creates its own ignored `upstream` and `.local` trees from the lock file; the desktop sources at the fork root are preserved for upstream history.
+Run these commands from this `android-port` directory. Adjust the example ROM, JDK and WSL paths to your checkout. This wrapper restores its own ignored `upstream` and `.local` trees from the lock file.
 
 Prerequisites: Git, Python 3, JDK 17, Android SDK platform/build-tools 35, NDK `27.3.13750724`, CMake `3.31.5` and Ninja. WSL Ubuntu needs GCC/G++, CMake, Ninja, Make, Python, `apt-get` and `dpkg-deb`. The host recompilation script extracts LLVM 21 packages locally; it does not install system packages or use sudo. Its package step requires a distro repository offering LLVM 21 (tested on Ubuntu resolute).
 
@@ -69,11 +75,13 @@ The normalized US ROM SHA-1 is `cf806ff2603640a748fca5026ded28802f1f4a50`. Recom
 
 The Gradle wrapper packages prebuilt native libraries from `.local/game-arm64`; running Gradle alone does **not** rebuild C++. Use `Build-Android.ps1` after native source edits. The output is `android/app/build/outputs/apk/debug/app-debug.apk`. Python and SDK paths can be supplied explicitly to the build scripts. Keep the local debug signing key if you want future builds to update this installation without uninstalling it.
 
-For the non-debuggable prerelease variant, run `./tools/Build-Android.ps1 -Variant Release` (plus `-PythonPath` if needed). Its output is `android/app/build/outputs/apk/release/app-release.apk`. This early-release configuration deliberately reuses the local development signing identity so existing testers can update. Keep that private keystore backed up and outside Git. A build made on another machine normally has a different signing certificate.
+For the non-debuggable release variant, run `./tools/Build-Android.ps1 -Variant Release` (plus `-PythonPath` if needed). Its output is `android/app/build/outputs/apk/release/app-release.apk`. This release configuration deliberately reuses the local development signing identity so existing testers can update. Keep that private keystore backed up and outside Git. A build made on another machine normally has a different signing certificate.
 
 ## Diagnostics and maintenance
 
-The `run-as` commands below require the **Debug** variant; they are unavailable in the non-debuggable prerelease APK. Launcher status and system crash reports remain available.
+Dev7 adds a **Turnip compatibility mode** toggle with an Adreno 840 information box. It enables system-memory rendering (`sysmem`), which resolved the water corruption in the user's Poco F8 Ultra tests with Turnip Gen8 V30 and V35. Existing dev6 sysmem selections stay enabled; new installations default to Off. Changes apply on the next game launch, and other diagnostic modes remain under Advanced Turnip diagnostics. The exact cause and performance impact remain unconfirmed. See [GRAPHICS-DIAGNOSTICS.md](GRAPHICS-DIAGNOSTICS.md) for the evidence and limits.
+
+The `run-as` commands below require the **Debug** variant; they are unavailable in the non-debuggable release APK. Launcher status and system crash reports remain available.
 
 ```powershell
 $adb = "$env:LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe"
@@ -84,7 +92,7 @@ $adb = "$env:LOCALAPPDATA/Android/Sdk/platform-tools/adb.exe"
 & $adb shell dumpsys activity exit-info io.github.dk64port
 ```
 
-`native.log` is replaced each game launch. The game runs in a separate `:game` process so a native crash does not destroy the import/recovery launcher. No storage-wide permissions, Internet permission or root is required. The original ROM, app-private ROM, configuration and saves are kept separate from APK assets.
+`native.log` is replaced each game launch. The game runs in a separate `:game` process so a native crash does not destroy the import/recovery launcher. No storage-wide permissions or root is required. Local dev5 adds `INTERNET` permission for optional LAN companion mods; it adds no online service or discovery/location permission. The original ROM, app-private ROM, configuration and saves are kept separate from APK assets.
 
 Local checkouts and build outputs are ignored by the outer repository. **The maintained port is the Android project, platform files, tools, `upstream.lock.json` and the six source patches in `patches/`.** Run `python tools/snapshot_sources.py` after editing upstream or nested dependencies, then keep the updated patches and lock file with your changes. The bootstrap refuses a dependency on an unexpected commit and does not overwrite existing edits.
 
