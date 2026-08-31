@@ -593,7 +593,7 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
     gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
     gDPSetTexturePersp(dl++, G_TP_NONE);
-    gDPSetTextureFilter(dl++, G_TF_POINT);
+    gDPSetTextureFilter(dl++, G_TF_BILERP);
     //
     gEXPushScissor(dl++);
     gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, width, height);
