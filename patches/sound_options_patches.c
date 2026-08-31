@@ -424,20 +424,24 @@ RECOMP_PATCH void func_global_asm_8061D1FC(Actor* arg0) {
     }
     if (analog_cam_enabled() && get_analog_allowed()) {
         recomp_analog_camera_get(&dRStickX, &dRStickY);
-        dRStickX *= recomp_get_analog_cam_sensitivity() * -0.5f * getFrameDelta();
+        dRStickX *= recomp_get_analog_cam_sensitivity() * -5.7f * getFrameDelta();
         dRStickY *= recomp_get_analog_cam_sensitivity() * 1.0f * getFrameDelta();
         if (CaaD->unkF3 != 2) {
             if (dRStickX != 0.0f) {
                 CaaD->unkB0 = 0;
-                CaaD->unkB2 += dRStickX * (4096.0f / 360.0f);
-                arg0->y_rotation = CaaD->unkB2;
+                CaaD->unkB2 += dRStickX;
+                CaaD->unkF1 = 1; // Makes things snappy
             }
             if (dRStickY != 0.0f) {
                 f32 ratio = (f32)CaaD->unkB8 / (f32)CaaD->unkA4;
                 CaaD->unkA4 += dRStickY;
-                CaaD->unkA4 = MAX(MIN(CaaD->unkA4, 300), 20);
-                CaaD->unkB8 = CaaD->unkA4 * ratio;
+                CaaD->unkA4 = MAX(MIN(CaaD->unkA4, 300), 50);
+                CaaD->unkB8 = MIN(CaaD->unkA4 * ratio, 300);
+                CaaD->unkA0 = CaaD->unkA4;
+                arg0->distance_from_floor = CaaD->unkB8;
+                CaaD->unkF1 = 1; // Makes things snappy
             }
+            return;
         }
     }
     if ((CaaD->unkB0) && (CaaD->unkF3 != 2)) {
@@ -460,7 +464,7 @@ RECOMP_PATCH void func_global_asm_8061D1FC(Actor* arg0) {
     }
 }
 
-s32 func_global_asm_8062133C(Actor*, void*, f32*, f32*, f32*, f32);
+s32 func_global_asm_8062133C(Actor*, Actor*, f32*, f32*, f32*, f32);
 void func_global_asm_80622334(Actor*, s16);
 u8 func_global_asm_80671E00(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 *arg4, s16 *arg5, u8 arg6, u16 arg7);
 extern s32 D_global_asm_807FBB68;
@@ -646,7 +650,7 @@ RECOMP_PATCH void func_global_asm_806EA628(void) {
         recomp_get_gyro_deltas(&dGyroY, &dGyroX);
         if (stick_x == 0) {
             if (dGyroX != 0.0f) {
-                stick_x = -dGyroX;
+                stick_x = dGyroX;
             } else if (dMouseX != 0.0f) {
                 stick_x = dMouseX;
             }
