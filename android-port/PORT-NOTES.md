@@ -82,3 +82,32 @@ An official Khronos Android validation layer was downloaded into ignored `.local
 - Uses an unchanged copy of upstream `icons/app.png` for the launcher and round-icon reference. The original SVG and its embedded attribution metadata are packaged with `android/ICON-NOTICE.md`. The icon is not AI-generated.
 - Adds a prominent disclosure to the GitHub and Android-port READMEs and release notes: the Android port contains AI-generated and AI-assisted changes and is not affiliated with, endorsed by, or supported by the upstream maintainers. Original upstream authorship, artwork and notices are retained.
 - No Java gameplay/launcher behavior, native renderer, shader, driver-selection or compatibility-mode changes. Verification for this update covers release packaging, icon inclusion, signing and comparison against dev7's native libraries. It does not add new on-device gameplay evidence; the phone's active session is left untouched.
+
+## Local dev9 GMEM diagnostic — 2026-08-31
+
+- Version `1.0.1-android-dev9-gmem-test`, version code 8. Local Debug build for the user-requested `TU_DEBUG=gmem,flushall,syncdraw` experiment; not a new GitHub release.
+- Adds separate GMEM-only and GMEM-with-strict-synchronization choices under Advanced Turnip diagnostics. Existing saved flags and the sysmem compatibility toggle are retained. Applies only to an imported driver on the next game-process launch.
+- The launcher explains that strict synchronization is an experiment, not a high-accuracy setting or a confirmed fix, and can be very slow. No native renderer or shader changes. See `GRAPHICS-DIAGNOSTICS.md` for the comparison and recovery procedure. No new on-device rendering or performance result is claimed.
+
+### Subsequent Poco test result
+
+- The dev9 diagnostic APK was installed on Poco F8 Ultra, retaining app data and Turnip Gen8 V35. The user selected **GMEM rendering — experimental** and reported that it works perfectly in the water test.
+- Read-only ADB confirmed version code 8, saved `gmem`, and a fresh launch with `TU_DEBUG=gmem; customDriver=true`, Turnip Gen8 V35 and Adreno 840. This is GMEM alone; the combined `gmem,flushall,syncdraw` mode has no confirmed result. The active game and selected mode were left untouched.
+- This updates the earlier pre-test note above. It is user-reported visual evidence, not a measured performance or full-game result. Native libraries remain identical to dev8. The tablet and GitHub releases were not changed.
+
+## Local dev10 GMEM default — 2026-08-31
+
+- Version `1.0.1-android-dev10`, version code 9. Makes `gmem` the app default for all imported Turnip drivers, at the user's request. System-driver launches still receive no Turnip debug flags. This is a local update; dev8 remains the public release.
+- Missing/default preferences and the legacy empty Off selection adopt GMEM. Existing explicit sysmem and diagnostic selections survive updating. A separate `driver-defaults` saved value provides an explicit automatic-driver opt-out without being mistaken for the legacy default.
+- Retains the sysmem compatibility switch; turning it off returns to GMEM. Other advanced diagnostics replace the default. The launcher explains the current behavior and the limits of the Poco result.
+- No native renderer, shader, mod-loading or game changes. Host regression checks cover default migration, retained explicit modes, automatic opt-out persistence and isolation from the system driver. No further on-device gameplay or general performance improvement is claimed, and neither device is updated while the user plays.
+
+## Android dev11 — audio resume and touch D-pad — 2026-08-31
+
+- Version `1.0.1-android-dev11`, version code 10. Non-debuggable ARM64 Release APK, with the existing signing certificate for in-place updates. This release also carries the dev9/dev10 GMEM choices/default described above; explicit graphics choices are preserved.
+- Addresses a concrete audio corruption path: the former backlog catch-up divided byte counts and could queue a partial float or stereo frame, with an unbounded shift for long backlogs. Android now queues whole stereo frames and drops stale backlog at a 100 ms bound. Queue timing uses the output rate. Short buffers and resampling boundaries are checked.
+- Audio waits for a resumed, focused activity with a surface. Java publishes atomic lifecycle state only; it never waits on SDL audio locks. The SDL event thread clears queued samples and interpolation history after SDL's backend resumes, and applies a 10 ms fade. Audio production and converter updates are serialized. A pause followed quickly by resume is retained as a generation change. Desktop audio code and the runtime mod loader are unchanged.
+- Adds a separate N64 D-pad above Z/L, supporting cardinal directions, diagonals, finger sliding and simultaneous analog/buttons. Opposite directions cancel; release, cancel, focus loss, pause and overlay hiding clear held input.
+- Automated validation: real SDL conversion with a dummy output under ASan/UBSan; partial-frame/large-backlog cases, 50 simulated backend-pause cycles and 1,000 concurrent producer/resume cycles; 45 Java D-pad/lifecycle checks; graphics, mod and driver import regressions; APK/signature/16 KiB library checks.
+- **Device validation pending:** ADB could not connect to the tablet during this update. The user reports that switching apps restores audio after lock-screen static. The identified corruption path is corrected, but eliminating every device-specific resume glitch and the D-pad's physical layout have not been confirmed on a device. No APK was installed, no saves/driver selections were altered and no co-op mod is included in this release.
+- Audio API references: [SDL_QueueAudio](https://wiki.libsdl.org/SDL2/SDL_QueueAudio) and [SDL_ClearQueuedAudio](https://wiki.libsdl.org/SDL2/SDL_ClearQueuedAudio). SDL clearing cannot retract samples already sent to hardware; a brief old tail is still possible.

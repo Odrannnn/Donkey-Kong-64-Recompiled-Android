@@ -9,8 +9,8 @@
 
 This fork adds the Android ARM64 port in **[android-port/](android-port/README.md)**. It is based on upstream **1.0.1** and is independent of the upstream maintainers. The Android changes were developed with AI assistance; validation limits and known issues are recorded in [the port notes](android-port/PORT-NOTES.md).
 
-- Tested on a Lenovo TB520FU (Snapdragon 8 Gen 3 / Adreno 750, Android 16) and Poco F8 Ultra (Adreno 840).
-- Dev7 adds **Turnip compatibility mode**: the user reports it fixes flashing/speckled water on the Poco with Turnip Gen8 V30 and V35. The setting persists across launches; new installations default to Off.
+- Earlier builds tested on a Lenovo TB520FU (Snapdragon 8 Gen 3 / Adreno 750, Android 16) and Poco F8 Ultra (Adreno 840).
+- **GMEM is now the default for imported Turnip drivers**, following the user-reported Poco V35 water workaround. Explicit sysmem/diagnostic choices are preserved; Advanced Turnip diagnostics includes **Driver defaults (automatic)** to opt out. System-driver launches receive no Turnip flags.
 - The intro and early gameplay render with an imported compatible Turnip driver; the user confirms Tag Anywhere works in-game.
 - Includes ROM import, touch controls, per-app graphics-driver import, and Android mod import/enable/disable/remove controls.
 
@@ -18,9 +18,9 @@ This fork adds the Android ARM64 port in **[android-port/](android-port/README.m
 
 ## Android download
 
-Download **[Android dev8](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev8)** for ARM64 devices. Supply your own supported original US ROM.
+Download **[Android dev11](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev11)** for ARM64 devices. Supply your own supported original US ROM.
 
-Dev8 adds the original DK64 Recompiled banana app icon, with [its attribution and original notices](android-port/android/ICON-NOTICE.md), and prominent AI/unaffiliated-project disclosures. It retains dev7's Turnip compatibility mode and native libraries. Reusing upstream artwork does not imply endorsement or affiliation.
+Dev11 adds a touch D-pad with diagonals, corrects audio queue corruption and resets stale audio after returning from the lock screen or another app. It also includes the previously local GMEM default change. The original banana icon and [its attribution and notices](android-port/android/ICON-NOTICE.md) are retained. Reusing upstream artwork does not imply endorsement or affiliation. No co-op or Archipelago mod is bundled.
 
 **Graphics driver warning:** the system Vulkan driver may cause a black screen or crash. Compatible Qualcomm Adreno devices may require an imported Turnip driver. Turnip is not compatible with every GPU and is not bundled. The launcher displays this warning before Launch game.
 
@@ -36,7 +36,7 @@ python tools/bootstrap_sources.py
 
 Then follow **[the Windows/WSL Android build instructions](android-port/README.md#build-on-windows)**. The maintained Android project, platform integration, tools, six dependency patches and lock file are all under `android-port`. The lock file restores 41 pinned repositories into ignored local directories. The desktop source tree below remains at the upstream base revision; Android-specific changes to it are maintained as reproducible patches.
 
-Validation for dev7: native build and release packaging, APK content/alignment/signing checks, 19 mod archive/storage checks, 19 native companion-bundle checks and 12 driver archive checks. Device evidence includes the Poco compatibility controls and user-confirmed water workaround, plus earlier Tag Anywhere loading on the tablet. Host checks are not a substitute for complete gameplay testing. The Android release is built locally from its tagged sources; no GitHub Actions build is claimed. The inherited desktop workflows require upstream-only build inputs.
+Validation for dev11: native build and signed release packaging, APK content/alignment checks, SDL dummy-output audio regressions under ASan/UBSan, 45 D-pad/lifecycle checks, 22 graphics-selection checks, 19 mod archive/storage checks, 19 native companion-bundle checks and 12 driver archive checks. **Dev11 has not received an on-device gameplay test: the tablet was unavailable over ADB.** Lock-screen recovery and the new touch layout still need device confirmation. Earlier device evidence includes the user-confirmed Poco water workaround and Tag Anywhere loading on the tablet. Host checks are not a substitute for complete gameplay testing. The Android release is built locally from its tagged sources; no GitHub Actions build is claimed. The inherited desktop workflows require upstream-only build inputs.
 
 ---
 

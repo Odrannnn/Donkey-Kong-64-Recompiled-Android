@@ -8,7 +8,7 @@ import org.libsdl.app.SDLActivity;
 
 /** Multi-touch N64 controls; touches outside controls pass through to SDL's menus. */
 final class TouchControls extends View {
-    private static final int STICK = -1, VISIBILITY = -2, MENU = -3;
+    private static final int STICK = -1, VISIBILITY = -2, MENU = -3, DPAD = -4;
     private static final class Control {
         final String label;
         final int mask;
@@ -21,9 +21,10 @@ final class TouchControls extends View {
     private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final ArrayList<Control> controls = new ArrayList<>();
     private final Map<Integer, Control> pointers = new HashMap<>();
+    private final Map<Integer, Integer> dpadPointers = new HashMap<>();
     private boolean visible = true;
     private float stickX, stickY;
-    private Control stick;
+    private Control stick, dpad;
 
     TouchControls(Context context) { super(context); setFocusable(false); }
 
@@ -47,10 +48,12 @@ final class TouchControls extends View {
         controls.clear();
         int w = width - getPaddingLeft() - getPaddingRight();
         int h = height - getPaddingTop() - getPaddingBottom();
-        if (w <= 0 || h <= 0) { stick = null; return; }
+        if (w <= 0 || h <= 0) { stick = dpad = null; return; }
         float s = Math.min(h * .115f, 76 * getResources().getDisplayMetrics().density);
         stick = new Control("", STICK, s*1.65f, h-s*1.65f, s*2.5f);
         controls.add(stick);
+        dpad = new Control("D", DPAD, s*1.65f, h-s*5.4f, s*2.5f);
+        controls.add(dpad);
         controls.add(new Control("A", 0x8000, w-s*.8f, h-s*1.4f, s));
         controls.add(new Control("B", 0x4000, w-s*2f, h-s*.85f, s));
         controls.add(new Control("Z", 0x2000, s*.8f, h-s*3.5f, s));
@@ -69,6 +72,7 @@ final class TouchControls extends View {
     @Override protected void onDraw(Canvas canvas) {
         for (Control control : controls) {
             if (!visible && control.mask != VISIBILITY && control.mask != MENU) continue;
+            if (control.mask == DPAD) { drawDpad(canvas); continue; }
             boolean pressed = pointers.containsValue(control);
             paint.setColor(pressed ? 0xbbd9a441 : 0x77333333);
             canvas.drawRoundRect(control.bounds, 20, 20, paint);
@@ -87,6 +91,32 @@ final class TouchControls extends View {
             canvas.drawCircle(stick.bounds.centerX()+stickX*radius*1.3f,
                 stick.bounds.centerY()-stickY*radius*1.3f, radius, paint);
         }
+    }
+
+    private int dpadButtons() {
+        int mask = 0;
+        for (int value : dpadPointers.values()) mask |= value;
+        return DpadInput.withoutOpposites(mask);
+    }
+    private void drawDpad(Canvas canvas) {
+        float cell = dpad.bounds.width()/3, cx = dpad.bounds.centerX(), cy = dpad.bounds.centerY();
+        int buttons = dpadButtons();
+        drawDirection(canvas, "↑", cx, cy-cell, cell, (buttons & DpadInput.UP) != 0);
+        drawDirection(canvas, "↓", cx, cy+cell, cell, (buttons & DpadInput.DOWN) != 0);
+        drawDirection(canvas, "←", cx-cell, cy, cell, (buttons & DpadInput.LEFT) != 0);
+        drawDirection(canvas, "→", cx+cell, cy, cell, (buttons & DpadInput.RIGHT) != 0);
+        paint.setTextAlign(Paint.Align.CENTER);
+        paint.setTextSize(cell*.25f); paint.setColor(0xddeeeeee);
+        canvas.drawText("D-PAD", cx, cy+paint.getTextSize()*.35f, paint);
+    }
+    private void drawDirection(Canvas canvas, String label, float cx, float cy, float size, boolean pressed) {
+        RectF bounds = new RectF(cx-size*.48f, cy-size*.48f, cx+size*.48f, cy+size*.48f);
+        paint.setStyle(Paint.Style.FILL); paint.setColor(pressed ? 0xbbd9a441 : 0x77333333);
+        canvas.drawRoundRect(bounds, 16, 16, paint);
+        paint.setStyle(Paint.Style.STROKE); paint.setStrokeWidth(2); paint.setColor(0xddeeeeee);
+        canvas.drawRoundRect(bounds, 16, 16, paint);
+        paint.setStyle(Paint.Style.FILL); paint.setTextAlign(Paint.Align.CENTER); paint.setTextSize(size*.4f);
+        canvas.drawText(label, cx, cy+paint.getTextSize()*.35f, paint);
     }
 
     @Override public boolean onTouchEvent(MotionEvent event) {
@@ -108,12 +138,19 @@ final class TouchControls extends View {
             }
         } else if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_POINTER_UP) {
             Control released = pointers.remove(pointer);
+            dpadPointers.remove(pointer);
             if (released == stick) { stickX = 0; stickY = 0; }
         } else if (action == MotionEvent.ACTION_CANCEL) {
             reset();
         }
         for (int i = 0; i < event.getPointerCount(); i++) {
-            if (pointers.get(event.getPointerId(i)) == stick) {
+            Control owned = pointers.get(event.getPointerId(i));
+            if (dpad != null && owned == dpad) {
+                float x = (event.getX(i)-dpad.bounds.centerX())/(dpad.bounds.width()/2);
+                float y = (event.getY(i)-dpad.bounds.centerY())/(dpad.bounds.height()/2);
+                dpadPointers.put(event.getPointerId(i), DpadInput.directions(x, y));
+            }
+            if (stick != null && owned == stick) {
                 float radius = stick.bounds.width()*.4f;
                 float x = (event.getX(i)-stick.bounds.centerX())/radius;
                 float y = (stick.bounds.centerY()-event.getY(i))/radius;
@@ -127,9 +164,9 @@ final class TouchControls extends View {
         return true;
     }
 
-    void reset() { pointers.clear(); stickX = stickY = 0; sendState(); invalidate(); }
+    void reset() { pointers.clear(); dpadPointers.clear(); stickX = stickY = 0; sendState(); invalidate(); }
     private void sendState() {
-        int buttons = 0;
+        int buttons = dpadButtons();
         for (Control control : pointers.values()) if (control.mask > 0) buttons |= control.mask;
         GameActivity.nativeTouchState(buttons, stickX, stickY);
     }

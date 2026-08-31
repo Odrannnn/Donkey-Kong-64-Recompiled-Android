@@ -25,7 +25,7 @@ Tested driver: KIMCHI's regular [Turnip v26.0.0 R8](https://github.com/K11MCH1/A
 
 **Graphics driver warning:** the system Vulkan driver may cause a black screen or crash. A compatible Turnip driver may be required on supported Qualcomm Adreno GPUs. Turnip is not compatible with every GPU and is imported separately; custom-driver import requires Android 9 or newer. The same warning is displayed above **Launch game** in the app.
 
-1. Download **[Android dev8](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev8)**, or build it below. This is a regular GitHub release. The signed APK uses the same certificate as earlier builds so those installations can update without uninstalling. Save your progress before updating; installation closes the running game.
+1. Download **[Android dev11](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev11)**, or build it below. This is a regular GitHub release. The signed APK uses the same certificate as earlier builds so those installations can update without uninstalling. Save your progress before updating; installation closes the running game.
 2. Choose **Import US DK64 ROM** and select your own original US ROM. `.z64`, `.n64` and `.v64` byte orders are supported; validation uses the normalized SHA-1, not the extension. Existing user files are never modified.
 3. To try Turnip, choose **Import graphics driver ZIP** and select a trusted ARM64 driver package compatible with the tablet's GPU and Android version. Standard `meta.json` / `libraryName` packages are supported. ZIPs without metadata must have an unambiguous `libvulkan_freedreno.so`, `vulkan.freedreno.so` or `libvulkan.so`.
 4. Press **Launch game**. The selected driver applies to the new game process. The launcher shows the selection and the last initialized GPU separately.
@@ -33,11 +33,15 @@ Tested driver: KIMCHI's regular [Turnip v26.0.0 R8](https://github.com/K11MCH1/A
 
 Driver ZIPs execute native code inside this app: import only from sources you trust. Imports are private to this app, checked for unsafe/duplicate paths, size limits and ARM64 ELF libraries, and made read-only. Custom drivers require Android 9 or newer. A library-load failure falls back to the system driver; a later driver crash is reported on the launcher rather than automatically retrying indefinitely. Selecting a driver does not establish that it supports this renderer.
 
-Touch controls include an analog stick, A/B/Z/L/R, C buttons and Start. **Touch** hides/shows the overlay; **Menu** sends Escape to the native menu. Native menus also accept touch events outside the controls. Bluetooth/USB controller support comes from SDL; mappings need device testing. Online mod discovery and native desktop file pickers are disabled on Android.
+Touch controls include an analog stick, a separate **D-pad above the left shoulder buttons**, A/B/Z/L/R, C buttons and Start. The D-pad supports diagonals and sliding between directions; the center is neutral. **Touch** hides/shows the overlay; **Menu** sends Escape to the native menu. Native menus also accept touch events outside the controls. Bluetooth/USB controller support comes from SDL; mappings need device testing. Online mod discovery and native desktop file pickers are disabled on Android.
+
+**Dev11 audio recovery:** Android now waits for activity resume, window focus and the render surface before restarting game work. After SDL resumes its audio backend, the app discards stale queued audio and resampling history, then fades in fresh samples. Audio backlog recovery keeps complete stereo frames instead of the earlier byte-skipping path, which could split float samples and cause static. Automated regression checks pass, but the intermittent lock-screen problem and new touch layout still require device confirmation; this release was not installed during preparation because ADB was unavailable.
+
+Dev11 also includes the previously local dev9/dev10 Turnip choices: **GMEM is the default for imported Turnip drivers**. Explicit sysmem or diagnostic choices are retained. Choose **Driver defaults (automatic)** under Advanced Turnip diagnostics to opt out; system-driver launches receive no Turnip debug flags. See [GRAPHICS-DIAGNOSTICS.md](GRAPHICS-DIAGNOSTICS.md) for the limited Poco test evidence and tradeoffs.
 
 ## Mods on Android
 
-**Dev7 includes native companion ZIP installation**, introduced in local dev5 and host-tested. The previous dev4 release rejects native packages. Co-op itself is not implemented, and native companion execution on a device has not been verified yet. No runtime mod-loader changes are made for this support.
+**Dev7 and later include native companion ZIP installation**, introduced in local dev5. The previous dev4 release rejects native packages. Native companion execution has since been verified using a separately developed LAN presence prototype; no co-op or Archipelago mod is bundled in the app. No runtime mod-loader changes are made for this support.
 
 Choose **Manage Mods** on the Android launcher, then **Import mod file**. The Android document picker can read Downloads and other document providers without granting access to the app's private directory. Supported imports are DK64 `.nrm` mods, `.rtz` texture packs, or a ZIP containing exactly one such file (including a nested folder). Review the mod name/version and confirm **Install** or **Update**. For a ZIP containing multiple mods, import the individual `.nrm`/`.rtz` files separately.
 
@@ -74,7 +78,10 @@ $env:JAVA_HOME = 'C:\path\to\jdk-17'
 ./tools/Build-Android.ps1 -PythonPath 'python'
 
 ./tools/Test-DriverImport.ps1
+./tools/Test-GraphicsDiagnostics.ps1 # Default migration, explicit overrides and system-driver isolation.
+./tools/Test-TouchLifecycle.ps1 # D-pad directions and activity/focus/surface gating.
 ./tools/Test-ModImport.ps1 # Uses cached org.json 20240303 on the host; or supply -JsonJar.
+# In WSL, run tools/Test-AndroidAudio.sh for SDL dummy-output ASan/UBSan regression tests.
 python tools/verify_apk.py android/app/build/outputs/apk/debug/app-debug.apk
 ```
 
@@ -86,9 +93,9 @@ For the non-debuggable release variant, run `./tools/Build-Android.ps1 -Variant 
 
 ## Diagnostics and maintenance
 
-Dev8 uses the original DK64 Recompiled banana app icon and adds prominent AI/unaffiliated-project disclosures. The icon is reused unchanged, with attribution in [android/ICON-NOTICE.md](android/ICON-NOTICE.md); it is not AI-generated. Dev7's graphics settings and native libraries are unchanged.
+Dev11 retains the original DK64 Recompiled banana app icon and the AI/unaffiliated-project disclosures introduced in dev8. The icon is reused unchanged, with attribution in [android/ICON-NOTICE.md](android/ICON-NOTICE.md); it is not AI-generated. The Android audio backend changes in dev11; the renderer is unchanged.
 
-Dev7 adds a **Turnip compatibility mode** toggle with an Adreno 840 information box. It enables system-memory rendering (`sysmem`), which resolved the water corruption in the user's Poco F8 Ultra tests with Turnip Gen8 V30 and V35. Existing dev6 sysmem selections stay enabled; new installations default to Off. Changes apply on the next game launch, and other diagnostic modes remain under Advanced Turnip diagnostics. The exact cause and performance impact remain unconfirmed. See [GRAPHICS-DIAGNOSTICS.md](GRAPHICS-DIAGNOSTICS.md) for the evidence and limits.
+**Dev11** includes the dev10 change to default to `TU_DEBUG=gmem` for all imported Turnip drivers. The user reported correct water rendering on Poco F8 Ultra / Adreno 840 with V35 using GMEM alone, without strict synchronization. New installations and the old empty Off/default selection adopt GMEM; explicit sysmem and other diagnostic selections stay intact. **Turnip compatibility mode (sysmem)** enables the fallback that also resolved the water issue with V30 and V35; switching it off returns to GMEM. **Driver defaults (automatic)** in Advanced Turnip diagnostics explicitly opts out. The system driver is unchanged, and settings apply on the next game launch. Broader device compatibility, performance and the exact cause remain unconfirmed. See [GRAPHICS-DIAGNOSTICS.md](GRAPHICS-DIAGNOSTICS.md) for the evidence and limits.
 
 The `run-as` commands below require the **Debug** variant; they are unavailable in the non-debuggable release APK. Launcher status and system crash reports remain available.
 

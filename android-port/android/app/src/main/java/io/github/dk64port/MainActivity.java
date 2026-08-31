@@ -107,7 +107,7 @@ public final class MainActivity extends Activity {
         systemDriver.setOnClickListener(view -> { DriverStore.useSystem(this); updateDriverStatus(); });
         column.addView(systemDriver);
         turnipCompatibility = new Switch(this);
-        turnipCompatibility.setText("Turnip compatibility mode");
+        turnipCompatibility.setText("Turnip compatibility mode (sysmem)");
         turnipCompatibility.setTextSize(18);
         turnipCompatibility.setPadding(warningPadding, warningPadding, warningPadding, warningPadding);
         turnipCompatibility.setOnCheckedChangeListener((button, enabled) -> {
@@ -123,7 +123,7 @@ public final class MainActivity extends Activity {
         });
         column.addView(turnipCompatibility);
         TextView compatibilityInfo = new TextView(this);
-        compatibilityInfo.setText("Adreno 840 graphics workaround\nMay fix flashing, speckled water or other graphical glitches when using Turnip on Adreno 840 devices. Reported to fix water on Poco F8 Ultra with Turnip Gen8 V30 and V35.\n\nUses system-memory rendering (sysmem). Performance may vary. Leave off if graphics already work correctly. Your choice is saved and applies on the next game launch. Only affects this app with an imported Turnip driver; it does not change the system driver.");
+        compatibilityInfo.setText("Turnip rendering\nGMEM is the default for imported Turnip drivers on all GPUs. Reported to fix water on Poco F8 Ultra / Adreno 840 with Turnip Gen8 V35. Broader device compatibility and performance remain unverified.\n\nEnable this switch to use system-memory rendering (sysmem) as a fallback. Sysmem was also reported to fix water on the Poco with V30 and V35. Turning the switch off selects GMEM again. Existing explicit diagnostic choices are retained after updating. Your choice is saved and applies on the next game launch. Only affects this app with an imported driver; it does not change the system driver.");
         compatibilityInfo.setTextSize(16);
         compatibilityInfo.setTextColor(android.graphics.Color.rgb(22, 58, 89));
         compatibilityInfo.setBackgroundColor(android.graphics.Color.rgb(230, 242, 255));
@@ -133,7 +133,7 @@ public final class MainActivity extends Activity {
         graphicsDiagnostics.setOnClickListener(view -> showGraphicsDiagnostics());
         column.addView(graphicsDiagnostics);
         TextView diagnosticsNote = new TextView(this);
-        diagnosticsNote.setText("Advanced troubleshooting only. Other test modes replace compatibility mode; they are not combined. May reduce performance. Applies on the next game launch. Off restores driver defaults. Ignored when using the system driver.");
+        diagnosticsNote.setText("Advanced troubleshooting only. GMEM rendering is the app default. Driver defaults (automatic) explicitly opts out and sends no Turnip debug flags. Other test modes replace the default or sysmem fallback; they are not combined. GMEM + strict synchronization adds cache flushes and GPU waits (gmem,flushall,syncdraw); it is not a high-accuracy setting and may be very slow. Applies on the next game launch. Ignored when using the system driver.");
         column.addView(diagnosticsNote);
         exitStatus = new TextView(this);
         column.addView(exitStatus);

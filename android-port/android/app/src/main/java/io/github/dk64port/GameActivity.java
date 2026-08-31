@@ -15,9 +15,11 @@ public final class GameActivity extends SDLActivity {
     private TouchControls touchControls;
     private ModSession modSession;
     private boolean openingMods, importMod, modDialogOpen;
+    private final GameLifecycle lifecycle = new GameLifecycle();
     static native void nativeTouchState(int buttons, float x, float y);
     private static native void nativePauseScheduler(boolean paused);
     private static native void nativeSurfaceReady(boolean ready);
+    private static native void nativeAudioPaused(boolean paused);
     @Override protected String[] getLibraries() { return new String[] { "c++_shared", "SDL2", "main" }; }
     @Override public void loadLibraries() {
         try {
@@ -73,8 +75,12 @@ public final class GameActivity extends SDLActivity {
             @Override public void surfaceCreated(SurfaceHolder holder) {
                 super.surfaceCreated(holder);
                 nativeSurfaceReady(true);
+                lifecycle.surfaceReady = true;
+                updateGameLifecycle();
             }
             @Override public void surfaceDestroyed(SurfaceHolder holder) {
+                lifecycle.surfaceReady = false;
+                updateGameLifecycle();
                 nativeSurfaceReady(false);
                 super.surfaceDestroyed(holder);
             }
@@ -82,15 +88,36 @@ public final class GameActivity extends SDLActivity {
     }
     @Override protected void onPause() {
         if (touchControls != null) touchControls.reset();
-        if (!mBrokenLibraries) nativePauseScheduler(true);
+        lifecycle.resumed = false;
+        updateGameLifecycle();
         super.onPause();
     }
     @Override protected void onResume() {
         super.onResume();
-        if (!mBrokenLibraries) nativePauseScheduler(false);
+        lifecycle.resumed = true;
+        updateGameLifecycle();
+    }
+    @Override public void onWindowFocusChanged(boolean hasFocus) {
+        if (!hasFocus) {
+            lifecycle.focused = false;
+            if (touchControls != null) touchControls.reset();
+            updateGameLifecycle();
+        }
+        super.onWindowFocusChanged(hasFocus);
+        lifecycle.focused = hasFocus;
+        updateGameLifecycle();
+    }
+    private void updateGameLifecycle() {
+        if (mBrokenLibraries) return;
+        boolean paused = !lifecycle.active() || isFinishing();
+        nativeAudioPaused(paused);
+        nativePauseScheduler(paused);
     }
     @Override protected void onDestroy() {
-        if (!mBrokenLibraries) nativePauseScheduler(false);
+        if (!mBrokenLibraries) {
+            nativeAudioPaused(true);
+            nativePauseScheduler(false); // Let SDL/graphics finish shutdown without reviving audio.
+        }
         super.onDestroy();
         // Keep the lease until process death: native configuration workers may still exist
         // after SDL returns. The OS releases the lock when this dedicated process exits.

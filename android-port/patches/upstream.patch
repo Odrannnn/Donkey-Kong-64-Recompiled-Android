@@ -1,5 +1,5 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 14db898..78e4567 100644
+index 14db898..007a6dc 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
 @@ -1,10 +1,12 @@
@@ -51,7 +51,7 @@ index 14db898..78e4567 100644
      DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.bin
  )
  
-@@ -146,8 +161,24 @@ add_custom_command(OUTPUT
+@@ -146,8 +161,25 @@ add_custom_command(OUTPUT
                     DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.elf
  )
  
@@ -71,6 +71,7 @@ index 14db898..78e4567 100644
 +    target_link_libraries(DK64Recompiled PRIVATE SDL2::SDL2 android log vulkan)
 +    target_include_directories(DK64Recompiled PRIVATE ${SDL2_INCLUDE_DIRS})
 +    target_sources(DK64Recompiled PRIVATE ${CMAKE_SOURCE_DIR}/../platform/android_bridge.cpp)
++    target_sources(DK64Recompiled PRIVATE ${CMAKE_SOURCE_DIR}/../platform/android_audio.cpp)
 +    target_include_directories(DK64Recompiled PRIVATE ${CMAKE_SOURCE_DIR}/../platform)
 +else()
 +    add_executable(DK64Recompiled)
@@ -78,7 +79,7 @@ index 14db898..78e4567 100644
  
  set (SOURCES
      ${CMAKE_SOURCE_DIR}/src/main/launcher_animation.cpp
-@@ -186,7 +217,7 @@ target_include_directories(DK64Recompiled PRIVATE
+@@ -186,7 +218,7 @@ target_include_directories(DK64Recompiled PRIVATE
  
  # Generate icon_bytes.c from the app icon PNG.
  add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.c ${CMAKE_CURRENT_BINARY_DIR}/icon_bytes.h
@@ -87,7 +88,7 @@ index 14db898..78e4567 100644
      DEPENDS ${CMAKE_SOURCE_DIR}/icons/app.png
  )
  
-@@ -319,7 +350,7 @@ set (DXC_CS_OPTS "${DXC_COMMON_OPTS}" "-E" "CSMain" "-T cs_6_0")
+@@ -319,7 +351,7 @@ set (DXC_CS_OPTS "${DXC_COMMON_OPTS}" "-E" "CSMain" "-T cs_6_0")
  set (DXC_GS_OPTS "${DXC_COMMON_OPTS}" "-E" "GSMain" "-T gs_6_0")
  set (DXC_RT_OPTS "${DXC_COMMON_OPTS}" "-D" "RT_SHADER" "-T" "lib_6_3" "-fspv-target-env=vulkan1.1spirv1.4" "-fspv-extension=SPV_KHR_ray_tracing" "-fspv-extension=SPV_EXT_descriptor_indexing")
  
@@ -96,7 +97,7 @@ index 14db898..78e4567 100644
      set (DXC "${PROJECT_SOURCE_DIR}/lib/rt64/src/contrib/dxc/bin/x64/dxc.exe")
      add_compile_definitions(NOMINMAX)
  else()
-@@ -368,7 +399,7 @@ foreach(NRM_FILE ${NRM_FILES})
+@@ -368,7 +400,7 @@ foreach(NRM_FILE ${NRM_FILES})
  
      add_custom_command(
          OUTPUT ${OUT_C} ${OUT_H}
@@ -127,7 +128,7 @@ index 467c01b..833c887 100644
  #endif
  
 diff --git a/src/main/main.cpp b/src/main/main.cpp
-index ec03f76..973de98 100644
+index ec03f76..e565ba3 100644
 --- a/src/main/main.cpp
 +++ b/src/main/main.cpp
 @@ -14,7 +14,9 @@
@@ -140,19 +141,20 @@ index ec03f76..973de98 100644
  #ifdef _WIN32
  #include "SDL.h"
  #else
-@@ -46,6 +48,11 @@
+@@ -46,6 +48,12 @@
  #include "recomp_data.h"
  #include "ovl_patches.hpp"
  #include "theme.h"
 +#if defined(__ANDROID__)
 +#include "android_bridge.h"
++#include "android_audio.h"
 +#include <unistd.h>
 +#include <android/log.h>
 +#endif
  #include "librecomp/game.hpp"
  #include "librecomp/mods.hpp"
  #include "librecomp/helpers.hpp"
-@@ -144,7 +151,7 @@ ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
+@@ -144,7 +152,7 @@ ultramodern::gfx_callbacks_t::gfx_data_t create_gfx() {
      SDL_SetHint(SDL_HINT_MOUSE_FOCUS_CLICKTHROUGH, "1");
      SDL_SetHint(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS, "1");
  
@@ -161,7 +163,7 @@ index ec03f76..973de98 100644
          exit_error("Failed to initialize SDL2: %s\n", SDL_GetError());
      }
  
-@@ -220,6 +227,9 @@ SDL_Window* window;
+@@ -220,6 +228,9 @@ SDL_Window* window;
  
  ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::gfx_data_t) {
      uint32_t flags = SDL_WINDOW_RESIZABLE;
@@ -171,7 +173,7 @@ index ec03f76..973de98 100644
  
  #if defined(__APPLE__)
      flags |= SDL_WINDOW_METAL;
-@@ -241,7 +251,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
+@@ -241,7 +252,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
      bool choose_kazooie_icon = (rand() % 2 == 0);
      HICON new_icon = LoadIcon(GetModuleHandle(NULL), choose_kazooie_icon ? MAKEINTRESOURCE(APP_ICON_K) : MAKEINTRESOURCE(APP_ICON_B));
      SendMessage(wmInfo.info.win.window, WM_SETICON, ICON_SMALL2, (LPARAM)(new_icon));
@@ -180,7 +182,33 @@ index ec03f76..973de98 100644
      SetImageAsIcon("icons/app.png", window);
  #endif
  
-@@ -402,6 +412,7 @@ bool reset_audio(uint32_t output_freq) {
+@@ -259,8 +270,25 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
+ 
+ void update_gfx(void*) {
+     recompinput::handle_events();
++#if defined(__ANDROID__)
++    dk64::android_audio::service();
++#endif
+ }
+ 
++#if defined(__ANDROID__)
++void queue_samples(int16_t* data, size_t count) {
++    dk64::android_audio::queue_samples(data, count, float(recompui::config::sound::get_main_volume()) / 100.0f);
++}
++size_t get_frames_remaining() { return dk64::android_audio::remaining_frames(); }
++void set_frequency(uint32_t frequency) { dk64::android_audio::set_frequency(frequency); }
++bool reset_audio(uint32_t frequency) {
++    if (dk64::android_audio::open(frequency)) return true;
++    std::string error = std::string("Cannot open Android audio: ") + SDL_GetError();
++    std::fprintf(stderr, "%s\n", error.c_str());
++    recompui::message_box(error.c_str());
++    return false;
++}
++#else
+ static SDL_AudioCVT audio_convert;
+ static SDL_AudioDeviceID audio_device = 0;
+ 
+@@ -402,6 +430,7 @@ bool reset_audio(uint32_t output_freq) {
      audio_device = SDL_OpenAudioDevice(nullptr, false, &spec_desired, nullptr, 0);
      if (audio_device == 0) {
          std::string audio_error = std::string("No audio device could be found. Please make sure an audio device is available.\nError opening audio device: ") + std::string(SDL_GetError());
@@ -188,7 +216,16 @@ index ec03f76..973de98 100644
          recompui::message_box(audio_error.c_str());
          return false;
      }
-@@ -680,6 +691,25 @@ void on_launcher_init(recompui::LauncherMenu *menu) {
+@@ -414,6 +443,8 @@ bool reset_audio(uint32_t output_freq) {
+     return true;
+ }
+ 
++#endif // Android uses the lifecycle-aware audio queue above; desktop stays unchanged.
++
+ extern RspUcodeFunc n_aspMain;
+ 
+ RspUcodeFunc* get_rsp_microcode(const OSTask* task) {
+@@ -680,6 +711,25 @@ void on_launcher_init(recompui::LauncherMenu *menu) {
  #define REGISTER_FUNC(name) recomp::overlays::register_base_export(#name, name)
  
  int main(int argc, char** argv) {
@@ -214,7 +251,7 @@ index ec03f76..973de98 100644
      (void)argc;
      (void)argv;
      recomp::Version project_version{};
-@@ -781,6 +811,16 @@ int main(int argc, char** argv) {
+@@ -781,6 +831,16 @@ int main(int argc, char** argv) {
          recomp::register_game(game);
      }
  
@@ -231,7 +268,7 @@ index ec03f76..973de98 100644
      REGISTER_FUNC(recomp_get_window_resolution);
      REGISTER_FUNC(recomp_get_target_aspect_ratio);
      REGISTER_FUNC(recomp_get_target_framerate);
-@@ -840,7 +880,11 @@ int main(int argc, char** argv) {
+@@ -840,7 +900,11 @@ int main(int argc, char** argv) {
  
      ultramodern::input::callbacks_t input_callbacks{
          .poll_input = recompinput::poll_inputs,

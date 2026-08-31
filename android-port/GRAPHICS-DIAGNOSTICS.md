@@ -1,5 +1,15 @@
 # Adreno 840 water investigation
 
+## Current default — included in dev11, 2026-08-31
+
+At the user's request, the app now defaults to `TU_DEBUG=gmem` for all imported Turnip drivers, regardless of GPU. The system driver still receives no Turnip flags. This is a default policy based on the Poco test below, not a claim of compatibility or improved performance on every device.
+
+New installations, missing/invalid saved selections and the old empty **Off — driver defaults** selection resolve to **GMEM rendering — default**. Existing explicit `sysmem`, `gmem`, depth/compression or strict-sync selections are preserved. The stored strings, rather than the old menu indices, determine the choice.
+
+**Turnip compatibility mode (sysmem)** remains a fallback: On selects only `sysmem`; switching Off returns to GMEM. Under Advanced Turnip diagnostics, **Driver defaults (automatic)** explicitly sends no debug flags. This opt-out is saved as `driver-defaults` so it is distinguishable from the old empty default after restarting. Other diagnostic modes replace the default; they do not silently inherit GMEM or sysmem. All changes apply to a new game-process launch.
+
+Dev11 includes the default change first built locally in dev10, alongside audio recovery and touch D-pad changes. No device installation was performed while preparing dev11. The older sections below describe their respective builds.
+
 ## Observations
 
 - User device: Poco F8 Ultra / Adreno 840. User reports flashing and speckled water throughout the game with StevenMXZ Turnip Gen8 V30 and V35, while their Snapdragon 8 Gen 3 device renders correctly.
@@ -8,7 +18,32 @@
 - A user screenshot shows heavy speckling across the water. A separate ADB screenshot caught a water scene without the same heavy speckling; a single frame cannot establish temporal correctness.
 - With **System-memory rendering (`TU_DEBUG=sysmem`)** enabled in dev6 on the Poco using Turnip Gen8 V30, the user revisited water and reported that the corruption seemed fully gone. This is a user-confirmed workaround for that tested combination.
 - The user also reports that the sysmem workaround works correctly with Turnip Gen8 V35 on the same phone. That V35 result is user-reported; the recorded ADB startup verification used V30.
-- The result implicates the tiled GMEM rendering path or its interaction with RT64; the exact root cause is **not confirmed**. No water shader or native renderer changes have been applied. Other devices, performance impact and long-session stability have not been verified.
+- The initial sysmem result suggested an issue involving the tiled rendering path or its interaction with RT64, but the subsequent forced-GMEM result below means it is not evidence that GMEM always fails. The exact root cause is **not confirmed**. No water shader or native renderer changes have been applied. Other devices, performance impact and long-session stability have not been verified.
+
+## Local dev9 GMEM experiment — 2026-08-31
+
+At the user's request, the local `1.0.1-android-dev9-gmem-test` build adds two entries under **Advanced Turnip diagnostics**:
+
+| Mode | TU_DEBUG | Purpose |
+| --- | --- | --- |
+| GMEM rendering — experimental | `gmem` | Requests tiled rendering as a comparison baseline |
+| GMEM + strict synchronization — very slow | `gmem,flushall,syncdraw` | Requests tiled rendering with cache flushes before GPU operations and waits after them |
+
+Turnip's [documented flags](https://docs.mesa3d.org/envvars.html#turnip-driver-environment-variables) are debugging controls, not a general high-accuracy preset. This experiment may narrow down a synchronization/cache problem, but does not establish the cause of the water corruption and may be slower than sysmem. An imported driver's support and any render-pass restrictions still apply; the app's log confirms requested flags, not the memory path actually used for every pass.
+
+Existing saved selections, including `sysmem`, remain unchanged after updating. Select **GMEM + strict synchronization — very slow**, save, then start a fresh game process. Compare the same water scene using the same imported driver and game graphics settings. Compare GMEM alone in a separate launch if useful. Record water stability and performance separately. Save game progress before ending a session.
+
+To restore the user-confirmed workaround, enable **Turnip compatibility mode** and start a fresh game process. That selects only `sysmem`; the GMEM/synchronization flags are not combined with it. **Off — driver defaults** restores the driver's normal mode selection, which is not the same as forcing GMEM. No settings are applied to the system Vulkan driver or other apps. The native renderer and shaders are unchanged.
+
+This is a local diagnostic build, not a published replacement for dev8.
+
+### Poco result — 2026-08-31
+
+The dev9 Debug APK was installed on the Poco F8 Ultra with an in-place update. Turnip Gen8 V35 and the previous `sysmem` selection were retained immediately after installation. The user then selected **GMEM rendering — experimental** and reported that it "works perfectly" in the ongoing water test.
+
+Read-only ADB verification confirms saved flags `gmem` and, at `08-31 00:27:29`, `Launch diagnostics: TU_DEBUG=gmem; customDriver=true`. The same process initialized Turnip Gen8 V35 on Adreno 840. This verifies the requested **GMEM-only** mode, not `gmem,flushall,syncdraw`. No successful combined-mode test is claimed. No setting was changed or game session interrupted during this verification.
+
+The visual improvement is user-reported; sustained performance, full gameplay and long-session stability remain unmeasured. Forcing GMEM differs from letting the driver choose its rendering path automatically. Both forcing sysmem and forcing GMEM have now been reported to avoid the water symptom in this setup, so the earlier sysmem result does not isolate the cause to GMEM itself. No transition/autotuning bug is proven. Leave GMEM selected for this test, with the existing sysmem option available if corruption returns.
 
 ## Local dev7 compatibility toggle
 

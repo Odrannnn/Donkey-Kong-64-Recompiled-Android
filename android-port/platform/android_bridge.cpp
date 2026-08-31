@@ -1,4 +1,5 @@
 #include "android_bridge.h"
+#include "android_audio.h"
 #include <algorithm>
 #include <cmath>
 #include <mutex>
@@ -40,6 +41,11 @@ Java_io_github_dk64port_GameActivity_nativeTouchState(JNIEnv*, jclass, jint butt
 extern "C" JNIEXPORT void JNICALL
 Java_io_github_dk64port_GameActivity_nativePauseScheduler(JNIEnv*, jclass, jboolean paused) {
     ultramodern::set_vi_scheduler_paused(paused);
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_io_github_dk64port_GameActivity_nativeAudioPaused(JNIEnv*, jclass, jboolean paused) {
+    dk64::android_audio::set_paused(paused);
 }
 
 extern "C" JNIEXPORT void JNICALL
