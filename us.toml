@@ -60,3 +60,8 @@ before_vram = 0x8060B140
 #func = "func_global_asm_80610350"
 #vram = 0x80610564
 #value = 0x3C0F8080 #lui $t7, hi(heap_start)
+
+[[patches.instruction]]
+func = "func_global_asm_80601D24"
+vram = 0x80601DE4
+value = 0x24150000 #li $s5, 0
