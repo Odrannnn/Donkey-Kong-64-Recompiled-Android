@@ -219,6 +219,31 @@ $toolVersions.python = (& $python --version | Select-Object -First 1)
 $packageLog = Join-Path $logsRoot '07-package.log'
 Invoke-Logged 'Release packaging' $python @((Join-Path $coopRoot 'tools/package.py'), '--nrm', $releaseNrm, '--android-library', $androidLibrary, '--windows-library', $windowsLibrary, '--dist', (Join-Path $coopRoot 'dist')) $packageLog $coopRoot
 
+# Compile the app's real importer classes and install the finished Android ZIP
+# into a temporary host directory. This catches package-layout and transaction
+# regressions that archive inspection alone cannot detect.
+if (-not $env:JAVA_HOME) { throw 'JAVA_HOME must point to JDK 17 or newer for the Android importer smoke test' }
+$javaHome = Require-Directory $env:JAVA_HOME 'JDK home'
+$javac = Require-File (Join-Path $javaHome 'bin/javac.exe') 'JDK javac'
+$java = Require-File (Join-Path $javaHome 'bin/java.exe') 'JDK java'
+$jsonJar = Require-File (Join-Path $workspace '.local/mod-tests/json.jar') 'Pinned org.json importer-test dependency'
+$toolVersions.java = ((& $java -version 2>&1 | Select-Object -First 1).ToString())
+$importRoot = Join-Path $releaseRoot 'android-importer-smoke'
+$importClasses = Join-Path $importRoot 'classes'
+$importScratch = Join-Path $importRoot 'scratch'
+New-Item -ItemType Directory -Path $importClasses, $importScratch | Out-Null
+$importSources = @('DriverArchive', 'ModSession', 'NativeMod', 'ModTransaction', 'ModArchive', 'ModStore') | ForEach-Object {
+    Require-File (Join-Path $workspace "android/app/src/main/java/io/github/dk64port/$_.java") "Android importer source $_"
+}
+$importTest = Require-File (Join-Path $coopRoot 'tests/BundleImportSmoke.java') 'Android co-op bundle importer test'
+$androidBundle = Require-File (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-android-prototype.zip") 'Packaged Android co-op bundle'
+$importCompileLog = Join-Path $logsRoot '08a-android-importer-compile.log'
+$javacArguments = @('-cp', $jsonJar, '-d', $importClasses) + $importSources + @($importTest)
+Invoke-Logged 'Android importer smoke compile' $javac $javacArguments $importCompileLog $workspace
+$importRunLog = Join-Path $logsRoot '08b-android-importer-run.log'
+Invoke-Logged 'Android importer smoke test' $java @('-cp', "$importClasses;$jsonJar", 'io.github.dk64port.BundleImportSmoke', $androidBundle, $importScratch) $importRunLog $workspace
+if ((Get-Content -LiteralPath $importRunLog -Raw) -notmatch 'PASS: actual Android co-op ZIP imports') { throw 'Android importer smoke test produced no PASS marker' }
+
 $artifacts = @($releaseNrm, (Join-Path $mipsRoot 'mod.elf'), $androidLibrary, $windowsLibrary, (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-android-prototype.zip"), (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-windows-prototype.zip"), (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-source.zip"), (Join-Path $coopRoot 'dist/SHA256SUMS.txt'))
 $hashes = [ordered]@{}
 foreach ($artifact in $artifacts) { $hashes[[IO.Path]::GetFileName($artifact)] = (Get-FileHash -Algorithm SHA256 -LiteralPath (Require-File $artifact 'Release artifact')).Hash.ToLowerInvariant() }
@@ -230,9 +255,10 @@ $status = [ordered]@{
     workspace = $workspace
     toolchains = $toolVersions
     validation = [ordered]@{ suite = 'Linux Debug ASan/UBSan native CTest'; result = "$expectedHostTests/$expectedHostTests passed"; log = '01-host-tests.log' }
+    importer_validation = [ordered]@{ suite = 'Android ModStore bundle import smoke'; result = 'passed'; log = '08b-android-importer-run.log' }
     commands = $commands
     artifacts_sha256 = $hashes
-    not_performed = @('gameplay testing', 'installation', 'game launch', 'commit', 'push', 'publish')
+    not_performed = @('gameplay testing', 'device installation', 'game launch', 'commit', 'push', 'publish')
 }
 $statusPath = Join-Path $releaseRoot 'build-status.json'
 $status | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath $statusPath -Encoding utf8
