@@ -18,13 +18,15 @@ This fork adds the Android ARM64 port in **[android-port/](android-port/README.m
 
 ## Android download
 
-Download **[Android dev11](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev11)** for ARM64 devices. Supply your own supported original US ROM.
+Download **[Android dev12](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/releases/tag/v1.0.1-android-dev12)** for ARM64 devices. Supply your own supported original US ROM.
 
-Dev11 adds a touch D-pad with diagonals, corrects audio queue corruption and resets stale audio after returning from the lock screen or another app. It also includes the previously local GMEM default change. The original banana icon and [its attribution and notices](android-port/android/ICON-NOTICE.md) are retained. Reusing upstream artwork does not imply endorsement or affiliation. No co-op or Archipelago mod is bundled.
+Dev12 opens the Android software keyboard for native menu text fields, including the LAN co-op guest IP setting. It retains dev11's lock-screen audio recovery, touch D-pad, per-app Turnip import, GMEM default, and Android mod manager.
+
+The same release includes the separate **DK64 LAN Co-op v0.42.0** Android and Windows bundles, standalone NRM, source archive, and checksums. The mod is experimental and is not embedded in the APK. Both peers need a matching platform bundle; the Android ZIP is imported through **Manage Mods**.
 
 **Graphics driver warning:** the system Vulkan driver may cause a black screen or crash. Compatible Qualcomm Adreno devices may require an imported Turnip driver. Turnip is not compatible with every GPU and is not bundled. The launcher displays this warning before Launch game.
 
-This is a regular GitHub release, not a prerelease. The APK is non-debuggable, with the existing development signing identity retained for update compatibility. Save your progress before updating. Read the release notes for requirements and testing limitations; full gameplay and all-device compatibility are not established.
+The APK is a regular non-debuggable release signed with the existing development identity for update compatibility. Save your progress before updating. Full gameplay and all-device compatibility are not established.
 
 ## Get the Android sources
 
@@ -36,7 +38,7 @@ python tools/bootstrap_sources.py
 
 Then follow **[the Windows/WSL Android build instructions](android-port/README.md#build-on-windows)**. The maintained Android project, platform integration, tools, six dependency patches and lock file are all under `android-port`. The lock file restores 41 pinned repositories into ignored local directories. The desktop source tree below remains at the upstream base revision; Android-specific changes to it are maintained as reproducible patches.
 
-Validation for dev11: native build and signed release packaging, APK content/alignment checks, SDL dummy-output audio regressions under ASan/UBSan, 45 D-pad/lifecycle checks, 22 graphics-selection checks, 19 mod archive/storage checks, 19 native companion-bundle checks and 12 driver archive checks. **Dev11 has not received an on-device gameplay test: the tablet was unavailable over ADB.** Lock-screen recovery and the new touch layout still need device confirmation. Earlier device evidence includes the user-confirmed Poco water workaround and Tag Anywhere loading on the tablet. Host checks are not a substitute for complete gameplay testing. The Android release is built locally from its tagged sources; no GitHub Actions build is claimed. The inherited desktop workflows require upstream-only build inputs.
+Validation for dev12: signed ARM64 release packaging and APK checks, plus the retained Android importer, graphics, touch/lifecycle and audio regression suites. LAN Co-op v0.42.0 passes all eight Linux Debug ASan/UBSan suites and pinned MIPS, Android ARM64, Windows x64, export, format and package checks. A protocol-42 Android-to-Android synthetic run exchanged all 5,894 item/progression IDs and acknowledgements in both directions without invalid or rejected packets. Expanded boss and campaign behavior remains experimental and needs gameplay validation.
 
 ---
 

@@ -173,6 +173,39 @@ index 19f761c..17e9c73 100644
  
      context.close();
      create_mod_config_modal();
+diff --git a/recompui/src/elements/ui_text_input.cpp b/recompui/src/elements/ui_text_input.cpp
+index 42c74e7..0d81abe 100644
+--- a/recompui/src/elements/ui_text_input.cpp
++++ b/recompui/src/elements/ui_text_input.cpp
+@@ -2,6 +2,10 @@
+ 
+ #include <cassert>
+ 
++#ifdef __ANDROID__
++#include <SDL.h>
++#endif
++
+ namespace recompui {
+ 
+     void TextInput::process_event(const Event &e) {
+@@ -18,6 +22,17 @@ namespace recompui {
+         }
+         case EventType::Focus: {
+             const EventFocus &event = std::get<EventFocus>(e.variant);
++#ifdef __ANDROID__
++            // SDL's Android backend does not show the software keyboard until
++            // text input is explicitly started. RmlUi owns the actual field;
++            // SDL's hidden EditText only supplies IME text events to it.
++            if (event.active) {
++                SDL_StartTextInput();
++            }
++            else {
++                SDL_StopTextInput();
++            }
++#endif
+             if (focus_callback != nullptr) {
+                 focus_callback(event.active);
+             }
 diff --git a/recompui/src/renderer/ui_renderer.cpp b/recompui/src/renderer/ui_renderer.cpp
 index 556df18..fb9baa1 100644
 --- a/recompui/src/renderer/ui_renderer.cpp

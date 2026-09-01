@@ -1,0 +1,598 @@
+{
+  "format": 1,
+  "revision": "66d0dc90064a572e9bf2a2eada53ef81a7f47eb4",
+  "rom_sha256": "04bca239f17380aa2a97e8f04715a09f1f05b74df9c057b609558408fd39c91a",
+  "sources": {
+    "randomizer/Patching/ASM/Items.py": "e0c5da84cc0c88d4fc8d55b7af396880300b51e275547760988fd4e68a569960",
+    "randomizer/Patching/ASMPatcher.py": "fc844cfb73af3fbf508a2facf1add27a2261c51af4ace3553c3653d8c6edf82d",
+    "base-hack/asm/hookcode/move.asm": "8d41f9bde4fe46dce80cf43b6548d22f4d0443fce1c3a6a188a67f4f1a5b8f5f",
+    "base-hack/asm/hookcode/io.asm": "61c2c476ada9733e9e292749db37407818c533b09adf8ed1056dac95b2da84bf",
+    "base-hack/asm/hookcode/shop.asm": "148029a50f05cbade26f058a156a37d30d5152ba3c491b19b8e8d87a085bd64d",
+    "randomizer/Patching/ASM/Save.py": "20e35d769c0c2a541805021d87030796d6d3df154426f7cc131bcc053ee8030e",
+    "base-hack/src/randomizers/move_rando.c": "0062c098c3cba55afcf154a4501a04ac92dff9fab95ec6ba14263b30e7e2c4e2",
+    "base-hack/src/item rando/item_handler.c": "7d18de5d64a7ee38b741fdeb5b9ce66697d22aaedbbf2dde9080b8421fbaec68",
+    "base-hack/src/misc/shop_indicator.c": "d7b0fcfade7b38ab793540f2e1fe45e7111b98ad234977e3a0745af10b47d7aa",
+    "archipelago/Prices.py": "39a93fa3115a4f2329fd2c895d094b1a79595619d0f93be6502f25ce215460db",
+    "base-hack/Build/patch_text.py": "2251b1a2e173adff21c56f4f521454dc2408ef4d920b65cdd4952f36941af43a",
+    "archipelago/DK64Client.py": "6bac6981b164a622f74f01b6425ec32266048f2d270bee85ef40c9e1c5326c4c",
+    "base-hack/src/item rando/archipelago.c": "cd8bc669025a79b656f3a004c9a1c1c985828cf7fe8a598b34043989b0cff06a",
+    "base-hack/Build/item_dictionaries.py": "da89249995b5967e606f60a24f1493c53092a119c9ae3ae4901ba611e4d6b89b",
+    "base-hack/src/item rando/ice_trap.c": "4f34f7422e8cea56bc6043fbb5754b3a884af9f363d088f86822c9b09129ba45"
+  },
+  "functions": [
+    {
+      "function": "func_global_asm_8063EA14",
+      "vram": "8063EA14",
+      "sha256": "811e4741bce69e392e9dd3ce13cb264ef0c34e6474cb13d275860887a69adbf9",
+      "words": {},
+      "hooks": {
+        "8063EE08": [
+          "addiu $t1, $zero, 1",
+          "addi $t4, $t4, -1",
+          "sllv $t4, $t1, $t4",
+          "addiu $t1, $zero, 0",
+          "and $at, $t6, $t4",
+          "beqz $at, @script_fail",
+          "nop",
+          "j {8063EE14}",
+          "nop",
+          "@script_fail:",
+          "j {8063EE1C}",
+          "nop"
+        ]
+      }
+    },
+    {
+      "function": "func_global_asm_8067E784",
+      "vram": "8067E784",
+      "sha256": "ac05f996d749062174f743975ff8844ac1442289e64ded78689b41399c97572f",
+      "words": {
+        "8067ECFC": "30810002",
+        "8067ED00": "50200003",
+        "8067ECE0": "30810004",
+        "8067ECE4": "10200002",
+        "8067EC80": "30830001",
+        "8067EC84": "18600002",
+        "8067ECA0": "30810001",
+        "8067ECA4": "18200002"
+      },
+      "hooks": {
+        "8067ECB8": [
+          "bnel $v1, $at, @hunky_finish",
+          "addiu $at, $zero, 4",
+          "andi $a2, $a0, 1",
+          "blezl $a2, @hunky_finish",
+          "addiu $at, $zero, 4",
+          "j {8067ECC8}",
+          "nop",
+          "@hunky_finish:",
+          "j {8067ECD0}",
+          "nop"
+        ]
+      }
+    },
+    {
+      "function": "func_global_asm_80681E18",
+      "vram": "80681E18",
+      "sha256": "19cab91b67caad995be958f377ecf2a061890126e0c3b3389dd5c8bf117306f8",
+      "words": {
+        "80682024": "31810002",
+        "80682028": "50200006"
+      },
+      "hooks": {}
+    },
+    {
+      "function": "func_global_asm_806E208C",
+      "vram": "806E208C",
+      "sha256": "d16fa34b6407dd033221053a448d7f976010315626611fadbdc2b29180b5dd2c",
+      "words": {
+        "806E20F0": "31010002",
+        "806E20F4": "5020000F"
+      },
+      "hooks": {}
+    },
+    {
+      "function": "func_global_asm_806E4740",
+      "vram": "806E4740",
+      "sha256": "648ab9b69bf7d028b439b587851baf22d2c054ca220b93ab048bce0ed528ba88",
+      "words": {
+        "806E48F4": "31810002",
+        "806E48F8": "50200074"
+      },
+      "hooks": {
+        "806E4930": [
+          "andi $t6, $t6, 1",
+          "lui $v1, 0x8080",
+          "j {806E4938}",
+          "addiu $v1, $v1, -0x44C0"
+        ],
+        "806E48AC": [
+          "lbu $t2, -0x35F4($t2)",
+          "andi $t2, $t2, 1",
+          "j {806E48B4}",
+          "addiu $a0, $zero, 0x25"
+        ]
+      }
+    },
+    {
+      "function": "func_global_asm_806F6E58",
+      "vram": "806F6E58",
+      "sha256": "dfa94fe5ca97dc198d38cc020057a9ddacee50a4d145792a1b9932d988587287",
+      "words": {},
+      "hooks": {
+        "806F6EA0": [
+          "lbu $t0, 0x4238($t0)",
+          "addi $t0, $t0, -1",
+          "addiu $v1, $zero, 1",
+          "sllv $t0, $v1, $t0",
+          "and $v1, $t0, $t9",
+          "beqz $v1, @barrel_finish",
+          "nop",
+          "addiu $v1, $zero, 1",
+          "@barrel_finish:",
+          "j {806F6EB4}",
+          "nop"
+        ]
+      },
+      "assembly": {
+        "806F6EBC": "jal ap_campaign_has_flag_move"
+      }
+    },
+    {
+      "function": "changeCollectableCount",
+      "vram": "806F91B4",
+      "sha256": "6c3f8a19a3744d3a264c50b391eea75e2e869e600486eb4b6083962436966f93",
+      "words": {},
+      "hooks": {}
+    },
+    {
+      "function": "func_global_asm_8060D2C8",
+      "vram": "8060D2C8",
+      "sha256": "989032c3f4b8aa8534bee78a67383f921d7a9f1b52603afd648d286ef924fc38",
+      "words": {},
+      "hooks": {},
+      "halfwords": {
+        "8060D586": "FFA0"
+      },
+      "gate_mask": 8
+    },
+    {
+      "function": "func_global_asm_8060DEC8",
+      "vram": "8060DEC8",
+      "sha256": "bfdc6bd82a970d7dd1b9dd72b36486ab3d7173a1434ba8af1c817bf3c4159a87",
+      "words": {
+        "8060E04C": "00000000"
+      },
+      "hooks": {
+        "8060DFF4": [
+          "bnez $s0, @save_not_moves",
+          "andi $a1, $s3, 0xFF",
+          "b @save_finish",
+          "addiu $a0, $zero, 10",
+          "@save_not_moves:",
+          "addiu $a0, $s0, 4",
+          "@save_finish:",
+          "j {8060DFFC}",
+          "nop"
+        ]
+      }
+    },
+    {
+      "function": "func_global_asm_8060DC3C",
+      "vram": "8060DC3C",
+      "sha256": "6da927aabf67c802ba359bc61fe836216f3801a92c492b7f1dc6f1732621b06d",
+      "words": {},
+      "hooks": {},
+      "halfwords": {
+        "8060DDAA": "0000"
+      }
+    },
+    {
+      "function": "func_menu_80025E04",
+      "vram": "80025E04",
+      "sha256": "24be788e3159a5e169c239f9772abc10fa929b837ee6ef5a8946698feb7914c8",
+      "words": {
+        "80025EA0": "90850004",
+        "80025E80": "90850004",
+        "80025F70": "93060005",
+        "80025E9C": "0C009751"
+      },
+      "hooks": {},
+      "dispatch": {
+        "mask": 4,
+        "symbol": "ap_apshop_purchase"
+      },
+      "replaces_calls": [
+        "8002691C"
+      ]
+    },
+    {
+      "function": "func_menu_800261C0",
+      "vram": "800261C0",
+      "sha256": "34c922d10ab53dfcb79866b6077090b816386fbd3ecc4bf7fc936f0cf865b944",
+      "words": {
+        "80026200": "90CF0005"
+      },
+      "hooks": {},
+      "dispatch": {
+        "mask": 4,
+        "symbol": "ap_apshop_afford"
+      },
+      "replaces_calls": []
+    },
+    {
+      "function": "func_menu_80025FB4",
+      "vram": "80025FB4",
+      "sha256": "3a5053eef14369dbe1df60bb6ae1f3ea215fe2c38313ebae429fc1cae1078c46",
+      "words": {
+        "80026160": "00000000"
+      },
+      "hooks": {
+        "800260E0": [
+          "beq $a0, $t0, @shop_bits",
+          "or $v1, $a0, $zero",
+          "beqz $a0, @shop_bits",
+          "nop",
+          "j {800260E8}",
+          "nop",
+          "@shop_bits:",
+          "j {800260F0}",
+          "nop"
+        ],
+        "800260A8": [
+          "addu $t3, $t3, $t9",
+          "sll $t3, $t3, 1",
+          "lbu $t2, 0xC($s2)",
+          "sltiu $t1, $t2, 7",
+          "beqz $t1, @shop_outside",
+          "nop",
+          "sll $t1, $t2, 2",
+          "subu $t1, $t1, $t2",
+          "sll $t1, $t1, 1",
+          "j {800260B4}",
+          "addu $v1, $v1, $t1",
+          "@shop_outside:",
+          "or $s0, $zero, $zero",
+          "j {80026168}",
+          "or $s1, $zero, $zero"
+        ],
+        "80026140": [
+          "lh $v0, 4($a1)",
+          "sh $v0, 4($s2)",
+          "andi $t8, $v0, 0xFF",
+          "j {8002614C}",
+          "sh $t8, 0($t2)"
+        ],
+        "80025FC0": [
+          "or $s2, $a0, $zero",
+          "lui $a1, %hi(D_global_asm_807FC950)",
+          "addiu $a1, $a1, %lo(D_global_asm_807FC950)",
+          "j {80025FC8}",
+          "or $s3, $a1, $zero"
+        ],
+        "800260F0": [
+          "lh $t4, 2($a1)",
+          "addu $t8, $s3, $a0",
+          "lbu $t9, 4($a1)",
+          "addiu $t6, $zero, 0x5E",
+          "mult $t9, $t6",
+          "mflo $t9",
+          "j {800260F8}",
+          "addu $t8, $t8, $t9"
+        ],
+        "8002611C": [
+          "lbu $t6, 4($a1)",
+          "addiu $t5, $zero, 0x5E",
+          "mult $t6, $t5",
+          "mflo $t6",
+          "addu $t4, $t4, $t6",
+          "lbu $t6, 0($t4)",
+          "j {80026124}",
+          "lh $t5, 2($a1)"
+        ]
+      },
+      "assembly": {
+        "80026070": "lui $v1, %hi(ap_cranky_moves)",
+        "80026078": "addiu $v1, $v1, %lo(ap_cranky_moves)",
+        "8002607C": "lui $v1, %hi(ap_candy_moves)",
+        "80026084": "addiu $v1, $v1, %lo(ap_candy_moves)",
+        "80026088": "lui $v1, %hi(ap_funky_moves)",
+        "8002608C": "addiu $v1, $v1, %lo(ap_funky_moves)"
+      },
+      "dispatch": {
+        "mask": 4,
+        "symbol": "ap_apshop_select"
+      },
+      "replaces_calls": [
+        "80026720",
+        "8002683C"
+      ]
+    },
+    {
+      "function": "func_menu_80026874",
+      "vram": "80026874",
+      "sha256": "9f08874c53dd3392d290c6cfa6690e3e9f190059ea72b79bbc0a7088ccf171ab",
+      "gate_mask": 4,
+      "words": {},
+      "hooks": {
+        "80026924": [
+          "lui $at, 0x8080",
+          "lw $at, -0x44C0($at)",
+          "lw $t9, 0x58($at)",
+          "addiu $at, $zero, 191",
+          "beq $t9, $at, @vendor_finish",
+          "addiu $t9, $zero, 4",
+          "lui $at, 0x8080",
+          "lw $at, -0x44C0($at)",
+          "lw $t9, 0x58($at)",
+          "addiu $at, $zero, 190",
+          "beq $t9, $at, @vendor_finish",
+          "addiu $t9, $zero, 2",
+          "lui $at, 0x8080",
+          "lw $at, -0x44C0($at)",
+          "lw $t9, 0x58($at)",
+          "addiu $at, $zero, 189",
+          "beq $t9, $at, @vendor_finish",
+          "addiu $t9, $zero, 0",
+          "lbu $t9, 0xB($s0)",
+          "@vendor_finish:",
+          "j {8002692C}",
+          "sltiu $at, $t9, 5"
+        ]
+      }
+    },
+    {
+      "function": "func_menu_800262A8",
+      "vram": "800262A8",
+      "sha256": "19acb58d8b005ced7bdff3679d004886b7f8c73b9257dba11fa0e8752f4e9d96",
+      "words": {},
+      "hooks": {},
+      "replaces_calls": []
+    },
+    {
+      "function": "func_menu_80026B28",
+      "vram": "80026B28",
+      "sha256": "4f63b2404265268eff2d95f120021ba05766d2a3a9973876a731a8e38383e53f",
+      "words": {},
+      "hooks": {},
+      "replaces_calls": [
+        "800270B8"
+      ]
+    },
+    {
+      "function": "func_global_asm_8070DDDC",
+      "vram": "8070DDDC",
+      "sha256": "c07fe83af32ba7167b292bb50ba8b55fff2fbcc7d6c645294915a0e0461ad560",
+      "words": {},
+      "hooks": {},
+      "replaces_calls": []
+    },
+    {
+      "function": "func_menu_80027988",
+      "vram": "80027988",
+      "sha256": "4fedb2f243e51d33898da4e2786bb0b54456178fa4dcc242ce344fee23e8dce3",
+      "words": {},
+      "hooks": {}
+    },
+    {
+      "function": "func_global_asm_806E9804",
+      "vram": "806E9804",
+      "sha256": "ec00034d710b67b5fa00912510b416a9d0ef660e97c319d1d4918678b7371fab",
+      "gate_mask": 32,
+      "halfwords": {"806E9812": "02FD"},
+      "assembly": {"806E9814": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "func_global_asm_806323C0",
+      "vram": "806323C0",
+      "sha256": "80f3dd69ef7075f939ee9bc6e48ae00c49279c244ceb6c86b8383b22b0b77291",
+      "gate_mask": 32,
+      "assembly": {"806324D4": "jal ap_campaign_get_kong_ownership_from_flag"}
+    },
+    {
+      "function": "func_global_asm_806491F4",
+      "vram": "806491F4",
+      "sha256": "018c2a6b79511e0fd68630e785eac802750df53deffea9216081a0df5e93895f",
+      "gate_mask": 32,
+      "assembly": {"8064936C": "jal ap_campaign_get_kong_ownership_from_flag"}
+    },
+    {
+      "function": "func_global_asm_80682E38",
+      "vram": "80682E38",
+      "sha256": "5dc5e80587eecc829ad23cd6e0a92fdbff78403a6c4dd3e49cf066e5428b5ead",
+      "gate_mask": 32,
+      "assembly": {"80682F40": "jal ap_campaign_get_kong_ownership_from_flag"}
+    },
+    {
+      "function": "func_global_asm_8068408C",
+      "vram": "8068408C",
+      "sha256": "b1563830f802dfab5c872a886c103fbe0558590efb68afec2f5da9319d0f6975",
+      "gate_mask": 32,
+      "assembly": {"806840D8": "jal ap_campaign_get_kong_ownership_from_flag"}
+    },
+    {
+      "function": "func_global_asm_806FA1A4",
+      "vram": "806FA1A4",
+      "sha256": "ba47db3c9f8db3af553b812015b14a732c2d3f384a9f32eaa3d088504490aecc",
+      "gate_mask": 32,
+      "assembly": {"806FA340": "jal ap_campaign_get_kong_ownership_from_flag"}
+    },
+    {
+      "function": "func_menu_80024788",
+      "vram": "80024788",
+      "sha256": "b9127db3b1c2a4aa85e89fb59135008391df68d3074817f5ae6a2ae641dc9af3",
+      "gate_mask": 32,
+      "words": {"80024854": "00801025"},
+      "halfwords": {"8002483A": "0004", "800248D2": "0004"},
+      "assembly": {"80024840": "jal ap_campaign_original_item_count"}
+    },
+    {
+      "function": "func_menu_80024CB0",
+      "vram": "80024CB0",
+      "sha256": "60c6cde2e886e41c1dd6d58c764e2cb7dd813342628e89bd67e9078e9e339952",
+      "gate_mask": 32,
+      "words": {"80024D08": "2405FFFF", "80024D10": "00E03025"},
+      "halfwords": {"80024D06": "0004"},
+      "assembly": {"80024D0C": "jal ap_campaign_original_item_count"}
+    },
+    {
+      "function": "func_global_asm_806A7600",
+      "vram": "806A7600",
+      "sha256": "1c32b5e0fab92698efb9c085bfe41408df6fcf1e82b213816958d0ca1f4b079b",
+      "gate_mask": 32,
+      "assembly": {"806A78A8": "jal ap_campaign_get_kong_ownership_from_flag"}
+    },
+    {
+      "function": "func_global_asm_806AA304",
+      "vram": "806AA304",
+      "sha256": "89cab64f13de9b58911d95315fa4c0c4fd663029fe9240b4638c55837451aeae",
+      "gate_mask": 32,
+      "words": {
+        "806AAB30": "3C068075",
+        "806AAB34": "90C6E77C",
+        "806AAB38": "24040004",
+        "806AAB40": "8FA5007C"
+      },
+      "halfwords": {
+        "806AA762": "02FD",
+        "806AAFB6": "02FD",
+        "806AB0F6": "02FD"
+      },
+      "assembly": {
+        "806AAB3C": "jal ap_campaign_original_item_count",
+        "806AA764": "jal ap_campaign_has_flag_move",
+        "806AAFB8": "jal ap_campaign_has_flag_move",
+        "806AB0F8": "jal ap_campaign_has_flag_move"
+      }
+    },
+    {
+      "function": "func_global_asm_806ABE3C",
+      "vram": "806ABE3C",
+      "sha256": "34ed6765d96e42f65ab23ec57aff07878c71c1b96cc42625dffa8d45e177be3f",
+      "gate_mask": 32,
+      "words": {
+        "806ABEFC": "24040006",
+        "806ABF04": "2405FFFF",
+        "806ABF18": "00000000",
+        "806ABF1C": "00000000",
+        "806ABF24": "A422C82C",
+        "806ABF6C": "24040007",
+        "806ABF94": "00000000",
+        "806ABF98": "00000000",
+        "806ABFA0": "A422C82A",
+        "806ABFAC": "00003025",
+        "806ABFC0": "24060001",
+        "806ABFD8": "2406FFFF"
+      },
+      "halfwords": {
+        "806ABF2A": "0005",
+        "806ABF42": "0009",
+        "806ABFA6": "0008",
+        "806ABFBA": "0008",
+        "806ABFCE": "0004",
+        "806ABFD2": "FFFF"
+      },
+      "assembly": {
+        "806ABF00": "jal ap_campaign_original_item_count",
+        "806ABF30": "jal ap_campaign_original_item_count",
+        "806ABF48": "jal ap_campaign_original_item_count",
+        "806ABF78": "jal ap_campaign_original_item_count",
+        "806ABFA8": "jal ap_campaign_original_item_count",
+        "806ABFBC": "jal ap_campaign_original_item_count",
+        "806ABFD4": "jal ap_campaign_original_item_count",
+        "806AC00C": "jal ap_campaign_get_kong_ownership_from_flag"
+      }
+    },
+    {
+      "function": "func_global_asm_806BD170",
+      "vram": "806BD170",
+      "sha256": "8b9bdb7e542015049665dcf9d4ea9e1f0bce5a999322e97651c4a07e1b8a3712",
+      "gate_mask": 32,
+      "words": {
+        "806BD2BC": "02202825",
+        "806BD2C4": "00003025",
+        "806BD308": "24040006"
+      },
+      "assembly": {"806BD304": "jal ap_campaign_original_item_count"}
+    },
+    {
+      "function": "func_global_asm_8060D7A8",
+      "vram": "8060D7A8",
+      "sha256": "e1066417a894e5ae2199b206d702509b35de5fb2042f48866044cbc51611c946",
+      "gate_mask": 32,
+      "halfwords": {"8060D986": "02FD"},
+      "assembly": {"8060D988": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "func_global_asm_806F6F28",
+      "vram": "806F6F28",
+      "sha256": "d291a78e2a1e6c6a275426646c3669fa9830a7825190b159f74547be0790838f",
+      "gate_mask": 32,
+      "halfwords": {"806F6F76": "02FD"},
+      "assembly": {"806F6F78": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "func_global_asm_806F8EB4",
+      "vram": "806F8EB4",
+      "sha256": "0ff8136ed6d44f5afc55fa4d8d3ce98c9be135d18ec3b44f1153fcd816332b6e",
+      "gate_mask": 32,
+      "halfwords": {"806F8EBE": "0005"},
+      "assembly": {"806F8EC4": "jal ap_campaign_original_item_count"}
+    },
+    {
+      "function": "func_global_asm_806F8EDC",
+      "vram": "806F8EDC",
+      "sha256": "1d9b6a2e2bbb88dc1984496a829fdcb5a6ab3b8dec5972c4f3ee14d401268529",
+      "gate_mask": 32,
+      "halfwords": {"806F916A": "02FD"},
+      "assembly": {"806F916C": "nop", "806F9174": "nop"}
+    },
+    {
+      "function": "func_global_asm_806CA2E4",
+      "vram": "806CA2E4",
+      "sha256": "7a6589d589e30c7a333239f9e066bfd681f96dfc429f44635069a2d942e2597e",
+      "gate_mask": 32,
+      "assembly": {"806CA308": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "func_global_asm_80698120",
+      "vram": "80698120",
+      "sha256": "a21ce21ba6f08dd7e41e1f92d01ce1c5e9848140a5d733bc1d26309448aef16e",
+      "gate_mask": 32,
+      "assembly": {"80698368": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "func_global_asm_8072F120",
+      "vram": "8072F120",
+      "sha256": "341c7bcab2e600cf4e98edbc8cf3e0794f9fa3720861a127ccb5365004d4d8db",
+      "gate_mask": 32,
+      "assembly": {"8072F190": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "func_global_asm_806E41EC",
+      "vram": "806E41EC",
+      "sha256": "2f9f97b9ecca647eb6a4ff2c2d5b12b8148c7db9a653e38d4ff476e19ada9a5e",
+      "gate_mask": 32,
+      "assembly": {"806E4250": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "playerCanDive",
+      "vram": "806E770C",
+      "sha256": "54d990cfbb62fe8f4a69f399dcfa6ecfddd37281afd0e72e52f9e815de4cbf34",
+      "gate_mask": 32,
+      "assembly": {"806E7718": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "playerCanThrowOrange",
+      "vram": "806E2CC4",
+      "sha256": "cddb13a77d8ed040dd123dfcb84f40901c2a416e377084549e852938da4cbb99",
+      "gate_mask": 32,
+      "assembly": {"806E2D6C": "jal ap_campaign_has_flag_move"}
+    },
+    {
+      "function": "func_global_asm_80712944",
+      "vram": "80712944",
+      "sha256": "8b3e6b54698969b1385c2079277e7826914682d0239f004e31ccbb609666c038"
+    }
+  ]
+}

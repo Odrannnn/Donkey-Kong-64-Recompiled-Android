@@ -1,0 +1,183 @@
+#include "combat.hpp"
+#include "protocol.hpp"
+#include <bit>
+#include <cmath>
+#include <type_traits>
+
+namespace dkcoop {
+static_assert(sizeof(CoopCombatFrame) == COOP_COMBAT_FRAME_WORDS * 4);
+static_assert(sizeof(CoopCombatResult) == COOP_COMBAT_RESULT_WORDS * 4);
+static_assert(std::is_trivially_copyable_v<CoopCombatFrame>);
+namespace {
+bool bounded_float(unsigned bits, float min, float max) {
+    const float value = std::bit_cast<float>(bits);
+    return std::isfinite(value) && value >= min && value <= max;
+}
+const CoopEnemy* find_enemy(const CoopCombatFrame& frame, unsigned key) {
+    for (const auto& enemy : frame.enemies) if (enemy.key == key && key) return &enemy;
+    return nullptr;
+}
+}
+bool valid_combat(const CoopCombatFrame& f) {
+    if (f.enabled > 3 || f.file > 3 || f.hands > 65535 || (f.enabled && !f.file)) return false;
+    if (!f.enabled && (f.file || f.layout || f.hands)) return false;
+    for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
+        const auto& e = f.enemies[i];
+        if (!e.key) { if (e.life || e.state || e.peer_life || e.kind || e.x || e.y || e.z || e.yaw) return false; continue; }
+        if (!f.enabled || !f.layout || e.key > 256 || !e.life || e.life > COOP_ENEMY_LIFE_MASK
+                || e.state < COOP_ENEMY_ALIVE || e.state > COOP_ENEMY_REQUEST) return false;
+        const unsigned health = coop_enemy_health(e);
+        if (e.kind < COOP_BLUE_BEAVER || e.kind > COOP_ENEMY_KIND_COUNT || (e.yaw & ~COOP_ENEMY_PACK_MASK)
+                || (e.state == COOP_ENEMY_ALIVE ? !health : health)
+                || !bounded_float(e.x, -100000, 100000) || !bounded_float(e.y, -100000, 100000)
+                || !bounded_float(e.z, -100000, 100000)) return false;
+        for (unsigned j = 0; j < i; ++j) if (f.enemies[j].key == e.key) return false;
+    }
+    for (unsigned i = 0; i < COOP_SHOTS; ++i) {
+        const auto& s = f.shots[i];
+        if (!s.id) { if (s.kind || s.x || s.y || s.z || s.yaw || s.scale) return false; continue; }
+        if (!f.enabled || s.kind < COOP_COCONUT || s.kind > COOP_ORANGE || s.yaw >= 4096
+            || !bounded_float(s.x, -100000, 100000) || !bounded_float(s.y, -100000, 100000)
+            || !bounded_float(s.z, -100000, 100000) || !bounded_float(s.scale, 0.01f, 4.0f)) return false;
+        for (unsigned j = 0; j < i; ++j) if (f.shots[j].id == s.id) return false;
+    }
+    const auto& b = f.boss;
+    if (!b.kind) {
+        if (b.life || b.peer_life || b.phase) return false;
+    } else if (!f.enabled || b.kind > COOP_BOSS_KIND_COUNT || !b.life
+            || b.life > COOP_ENEMY_LIFE_MASK || b.peer_life > COOP_ENEMY_LIFE_MASK || b.phase > 4) return false;
+    return true;
+}
+std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat_words(const CoopCombatFrame& f) {
+    std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> w{};
+    size_t n = 0;
+    w[n++] = f.enabled; w[n++] = f.file; w[n++] = f.layout; w[n++] = f.hands;
+    for (const auto& e : f.enemies) {
+        uint32_t identity = e.key | (e.state << COOP_ENEMY_STATE_SHIFT) | (e.kind << COOP_ENEMY_KIND_SHIFT);
+        if (e.key > 256 || e.state > 3 || e.kind > COOP_ENEMY_KIND_MASK) identity |= 0x20000u;
+        w[n++] = identity;
+        w[n++] = e.life; w[n++] = e.peer_life;
+        w[n++] = e.x; w[n++] = e.y; w[n++] = e.z; w[n++] = e.yaw;
+    }
+    for (const auto& s : f.shots) { w[n++] = s.id; w[n++] = s.kind; w[n++] = s.x; w[n++] = s.y; w[n++] = s.z; w[n++] = s.yaw; w[n++] = s.scale; }
+    w[n++] = f.boss.kind; w[n++] = f.boss.life; w[n++] = f.boss.peer_life; w[n++] = f.boss.phase;
+    static_assert(4 + COOP_ENEMIES * 7 + COOP_SHOTS * 7 + 4 == COOP_COMBAT_WIRE_WORDS);
+    return w;
+}
+CoopCombatFrame combat_from_words(const std::array<uint32_t, COOP_COMBAT_WIRE_WORDS>& w) {
+    CoopCombatFrame f{}; size_t n = 0;
+    f.enabled = w[n++]; f.file = w[n++]; f.layout = w[n++]; f.hands = w[n++];
+    for (auto& e : f.enemies) {
+        const uint32_t identity = w[n++];
+        e.key = identity & COOP_ENEMY_KEY_MASK;
+        e.state = (identity >> COOP_ENEMY_STATE_SHIFT) & 3u;
+        e.kind = (identity >> COOP_ENEMY_KIND_SHIFT) & COOP_ENEMY_KIND_MASK;
+        if (identity & ~COOP_ENEMY_IDENTITY_MASK) e.key = 257; // Fail valid_combat.
+        e.life = w[n++]; e.peer_life = w[n++];
+        e.x = w[n++]; e.y = w[n++]; e.z = w[n++]; e.yaw = w[n++];
+    }
+    for (auto& s : f.shots) { s.id = w[n++]; s.kind = w[n++]; s.x = w[n++]; s.y = w[n++]; s.z = w[n++]; s.yaw = w[n++]; s.scale = w[n++]; }
+    f.boss.kind = w[n++]; f.boss.life = w[n++]; f.boss.peer_life = w[n++]; f.boss.phase = w[n++];
+    return f;
+}
+void CombatSync::reset() { *this = {}; }
+void CombatSync::update(bool host, const State& local, const CoopCombatFrame& input,
+        const State& peer, const CoopCombatFrame& remote, bool fresh) {
+    outgoing = valid_combat(input) ? input : CoopCombatFrame{};
+    output = {};
+    for (auto& e : outgoing.enemies) {
+        // Preserve only locally captured visual metadata. The bridge owns the
+        // low reciprocal-life bits and all request/commit roles.
+        e.peer_life &= COOP_ENEMY_POSE_HASH_PACK_MASK;
+        if (e.state == COOP_ENEMY_REQUEST) { outgoing = {}; break; } // Not a game readback state.
+        if (!host && e.state == COOP_ENEMY_DEFEATED) e.state = COOP_ENEMY_REQUEST;
+    }
+    outgoing.boss.peer_life = 0; // The bridge owns reciprocal binding tokens.
+    if (!outgoing.enabled) { bindings = {}; boss_binding = {}; context = {}; return; }
+    output.status = COOP_COMBAT_WAITING;
+    if (!fresh || !valid_combat(remote) || !remote.enabled || !valid_state(local) || !valid_state(peer)
+        || local.flags != active || peer.flags != active || local.map != peer.map) {
+        bindings = {}; boss_binding = {}; context = {}; return;
+    }
+    output.status = COOP_COMBAT_SHOTS;
+    output.hands = remote.hands;
+    for (unsigned i = 0; i < COOP_SHOTS; ++i) output.shots[i] = remote.shots[i];
+    const std::array<uint32_t, 7> next{local.epoch, peer.epoch, outgoing.file, remote.file, outgoing.layout, remote.layout, local.map};
+    if (context != next) { bindings = {}; boss_binding = {}; context = next; }
+    const unsigned expected_boss = coop_boss_kind(local.map);
+    if (expected_boss && outgoing.boss.kind == expected_boss
+            && remote.boss.kind == expected_boss) {
+        if (boss_binding.local_life != outgoing.boss.life || boss_binding.peer_life != remote.boss.life
+                || boss_binding.kind != outgoing.boss.kind)
+            boss_binding = {outgoing.boss.life, remote.boss.life, outgoing.boss.kind};
+        outgoing.boss.peer_life = boss_binding.peer_life;
+        if (remote.boss.peer_life == outgoing.boss.life) {
+            output.status = COOP_COMBAT_READY;
+            ++output.paired;
+            const unsigned target = host
+                ? (outgoing.boss.phase > remote.boss.phase ? outgoing.boss.phase : remote.boss.phase)
+                : remote.boss.phase;
+            if (target > outgoing.boss.phase)
+                output.boss = {outgoing.boss.kind, outgoing.boss.life, boss_binding.peer_life, target};
+        }
+    } else boss_binding = {};
+    if (!coop_combat_map(local.map) || !outgoing.layout || !remote.layout) { bindings = {}; return; }
+    if (outgoing.layout != remote.layout) { bindings = {}; output.status = COOP_COMBAT_LAYOUT_MISMATCH; return; }
+    output.status = COOP_COMBAT_READY;
+    if (outgoing.enabled >= 2 && remote.enabled >= 2) output.movement |= COOP_COMBAT_MOVEMENT;
+    if (outgoing.enabled == 3 && remote.enabled == 3) output.movement |= COOP_COMBAT_POSE;
+    const auto previous = bindings;
+    bindings = {};
+    for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
+        auto& e = outgoing.enemies[i]; auto& b = bindings[i];
+        const auto* p = find_enemy(remote, e.key);
+        if (!p || e.kind != p->kind) { b = {}; continue; }
+        // Snapshot order may change as other actors load or unload.
+        for (const auto& candidate : previous)
+            if (candidate.key == e.key && candidate.local_life == e.life && candidate.peer_life == p->life && candidate.kind == e.kind) { b = candidate; break; }
+        if (b.key != e.key || b.local_life != e.life || b.peer_life != p->life) {
+            b = {};
+            // Both copies must have been seen alive in this session. Never bind
+            // a historical defeat to a new/respawned or late-joining actor.
+            if (e.state == COOP_ENEMY_ALIVE && p->state == COOP_ENEMY_ALIVE)
+                b = {e.key, e.life, p->life, e.kind};
+        }
+        if (!b.key) continue;
+        e.peer_life = (e.peer_life & COOP_ENEMY_POSE_HASH_PACK_MASK) | b.peer_life;
+        if (coop_enemy_peer_life(*p) != e.life) continue; // Reciprocal spawn acknowledgement.
+        ++output.paired;
+        const bool local_defeated = input.enemies[i].key == e.key
+            && input.enemies[i].life == e.life
+            && input.enemies[i].state == COOP_ENEMY_DEFEATED;
+        if (local_defeated && p->state == COOP_ENEMY_DEFEATED) {
+            if (!host) e.state = COOP_ENEMY_DEFEATED;
+            output.apply[i] = {e.key, e.life, COOP_ENEMY_ABSENT, p->life, e.kind, 0, 0, 0, 0};
+            continue;
+        }
+        if (e.state == COOP_ENEMY_ALIVE && p->state == COOP_ENEMY_ALIVE) {
+            const unsigned local_health = coop_enemy_health(e);
+            const unsigned peer_health = coop_enemy_health(*p);
+            const unsigned target_health = host
+                ? (local_health < peer_health ? local_health : peer_health)
+                : peer_health;
+            // Health only converges downward. The host accepts a guest's lower
+            // readback, then both peers wait for the game adapter to publish
+            // that exact target before it becomes authoritative wire state.
+            if (target_health && target_health < local_health)
+                output.apply[i] = {e.key, e.life, COOP_ENEMY_ALIVE, p->life, e.kind,
+                    0, 0, 0, coop_enemy_pack(0, target_health)};
+        }
+        if (!host && output.movement && e.state == COOP_ENEMY_ALIVE && p->state == COOP_ENEMY_ALIVE) {
+            output.motion[i] = *p;
+            output.motion[i].life = e.life;
+            output.motion[i].peer_life = (p->peer_life & COOP_ENEMY_POSE_HASH_PACK_MASK) | p->life;
+        }
+        if (e.state == COOP_ENEMY_ALIVE && p->state == (host ? COOP_ENEMY_REQUEST : COOP_ENEMY_DEFEATED)) {
+            // On host: a guest's confirmed local hit requests a defeat. On guest:
+            // only the host's actual readback can commit one. Repeating this
+            // command is safe; the game checks the same local actor life.
+            output.apply[i] = {e.key, e.life, COOP_ENEMY_DEFEATED, p->life, e.kind, 0, 0, 0, 0};
+        }
+    }
+}
+}

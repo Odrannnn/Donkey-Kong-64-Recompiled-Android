@@ -1,0 +1,103 @@
+[manifest]
+id = "odrannnn_dk64_lan_coop"
+version = "0.42.0"
+display_name = "DK64 LAN Co-op Prototype"
+description = "Experimental two-player LAN co-op. Optional combat shares gun/orange visuals, downward enemy health, and blue/gold beaver, regular Kremling, Klump, Mushroom Man, Robo-Kremling, Kosha, both Zinger variants, Robo-Zinger, bat, all five Kasplat, Shuri, Gimpfish, all three Klaptrap, Krossbones, Kaboom, Klobber, Pufftup, sheeted Kritter, both Mr. Dice variants, Sir Domino, Spiderling, glasses fireball and Ruler defeats across 58 reviewed vanilla gameplay maps, including ordinary level interiors, Hideout Helm, DK Isles, four lobbies, the Fungi Spider encounter and Chunky's Caves igloo. Limited to 20 enemy records; confirmed deaths retire after reciprocal acknowledgement so later spawner entries can use the records. Optional host enemy movement corrects guest positions/facing. Version 0.40 retains the ability to correct the guest's current local enemy animation frame after exact identity, life and local-clip checks. Each reciprocally bound sample is evaluated once so local animation advances between network updates; it never transfers a clip, control state or attack. Attacks and AI still run locally. Version 0.42.0 shares bounded damage phases for Army Dillo, Dogadon, Mad Jack, Pufftoss, King Kut Out, all five K. Rool rounds and Tiny's shoe sequence through pinned vanilla handlers and state gates. Boss AI, attacks, timers, position, projectiles and player damage remain local. Kasplat blueprint drops still run locally; blueprint ownership uses the item channel. Klaptrap skeleton remnants and detached Krossbones parts remain local. Optional sharing of 40 blueprints, 20 fairies, 10 crowns, 8 boss keys 2 special coins, 40 banana medals, all 201 GBs, 1700 ordinary pickups, 104 balloons and 16 rainbow coins in isolated item saves. Also shares Kong rescues, shop moves/upgrades, melon capacity and K. Lumsy progression. Also shares training, camera/shockwave, 87 vanilla Bananaport tags and all eight B. Locker clearances. Receive pad tags outside their map and clearances outside lobbies, then re-enter. Also shares ten permanent Aztec/Galleon/Fungi world unlocks outside their level: llama rescue and temple cooling, seal rescue, five Giant Mushroom gun switches, first rabbit race and grown beanstalk. Also shares eight permanent Factory hatch/gate/core, breakable-grate, question-mark-box, arcade-lever and crown-grate flags outside Factory. Adds 82 more permanent completions across all levels, Isles/lobbies and Helm: gates, walls, puzzles, pearls, boss-portal closure, training exit, Rareware room, Helm shutdown/doors and four further warp tags. Receiving waits outside affected levels/interiors; prerequisites must be owned. The first Japes gate is handled by item sharing; the obsolete standalone gate experiment has been retired. Also shares reversible Galleon water height and Fungi day/night through host-authoritative revisions. Both return to safe main maps to exchange. By default incoming changes wait outside the affected level; the optional automatic world refresh applies 11 reviewed simple gate/door flags live and reloads the safe main map only for complex state. Wait for LAN WORLD: SYNCED before using switches. Host state wins stale/concurrent requests and reconnects. Also shares cumulative Troff and Scoff feeding for all five Kongs in all seven levels. Missing feeding milestones consume matching available bananas once and update the boss-door total outside that level. Feeding the same Kong on both peers merges by maximum, not addition. Wait for ITEMS: SYNCED before and after feeding. Other temporary/reversible switches, machine timing and arcade payments stay local. All experiments default Off and need gameplay validation. Version 0.42.0 retains independent exploration as the default; a join-side option enables host-follow transitions for 169 reviewed ordinary vanilla routes across DK Isles, lobbies, level portals, tunnels and level interiors. Monotonic tickets persist briefly through host arrival and reject stale/replayed routes. Castle-cannon entry, Helm, bosses, Troff and Scoff, races, bonuses, cutscenes and menus remain local. Item pages keep exchanging from different maps after each device has captured one verified safe snapshot; unsafe overlays use that cached snapshot and defer local writes. Requires a matching 0.42.0 package; existing loader unchanged. Trusted LAN only. AI-assisted independent mod."
+short_description = "Experimental LAN player presence; not full campaign co-op."
+authors = ["Odrannnn (AI-assisted)"]
+game_id = "dk64"
+minimum_recomp_version = "1.0.1"
+native_libraries = [{ name = "dk64_coop_bridge", funcs = ["dk64_coop_start", "dk64_coop_local_ipv4", "dk64_coop_tick_v42", "dk64_coop_stop"] }]
+
+[inputs]
+elf_path = "build/mod/mod.elf"
+mod_filename = "dk64_lan_coop"
+func_reference_syms_file = "../upstream/DK64Syms/dump.toml"
+data_reference_syms_files = ["../upstream/DK64Syms/data_dump.toml"]
+additional_files = []
+
+[[manifest.config_options]]
+id = "role"
+name = "LAN session (restart required)"
+description = "Off leaves normal play unchanged. Host/Join use separate experimental saves and start a two-player LAN session. Set before launching the game."
+type = "Enum"
+options = ["Off", "Host", "Join"]
+default = "Off"
+
+[[manifest.config_options]]
+id = "save_profile"
+name = "Co-op campaign save (restart)"
+description = "Selects an isolated persistent co-op campaign on this device. Campaign 1 keeps existing co-op progress from earlier releases. Campaigns 2-8 use separate files. Choose the corresponding campaign number on both peers. Host and Join retain separate local copies for conflict safety. Changing the host IP, port or room code does not change this save selection. Role Off continues to use the normal non-co-op save."
+type = "Enum"
+options = ["Campaign 1 (existing)", "Campaign 2", "Campaign 3", "Campaign 4", "Campaign 5", "Campaign 6", "Campaign 7", "Campaign 8"]
+default = "Campaign 1 (existing)"
+
+[[manifest.config_options]]
+id = "host_ip"
+name = "Host IPv4 address"
+description = "Join only: enter the LAN IPv4 address shown automatically on the host's in-game LAN status, for example 192.168.1.50. The host ignores this field. No hostname or Internet relay."
+type = "String"
+default = "192.168.1.50"
+
+[[manifest.config_options]]
+id = "save_conflict"
+name = "Guest-save conflict (host, restart)"
+description = "Host only. Stop safely blocks item synchronization when the selected guest campaign contains permanent progress absent from the host. Merge guest progress imports that validated progress through the normal item/world grant and save paths, producing the union on the host and then the guest. Use only with the intended peer and campaign, wait for LAN ITEMS: SYNCED, then return this setting to Stop safely. It never copies raw save bytes and cannot import excluded temporary state."
+type = "Enum"
+options = ["Stop safely", "Merge guest progress into host"]
+default = "Stop safely"
+
+[[manifest.config_options]]
+id = "port"
+name = "UDP port"
+description = "Use the same port on both devices. Windows may ask to allow private-network access."
+type = "Number"
+min = 1024
+max = 65535
+step = 1
+precision = 0
+default = 6464
+
+[[manifest.config_options]]
+id = "room"
+name = "Six-digit room code"
+description = "Match this on both devices to avoid accidental joins. This is not encryption: only use a trusted LAN."
+type = "Number"
+min = 100000
+max = 999999
+step = 1
+precision = 0
+default = 123456
+
+[[manifest.config_options]]
+id = "follow_host_transitions"
+name = "Transition behavior (restart)"
+description = "Join-side behavior only. Independent exploration ignores host transition tickets, so both players can use different maps while collectible and progression synchronization continues. Follow host makes the joining player follow the host through 169 reviewed ordinary Isles, lobby, level-portal, tunnel and interior routes when both are still in the same source map. Combat and the remote player model remain active only while both players share a map. The host setting is ignored; matching settings are not required."
+type = "Enum"
+options = ["Independent exploration", "Follow host"]
+default = "Independent exploration"
+
+[[manifest.config_options]]
+id = "combat"
+name = "Combat experiment (restart)"
+description = "Opt in on BOTH peers. Shares shots, downward partial health and linked blue/gold beaver, regular Kremling, Klump, Mushroom Man, Robo-Kremling, Kosha, both Zingers, Robo-Zinger, bat, all five Kasplats, Shuris, Gimpfish, all three Klaptraps, Krossbones, Kaboom, Klobber, Pufftup, sheeted Kritter, both Mr. Dice variants, Sir Domino, Spiderling, glasses fireball and Ruler across 58 reviewed vanilla maps: the seven main levels, supported ordinary-enemy interiors, Hideout Helm, DK Isles and four lobbies. Limited to 20 enemy records, including confirmed deaths until respawn or map reload. Both copies must link while alive; no historical kills. The third option also follows host enemy positions/facing when BOTH choose it. The fourth additionally corrects the guest's normalized frame only when both already run matching local enemy clips and the exact identity/life binding agrees. Each reciprocally bound pose sample is evaluated once so local animation advances between network updates. No clip, AI, attack state, effect or damage is transferred. AI/attacks, other enemies, boss behavior outside those bounded damage phases, excluded interiors/minigames, drops and player damage stay local. Ten boss rounds are shared separately: Army Dillo, Dogadon, Mad Jack, Pufftoss, King Kut Out, DK/Diddy/Lanky/Chunky K. Rool rounds, and Tiny's shoe/toe damage. The host accepts the highest reciprocally bound logical phase and each game advances one step through its pinned vanilla handler and vulnerable-state gate. Real local collisions win, transition state defers remote advancement and behavior-hook conflicts fail closed. Experimental; not gameplay-validated."
+type = "Enum"
+options = ["Off", "Shots and enemy defeats", "Shots, defeats and enemy movement", "Shots, defeats, movement and enemy pose"]
+default = "Off"
+
+[[manifest.config_options]]
+id = "shared_items"
+name = "Shared collectibles and upgrades (restart)"
+description = "Enable on BOTH peers. Shares blueprints, fairies, crowns, keys, special coins, medals, all 201 GBs, 1700 ordinary banana/coin pickups, 104 balloons and 16 rainbow coins. Incoming numeric rewards wait until you LEAVE THEIR LEVEL (Snide: leave HQ); play in a main world or Isles to apply. Also shares Kong rescues, shop moves/upgrades, melon capacity, eight key turn-ins and initial/final K. Lumsy flags. After each device captures one safe snapshot, item pages keep syncing while the players occupy different areas; received writes remain queued until that device reaches a safe gameplay frame. Shares training, first slam and camera/shockwave. Also shares 87 Bananaport tags independently and eight B. Locker clearances. Incoming tags wait outside their map; leave lobbies to exchange clearance flags. Three hidden pads use their existing GBs; Japes hidden pad requires its GB reveal. Also shares llama rescue/temple cooling, seal rescue, five Giant Mushroom gun switches, first rabbit race and grown beanstalk. Also shares eight permanent Factory hatch/gate/core, two breakable-grate, question-mark-box, arcade-lever and crown-grate flags. Also covers the remaining reviewed permanent gates, walls, reveals and puzzle completions across all levels, Isles/lobbies and Helm, plus five pearls, boss-portal closure, training exit, Rareware room, Helm shutdown and coin/crown doors, and four more warp tags. Helm crown door needs any four crowns, coin door both special coins, Rareware room camera plus all fairies, closed boss portals their key. Permanent gate prerequisites do not spend items. Shared Troff feeding does deduct the matching available colored bananas. The first Japes gate uses this option; the obsolete standalone gate experiment has been retired. Interior-only lobby/training/fairy unlocks can arrive in any safe map. Reversible Fungi day/night and Galleon water height use a separate host-authoritative state path under this option. Wait for LAN WORLD: SYNCED before switching. Reversible LAN World state still requires live safe-map samples on both devices. By default receivers leave the affected level and re-enter; the separate automatic world-refresh option removes that whole-level trip when the receiver is already in an affected safe main map. Host wins concurrent or stale requests; reconnect discards uncommitted toggle requests and uses host save state. Arcade payments, other temporary switches and machine timing stay local. With automatic world refresh Off, incoming world unlocks wait until you leave their level and re-entry loads them. With it On, 11 reviewed simple gate/door flags update their loaded vanilla scripts directly; complex changes save and reload the affected safe main map once. No remote cutscenes, temporary carried items or refill drops. Optional join-side host-follow teleport is limited to 169 reviewed ordinary lobby, level, tunnel and interior routes; other transitions and partner-pad activation remain local. DK treehouse receives training before leaving the starting area; training grounds/barrels and shops wait until you leave. Remote rescues wait outside their level; K. Lumsy flags wait outside Isles. First slam (local or shared) must apply before higher upgrades. On fresh saves visit K. Lumsy locally to open Japes. Purchases charge only the buyer; health/ammo refills remain local. Troff and Scoff cumulative feeding now syncs for all five Kongs and seven levels: each missing fed banana is deducted from the same Kong and level available balance. Receive outside that level in Isles or another main world; then re-enter Troff and Scoff. The higher per-Kong fed count wins, not the sum of duplicate feedings. Different Kongs add toward the level total. Missing pickup credits delay feeding; no free bananas, remote feeding animation or forced boss transition. Wait for ITEMS: SYNCED before feeding again. Existing guest-only feeding may cause SAVE AHEAD. Retains isolated item saves; expanded ownership may reveal a guest-save-ahead conflict. Wait for SYNCED before collecting on guest. Offline guest gains cause a save-ahead conflict. Film, crystals, orange refills, other puzzles and Japes boulder bunch stay local. Vanilla setups only. Version 0.42.0 native validation expands the coordinated-transition policy and adds automatic host-address reporting; gameplay validation remains pending."
+type = "Enum"
+options = ["Off", "Unique collectibles"]
+default = "Off"
+
+[[manifest.config_options]]
+id = "automatic_world_refresh"
+name = "Auto-refresh shared world (restart)"
+description = "Requires shared collectibles. When a permanent world flag arrives in a safe main map, 11 reviewed simple gate/door flags update all affected loaded vanilla scripts directly. Complex puzzles, actor spawns, water height and day/night run their reviewed loaded vanilla switch scripts; unsupported complex state saves and reloads the same map through its current entrance. Missing reviewed objects also fail closed to that reload. This removes the manual leave-and-return step; simple supported gates do not interrupt play, while fallback reloads return you to the entrance. Numeric collectibles, rescues, pads, lobbies, interiors, shops, Troff and Scoff, bosses and minigames retain their existing safety rules. Enable independently on each receiving device; matching settings are not required. Experimental and gameplay validation is pending."
+type = "Enum"
+options = ["Off", "Live update with reload fallback"]
+default = "Off"
+

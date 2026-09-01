@@ -1,0 +1,18 @@
+{
+  "repository": "https://github.com/2dos/DK64-Randomizer",
+  "revision": "66d0dc90064a572e9bf2a2eada53ef81a7f47eb4",
+  "world_version": "1.5.8",
+  "profile": "dk64-recomp-first-moves-japes-v1",
+  "files": {
+    "archipelago/client/items.py": "e2fb81e2eb4d017e39d1546df8f624ab3159fad1908347ff8d36652728e86f84",
+    "archipelago/client/ap_check_ids.py": "00a50bcbc2fad101b6b5f3becd1b7a7fccf8787ebef2569bfa5b80652fa1293b",
+    "archipelago/client/check_flag_locations.py": "0aaaeacf77239d96c522959c4feb10558dbe46edbe885802afbcbe32ddbbe65a"
+  },
+  "campaign_files": {
+    "randomizer/Lists/Location.py": "9c0182109707d8705ca71e60bc5ac6d667a36e79733aa35dc237a3f20ac83155",
+    "archipelago/DK64Client.py": "6bac6981b164a622f74f01b6425ec32266048f2d270bee85ef40c9e1c5326c4c",
+    "base-hack/include/vars.h": "515a462669c3752436666011082119ccd3ceda0f3dff4832f314df390baa5848",
+    "base-hack/src/item rando/archipelago.c": "cd8bc669025a79b656f3a004c9a1c1c985828cf7fe8a598b34043989b0cff06a",
+    "base-hack/src/lib.c": "c5ffc0654ba2b65d160f245a33877a58300625519887ed56e2ab181d10a176ef"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "game": "DK64 Recomp Integration Test",
+  "world_version": "0.1.0",
+  "minimum_ap_version": "0.6.5",
+  "authors": ["Odrannnn (AI-assisted)"],
+  "version": 1,
+  "compatible_version": 1
+}

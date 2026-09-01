@@ -1,0 +1,6 @@
+name: DK64Test
+game: DK64 Recomp Integration Test
+description: Developer bridge test; vanilla DK64 gameplay, two checks, not the DK64 randomizer.
+DK64 Recomp Integration Test:
+  progression_balancing: 0
+  accessibility: full

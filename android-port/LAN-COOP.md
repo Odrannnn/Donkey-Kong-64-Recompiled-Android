@@ -1,6 +1,42 @@
-# LAN co-op feasibility
+# LAN co-op development
 
-Assessed 2026-08-30. **No LAN networking or co-op gameplay has been implemented.** The APK and tablet installation are unchanged by this assessment. The user confirms that the imported Tag Anywhere mod works in-game; that establishes a working recomp-mod path on this Android port, not multiplayer support.
+Updated 2026-09-01. The prototype in [coop/](coop/README.md) is now **0.42.0**.
+Independent exploration is the default: collectible and progression pages keep
+exchanging while players occupy different maps, after each game has captured one
+verified safe snapshot. Incoming writes wait for a safe gameplay frame. An optional
+join-side Follow host mode supports 169 reviewed ordinary routes.
+
+The progression channel covers 5,894 collectible, upgrade, permanent-world and
+Troff & Scoff accounting IDs. Eleven simple permanent gates and doors can update
+their loaded vanilla scripts immediately; complex state uses a controlled reload
+fallback. Galleon water and Fungi day/night also invoke their loaded vanilla switch
+scripts when possible. Unsafe overlays show an explicit Paused state rather than
+alternating between Waiting and Synced.
+
+Combat retains 32 ordinary-enemy kinds across 58 reviewed maps and adds bounded
+damage-phase synchronization for Army Dillo, Dogadon, Mad Jack, Pufftoss, King Kut
+Out, all five K. Rool rounds, and Tiny's shoe/toe sequence. Boss AI, attacks,
+movement, timers, projectiles and player damage remain local. Protocol 42 rejects
+older behavior sets before gameplay state can be exchanged.
+
+All eight native ASan/UBSan suites, MIPS, Android ARM64, Windows x64, export and
+package checks pass. A protocol-42 Android-to-Android synthetic regression exchanged
+all 5,894 IDs and acknowledgements in both directions with no invalid or rejected
+packets. Expanded boss behavior remains experimental and needs campaign gameplay
+validation. See [WORLD-UNLOCKS.md](coop/WORLD-UNLOCKS.md) and the
+[co-op README](coop/README.md) for exact coverage and safety rules.
+
+Actual 0.10 tablet-host/Windows-guest testing now confirms remote Kongs and
+SYNCED in the treehouse, plus transfer of Cranky's training-barrel availability
+flag to Windows without a local Cranky visit, then diving without entering a
+course on Windows. The isolated Windows EEPROM contains those flags with
+valid checksums. Both actual games were restarted and returned to SYNCED with
+that progress intact. Offline reload behavior, ability use and broader campaign
+rewards still require further live testing.
+
+Earlier **0.1** tablet gameplay loaded the bridge and displayed a moving Diddy proxy sent by a Windows synthetic peer, including disconnect/reconnect. A subsequent test connected the actual Android host and official Windows 1.0.1 game: both displayed the other Kong in DK's treehouse, and moving the tablet player updated Windows. Background/resume reconnected; closing Windows removed its proxy. Normal save hashes stayed unchanged. Broad map-lifecycle behavior and sustained Windows controls need further checks; broader combat and coordinated transitions are **not implemented**; later progression work is summarized above. This is not finished campaign co-op.
+
+The following assessment and milestones remain the longer-term design. Current implementation details and installation steps are in the co-op project's README and technical notes.
 
 ## Assessment
 
@@ -32,7 +68,7 @@ Keep co-op development in a separate project/repository from the Android port. T
 - Reject incompatible protocol, bridge, game and co-op mod versions before creating remote actors or modifying saves. Define which additional gameplay mods are allowed rather than assuming every installed mod combination works.
 - Test Android-host/Windows-guest and Windows-host/Android-guest first, then both same-platform configurations. Mixed-platform testing should begin at the first connection/avatar milestone, not after synchronization is finished.
 
-The earlier dev4 APK has no network permission and rejects native companion imports. Dev7 includes the Android ZIP companion import/management and `INTERNET` permission introduced in local dev5, without changing the runtime loader. Host tests cover package handling and interrupted-update recovery; actual native bridge execution on a device remains unverified. A mod cannot grant its host app Android permissions. Importing a co-op `.nrm` alone will not enable networking in dev4, and this release includes no co-op bridge or gameplay.
+The earlier dev4 APK has no network permission and rejects native companion imports. Dev7 includes the Android ZIP companion import/management and `INTERNET` permission introduced in local dev5, without changing the runtime loader. Host tests cover package handling and interrupted-update recovery. Actual native bridge execution has now been verified on the tablet using dev5 and the separately installed prototype bundle. A mod cannot grant its host app Android permissions. Importing a co-op `.nrm` alone will not enable networking in dev4; the Android app itself does not bundle the co-op mod.
 
 The pinned runtime already reads `native_libraries` and loads platform-specific companion libraries with `LoadLibraryExW` or `dlopen`. Keep its existing lookup and manifest interpretation unchanged. Its lookup expects the native library beside the `.nrm`, not embedded inside it. Initial Android bundle support accepts one declared native bridge per mod; additional platform dependencies should use Android public NDK libraries or be linked into that bridge.
 

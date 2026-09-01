@@ -1,0 +1,20 @@
+{
+  "ixwebsocket": {
+    "patches": "tools/bootstrap-native.py receive limits; compression disabled",
+    "version": "12.0.1",
+    "commit": "64fae7676bd8fe31f7cb4bcde7a6841892dad65e",
+    "repository": "https://github.com/machinezone/IXWebSocket"
+  },
+  "mbedtls": {
+    "version": "3.6.7",
+    "framework_commit": "dde0c4a0e448a0552f18817dcea633bb851fd288",
+    "commit": "068ff080b369adfac81509f9b57b2afabaf82dc5",
+    "repository": "https://github.com/Mbed-TLS/mbedtls"
+  },
+  "files": {
+    "vendor/nlohmann/json.hpp": "5f09d1eebe9b3557f21df155869af13bcde79b74a0748f82ca946e8cc088aaa0",
+    "vendor/cacert.pem": "f66dff1bdf8f96060b8177976f8b7d9254bc89bc4db933d769f7384d28480bc9"
+  },
+  "ca_source": "https://curl.se/ca/cacert.pem",
+  "ca_date": "2026-08-13"
+}

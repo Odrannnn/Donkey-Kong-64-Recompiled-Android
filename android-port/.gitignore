@@ -16,12 +16,10 @@
 *.jks
 *.keystore
 
-
 # Local credentials, compiler products and editor state.
 .env
 .env.*
 !.env.example
-*.pem
 *.key
 *.class
 *.pyc

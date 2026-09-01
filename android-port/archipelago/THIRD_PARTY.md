@@ -1,0 +1,13 @@
+# Attribution
+
+Independent, unofficial, AI-assisted integration; not endorsed by the DK64 Randomizer, DK64 Recompiled or Archipelago maintainers. New code is GPL-3.0-or-later; see `LICENSE`. No ROM, original game assets, signing keys or user save/credential data are distributed.
+
+- Original DK64 item IDs and location flags: **2dos/DK64-Randomizer**, commit `66d0dc90064a572e9bf2a2eada53ef81a7f47eb4`, world 1.5.8. MIT notice in `licenses/DK64-Randomizer.txt`. `upstream.json`, `tools/import-randomizer.py` and `tools/verify_upstream.py` pin inputs and check the full generated catalog without executing upstream code. Catalog coverage is separate from playable support; see `FULL-PORT.md`.
+- **IXWebSocket 12.0.1**, commit `64fae7676bd8fe31f7cb4bcde7a6841892dad65e`, BSD-3-Clause, statically linked. Notices in `licenses/IXWebSocket.txt` and `licenses/IXWebSocket-URL-parser.txt` (MIT URL parser). `tools/bootstrap-native.py` modifies frame, fragment, decoded-message, status-line and HTTP-header bounds. Compression is disabled in this build.
+- **mbedTLS 3.6.7**, commit `068ff080b369adfac81509f9b57b2afabaf82dc5`, statically linked under its Apache-2.0 option. Full dual license in `licenses/mbedTLS.txt`; this includes the Apache-2.0 terms for Project Everest/KreMLin (Copyright INRIA and Microsoft Corporation) and Mbed TLS Contributors' p256-m code. Dependency sources and their individual notices are included in the corresponding source ZIP.
+- **nlohmann JSON 3.12.0**, Copyright 2013–2025 Niels Lohmann, MIT. Vendored header and `licenses/nlohmann-json.txt` retain attribution; embedded third-party notices are also retained in the header.
+- Public **Mozilla CA root certificates**, extracted by curl's `mk-ca-bundle.pl`, dated 2026-08-13. Source `https://curl.se/ca/cacert.pem`; hashes in `native-dependencies.json`. `vendor/cacert.pem` is embedded in the native client, with original extraction metadata. Mozilla Public License 2.0 terms in `licenses/Mozilla-Public-License-2.0.txt`. No private keys are included.
+- Recomp mod headers/linker script: existing `coop/vendor/recomp` copy of **N64Recomp**, notice in `vendor/recomp/LICENSE`. Build-time DK64 headers and symbols come from the parent workspace's prepared upstream dependencies.
+- Android NDK/LLVM C++ runtime: notices retained in `licenses/`. The mod requires Android's system runtime libraries, but no separately installed networking library or relay.
+
+The network test harness uses separately installed Python `websockets` and a disposable official Archipelago server. Neither is a runtime dependency of the Android mod. The test world implements the documented AP world interface; no upstream AP client source is copied into the native client.

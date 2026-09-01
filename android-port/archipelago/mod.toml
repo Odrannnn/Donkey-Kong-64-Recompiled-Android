@@ -1,0 +1,73 @@
+[manifest]
+id = "odrannnn_dk64_archipelago"
+version = "0.2.0"
+display_name = "DK64 Archipelago Direct Integration Test"
+description = "Connects directly to Archipelago from the Android mod; no desktop relay. Experimental five first special moves and two Japes checks using original DK64 Randomizer IDs. Requires the separate integration-test AP world. NOT compatible with ordinary DK64 randomizer seeds; vanilla rewards remain. Isolated saves, slot 1 only. Disable co-op and other save/gameplay mods. AI-assisted, unofficial."
+short_description = "Direct Archipelago test connection; not the full DK64 randomizer."
+authors = ["Odrannnn (AI-assisted)"]
+game_id = "dk64"
+minimum_recomp_version = "1.0.1"
+native_libraries = [{ name = "dk64_ap_bridge", funcs = ["dk64_ap_configure_v2", "dk64_ap_start_v2", "dk64_ap_tick_v2", "dk64_ap_labels_v2", "dk64_ap_stop_v2", "dk64_ap_campaign_configure_v3", "dk64_ap_campaign_start_v3", "dk64_ap_campaign_connect_v3", "dk64_ap_campaign_tick_v3", "dk64_ap_campaign_stage_v3", "dk64_ap_campaign_stop_v3"] }]
+
+[inputs]
+elf_path = "build/mod/mod.elf"
+mod_filename = "dk64_archipelago"
+func_reference_syms_file = "../upstream/DK64Syms/dump.toml"
+data_reference_syms_files = ["../upstream/DK64Syms/data_dump.toml"]
+additional_files = []
+
+[[manifest.config_options]]
+id = "enabled"
+name = "Direct integration test (restart required)"
+description = "Use the integration-test AP world, not dk64.apworld. Off leaves ordinary play unchanged. Restart after changing any session setting."
+type = "Enum"
+options = ["Off", "On"]
+default = "Off"
+
+[[manifest.config_options]]
+id = "server"
+name = "Archipelago server URL"
+description = "Full ws://host:port or wss://host:port URL. Use wss for encryption with a publicly trusted certificate. No relay address."
+type = "String"
+default = ""
+
+[[manifest.config_options]]
+id = "slot_name"
+name = "Archipelago player / slot name"
+type = "String"
+default = "DK64Test"
+
+[[manifest.config_options]]
+id = "password"
+name = "Room password (optional)"
+description = "Stored unmasked in app-private mod settings. ws:// sends it without encryption; prefer wss://. Never use a reused account password."
+type = "String"
+default = ""
+
+[[manifest.config_options]]
+id = "seed"
+name = "Expected AP seed name"
+description = "Copy the seed_name shown by the room / generator, not a numeric generation input. Binds the isolated save before the game starts."
+type = "String"
+default = ""
+
+[[manifest.config_options]]
+id = "team"
+name = "AP team number (usually 0)"
+type = "Number"
+min = 0
+max = 65535
+step = 1
+precision = 0
+default = 0
+
+[[manifest.config_options]]
+id = "slot"
+name = "AP slot number (usually 1 for the test seed)"
+description = "AP player number, not a DK64 save slot. Always use DK64 save slot 1."
+type = "Number"
+min = 1
+max = 65535
+step = 1
+precision = 0
+default = 1

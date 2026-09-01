@@ -1,0 +1,7914 @@
+{
+  "format": 1,
+  "revision": "66d0dc90064a572e9bf2a2eada53ef81a7f47eb4",
+  "world_version": "1.5.8",
+  "checks": [
+    {
+      "id": 14041140,
+      "name": "Isles Japes Lobby Entrance Item",
+      "flag": 381,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041141,
+      "name": "Isles Tiny Feather Cage",
+      "flag": 420,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041142,
+      "name": "Isles Tiny Saxophone Pad",
+      "flag": 425,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041143,
+      "name": "Isles Lanky Grape Cage",
+      "flag": 421,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041144,
+      "name": "Isles Chunky Pineapple Cage",
+      "flag": 422,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041145,
+      "name": "Isles Chunky Triangle Pad",
+      "flag": 424,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041146,
+      "name": "Isles Chunky Pound the X",
+      "flag": 431,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041147,
+      "name": "Isles Fairy (Small Island)",
+      "flag": 606,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041148,
+      "name": "Isles Fairy (Upper Krem Isle)",
+      "flag": 607,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041149,
+      "name": "Isles Lanky Sprint Cage",
+      "flag": 429,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041150,
+      "name": "The Banana Fairy's Gift",
+      "flag": 377,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041151,
+      "name": "Returning the Banana Fairies",
+      "flag": 301,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041152,
+      "name": "Isles Lanky Japes Instrument",
+      "flag": 398,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041153,
+      "name": "Isles Tiny Aztec Lobby Barrel",
+      "flag": 402,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041154,
+      "name": "Isles Donkey Coconut Cage",
+      "flag": 419,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041155,
+      "name": "Isles Diddy Snides Spring Barrel",
+      "flag": 416,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041156,
+      "name": "Isles Battle Arena 1 (Snide's Room: Under Rock)",
+      "flag": 615,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041157,
+      "name": "Isles Donkey Bongos Pad",
+      "flag": 404,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041158,
+      "name": "Isles Kasplat: Factory Lobby Box",
+      "flag": 507,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041159,
+      "name": "Isles Fairy (Factory Lobby)",
+      "flag": 593,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041160,
+      "name": "Isles Tiny Galleon Lobby Swim",
+      "flag": 403,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041161,
+      "name": "Isles Kasplat: Galleon Lobby",
+      "flag": 508,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041162,
+      "name": "Isles Diddy Peanut Cage",
+      "flag": 423,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041163,
+      "name": "Isles Diddy Summit Barrel",
+      "flag": 428,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041164,
+      "name": "Isles Battle Arena 2 (Fungi Lobby: Gorilla Gone Box)",
+      "flag": 614,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041165,
+      "name": "Isles Fairy (Forest Lobby)",
+      "flag": 594,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041166,
+      "name": "Isles Donkey Caves Lava",
+      "flag": 411,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041167,
+      "name": "Isles Diddy Guitar Pad",
+      "flag": 410,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041168,
+      "name": "Isles Kasplat: Caves Lobby Punch",
+      "flag": 506,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041169,
+      "name": "Isles Lanky Castle Lobby Barrel",
+      "flag": 415,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041170,
+      "name": "Isles Kasplat: Castle Lobby",
+      "flag": 505,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041171,
+      "name": "Isles Chunky Helm Lobby Barrel",
+      "flag": 406,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041172,
+      "name": "Isles Kasplat: Helm Lobby",
+      "flag": 504,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041173,
+      "name": "Banana Hoard",
+      "flag": 432,
+      "source": "goal",
+      "detector": "event"
+    },
+    {
+      "id": 14041174,
+      "name": "Japes Donkey Medal",
+      "flag": 549,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041175,
+      "name": "Japes Diddy Medal",
+      "flag": 550,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041176,
+      "name": "Japes Lanky Medal",
+      "flag": 551,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041177,
+      "name": "Japes Tiny Medal",
+      "flag": 552,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041178,
+      "name": "Japes Chunky Medal",
+      "flag": 553,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041179,
+      "name": "Japes Cage: Diddy Kong",
+      "flag": 6,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041180,
+      "name": "Japes in Front of Diddy Cage",
+      "flag": 4,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041181,
+      "name": "Japes Free Diddy Item",
+      "flag": 5,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041182,
+      "name": "Japes Donkey Floor Cage Banana",
+      "flag": 20,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041183,
+      "name": "Japes Donkey Baboon Blast",
+      "flag": 3,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041184,
+      "name": "Japes Diddy Timed Cage Banana",
+      "flag": 18,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041185,
+      "name": "Japes Diddy Top of Mountain",
+      "flag": 23,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041186,
+      "name": "Japes Lanky Timed Cage Banana",
+      "flag": 19,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041187,
+      "name": "Japes Tiny Timed Cage Banana",
+      "flag": 21,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041188,
+      "name": "Japes Chunky Boulder",
+      "flag": 25,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041189,
+      "name": "Japes Chunky Timed Cage Banana",
+      "flag": 22,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041190,
+      "name": "Japes Battle Arena (Near Low Hill Shop)",
+      "flag": 609,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041191,
+      "name": "Japes Diddy Peanut Tunnel",
+      "flag": 31,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041192,
+      "name": "Japes Lanky Grape Gate Barrel",
+      "flag": 1,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041193,
+      "name": "Japes Tiny Feather Gate Barrel",
+      "flag": 2,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041194,
+      "name": "Japes Kasplat: Hive Tunnel Lower",
+      "flag": 469,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041195,
+      "name": "Japes Kasplat: Hive Tunnel Upper",
+      "flag": 472,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041196,
+      "name": "Japes Tiny Stump",
+      "flag": 8,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041197,
+      "name": "Japes Chunky Giant Bonus Barrel",
+      "flag": 28,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041198,
+      "name": "Japes Tiny Beehive",
+      "flag": 9,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041199,
+      "name": "Japes Lanky Slope Barrel",
+      "flag": 11,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041200,
+      "name": "Japes Kasplat: Tunnel Near Painting Room",
+      "flag": 470,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041201,
+      "name": "Japes Kasplat: By Lanky Slope Bonus",
+      "flag": 471,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041202,
+      "name": "Japes Fairy (Rambi Door Pool)",
+      "flag": 589,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041203,
+      "name": "Japes Lanky Painting Room Zingers",
+      "flag": 10,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041204,
+      "name": "Japes Fairy (Painting Room)",
+      "flag": 590,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041205,
+      "name": "Japes Diddy Minecart",
+      "flag": 24,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041206,
+      "name": "Japes Chunky Underground",
+      "flag": 12,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041207,
+      "name": "Japes Kasplat: Underground",
+      "flag": 473,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041208,
+      "name": "Japes Boss Defeated",
+      "flag": 26,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041209,
+      "name": "Aztec Donkey Medal",
+      "flag": 554,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041210,
+      "name": "Aztec Diddy Medal",
+      "flag": 555,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041211,
+      "name": "Aztec Lanky Medal",
+      "flag": 556,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041212,
+      "name": "Aztec Tiny Medal",
+      "flag": 557,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041213,
+      "name": "Aztec Chunky Medal",
+      "flag": 558,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041214,
+      "name": "Aztec Donkey Free Llama Blast",
+      "flag": 51,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041215,
+      "name": "Aztec Chunky Vases",
+      "flag": 49,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041216,
+      "name": "Aztec Kasplat: Behind DK Stone Door",
+      "flag": 474,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041217,
+      "name": "Aztec Kasplat: On Tiny Temple",
+      "flag": 475,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041218,
+      "name": "Aztec Tiny Klaptrap Room",
+      "flag": 65,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041219,
+      "name": "Aztec Chunky Klaptrap Room",
+      "flag": 64,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041220,
+      "name": "Aztec Cage: Tiny Kong",
+      "flag": 66,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041221,
+      "name": "Aztec Free Tiny Item",
+      "flag": 67,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041222,
+      "name": "Aztec Lanky Vulture Shooting",
+      "flag": 68,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041223,
+      "name": "Aztec Battle Arena (Tiny Temple: Vulture Room)",
+      "flag": 610,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041224,
+      "name": "Aztec Donkey Sealed Quicksand Tunnel Barrel",
+      "flag": 62,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041225,
+      "name": "Aztec Diddy Ram Gongs",
+      "flag": 54,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041226,
+      "name": "Aztec Diddy Vulture Race",
+      "flag": 63,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041227,
+      "name": "Aztec Chunky Giant Caged Barrel",
+      "flag": 52,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041228,
+      "name": "Aztec Kasplat: Hunky Chunky Barrel",
+      "flag": 477,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041229,
+      "name": "Aztec Donkey 5 Door Temple",
+      "flag": 57,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041230,
+      "name": "Aztec Diddy 5 Door Temple",
+      "flag": 56,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041231,
+      "name": "Aztec Lanky 5 Door Temple",
+      "flag": 60,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041232,
+      "name": "Aztec Tiny 5 Door Temple",
+      "flag": 58,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041233,
+      "name": "Aztec Fairy (Tiny 5-Door Temple)",
+      "flag": 601,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041234,
+      "name": "Aztec Chunky 5 Door Temple",
+      "flag": 59,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041235,
+      "name": "Aztec Kasplat: Chunky 5-Door Temple",
+      "flag": 478,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041236,
+      "name": "Aztec Tiny Beetle Race",
+      "flag": 75,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041237,
+      "name": "Aztec Cage: Lanky Kong",
+      "flag": 70,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041238,
+      "name": "Aztec Free Lanky Item",
+      "flag": 77,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041239,
+      "name": "Aztec Lanky Llama Temple Barrel",
+      "flag": 73,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041240,
+      "name": "Aztec Lanky Matching Game",
+      "flag": 72,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041241,
+      "name": "Aztec Fairy (Llama Temple)",
+      "flag": 600,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041242,
+      "name": "Aztec Tiny Llama Temple Lava Pedestals",
+      "flag": 71,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041243,
+      "name": "Aztec Kasplat: Llama Temple Lava",
+      "flag": 476,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041244,
+      "name": "Aztec Boss Defeated",
+      "flag": 74,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041245,
+      "name": "Factory Donkey Medal",
+      "flag": 559,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041246,
+      "name": "Factory Diddy Medal",
+      "flag": 560,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041247,
+      "name": "Factory Lanky Medal",
+      "flag": 561,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041248,
+      "name": "Factory Tiny Medal",
+      "flag": 562,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041249,
+      "name": "Factory Chunky Medal",
+      "flag": 563,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041250,
+      "name": "Factory Donkey Number Game",
+      "flag": 122,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041251,
+      "name": "Factory Diddy Block Tower",
+      "flag": 135,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041252,
+      "name": "Factory Lanky Testing Room Barrel",
+      "flag": 137,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041253,
+      "name": "Factory Tiny Dartboard",
+      "flag": 124,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041254,
+      "name": "Factory Kasplat: Block Tower",
+      "flag": 483,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041255,
+      "name": "Factory Fairy (Number Game)",
+      "flag": 602,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041256,
+      "name": "Factory Fairy (Testing Shop)",
+      "flag": 591,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041257,
+      "name": "Factory Diddy Charge Enemies",
+      "flag": 126,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041258,
+      "name": "Factory Lanky Piano Game",
+      "flag": 125,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041259,
+      "name": "Factory Chunky Toy Monster",
+      "flag": 127,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041260,
+      "name": "Factory Kasplat: Research and Development",
+      "flag": 481,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041261,
+      "name": "Factory Battle Arena (Under R&D Grate)",
+      "flag": 611,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041262,
+      "name": "Factory Tiny Car Race",
+      "flag": 139,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041263,
+      "name": "Factory Diddy Storage Room Barrel",
+      "flag": 134,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041264,
+      "name": "Factory Donkey Power Hut",
+      "flag": 112,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041265,
+      "name": "Factory Cage: Chunky Kong",
+      "flag": 117,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041266,
+      "name": "DK Arcade Round 2",
+      "flag": 132,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041267,
+      "name": "Factory Donkey DK Arcade Round 1",
+      "flag": 130,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041268,
+      "name": "Factory Free Chunky Item",
+      "flag": 118,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041269,
+      "name": "Factory Tiny Mini by Arcade",
+      "flag": 123,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041270,
+      "name": "Factory Chunky Dark Room",
+      "flag": 121,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041271,
+      "name": "Factory Chunky Barrel by Arcade",
+      "flag": 136,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041272,
+      "name": "Factory Kasplat: Base of Production",
+      "flag": 480,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041273,
+      "name": "Factory Kasplat: Pole to Arcade",
+      "flag": 482,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041274,
+      "name": "Factory Donkey Crusher Room",
+      "flag": 128,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041275,
+      "name": "Factory Diddy Production Spring",
+      "flag": 113,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041276,
+      "name": "Factory Lanky Production Handstand",
+      "flag": 115,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041277,
+      "name": "Factory Tiny Production Twirl",
+      "flag": 116,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041278,
+      "name": "Factory Chunky Production Timer",
+      "flag": 114,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041279,
+      "name": "Factory Kasplat: Upper Production Pipe",
+      "flag": 479,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041280,
+      "name": "Factory Boss Defeated",
+      "flag": 138,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041281,
+      "name": "Galleon Donkey Medal",
+      "flag": 564,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041282,
+      "name": "Galleon Diddy Medal",
+      "flag": 565,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041283,
+      "name": "Galleon Lanky Medal",
+      "flag": 566,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041284,
+      "name": "Galleon Tiny Medal",
+      "flag": 567,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041285,
+      "name": "Galleon Chunky Medal",
+      "flag": 568,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041286,
+      "name": "Galleon Chunky Chest",
+      "flag": 182,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041287,
+      "name": "Galleon Kasplat: Past Vines",
+      "flag": 487,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041288,
+      "name": "Galleon Battle Arena (Under Cavern Shop)",
+      "flag": 612,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041289,
+      "name": "Galleon Fairy (In Punch Chest)",
+      "flag": 592,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041290,
+      "name": "Galleon Chunky Cannon Game",
+      "flag": 154,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041291,
+      "name": "Galleon Kasplat: Cannon Game Room",
+      "flag": 486,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041292,
+      "name": "Galleon Diddy Top of Lighthouse",
+      "flag": 204,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041293,
+      "name": "Galleon Lanky Enguarde Chest",
+      "flag": 192,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041294,
+      "name": "Galleon Kasplat: Lighthouse Alcove",
+      "flag": 485,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041295,
+      "name": "Galleon Donkey Lighthouse",
+      "flag": 157,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041296,
+      "name": "Galleon Tiny Mermaid Reward",
+      "flag": 191,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041297,
+      "name": "Galleon Chunky Seasick",
+      "flag": 166,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041298,
+      "name": "Galleon Donkey Free the Seal",
+      "flag": 193,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041299,
+      "name": "Galleon Kasplat: Musical Cactus",
+      "flag": 488,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041300,
+      "name": "Galleon Donkey Seal Race",
+      "flag": 165,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041301,
+      "name": "Galleon Diddy Gold Tower Barrel",
+      "flag": 163,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041302,
+      "name": "Galleon Lanky Gold Tower Barrel",
+      "flag": 164,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041303,
+      "name": "Galleon Kasplat: Diddy Gold Tower",
+      "flag": 484,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041304,
+      "name": "Galleon Tiny Submarine Barrel",
+      "flag": 202,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041305,
+      "name": "Galleon Diddy Mechfish",
+      "flag": 167,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041306,
+      "name": "Galleon Lanky 2 Door Ship",
+      "flag": 183,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041307,
+      "name": "Galleon Tiny 2 Door Ship",
+      "flag": 184,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041308,
+      "name": "Galleon Donkey 5 Door Ship",
+      "flag": 200,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041309,
+      "name": "Galleon Diddy 5 Door Ship",
+      "flag": 198,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041310,
+      "name": "Galleon Lanky 5 Door Ship",
+      "flag": 199,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041311,
+      "name": "Galleon Tiny 5 Door Ship",
+      "flag": 201,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041312,
+      "name": "Galleon Fairy (In Tiny's 5-Door Ship)",
+      "flag": 603,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041313,
+      "name": "Galleon Chunky 5 Door Ship",
+      "flag": 197,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041314,
+      "name": "Treasure Chest Far Left Clam",
+      "flag": 186,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041315,
+      "name": "Treasure Chest Center Clam",
+      "flag": 187,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041316,
+      "name": "Treasure Chest Far Right Clam",
+      "flag": 188,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041317,
+      "name": "Treasure Chest Close Right Clam",
+      "flag": 189,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041318,
+      "name": "Treasure Chest Close Left Clam",
+      "flag": 190,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041319,
+      "name": "Galleon Boss Defeated",
+      "flag": 168,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041320,
+      "name": "Forest Donkey Medal",
+      "flag": 569,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041321,
+      "name": "Forest Diddy Medal",
+      "flag": 570,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041322,
+      "name": "Forest Lanky Medal",
+      "flag": 571,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041323,
+      "name": "Forest Tiny Medal",
+      "flag": 572,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041324,
+      "name": "Forest Chunky Medal",
+      "flag": 573,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041325,
+      "name": "Forest Chunky Minecart",
+      "flag": 215,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041326,
+      "name": "Forest Diddy Top of Mushroom Barrel",
+      "flag": 211,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041327,
+      "name": "Forest Tiny Mushroom Barrel",
+      "flag": 227,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041328,
+      "name": "Forest Donkey Baboon Blast",
+      "flag": 254,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041329,
+      "name": "Forest Kasplat: Mushroom Exterior Lower Floor",
+      "flag": 492,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041330,
+      "name": "Forest Donkey Mushroom Cannons",
+      "flag": 228,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041331,
+      "name": "Forest Kasplat: Inside Giant Mushroom",
+      "flag": 490,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041332,
+      "name": "Forest Kasplat: Mushroom Exterior Night Door",
+      "flag": 493,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041333,
+      "name": "Forest Battle Arena (Mushroom Exterior Top Ladder)",
+      "flag": 613,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041334,
+      "name": "Forest Chunky Face Puzzle",
+      "flag": 225,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041335,
+      "name": "Forest Lanky Zinger Bounce",
+      "flag": 226,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041336,
+      "name": "Forest Lanky Colored Mushroom Slam",
+      "flag": 224,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041337,
+      "name": "Forest Diddy Owl Race",
+      "flag": 250,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041338,
+      "name": "Forest Lanky Rabbit Race",
+      "flag": 249,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041339,
+      "name": "Forest Kasplat: Under Owl Tree",
+      "flag": 491,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041340,
+      "name": "Forest Tiny Anthill Banana",
+      "flag": 205,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041341,
+      "name": "Forest Donkey Mill Levers",
+      "flag": 219,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041342,
+      "name": "Forest Diddy Winch Cage",
+      "flag": 214,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041343,
+      "name": "Forest Tiny Spider Boss",
+      "flag": 247,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041344,
+      "name": "Forest Chunky Keg Crushing",
+      "flag": 221,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041345,
+      "name": "Forest Diddy Dark Rafters",
+      "flag": 216,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041346,
+      "name": "Forest Fairy (Dark Rafters)",
+      "flag": 595,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041347,
+      "name": "Forest Lanky Attic Shooting",
+      "flag": 217,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041348,
+      "name": "Forest Kasplat: Behind Thornvine Barn",
+      "flag": 489,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041349,
+      "name": "Forest Donkey Thornvine Barn Barrel",
+      "flag": 235,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041350,
+      "name": "Forest Fairy (Thornvine Barn)",
+      "flag": 596,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041351,
+      "name": "Forest Tiny Top of the Beanstalk",
+      "flag": 209,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041352,
+      "name": "Forest Chunky Apple Rescue",
+      "flag": 253,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041353,
+      "name": "Forest Second Anthill Reward",
+      "flag": 768,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041354,
+      "name": "Forest Boss Defeated",
+      "flag": 236,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041355,
+      "name": "Caves Donkey Medal",
+      "flag": 574,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041356,
+      "name": "Caves Diddy Medal",
+      "flag": 575,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041357,
+      "name": "Caves Lanky Medal",
+      "flag": 576,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041358,
+      "name": "Caves Tiny Medal",
+      "flag": 577,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041359,
+      "name": "Caves Chunky Medal",
+      "flag": 578,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041360,
+      "name": "Caves Donkey Baboon Blast",
+      "flag": 298,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041361,
+      "name": "Caves Diddy Jetpack Barrel",
+      "flag": 294,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041362,
+      "name": "Caves Tiny Mini Cave Barrel",
+      "flag": 295,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041363,
+      "name": "Caves Tiny Monkeyport Igloo",
+      "flag": 297,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041364,
+      "name": "Caves Chunky Gorilla Gone",
+      "flag": 268,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041365,
+      "name": "Caves Kasplat: Near Ice Castle",
+      "flag": 494,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041366,
+      "name": "Caves Kasplat: Mini Room by Funky",
+      "flag": 495,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041367,
+      "name": "Caves Kasplat: On Warp 5 Pillar",
+      "flag": 496,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041368,
+      "name": "Caves Kasplat: Cabins Central Rise",
+      "flag": 497,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041369,
+      "name": "Caves Lanky Beetle Race",
+      "flag": 259,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041370,
+      "name": "Caves Lanky Ice Castle Slam Challenge",
+      "flag": 271,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041371,
+      "name": "Caves Chunky Transparent Igloo",
+      "flag": 270,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041372,
+      "name": "Caves Kasplat: On the Igloo",
+      "flag": 498,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041373,
+      "name": "Caves Donkey 5 Door Igloo",
+      "flag": 275,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041374,
+      "name": "Caves Diddy 5 Door Igloo",
+      "flag": 274,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041375,
+      "name": "Caves Lanky 5 Door Igloo",
+      "flag": 281,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041376,
+      "name": "Caves Tiny 5 Door Igloo",
+      "flag": 279,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041377,
+      "name": "Caves Fairy (Tiny Igloo)",
+      "flag": 597,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041378,
+      "name": "Caves Chunky 5 Door Igloo",
+      "flag": 278,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041379,
+      "name": "Caves Donkey Rotating Cabin",
+      "flag": 276,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041380,
+      "name": "Caves Battle Arena (Rotating Cabin: Wall)",
+      "flag": 616,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041381,
+      "name": "Caves Donkey 5 Door Cabin",
+      "flag": 261,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041382,
+      "name": "Caves Diddy 5 Door Cabin Lower",
+      "flag": 262,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041383,
+      "name": "Caves Diddy 5 Door Cabin Upper",
+      "flag": 293,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041384,
+      "name": "Caves Fairy (Diddy Candles Cabin)",
+      "flag": 608,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041385,
+      "name": "Caves Lanky Sprint Cabin",
+      "flag": 264,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041386,
+      "name": "Caves Tiny 5 Door Cabin",
+      "flag": 260,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041387,
+      "name": "Caves Chunky 5 Door Cabin",
+      "flag": 263,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041388,
+      "name": "Caves Boss Defeated",
+      "flag": 292,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041389,
+      "name": "Castle Donkey Medal",
+      "flag": 579,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041390,
+      "name": "Castle Diddy Medal",
+      "flag": 580,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041391,
+      "name": "Castle Lanky Medal",
+      "flag": 581,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041392,
+      "name": "Castle Tiny Medal",
+      "flag": 582,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041393,
+      "name": "Castle Chunky Medal",
+      "flag": 583,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041394,
+      "name": "Castle Diddy Above Castle",
+      "flag": 350,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041395,
+      "name": "Castle Kasplat: Near Rocketbarrel Overhang",
+      "flag": 501,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041396,
+      "name": "Castle Kasplat: On a lone platform",
+      "flag": 502,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041397,
+      "name": "Castle Donkey Tree Sniping",
+      "flag": 320,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041398,
+      "name": "Castle Chunky Tree Sniping Barrel",
+      "flag": 319,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041399,
+      "name": "Castle Kasplat: Inside the Tree",
+      "flag": 499,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041400,
+      "name": "Castle Fairy (Tree Sniping Room)",
+      "flag": 605,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041401,
+      "name": "Castle Donkey Library",
+      "flag": 313,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041402,
+      "name": "Castle Diddy Ballroom",
+      "flag": 305,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041403,
+      "name": "Castle Fairy (Near Car Race)",
+      "flag": 604,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041404,
+      "name": "Castle Tiny Car Race",
+      "flag": 325,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041405,
+      "name": "Castle Lanky Tower",
+      "flag": 306,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041406,
+      "name": "Castle Lanky Greenhouse",
+      "flag": 323,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041407,
+      "name": "Castle Battle Arena (Greenhouse: Center)",
+      "flag": 617,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041408,
+      "name": "Castle Tiny Trash Can",
+      "flag": 351,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041409,
+      "name": "Castle Chunky Shed",
+      "flag": 322,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041410,
+      "name": "Castle Chunky Museum",
+      "flag": 314,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041411,
+      "name": "Castle Kasplat: Lower Cave Center",
+      "flag": 500,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041412,
+      "name": "Castle Diddy Crypt",
+      "flag": 310,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041413,
+      "name": "Castle Chunky Crypt",
+      "flag": 311,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041414,
+      "name": "Castle Donkey Minecart",
+      "flag": 318,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041415,
+      "name": "Castle Lanky Mausoleum",
+      "flag": 308,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041416,
+      "name": "Castle Tiny Mausoleum",
+      "flag": 309,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041417,
+      "name": "Castle Tiny Over Chasm",
+      "flag": 315,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041418,
+      "name": "Castle Kasplat: Near Upper Cave Shop",
+      "flag": 503,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041419,
+      "name": "Castle Donkey Dungeon",
+      "flag": 326,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041420,
+      "name": "Castle Diddy Dungeon",
+      "flag": 353,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041421,
+      "name": "Castle Lanky Dungeon",
+      "flag": 316,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041422,
+      "name": "Castle Boss Defeated",
+      "flag": 317,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041423,
+      "name": "Helm Donkey Barrel 1",
+      "flag": 972,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041424,
+      "name": "Helm Donkey Barrel 2",
+      "flag": 973,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041425,
+      "name": "Helm Diddy Barrel 1",
+      "flag": 974,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041426,
+      "name": "Helm Diddy Barrel 2",
+      "flag": 975,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041427,
+      "name": "Helm Lanky Barrel 1",
+      "flag": 976,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041428,
+      "name": "Helm Lanky Barrel 2",
+      "flag": 977,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041429,
+      "name": "Helm Tiny Barrel 1",
+      "flag": 978,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041430,
+      "name": "Helm Tiny Barrel 2",
+      "flag": 979,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041431,
+      "name": "Helm Chunky Barrel 1",
+      "flag": 980,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041432,
+      "name": "Helm Chunky Barrel 2",
+      "flag": 981,
+      "source": "helm_barrel",
+      "detector": "event"
+    },
+    {
+      "id": 14041433,
+      "name": "Helm Battle Arena (Top of Blast-o-Matic)",
+      "flag": 618,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041434,
+      "name": "Helm Donkey Medal",
+      "flag": 584,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041435,
+      "name": "Helm Chunky Medal",
+      "flag": 588,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041436,
+      "name": "Helm Tiny Medal",
+      "flag": 587,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041437,
+      "name": "Helm Lanky Medal",
+      "flag": 586,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041438,
+      "name": "Helm Diddy Medal",
+      "flag": 585,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041439,
+      "name": "Helm Fairy (Key 8 Room (1))",
+      "flag": 598,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041440,
+      "name": "Helm Fairy (Key 8 Room (2))",
+      "flag": 599,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041441,
+      "name": "The End of Helm",
+      "flag": 380,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041442,
+      "name": "Isles Cranky Shared",
+      "flag": 835,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041443,
+      "name": "Japes Cranky Donkey",
+      "flag": 800,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041444,
+      "name": "Japes Cranky Diddy",
+      "flag": 801,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041445,
+      "name": "Japes Cranky Lanky",
+      "flag": 802,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041446,
+      "name": "Japes Cranky Tiny",
+      "flag": 803,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041447,
+      "name": "Japes Cranky Chunky",
+      "flag": 804,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041448,
+      "name": "Japes Funky Donkey",
+      "flag": 840,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041449,
+      "name": "Japes Funky Diddy",
+      "flag": 841,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041450,
+      "name": "Japes Funky Lanky",
+      "flag": 842,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041451,
+      "name": "Japes Funky Tiny",
+      "flag": 843,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041452,
+      "name": "Japes Funky Chunky",
+      "flag": 844,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041453,
+      "name": "Aztec Cranky Donkey",
+      "flag": 805,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041454,
+      "name": "Aztec Cranky Diddy",
+      "flag": 806,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041455,
+      "name": "Aztec Candy Donkey",
+      "flag": 875,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041456,
+      "name": "Aztec Candy Diddy",
+      "flag": 876,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041457,
+      "name": "Aztec Candy Lanky",
+      "flag": 877,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041458,
+      "name": "Aztec Candy Tiny",
+      "flag": 878,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041459,
+      "name": "Aztec Candy Chunky",
+      "flag": 879,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041460,
+      "name": "Factory Cranky Donkey",
+      "flag": 810,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041461,
+      "name": "Factory Cranky Diddy",
+      "flag": 811,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041462,
+      "name": "Factory Cranky Lanky",
+      "flag": 812,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041463,
+      "name": "Factory Cranky Tiny",
+      "flag": 813,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041464,
+      "name": "Factory Cranky Chunky",
+      "flag": 814,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041465,
+      "name": "Factory Funky Shared",
+      "flag": 850,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041466,
+      "name": "Galleon Candy Shared",
+      "flag": 885,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041467,
+      "name": "Forest Cranky Shared",
+      "flag": 820,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041468,
+      "name": "Forest Funky Shared",
+      "flag": 860,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041469,
+      "name": "Caves Cranky Lanky",
+      "flag": 827,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041470,
+      "name": "Caves Cranky Tiny",
+      "flag": 828,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041471,
+      "name": "Caves Cranky Chunky",
+      "flag": 829,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041472,
+      "name": "Caves Funky Shared",
+      "flag": 865,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041473,
+      "name": "Caves Candy Shared",
+      "flag": 890,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041474,
+      "name": "Castle Cranky Shared",
+      "flag": 830,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041475,
+      "name": "Castle Funky Shared",
+      "flag": 870,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041476,
+      "name": "Castle Candy Shared",
+      "flag": 895,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041477,
+      "name": "Jetpac",
+      "flag": 379,
+      "source": "flag",
+      "detector": "stock_flag"
+    },
+    {
+      "id": 14041478,
+      "name": "Japes Cranky Shared",
+      "flag": 800,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041479,
+      "name": "Japes Funky Shared",
+      "flag": 840,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041480,
+      "name": "Aztec Cranky Shared",
+      "flag": 805,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041481,
+      "name": "Aztec Cranky Lanky",
+      "flag": 807,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041482,
+      "name": "Aztec Cranky Tiny",
+      "flag": 808,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041483,
+      "name": "Aztec Cranky Chunky",
+      "flag": 809,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041484,
+      "name": "Aztec Funky Shared",
+      "flag": 845,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041485,
+      "name": "Aztec Funky Donkey",
+      "flag": 845,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041486,
+      "name": "Aztec Funky Diddy",
+      "flag": 846,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041487,
+      "name": "Aztec Funky Lanky",
+      "flag": 847,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041488,
+      "name": "Aztec Funky Tiny",
+      "flag": 848,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041489,
+      "name": "Aztec Funky Chunky",
+      "flag": 849,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041490,
+      "name": "Aztec Candy Shared",
+      "flag": 875,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041491,
+      "name": "Factory Cranky Shared",
+      "flag": 810,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041492,
+      "name": "Factory Funky Donkey",
+      "flag": 850,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041493,
+      "name": "Factory Funky Diddy",
+      "flag": 851,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041494,
+      "name": "Factory Funky Lanky",
+      "flag": 852,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041495,
+      "name": "Factory Funky Tiny",
+      "flag": 853,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041496,
+      "name": "Factory Funky Chunky",
+      "flag": 854,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041497,
+      "name": "Factory Candy Shared",
+      "flag": 880,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041498,
+      "name": "Factory Candy Donkey",
+      "flag": 880,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041499,
+      "name": "Factory Candy Diddy",
+      "flag": 881,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041500,
+      "name": "Factory Candy Lanky",
+      "flag": 882,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041501,
+      "name": "Factory Candy Tiny",
+      "flag": 883,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041502,
+      "name": "Factory Candy Chunky",
+      "flag": 884,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041503,
+      "name": "Galleon Cranky Shared",
+      "flag": 815,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041504,
+      "name": "Galleon Cranky Donkey",
+      "flag": 815,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041505,
+      "name": "Galleon Cranky Diddy",
+      "flag": 816,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041506,
+      "name": "Galleon Cranky Lanky",
+      "flag": 817,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041507,
+      "name": "Galleon Cranky Tiny",
+      "flag": 818,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041508,
+      "name": "Galleon Cranky Chunky",
+      "flag": 819,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041509,
+      "name": "Galleon Funky Shared",
+      "flag": 855,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041510,
+      "name": "Galleon Funky Donkey",
+      "flag": 855,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041511,
+      "name": "Galleon Funky Diddy",
+      "flag": 856,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041512,
+      "name": "Galleon Funky Lanky",
+      "flag": 857,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041513,
+      "name": "Galleon Funky Tiny",
+      "flag": 858,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041514,
+      "name": "Galleon Funky Chunky",
+      "flag": 859,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041515,
+      "name": "Galleon Candy Donkey",
+      "flag": 885,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041516,
+      "name": "Galleon Candy Diddy",
+      "flag": 886,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041517,
+      "name": "Galleon Candy Lanky",
+      "flag": 887,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041518,
+      "name": "Galleon Candy Tiny",
+      "flag": 888,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041519,
+      "name": "Galleon Candy Chunky",
+      "flag": 889,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041520,
+      "name": "Forest Cranky Donkey",
+      "flag": 820,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041521,
+      "name": "Forest Cranky Diddy",
+      "flag": 821,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041522,
+      "name": "Forest Cranky Lanky",
+      "flag": 822,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041523,
+      "name": "Forest Cranky Tiny",
+      "flag": 823,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041524,
+      "name": "Forest Cranky Chunky",
+      "flag": 824,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041525,
+      "name": "Forest Funky Donkey",
+      "flag": 860,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041526,
+      "name": "Forest Funky Diddy",
+      "flag": 861,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041527,
+      "name": "Forest Funky Lanky",
+      "flag": 862,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041528,
+      "name": "Forest Funky Tiny",
+      "flag": 863,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041529,
+      "name": "Forest Funky Chunky",
+      "flag": 864,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041530,
+      "name": "Caves Cranky Shared",
+      "flag": 825,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041531,
+      "name": "Caves Cranky Donkey",
+      "flag": 825,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041532,
+      "name": "Caves Cranky Diddy",
+      "flag": 826,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041533,
+      "name": "Caves Funky Donkey",
+      "flag": 865,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041534,
+      "name": "Caves Funky Diddy",
+      "flag": 866,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041535,
+      "name": "Caves Funky Lanky",
+      "flag": 867,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041536,
+      "name": "Caves Funky Tiny",
+      "flag": 868,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041537,
+      "name": "Caves Funky Chunky",
+      "flag": 869,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041538,
+      "name": "Caves Candy Donkey",
+      "flag": 890,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041539,
+      "name": "Caves Candy Diddy",
+      "flag": 891,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041540,
+      "name": "Caves Candy Lanky",
+      "flag": 892,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041541,
+      "name": "Caves Candy Tiny",
+      "flag": 893,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041542,
+      "name": "Caves Candy Chunky",
+      "flag": 894,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041543,
+      "name": "Castle Cranky Donkey",
+      "flag": 830,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041544,
+      "name": "Castle Cranky Diddy",
+      "flag": 831,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041545,
+      "name": "Castle Cranky Lanky",
+      "flag": 832,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041546,
+      "name": "Castle Cranky Tiny",
+      "flag": 833,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041547,
+      "name": "Castle Cranky Chunky",
+      "flag": 834,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041548,
+      "name": "Castle Funky Donkey",
+      "flag": 870,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041549,
+      "name": "Castle Funky Diddy",
+      "flag": 871,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041550,
+      "name": "Castle Funky Lanky",
+      "flag": 872,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041551,
+      "name": "Castle Funky Tiny",
+      "flag": 873,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041552,
+      "name": "Castle Funky Chunky",
+      "flag": 874,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041553,
+      "name": "Castle Candy Donkey",
+      "flag": 895,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041554,
+      "name": "Castle Candy Diddy",
+      "flag": 896,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041555,
+      "name": "Castle Candy Lanky",
+      "flag": 897,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041556,
+      "name": "Castle Candy Tiny",
+      "flag": 898,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041557,
+      "name": "Castle Candy Chunky",
+      "flag": 899,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041558,
+      "name": "Isles Cranky Donkey",
+      "flag": 835,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041559,
+      "name": "Isles Cranky Diddy",
+      "flag": 836,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041560,
+      "name": "Isles Cranky Lanky",
+      "flag": 837,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041561,
+      "name": "Isles Cranky Tiny",
+      "flag": 838,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041562,
+      "name": "Isles Cranky Chunky",
+      "flag": 839,
+      "source": "shop",
+      "detector": "shop"
+    },
+    {
+      "id": 14041563,
+      "name": "Turning In 1 Blueprint",
+      "flag": 1022,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041564,
+      "name": "Turning In 2 Blueprints",
+      "flag": 1023,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041565,
+      "name": "Turning In 3 Blueprints",
+      "flag": 1024,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041566,
+      "name": "Turning In 4 Blueprints",
+      "flag": 1025,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041567,
+      "name": "Turning In 5 Blueprints",
+      "flag": 1026,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041568,
+      "name": "Turning In 6 Blueprints",
+      "flag": 1027,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041569,
+      "name": "Turning In 7 Blueprints",
+      "flag": 1028,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041570,
+      "name": "Turning In 8 Blueprints",
+      "flag": 1029,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041571,
+      "name": "Turning In 9 Blueprints",
+      "flag": 1030,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041572,
+      "name": "Turning In 10 Blueprints",
+      "flag": 1031,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041573,
+      "name": "Turning In 11 Blueprints",
+      "flag": 1032,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041574,
+      "name": "Turning In 12 Blueprints",
+      "flag": 1033,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041575,
+      "name": "Turning In 13 Blueprints",
+      "flag": 1034,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041576,
+      "name": "Turning In 14 Blueprints",
+      "flag": 1035,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041577,
+      "name": "Turning In 15 Blueprints",
+      "flag": 1036,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041578,
+      "name": "Turning In 16 Blueprints",
+      "flag": 1037,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041579,
+      "name": "Turning In 17 Blueprints",
+      "flag": 1038,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041580,
+      "name": "Turning In 18 Blueprints",
+      "flag": 1039,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041581,
+      "name": "Turning In 19 Blueprints",
+      "flag": 1040,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041582,
+      "name": "Turning In 20 Blueprints",
+      "flag": 1041,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041583,
+      "name": "Turning In 21 Blueprints",
+      "flag": 1042,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041584,
+      "name": "Turning In 22 Blueprints",
+      "flag": 1043,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041585,
+      "name": "Turning In 23 Blueprints",
+      "flag": 1044,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041586,
+      "name": "Turning In 24 Blueprints",
+      "flag": 1045,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041587,
+      "name": "Turning In 25 Blueprints",
+      "flag": 1046,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041588,
+      "name": "Turning In 26 Blueprints",
+      "flag": 1047,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041589,
+      "name": "Turning In 27 Blueprints",
+      "flag": 1048,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041590,
+      "name": "Turning In 28 Blueprints",
+      "flag": 1049,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041591,
+      "name": "Turning In 29 Blueprints",
+      "flag": 1050,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041592,
+      "name": "Turning In 30 Blueprints",
+      "flag": 1051,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041593,
+      "name": "Turning In 31 Blueprints",
+      "flag": 1052,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041594,
+      "name": "Turning In 32 Blueprints",
+      "flag": 1053,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041595,
+      "name": "Turning In 33 Blueprints",
+      "flag": 1054,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041596,
+      "name": "Turning In 34 Blueprints",
+      "flag": 1055,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041597,
+      "name": "Turning In 35 Blueprints",
+      "flag": 1056,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041598,
+      "name": "Turning In 36 Blueprints",
+      "flag": 1057,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041599,
+      "name": "Turning In 37 Blueprints",
+      "flag": 1058,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041600,
+      "name": "Turning In 38 Blueprints",
+      "flag": 1059,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041601,
+      "name": "Turning In 39 Blueprints",
+      "flag": 1060,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041602,
+      "name": "Turning In 40 Blueprints",
+      "flag": 1061,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041603,
+      "name": "Japes Donkey Hint Door",
+      "flag": 900,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041604,
+      "name": "Japes Diddy Hint Door",
+      "flag": 901,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041605,
+      "name": "Japes Lanky Hint Door",
+      "flag": 902,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041606,
+      "name": "Japes Tiny Hint Door",
+      "flag": 903,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041607,
+      "name": "Japes Chunky Hint Door",
+      "flag": 904,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041608,
+      "name": "Aztec Donkey Hint Door",
+      "flag": 905,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041609,
+      "name": "Aztec Diddy Hint Door",
+      "flag": 906,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041610,
+      "name": "Aztec Lanky Hint Door",
+      "flag": 907,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041611,
+      "name": "Aztec Tiny Hint Door",
+      "flag": 908,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041612,
+      "name": "Aztec Chunky Hint Door",
+      "flag": 909,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041613,
+      "name": "Factory Donkey Hint Door",
+      "flag": 910,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041614,
+      "name": "Factory Diddy Hint Door",
+      "flag": 911,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041615,
+      "name": "Factory Lanky Hint Door",
+      "flag": 912,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041616,
+      "name": "Factory Tiny Hint Door",
+      "flag": 913,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041617,
+      "name": "Factory Chunky Hint Door",
+      "flag": 914,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041618,
+      "name": "Galleon Donkey Hint Door",
+      "flag": 915,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041619,
+      "name": "Galleon Diddy Hint Door",
+      "flag": 916,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041620,
+      "name": "Galleon Lanky Hint Door",
+      "flag": 917,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041621,
+      "name": "Galleon Tiny Hint Door",
+      "flag": 918,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041622,
+      "name": "Galleon Chunky Hint Door",
+      "flag": 919,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041623,
+      "name": "Forest Donkey Hint Door",
+      "flag": 920,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041624,
+      "name": "Forest Diddy Hint Door",
+      "flag": 921,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041625,
+      "name": "Forest Lanky Hint Door",
+      "flag": 922,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041626,
+      "name": "Forest Tiny Hint Door",
+      "flag": 923,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041627,
+      "name": "Forest Chunky Hint Door",
+      "flag": 924,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041628,
+      "name": "Caves Donkey Hint Door",
+      "flag": 925,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041629,
+      "name": "Caves Diddy Hint Door",
+      "flag": 926,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041630,
+      "name": "Caves Lanky Hint Door",
+      "flag": 927,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041631,
+      "name": "Caves Tiny Hint Door",
+      "flag": 928,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041632,
+      "name": "Caves Chunky Hint Door",
+      "flag": 929,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041633,
+      "name": "Castle Donkey Hint Door",
+      "flag": 930,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041634,
+      "name": "Castle Diddy Hint Door",
+      "flag": 931,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041635,
+      "name": "Castle Lanky Hint Door",
+      "flag": 932,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041636,
+      "name": "Castle Tiny Hint Door",
+      "flag": 933,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041637,
+      "name": "Castle Chunky Hint Door",
+      "flag": 934,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041673,
+      "name": "Japes Dirt (On Painting Hill)",
+      "flag": 678,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041674,
+      "name": "Aztec Dirt (Chunky 5DT)",
+      "flag": 679,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041675,
+      "name": "Factory Dirt (Dark Room)",
+      "flag": 680,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041676,
+      "name": "Isles Dirt (Front of Fungi Building)",
+      "flag": 681,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041677,
+      "name": "Isles Dirt (Under Caves Lobby Entrance)",
+      "flag": 682,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041678,
+      "name": "Isles Dirt (On Aztec Building)",
+      "flag": 683,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041679,
+      "name": "Aztec Dirt (Oasis)",
+      "flag": 684,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041680,
+      "name": "Forest Dirt (Mill Grass)",
+      "flag": 685,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041681,
+      "name": "Forest Dirt (Front of Beanstalk)",
+      "flag": 686,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041682,
+      "name": "Galleon Dirt (Lighthouse: Interior Rear)",
+      "flag": 687,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041683,
+      "name": "Caves Dirt (Giant Kosha)",
+      "flag": 688,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041684,
+      "name": "Castle Dirt (Top of Castle Near Shop)",
+      "flag": 689,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041685,
+      "name": "Isles Dirt (Prison: Back)",
+      "flag": 690,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041686,
+      "name": "Isles Dirt (Training Grounds: Rear Tunnel)",
+      "flag": 691,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041687,
+      "name": "Isles Dirt (Training Grounds: Banana Hoard)",
+      "flag": 692,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041688,
+      "name": "Isles Dirt (Castle Lobby: Center)",
+      "flag": 693,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041689,
+      "name": "Japes Crate (Behind the Mountain)",
+      "flag": 940,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041690,
+      "name": "Japes Crate (In the Rambi Cave)",
+      "flag": 941,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041691,
+      "name": "Aztec Crate (Llama Temple: Entrance)",
+      "flag": 942,
+      "source": "item_fallback",
+      "detector": "event"
+    },
+    {
+      "id": 14041692,
+      "name": "Factory Crate (Testing Shop Entrance Right)",
+      "flag": 943,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041693,
+      "name": "Factory Crate (Near Right Storage Shop)",
+      "flag": 944,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041694,
+      "name": "Galleon Crate (Near Cactus)",
+      "flag": 945,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041695,
+      "name": "Aztec Crate (On Llama Temple)",
+      "flag": 946,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041696,
+      "name": "Aztec Crate (Near Gong Tower)",
+      "flag": 947,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041697,
+      "name": "Forest Crate (Owl Tree Clearing)",
+      "flag": 948,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041698,
+      "name": "Forest Crate (Near Thornvine Barn)",
+      "flag": 949,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041699,
+      "name": "Forest Crate (Behind Rafters Barn)",
+      "flag": 950,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041700,
+      "name": "Forest Crate (Thornvine Barn: Back Left)",
+      "flag": 951,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041701,
+      "name": "Castle Crate (Lower Cave: Behind Mausoleum)",
+      "flag": 952,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041702,
+      "name": "Isles Boulder (Near Level 2)",
+      "flag": 694,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041703,
+      "name": "Isles Boulder (Near Level 6)",
+      "flag": 695,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041704,
+      "name": "Aztec Boulder (Tunnel)",
+      "flag": 696,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041705,
+      "name": "Caves Boulder (Small)",
+      "flag": 697,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041706,
+      "name": "Caves Boulder (Large)",
+      "flag": 698,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041707,
+      "name": "Castle Boulder (Museum)",
+      "flag": 699,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041708,
+      "name": "Isles Boulder (Japes Lobby)",
+      "flag": 700,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041709,
+      "name": "Isles Boulder (Castle Lobby)",
+      "flag": 701,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041710,
+      "name": "Isles Boulder (Caves Lobby)",
+      "flag": 702,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041711,
+      "name": "Forest Keg (Mill Front: Near)",
+      "flag": 703,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041712,
+      "name": "Forest Keg (Mill Front: Far)",
+      "flag": 704,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041713,
+      "name": "Forest Keg (Mill Back)",
+      "flag": 705,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041714,
+      "name": "Aztec Vase (Circle)",
+      "flag": 706,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041715,
+      "name": "Aztec Vase (Colon)",
+      "flag": 707,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041716,
+      "name": "Aztec Vase (Triangle)",
+      "flag": 708,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041717,
+      "name": "Aztec Vase (Plus)",
+      "flag": 709,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14041718,
+      "name": "Japes Enemy: Start",
+      "flag": 1062,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041719,
+      "name": "Japes Enemy: Diddy Cavern",
+      "flag": 1063,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041720,
+      "name": "Japes Enemy: Tunnel (0)",
+      "flag": 1064,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041721,
+      "name": "Japes Enemy: Tunnel (1)",
+      "flag": 1065,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041722,
+      "name": "Japes Enemy: Storm (0)",
+      "flag": 1066,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041723,
+      "name": "Japes Enemy: Storm (1)",
+      "flag": 1067,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041724,
+      "name": "Japes Enemy: Storm (2)",
+      "flag": 1068,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041725,
+      "name": "Japes Enemy: Hive (0)",
+      "flag": 1069,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041726,
+      "name": "Japes Enemy: Hive (1)",
+      "flag": 1070,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041727,
+      "name": "Japes Enemy: Hive (2)",
+      "flag": 1071,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041728,
+      "name": "Japes Enemy: Hive (3)",
+      "flag": 1072,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041729,
+      "name": "Japes Enemy: Hive (4)",
+      "flag": 1073,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041730,
+      "name": "Japes Enemy: Killed In Demo",
+      "flag": 1074,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041731,
+      "name": "Japes Enemy: Near Underground",
+      "flag": 1075,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041732,
+      "name": "Japes Enemy: Near Painting (0)",
+      "flag": 1076,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041733,
+      "name": "Japes Enemy: Near Painting (1)",
+      "flag": 1077,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041734,
+      "name": "Japes Enemy: Near Painting (2)",
+      "flag": 1078,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041735,
+      "name": "Japes Enemy: Mountain",
+      "flag": 1079,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041736,
+      "name": "Japes Enemy: Feather Tunnel",
+      "flag": 1080,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041737,
+      "name": "Japes Enemy: Middle Tunnel",
+      "flag": 1081,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041738,
+      "name": "Isles Japes Lobby Enemy: Enemy (0)",
+      "flag": 1082,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041739,
+      "name": "Isles Japes Lobby Enemy: Enemy (1)",
+      "flag": 1083,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041740,
+      "name": "Japes Mountain Enemy: Start (0)",
+      "flag": 1089,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041741,
+      "name": "Japes Mountain Enemy: Start (1)",
+      "flag": 1090,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041742,
+      "name": "Japes Mountain Enemy: Start (2)",
+      "flag": 1091,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041743,
+      "name": "Japes Mountain Enemy: Start (3)",
+      "flag": 1092,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041744,
+      "name": "Japes Mountain Enemy: Start (4)",
+      "flag": 1093,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041745,
+      "name": "Japes Mountain Enemy: Near Gate Switch (0)",
+      "flag": 1094,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041746,
+      "name": "Japes Mountain Enemy: Near Gate Switch (1)",
+      "flag": 1095,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041747,
+      "name": "Japes Mountain Enemy: Hi Lo",
+      "flag": 1096,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041748,
+      "name": "Japes Mountain Enemy: Conveyor (0)",
+      "flag": 1097,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041749,
+      "name": "Japes Mountain Enemy: Conveyor (1)",
+      "flag": 1098,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041750,
+      "name": "Japes Tiny Hive Enemy: First Room",
+      "flag": 1099,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041751,
+      "name": "Japes Tiny Hive Enemy: Second Room (0)",
+      "flag": 1100,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041752,
+      "name": "Japes Tiny Hive Enemy: Second Room (1)",
+      "flag": 1101,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041753,
+      "name": "Japes Tiny Hive Enemy: Third Room (0)",
+      "flag": 1102,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041754,
+      "name": "Japes Tiny Hive Enemy: Third Room (1)",
+      "flag": 1103,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041755,
+      "name": "Japes Tiny Hive Enemy: Third Room (2)",
+      "flag": 1104,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041756,
+      "name": "Japes Tiny Hive Enemy: Third Room (3)",
+      "flag": 1105,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041757,
+      "name": "Japes Tiny Hive Enemy: Main Room",
+      "flag": 1106,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041758,
+      "name": "Aztec Enemy: Vase Room (0)",
+      "flag": 1107,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041759,
+      "name": "Aztec Enemy: Vase Room (1)",
+      "flag": 1108,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041760,
+      "name": "Aztec Enemy: Vase Room (2)",
+      "flag": 1109,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041761,
+      "name": "Aztec Enemy: Tunnel Pad (0)",
+      "flag": 1110,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041762,
+      "name": "Aztec Enemy: Tunnel Cage (0)",
+      "flag": 1111,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041763,
+      "name": "Aztec Enemy: Tunnel Cage (1)",
+      "flag": 1112,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041764,
+      "name": "Aztec Enemy: Tunnel Cage (2)",
+      "flag": 1113,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041765,
+      "name": "Aztec Enemy: Starting Tunnel (0)",
+      "flag": 1114,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041766,
+      "name": "Aztec Enemy: Starting Tunnel (1)",
+      "flag": 1115,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041767,
+      "name": "Aztec Enemy: Oasis Door",
+      "flag": 1116,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041768,
+      "name": "Aztec Enemy: Tunnel Cage (3)",
+      "flag": 1117,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041769,
+      "name": "Aztec Enemy: Outside Llama",
+      "flag": 1118,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041770,
+      "name": "Aztec Enemy: Outside Tower",
+      "flag": 1119,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041771,
+      "name": "Aztec Enemy: Tunnel Pad (1)",
+      "flag": 1120,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041772,
+      "name": "Aztec Enemy: Near Candy",
+      "flag": 1121,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041773,
+      "name": "Aztec Enemy: Around Totem",
+      "flag": 1122,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041774,
+      "name": "Aztec Enemy: Starting Tunnel (2)",
+      "flag": 1123,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041775,
+      "name": "Aztec Enemy: Starting Tunnel (3)",
+      "flag": 1124,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041776,
+      "name": "Aztec Enemy: Outside Snide",
+      "flag": 1125,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041777,
+      "name": "Aztec Enemy: Outside 5DT",
+      "flag": 1126,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041778,
+      "name": "Aztec Enemy: Near Sealed Quicksand Tunnel",
+      "flag": 1127,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041779,
+      "name": "Aztec Donkey 5DTemple Enemy: Start Trap (0)",
+      "flag": 1130,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041780,
+      "name": "Aztec Donkey 5DTemple Enemy: Start Trap (1)",
+      "flag": 1131,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041781,
+      "name": "Aztec Donkey 5DTemple Enemy: Start Trap (2)",
+      "flag": 1132,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041782,
+      "name": "Aztec Donkey 5DTemple Enemy: End Trap (0)",
+      "flag": 1133,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041783,
+      "name": "Aztec Donkey 5DTemple Enemy: End Trap (1)",
+      "flag": 1134,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041784,
+      "name": "Aztec Donkey 5DTemple Enemy: End Trap (2)",
+      "flag": 1135,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041785,
+      "name": "Aztec Donkey 5DTemple Enemy: End Path (0)",
+      "flag": 1136,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041786,
+      "name": "Aztec Donkey 5DTemple Enemy: End Path (1)",
+      "flag": 1137,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041787,
+      "name": "Aztec Donkey 5DTemple Enemy: Start Path",
+      "flag": 1138,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041788,
+      "name": "Aztec Diddy 5DTemple Enemy: End Trap (0)",
+      "flag": 1139,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041789,
+      "name": "Aztec Diddy 5DTemple Enemy: End Trap (1)",
+      "flag": 1140,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041790,
+      "name": "Aztec Diddy 5DTemple Enemy: End Trap (2)",
+      "flag": 1141,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041791,
+      "name": "Aztec Diddy 5DTemple Enemy: Start Left (0)",
+      "flag": 1142,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041792,
+      "name": "Aztec Diddy 5DTemple Enemy: Start Left (1)",
+      "flag": 1143,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041793,
+      "name": "Aztec Diddy 5DTemple Enemy: Reward",
+      "flag": 1144,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041794,
+      "name": "Aztec Diddy 5DTemple Enemy: Second Switch",
+      "flag": 1145,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041795,
+      "name": "Aztec Lanky 5DTemple Enemy: Joining Paths",
+      "flag": 1146,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041796,
+      "name": "Aztec Lanky 5DTemple Enemy: End Trap",
+      "flag": 1147,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041797,
+      "name": "Aztec Lanky 5DTemple Enemy: Reward",
+      "flag": 1148,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041798,
+      "name": "Aztec Tiny 5DTemple Enemy: Start Right Front",
+      "flag": 1149,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041799,
+      "name": "Aztec Tiny 5DTemple Enemy: Start Left Back",
+      "flag": 1150,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041800,
+      "name": "Aztec Tiny 5DTemple Enemy: Start Right Back",
+      "flag": 1151,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041801,
+      "name": "Aztec Tiny 5DTemple Enemy: Start Left Front",
+      "flag": 1152,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041802,
+      "name": "Aztec Tiny 5DTemple Enemy: Reward (0)",
+      "flag": 1153,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041803,
+      "name": "Aztec Tiny 5DTemple Enemy: Reward (1)",
+      "flag": 1154,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041804,
+      "name": "Aztec Tiny 5DTemple Enemy: Dead End (0)",
+      "flag": 1155,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041805,
+      "name": "Aztec Tiny 5DTemple Enemy: Dead End (1)",
+      "flag": 1156,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041806,
+      "name": "Aztec Chunky 5DTemple Enemy: Start Right",
+      "flag": 1157,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041807,
+      "name": "Aztec Chunky 5DTemple Enemy: Start Left",
+      "flag": 1158,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041808,
+      "name": "Aztec Chunky 5DTemple Enemy: Second Right",
+      "flag": 1159,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041809,
+      "name": "Aztec Chunky 5DTemple Enemy: Second Left",
+      "flag": 1160,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041810,
+      "name": "Aztec Chunky 5DTemple Enemy: Reward",
+      "flag": 1161,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041811,
+      "name": "Aztec Llama Temple Enemy: Kong Free Instrument",
+      "flag": 1162,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041812,
+      "name": "Aztec Llama Temple Enemy: Dino Instrument",
+      "flag": 1163,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041813,
+      "name": "Aztec Llama Temple Enemy: Matching0",
+      "flag": 1164,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041814,
+      "name": "Aztec Llama Temple Enemy: Matching1",
+      "flag": 1165,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041815,
+      "name": "Aztec Llama Temple Enemy: Right",
+      "flag": 1166,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041816,
+      "name": "Aztec Llama Temple Enemy: Left",
+      "flag": 1167,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041817,
+      "name": "Aztec Llama Temple Enemy: Melon Crate",
+      "flag": 1168,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041818,
+      "name": "Aztec Llama Temple Enemy: Slam Switch",
+      "flag": 1169,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041819,
+      "name": "Aztec Tiny Temple Enemy: Guard Rotating (0)",
+      "flag": 1190,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041820,
+      "name": "Aztec Tiny Temple Enemy: Guard Rotating (1)",
+      "flag": 1191,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041821,
+      "name": "Aztec Tiny Temple Enemy: Main Room (0)",
+      "flag": 1192,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041822,
+      "name": "Aztec Tiny Temple Enemy: Main Room (1)",
+      "flag": 1193,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041823,
+      "name": "Aztec Tiny Temple Enemy: Main Room (2)",
+      "flag": 1194,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041824,
+      "name": "Aztec Tiny Temple Enemy: Kong Room (0)",
+      "flag": 1195,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041825,
+      "name": "Aztec Tiny Temple Enemy: Kong Room (1)",
+      "flag": 1196,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041826,
+      "name": "Aztec Tiny Temple Enemy: Kong Room (2)",
+      "flag": 1197,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041827,
+      "name": "Aztec Tiny Temple Enemy: Kong Room (3)",
+      "flag": 1198,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041828,
+      "name": "Aztec Tiny Temple Enemy: Kong Room (4)",
+      "flag": 1199,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041829,
+      "name": "Factory Enemy: Candy Cranky (0)",
+      "flag": 1201,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041830,
+      "name": "Factory Enemy: Candy Cranky (1)",
+      "flag": 1202,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041831,
+      "name": "Factory Enemy: Lobby Left",
+      "flag": 1203,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041832,
+      "name": "Factory Enemy: Lobby Right",
+      "flag": 1204,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041833,
+      "name": "Factory Enemy: Storage Room",
+      "flag": 1205,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041834,
+      "name": "Factory Enemy: Block Tower (0)",
+      "flag": 1206,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041835,
+      "name": "Factory Enemy: Block Tower (1)",
+      "flag": 1207,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041836,
+      "name": "Factory Enemy: Block Tower (2)",
+      "flag": 1208,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041837,
+      "name": "Factory Enemy: Tunnel To Hatch",
+      "flag": 1209,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041838,
+      "name": "Factory Enemy: Tunnel To Prod (0)",
+      "flag": 1210,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041839,
+      "name": "Factory Enemy: Tunnel To Prod (1)",
+      "flag": 1211,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041840,
+      "name": "Factory Enemy: Tunnel To Block Tower",
+      "flag": 1212,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041841,
+      "name": "Factory Enemy: Tunnel To Race (0)",
+      "flag": 1213,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041842,
+      "name": "Factory Enemy: Tunnel To Race (1)",
+      "flag": 1214,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041843,
+      "name": "Factory Enemy: Low Warp 4",
+      "flag": 1215,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041844,
+      "name": "Factory Enemy: Diddy Switch",
+      "flag": 1216,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041845,
+      "name": "Factory Enemy: To Block Tower Tunnel",
+      "flag": 1217,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041846,
+      "name": "Factory Enemy: Dark Room (0)",
+      "flag": 1218,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041847,
+      "name": "Factory Enemy: Dark Room (1)",
+      "flag": 1219,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041848,
+      "name": "Isles Factory Lobby Enemy: Enemy (0)",
+      "flag": 1238,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041849,
+      "name": "Galleon Enemy: Chest Room (0)",
+      "flag": 1239,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041850,
+      "name": "Galleon Enemy: Chest Room (1)",
+      "flag": 1240,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041851,
+      "name": "Galleon Enemy: Near Vine Cannon",
+      "flag": 1241,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041852,
+      "name": "Galleon Enemy: Cranky Cannon",
+      "flag": 1242,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041853,
+      "name": "Galleon Enemy: Peanut Tunnel",
+      "flag": 1246,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041854,
+      "name": "Galleon Enemy: Coconut Tunnel",
+      "flag": 1247,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041855,
+      "name": "Galleon Lighthouse Enemy: Enemy (0)",
+      "flag": 1248,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041856,
+      "name": "Galleon Lighthouse Enemy: Enemy (1)",
+      "flag": 1249,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041857,
+      "name": "Forest Enemy: Hollow Tree (0)",
+      "flag": 1264,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041858,
+      "name": "Forest Enemy: Hollow Tree (1)",
+      "flag": 1265,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041859,
+      "name": "Forest Enemy: Hollow Tree Entrance",
+      "flag": 1266,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041860,
+      "name": "Forest Enemy: Tree Melon Crate (0)",
+      "flag": 1267,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041861,
+      "name": "Forest Enemy: Tree Melon Crate (1)",
+      "flag": 1268,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041862,
+      "name": "Forest Enemy: Tree Melon Crate (2)",
+      "flag": 1269,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041863,
+      "name": "Forest Enemy: Apple Gauntlet (0)",
+      "flag": 1270,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041864,
+      "name": "Forest Enemy: Apple Gauntlet (1)",
+      "flag": 1271,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041865,
+      "name": "Forest Enemy: Apple Gauntlet (2)",
+      "flag": 1272,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041866,
+      "name": "Forest Enemy: Apple Gauntlet (3)",
+      "flag": 1273,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041867,
+      "name": "Forest Enemy: Near Beanstalk (0)",
+      "flag": 1274,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041868,
+      "name": "Forest Enemy: Near Beanstalk (1)",
+      "flag": 1275,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041869,
+      "name": "Forest Enemy: Green Tunnel",
+      "flag": 1276,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041870,
+      "name": "Forest Enemy: Near Low Warp 5",
+      "flag": 1277,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041871,
+      "name": "Forest Enemy: Near Pink Tunnel Bounce Tag",
+      "flag": 1278,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041872,
+      "name": "Forest Enemy: Near Giant Mushroom Rocketbarrel",
+      "flag": 1279,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041873,
+      "name": "Forest Enemy: Between Yellow Tunnel And RB",
+      "flag": 1280,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041874,
+      "name": "Forest Enemy: Near Cranky",
+      "flag": 1281,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041875,
+      "name": "Forest Enemy: Near Pink Tunnel Giant Mushroom",
+      "flag": 1282,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041876,
+      "name": "Forest Enemy: Giant Mushroom Rear Tag",
+      "flag": 1283,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041877,
+      "name": "Forest Enemy: Near Face Puzzle",
+      "flag": 1284,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041878,
+      "name": "Forest Enemy: Near Crown",
+      "flag": 1285,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041879,
+      "name": "Forest Enemy: Near High Warp 5",
+      "flag": 1286,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041880,
+      "name": "Forest Enemy: Top Of Mushroom",
+      "flag": 1287,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041881,
+      "name": "Forest Enemy: Near Apple Dropoff",
+      "flag": 1288,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041882,
+      "name": "Forest Enemy: Near DKPortal",
+      "flag": 1289,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041883,
+      "name": "Forest Enemy: Near Well Tag",
+      "flag": 1290,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041884,
+      "name": "Forest Enemy: Yellow Tunnel (0)",
+      "flag": 1291,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041885,
+      "name": "Forest Enemy: Yellow Tunnel (1)",
+      "flag": 1292,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041886,
+      "name": "Forest Enemy: Yellow Tunnel (2)",
+      "flag": 1293,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041887,
+      "name": "Forest Enemy: Yellow Tunnel (3)",
+      "flag": 1294,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041888,
+      "name": "Forest Enemy: Near Snide",
+      "flag": 1295,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041889,
+      "name": "Forest Enemy: Near the hidden Rainbow Coin",
+      "flag": 1296,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041890,
+      "name": "Forest Enemy: Near BBlast",
+      "flag": 1297,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041891,
+      "name": "Forest Enemy: Near Dark Attic",
+      "flag": 1298,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041892,
+      "name": "Forest Enemy: Near Well Exit",
+      "flag": 1299,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041893,
+      "name": "Forest Enemy: Near Blue Tunnel",
+      "flag": 1300,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041894,
+      "name": "Forest Enemy: Thornvine (0)",
+      "flag": 1301,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041895,
+      "name": "Forest Enemy: Thornvine (1)",
+      "flag": 1302,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041896,
+      "name": "Forest Enemy: Thornvine (2)",
+      "flag": 1303,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041897,
+      "name": "Forest Enemy: Thornvine Entrance",
+      "flag": 1304,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041898,
+      "name": "Forest Anthill Enemy: Gauntlet (0)",
+      "flag": 1305,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041899,
+      "name": "Forest Anthill Enemy: Gauntlet (1)",
+      "flag": 1306,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041900,
+      "name": "Forest Anthill Enemy: Gauntlet (2)",
+      "flag": 1307,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041901,
+      "name": "Forest Anthill Enemy: Gauntlet (3)",
+      "flag": 1308,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041902,
+      "name": "Forest Winch Room Enemy: Enemy",
+      "flag": 1309,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041903,
+      "name": "Forest Thornvine Barn Enemy: Enemy",
+      "flag": 1310,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041904,
+      "name": "Forest Mill Front Enemy: Enemy",
+      "flag": 1311,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041905,
+      "name": "Forest Mill Back Enemy: Enemy",
+      "flag": 1312,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041906,
+      "name": "Forest Giant Mushroom Enemy: Above Night Door",
+      "flag": 1313,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041907,
+      "name": "Forest Giant Mushroom Enemy: Path (0)",
+      "flag": 1314,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041908,
+      "name": "Forest Giant Mushroom Enemy: Path (1)",
+      "flag": 1315,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041909,
+      "name": "Forest Lanky Zingers Room Enemy: Enemy (0)",
+      "flag": 1319,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041910,
+      "name": "Forest Lanky Zingers Room Enemy: Enemy (1)",
+      "flag": 1320,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041911,
+      "name": "Forest Chunky Face Room Enemy: Enemy",
+      "flag": 1321,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041912,
+      "name": "Caves Enemy: Start",
+      "flag": 1325,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041913,
+      "name": "Caves Enemy: Near Ice Castle",
+      "flag": 1326,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041914,
+      "name": "Caves Enemy: Outside 5DC",
+      "flag": 1327,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041915,
+      "name": "Caves Enemy: 1DC Waterfall",
+      "flag": 1328,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041916,
+      "name": "Caves Enemy: Near Funky",
+      "flag": 1329,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041917,
+      "name": "Caves Enemy: Near Snide",
+      "flag": 1330,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041918,
+      "name": "Caves Enemy: Near Bonus Room",
+      "flag": 1331,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041919,
+      "name": "Caves Enemy: 1DC Headphones",
+      "flag": 1332,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041920,
+      "name": "Caves Donkey Igloo Enemy: Right",
+      "flag": 1334,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041921,
+      "name": "Caves Donkey Igloo Enemy: Left",
+      "flag": 1335,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041922,
+      "name": "Caves Tiny Igloo Enemy: Big Enemy",
+      "flag": 1341,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041923,
+      "name": "Caves Lanky Cabin Enemy: Near",
+      "flag": 1347,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041924,
+      "name": "Castle Enemy: Near Bridge (0)",
+      "flag": 1370,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041925,
+      "name": "Castle Enemy: Near Bridge (1)",
+      "flag": 1371,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041926,
+      "name": "Castle Enemy: Wooden Extrusion (0)",
+      "flag": 1372,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041927,
+      "name": "Castle Enemy: Wooden Extrusion (1)",
+      "flag": 1373,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041928,
+      "name": "Castle Enemy: Near Shed",
+      "flag": 1374,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041929,
+      "name": "Castle Enemy: Near Library",
+      "flag": 1375,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041930,
+      "name": "Castle Enemy: Near Tower",
+      "flag": 1376,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041931,
+      "name": "Castle Enemy: Museum Steps",
+      "flag": 1377,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041932,
+      "name": "Castle Enemy: Near Low Cave",
+      "flag": 1378,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041933,
+      "name": "Castle Enemy: Path To Low Kasplat",
+      "flag": 1379,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041934,
+      "name": "Castle Enemy: Low TnS",
+      "flag": 1380,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041935,
+      "name": "Castle Enemy: Path To Dungeon",
+      "flag": 1381,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041936,
+      "name": "Castle Enemy: Near Headphones",
+      "flag": 1382,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041937,
+      "name": "Isles Castle Lobby Enemy: Left",
+      "flag": 1383,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041938,
+      "name": "Isles Castle Lobby Enemy: Far Right",
+      "flag": 1384,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041939,
+      "name": "Isles Castle Lobby Enemy: Near Right",
+      "flag": 1385,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041940,
+      "name": "Castle Ballroom Enemy: Start",
+      "flag": 1391,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041941,
+      "name": "Castle Dungeon Enemy: Face Room",
+      "flag": 1392,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041942,
+      "name": "Castle Dungeon Enemy: Chair Room",
+      "flag": 1393,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041943,
+      "name": "Castle Dungeon Enemy: Outside Lanky Room",
+      "flag": 1394,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041944,
+      "name": "Castle Lower Cave Enemy: Near Crypt",
+      "flag": 1400,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041945,
+      "name": "Castle Lower Cave Enemy: Stair Right",
+      "flag": 1401,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041946,
+      "name": "Castle Lower Cave Enemy: Stair Left",
+      "flag": 1402,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041947,
+      "name": "Castle Lower Cave Enemy: Near Mausoleum",
+      "flag": 1403,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041948,
+      "name": "Castle Lower Cave Enemy: Near Funky",
+      "flag": 1404,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041949,
+      "name": "Castle Lower Cave Enemy: Near Tag",
+      "flag": 1405,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041950,
+      "name": "Castle Crypt Enemy: Diddy Coffin (0)",
+      "flag": 1406,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041951,
+      "name": "Castle Crypt Enemy: Diddy Coffin (1)",
+      "flag": 1407,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041952,
+      "name": "Castle Crypt Enemy: Diddy Coffin (2)",
+      "flag": 1408,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041953,
+      "name": "Castle Crypt Enemy: Diddy Coffin (3)",
+      "flag": 1409,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041954,
+      "name": "Castle Crypt Enemy: Chunky Coffin (0)",
+      "flag": 1410,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041955,
+      "name": "Castle Crypt Enemy: Chunky Coffin (1)",
+      "flag": 1411,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041956,
+      "name": "Castle Crypt Enemy: Chunky Coffin (2)",
+      "flag": 1412,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041957,
+      "name": "Castle Crypt Enemy: Chunky Coffin (3)",
+      "flag": 1413,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041958,
+      "name": "Castle Crypt Enemy: Minecart Entry",
+      "flag": 1414,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041959,
+      "name": "Castle Crypt Enemy: Fork",
+      "flag": 1415,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041960,
+      "name": "Castle Crypt Enemy: Near Diddy",
+      "flag": 1416,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041961,
+      "name": "Castle Crypt Enemy: Near Chunky",
+      "flag": 1417,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041962,
+      "name": "Castle Mausoleum Enemy: Tiny Path",
+      "flag": 1418,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041963,
+      "name": "Castle Mausoleum Enemy: Lanky Path (0)",
+      "flag": 1419,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041964,
+      "name": "Castle Mausoleum Enemy: Lanky Path (1)",
+      "flag": 1420,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041965,
+      "name": "Castle Upper Cave Enemy: Near Dungeon",
+      "flag": 1421,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041966,
+      "name": "Castle Upper Cave Enemy: Near Pit",
+      "flag": 1423,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041967,
+      "name": "Castle Upper Cave Enemy: Near Entrance",
+      "flag": 1424,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041968,
+      "name": "Castle Library Enemy: Fork Left (0)",
+      "flag": 1440,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041969,
+      "name": "Castle Library Enemy: Fork Left (1)",
+      "flag": 1441,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041970,
+      "name": "Castle Library Enemy: Fork Center",
+      "flag": 1442,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041971,
+      "name": "Castle Library Enemy: Fork Right",
+      "flag": 1443,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041972,
+      "name": "Castle Museum Enemy: Main Floor (0)",
+      "flag": 1444,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041973,
+      "name": "Castle Museum Enemy: Main Floor (1)",
+      "flag": 1445,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041974,
+      "name": "Castle Museum Enemy: Main Floor (2)",
+      "flag": 1446,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041975,
+      "name": "Castle Museum Enemy: Main Floor (3)",
+      "flag": 1447,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041976,
+      "name": "Castle Museum Enemy: Start",
+      "flag": 1448,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041977,
+      "name": "Castle Tree Enemy: Start Room (0)",
+      "flag": 1459,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041978,
+      "name": "Castle Tree Enemy: Start Room (1)",
+      "flag": 1460,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041979,
+      "name": "Helm Enemy: Start (0)",
+      "flag": 1461,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041980,
+      "name": "Helm Enemy: Start (1)",
+      "flag": 1462,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041981,
+      "name": "Helm Enemy: Hill",
+      "flag": 1463,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041982,
+      "name": "Helm Enemy: Switch Room (0)",
+      "flag": 1464,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041983,
+      "name": "Helm Enemy: Switch Room (1)",
+      "flag": 1465,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041984,
+      "name": "Helm Enemy: Mini Room (0)",
+      "flag": 1466,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041985,
+      "name": "Helm Enemy: Mini Room (1)",
+      "flag": 1467,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041986,
+      "name": "Helm Enemy: Mini Room (2)",
+      "flag": 1468,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041987,
+      "name": "Helm Enemy: Mini Room (3)",
+      "flag": 1469,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041988,
+      "name": "Helm Enemy: DKRoom",
+      "flag": 1470,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041989,
+      "name": "Helm Enemy: Chunky Room (0)",
+      "flag": 1471,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041990,
+      "name": "Helm Enemy: Chunky Room (1)",
+      "flag": 1472,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041991,
+      "name": "Helm Enemy: Tiny Room",
+      "flag": 1473,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041992,
+      "name": "Helm Enemy: Lanky Room (0)",
+      "flag": 1474,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041993,
+      "name": "Helm Enemy: Lanky Room (1)",
+      "flag": 1475,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041994,
+      "name": "Helm Enemy: Diddy Room (0)",
+      "flag": 1476,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041995,
+      "name": "Helm Enemy: Diddy Room (1)",
+      "flag": 1477,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041996,
+      "name": "Helm Enemy: Nav Right",
+      "flag": 1478,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041997,
+      "name": "Helm Enemy: Nav Left",
+      "flag": 1479,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041998,
+      "name": "Isles Enemy: Pineapple Cage (0)",
+      "flag": 1480,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14041999,
+      "name": "Isles Enemy: Fungi Cannon (0)",
+      "flag": 1481,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042000,
+      "name": "Isles Enemy: Japes Entrance",
+      "flag": 1482,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042001,
+      "name": "Isles Enemy: Monkeyport Pad",
+      "flag": 1483,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042002,
+      "name": "Isles Enemy: Upper Factory Path",
+      "flag": 1484,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042003,
+      "name": "Isles Enemy: Near Aztec",
+      "flag": 1485,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042004,
+      "name": "Isles Enemy: Fungi Cannon (1)",
+      "flag": 1486,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042005,
+      "name": "Isles Enemy: Pineapple Cage (1)",
+      "flag": 1487,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042006,
+      "name": "Isles Enemy: Lower Factory Path (0)",
+      "flag": 1488,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042007,
+      "name": "Isles Enemy: Lower Factory Path (1)",
+      "flag": 1489,
+      "source": "flag",
+      "detector": "enemy"
+    },
+    {
+      "id": 14042329,
+      "name": "Japes Donkey Half Medal",
+      "flag": 982,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042330,
+      "name": "Japes Diddy Half Medal",
+      "flag": 983,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042331,
+      "name": "Japes Lanky Half Medal",
+      "flag": 984,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042332,
+      "name": "Japes Tiny Half Medal",
+      "flag": 985,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042333,
+      "name": "Japes Chunky Half Medal",
+      "flag": 986,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042334,
+      "name": "Aztec Donkey Half Medal",
+      "flag": 987,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042335,
+      "name": "Aztec Diddy Half Medal",
+      "flag": 988,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042336,
+      "name": "Aztec Lanky Half Medal",
+      "flag": 989,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042337,
+      "name": "Aztec Tiny Half Medal",
+      "flag": 990,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042338,
+      "name": "Aztec Chunky Half Medal",
+      "flag": 991,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042339,
+      "name": "Factory Donkey Half Medal",
+      "flag": 992,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042340,
+      "name": "Factory Diddy Half Medal",
+      "flag": 993,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042341,
+      "name": "Factory Lanky Half Medal",
+      "flag": 994,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042342,
+      "name": "Factory Tiny Half Medal",
+      "flag": 995,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042343,
+      "name": "Factory Chunky Half Medal",
+      "flag": 996,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042344,
+      "name": "Galleon Donkey Half Medal",
+      "flag": 997,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042345,
+      "name": "Galleon Diddy Half Medal",
+      "flag": 998,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042346,
+      "name": "Galleon Lanky Half Medal",
+      "flag": 999,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042347,
+      "name": "Galleon Tiny Half Medal",
+      "flag": 1000,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042348,
+      "name": "Galleon Chunky Half Medal",
+      "flag": 1001,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042349,
+      "name": "Forest Donkey Half Medal",
+      "flag": 1002,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042350,
+      "name": "Forest Diddy Half Medal",
+      "flag": 1003,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042351,
+      "name": "Forest Lanky Half Medal",
+      "flag": 1004,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042352,
+      "name": "Forest Tiny Half Medal",
+      "flag": 1005,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042353,
+      "name": "Forest Chunky Half Medal",
+      "flag": 1006,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042354,
+      "name": "Caves Donkey Half Medal",
+      "flag": 1007,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042355,
+      "name": "Caves Diddy Half Medal",
+      "flag": 1008,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042356,
+      "name": "Caves Lanky Half Medal",
+      "flag": 1009,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042357,
+      "name": "Caves Tiny Half Medal",
+      "flag": 1010,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042358,
+      "name": "Caves Chunky Half Medal",
+      "flag": 1011,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042359,
+      "name": "Castle Donkey Half Medal",
+      "flag": 1012,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042360,
+      "name": "Castle Diddy Half Medal",
+      "flag": 1013,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042361,
+      "name": "Castle Lanky Half Medal",
+      "flag": 1014,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042362,
+      "name": "Castle Tiny Half Medal",
+      "flag": 1015,
+      "source": "flag",
+      "detector": "event"
+    },
+    {
+      "id": 14042363,
+      "name": "Castle Chunky Half Medal",
+      "flag": 1016,
+      "source": "flag",
+      "detector": "event"
+    }
+  ],
+  "items": [
+    {
+      "id": 14041088,
+      "name": "Victory",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041089,
+      "name": "No Item",
+      "count_id": null,
+      "flag_id": 0
+    },
+    {
+      "id": 14041090,
+      "name": "Fill Helper Item - SHOULD NOT BE PLACED",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041091,
+      "name": "Donkey",
+      "count_id": {
+        "field": "kong_bitfield",
+        "bit": 0
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041092,
+      "name": "Diddy",
+      "count_id": {
+        "field": "kong_bitfield",
+        "bit": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041093,
+      "name": "Lanky",
+      "count_id": {
+        "field": "kong_bitfield",
+        "bit": 2
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041094,
+      "name": "Tiny",
+      "count_id": {
+        "field": "kong_bitfield",
+        "bit": 3
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041095,
+      "name": "Chunky",
+      "count_id": {
+        "field": "kong_bitfield",
+        "bit": 4
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041096,
+      "name": "Vines",
+      "count_id": {
+        "field": "flag_moves",
+        "bit": "vines"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041097,
+      "name": "Diving",
+      "count_id": {
+        "field": "flag_moves",
+        "bit": "diving"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041098,
+      "name": "Oranges",
+      "count_id": {
+        "field": "flag_moves",
+        "bit": "oranges"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041099,
+      "name": "Barrels",
+      "count_id": {
+        "field": "flag_moves",
+        "bit": "barrels"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041100,
+      "name": "Climbing",
+      "count_id": null,
+      "flag_id": 671,
+      "progression": true
+    },
+    {
+      "id": 14041101,
+      "name": "progression Slam",
+      "count_id": {
+        "item": 2,
+        "level": 3
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041102,
+      "name": "progression Slam ",
+      "count_id": {
+        "item": 2,
+        "level": 3
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041103,
+      "name": "progression Donkey Potion",
+      "count_id": null,
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041104,
+      "name": "Baboon Blast",
+      "count_id": {
+        "item": 26,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041105,
+      "name": "Strong Kong",
+      "count_id": {
+        "item": 27,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041106,
+      "name": "Gorilla Grab",
+      "count_id": {
+        "item": 28,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041107,
+      "name": "progression Diddy Potion",
+      "count_id": null,
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041108,
+      "name": "Chimpy Charge",
+      "count_id": {
+        "item": 29,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041109,
+      "name": "Rocketbarrel Boost",
+      "count_id": {
+        "item": 30,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041110,
+      "name": "Simian Spring",
+      "count_id": {
+        "item": 31,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041111,
+      "name": "progression Lanky Potion",
+      "count_id": null,
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041112,
+      "name": "Orangstand",
+      "count_id": {
+        "item": 32,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041113,
+      "name": "Baboon Balloon",
+      "count_id": {
+        "item": 33,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041114,
+      "name": "Orangstand Sprint",
+      "count_id": {
+        "item": 34,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041115,
+      "name": "progression Tiny Potion",
+      "count_id": null,
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041116,
+      "name": "Mini Monkey",
+      "count_id": {
+        "item": 35,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041117,
+      "name": "Pony Tail Twirl",
+      "count_id": {
+        "item": 36,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041118,
+      "name": "Monkeyport",
+      "count_id": {
+        "item": 37,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041119,
+      "name": "progression Chunky Potion",
+      "count_id": null,
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041120,
+      "name": "Hunky Chunky",
+      "count_id": {
+        "item": 38,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041121,
+      "name": "Primate Punch",
+      "count_id": {
+        "item": 39,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041122,
+      "name": "Gorilla Gone",
+      "count_id": {
+        "item": 40,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041123,
+      "name": "Coconut",
+      "count_id": {
+        "item": 46,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041124,
+      "name": "Peanut",
+      "count_id": {
+        "item": 47,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041125,
+      "name": "Grape",
+      "count_id": {
+        "item": 48,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041126,
+      "name": "Feather",
+      "count_id": {
+        "item": 49,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041127,
+      "name": "Pineapple",
+      "count_id": {
+        "item": 50,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041128,
+      "name": "Homing Ammo",
+      "count_id": {
+        "item": 52,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041129,
+      "name": "Sniper Sight",
+      "count_id": {
+        "item": 53,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041130,
+      "name": "progression Ammo Belt",
+      "count_id": {
+        "item": 54,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041131,
+      "name": "progression Ammo Belt ",
+      "count_id": {
+        "item": 54,
+        "level": 2
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041132,
+      "name": "Bongos",
+      "count_id": {
+        "item": 41,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041133,
+      "name": "Guitar",
+      "count_id": {
+        "item": 42,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041134,
+      "name": "Trombone",
+      "count_id": {
+        "item": 43,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041135,
+      "name": "Saxophone",
+      "count_id": {
+        "item": 44,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041136,
+      "name": "Triangle",
+      "count_id": {
+        "item": 45,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041137,
+      "name": "progression Instrument Upgrade",
+      "count_id": {
+        "item": 55,
+        "level": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041138,
+      "name": "progression Instrument Upgrade ",
+      "count_id": {
+        "item": 55,
+        "level": 2
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041139,
+      "name": "progression Instrument Upgrade  ",
+      "count_id": {
+        "item": 55,
+        "level": 3
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041140,
+      "name": "Fairy Camera",
+      "count_id": {
+        "field": "flag_moves",
+        "bit": "camera"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041141,
+      "name": "Shockwave",
+      "count_id": {
+        "field": "flag_moves",
+        "bit": "shockwave"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041142,
+      "name": "Camera and Shockwave",
+      "count_id": [
+        {
+          "field": "flag_moves",
+          "bit": "camera"
+        },
+        {
+          "field": "flag_moves",
+          "bit": "shockwave"
+        }
+      ],
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041143,
+      "name": "Nintendo Coin",
+      "count_id": {
+        "field": "special_items",
+        "bit": "nintendo_coin"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041144,
+      "name": "Rareware Coin",
+      "count_id": {
+        "field": "special_items",
+        "bit": "rareware_coin"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041145,
+      "name": "Key 1",
+      "count_id": {
+        "field": "key_bitfield",
+        "bit": 0
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041146,
+      "name": "Key 2",
+      "count_id": {
+        "field": "key_bitfield",
+        "bit": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041147,
+      "name": "Key 3",
+      "count_id": {
+        "field": "key_bitfield",
+        "bit": 2
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041148,
+      "name": "Key 4",
+      "count_id": {
+        "field": "key_bitfield",
+        "bit": 3
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041149,
+      "name": "Key 5",
+      "count_id": {
+        "field": "key_bitfield",
+        "bit": 4
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041150,
+      "name": "Key 6",
+      "count_id": {
+        "field": "key_bitfield",
+        "bit": 5
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041151,
+      "name": "Key 7",
+      "count_id": {
+        "field": "key_bitfield",
+        "bit": 6
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041152,
+      "name": "Key 8",
+      "count_id": {
+        "field": "key_bitfield",
+        "bit": 7
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041153,
+      "name": "Helm Donkey Barrel 1",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041154,
+      "name": "Helm Donkey Barrel 2",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041155,
+      "name": "Helm Diddy Barrel 1",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041156,
+      "name": "Helm Diddy Barrel 2",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041157,
+      "name": "Helm Lanky Barrel 1",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041158,
+      "name": "Helm Lanky Barrel 2",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041159,
+      "name": "Helm Tiny Barrel 1",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041160,
+      "name": "Helm Tiny Barrel 2",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041161,
+      "name": "Helm Chunky Barrel 1",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041162,
+      "name": "Helm Chunky Barrel 2",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041167,
+      "name": "Bean",
+      "count_id": {
+        "field": "special_items",
+        "bit": "bean"
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041170,
+      "name": "Bubble Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "bubble"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041171,
+      "name": "Reverse Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "reverse"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041172,
+      "name": "Slow Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "slow"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041173,
+      "name": "Junk Item (Crystal)",
+      "count_id": {
+        "field": "junk_items",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041174,
+      "name": "Junk Item (Melon Slice)",
+      "count_id": {
+        "field": "junk_items",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041175,
+      "name": "Junk Item (Ammo Crate)",
+      "count_id": {
+        "field": "junk_items",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041176,
+      "name": "Junk Item (Film)",
+      "count_id": {
+        "field": "junk_items",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041177,
+      "name": "Junk Item (Orange)",
+      "count_id": {
+        "field": "junk_items",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041178,
+      "name": "Crate Melon",
+      "count_id": {
+        "field": "junk_items",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041179,
+      "name": "Enemy Item",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041180,
+      "name": "Cranky",
+      "count_id": null,
+      "flag_id": 962,
+      "progression": true
+    },
+    {
+      "id": 14041181,
+      "name": "Funky",
+      "count_id": null,
+      "flag_id": 963,
+      "progression": true
+    },
+    {
+      "id": 14041182,
+      "name": "Candy",
+      "count_id": null,
+      "flag_id": 964,
+      "progression": true
+    },
+    {
+      "id": 14041183,
+      "name": "Snide",
+      "count_id": null,
+      "flag_id": 965,
+      "progression": true
+    },
+    {
+      "id": 14041184,
+      "name": "Banana Hoard",
+      "count_id": null,
+      "flag_id": null
+    },
+    {
+      "id": 14041185,
+      "name": "Japes Donkey Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 0,
+        "level": 0
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041186,
+      "name": "Japes Diddy Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 1,
+        "level": 0
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041187,
+      "name": "Japes Lanky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 2,
+        "level": 0
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041188,
+      "name": "Japes Tiny Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 3,
+        "level": 0
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041189,
+      "name": "Japes Chunky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 4,
+        "level": 0
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041190,
+      "name": "Aztec Donkey Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 0,
+        "level": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041191,
+      "name": "Aztec Diddy Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 1,
+        "level": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041192,
+      "name": "Aztec Lanky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 2,
+        "level": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041193,
+      "name": "Aztec Tiny Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 3,
+        "level": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041194,
+      "name": "Aztec Chunky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 4,
+        "level": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041195,
+      "name": "Factory Donkey Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 0,
+        "level": 2
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041196,
+      "name": "Factory Diddy Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 1,
+        "level": 2
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041197,
+      "name": "Factory Lanky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 2,
+        "level": 2
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041198,
+      "name": "Factory Tiny Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 3,
+        "level": 2
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041199,
+      "name": "Factory Chunky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 4,
+        "level": 2
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041200,
+      "name": "Galleon Donkey Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 0,
+        "level": 3
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041201,
+      "name": "Galleon Diddy Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 1,
+        "level": 3
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041202,
+      "name": "Galleon Lanky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 2,
+        "level": 3
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041203,
+      "name": "Galleon Tiny Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 3,
+        "level": 3
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041204,
+      "name": "Galleon Chunky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 4,
+        "level": 3
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041205,
+      "name": "Forest Donkey Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 0,
+        "level": 4
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041206,
+      "name": "Forest Diddy Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 1,
+        "level": 4
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041207,
+      "name": "Forest Lanky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 2,
+        "level": 4
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041208,
+      "name": "Forest Tiny Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 3,
+        "level": 4
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041209,
+      "name": "Forest Chunky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 4,
+        "level": 4
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041210,
+      "name": "Caves Donkey Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 0,
+        "level": 5
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041211,
+      "name": "Caves Diddy Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 1,
+        "level": 5
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041212,
+      "name": "Caves Lanky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 2,
+        "level": 5
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041213,
+      "name": "Caves Tiny Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 3,
+        "level": 5
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041214,
+      "name": "Caves Chunky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 4,
+        "level": 5
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041215,
+      "name": "Castle Donkey Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 0,
+        "level": 6
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041216,
+      "name": "Castle Diddy Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 1,
+        "level": 6
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041217,
+      "name": "Castle Lanky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 2,
+        "level": 6
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041218,
+      "name": "Castle Tiny Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 3,
+        "level": 6
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041219,
+      "name": "Castle Chunky Hint",
+      "count_id": {
+        "field": "hint_bitfield",
+        "kong": 4,
+        "level": 6
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041260,
+      "name": "progression Slam  ",
+      "count_id": {
+        "item": 2,
+        "level": 3
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041262,
+      "name": "Ice Trap (Bubble - Bean)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "bubble"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041263,
+      "name": "Ice Trap (Reverse - Bean)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "reverse"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041264,
+      "name": "Ice Trap (Slow - Bean)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "slow"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041265,
+      "name": "Ice Trap (Bubble - Key)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "bubble"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041266,
+      "name": "Ice Trap (Reverse - Key)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "reverse"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041267,
+      "name": "Ice Trap (Slow - Key)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "slow"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041269,
+      "name": "Pearl",
+      "count_id": {
+        "field": "pearls",
+        "increment": 1
+      },
+      "flag_id": null,
+      "progression": true
+    },
+    {
+      "id": 14041270,
+      "name": "Golden Banana",
+      "count_id": {
+        "item": 1,
+        "level": 1
+      },
+      "flag_id": null
+    },
+    {
+      "id": 14041271,
+      "name": "Banana Fairy",
+      "count_id": {
+        "field": "fairies",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041272,
+      "name": "Battle Crown",
+      "count_id": {
+        "field": "crowns",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041273,
+      "name": "Banana Medal",
+      "count_id": {
+        "field": "medals",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041274,
+      "name": "Disable A Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_a"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041275,
+      "name": "Ice Trap (Disable A - Bean)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_a"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041276,
+      "name": "Ice Trap (Disable A - Key)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_a"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041277,
+      "name": "Disable B Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_b"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041278,
+      "name": "Ice Trap (Disable B - Bean)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_b"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041279,
+      "name": "Ice Trap (Disable B - Key)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_b"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041280,
+      "name": "Disable Z Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_z"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041281,
+      "name": "Ice Trap (Disable Z - Bean)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_z"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041282,
+      "name": "Ice Trap (Disable Z - Key)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_z"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041283,
+      "name": "Disable C Up Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_c_up"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041284,
+      "name": "Ice Trap (Disable C Up - Bean)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_c_up"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041285,
+      "name": "Ice Trap (Disable C Up - Key)",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disable_c_up"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041314,
+      "name": "Treasure Chest Far Left Clam",
+      "count_id": null,
+      "flag_id": 186
+    },
+    {
+      "id": 14041315,
+      "name": "Treasure Chest Center Clam",
+      "count_id": null,
+      "flag_id": 187
+    },
+    {
+      "id": 14041316,
+      "name": "Treasure Chest Far Right Clam",
+      "count_id": null,
+      "flag_id": 188
+    },
+    {
+      "id": 14041317,
+      "name": "Treasure Chest Close Right Clam",
+      "count_id": null,
+      "flag_id": 189
+    },
+    {
+      "id": 14041318,
+      "name": "Treasure Chest Close Left Clam",
+      "count_id": null,
+      "flag_id": 190
+    },
+    {
+      "id": 14041323,
+      "name": "Get Out Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "get_out"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041326,
+      "name": "Dry Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "dry"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041329,
+      "name": "Flip Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "flip"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041342,
+      "name": "Ice Floor Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "icefloor"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041346,
+      "name": "Paper Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "paper"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041350,
+      "name": "Slip Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "slip"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041353,
+      "name": "Forest Second Anthill Reward",
+      "count_id": {
+        "field": "special_items",
+        "bit": "bean"
+      },
+      "flag_id": null
+    },
+    {
+      "id": 14041354,
+      "name": "Rainbow Coin",
+      "count_id": {
+        "field": "rainbow_coins",
+        "increment": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041358,
+      "name": "Donkey Blueprint",
+      "count_id": {
+        "field": "bp_count",
+        "kong": 0
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041359,
+      "name": "Diddy Blueprint",
+      "count_id": {
+        "field": "bp_count",
+        "kong": 1
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041360,
+      "name": "Lanky Blueprint",
+      "count_id": {
+        "field": "bp_count",
+        "kong": 2
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041361,
+      "name": "Tiny Blueprint",
+      "count_id": {
+        "field": "bp_count",
+        "kong": 3
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041362,
+      "name": "Chunky Blueprint",
+      "count_id": {
+        "field": "bp_count",
+        "kong": 4
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041369,
+      "name": "Animal Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "animal"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041373,
+      "name": "Rockfall Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "rockfall"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041377,
+      "name": "Disable Tag Trap",
+      "count_id": {
+        "field": "ice_traps",
+        "increment": 1,
+        "ice_trap_type": "disabletag"
+      },
+      "flag_id": null,
+      "extended_whitelist": true
+    },
+    {
+      "id": 14041689,
+      "name": "Japes Crate: Behind the Mountain",
+      "count_id": null,
+      "flag_id": 940
+    },
+    {
+      "id": 14041690,
+      "name": "Japes Crate: In the Rambi Cave",
+      "count_id": null,
+      "flag_id": 941
+    },
+    {
+      "id": 14041691,
+      "name": "Aztec Crate: Llama Temple Entrance",
+      "count_id": null,
+      "flag_id": 942
+    },
+    {
+      "id": 14041692,
+      "name": "Factory Crate: Near Funky",
+      "count_id": null,
+      "flag_id": 943
+    },
+    {
+      "id": 14041693,
+      "name": "Factory Crate: Near Candy",
+      "count_id": null,
+      "flag_id": 944
+    },
+    {
+      "id": 14041694,
+      "name": "Galleon Crate: Near Cactus",
+      "count_id": null,
+      "flag_id": 945
+    },
+    {
+      "id": 14041695,
+      "name": "Aztec Crate: On Llama Temple",
+      "count_id": null,
+      "flag_id": 946
+    },
+    {
+      "id": 14041696,
+      "name": "Aztec Crate: Near Gong Tower",
+      "count_id": null,
+      "flag_id": 947
+    },
+    {
+      "id": 14041697,
+      "name": "Forest Crate: Near Owl Tree",
+      "count_id": null,
+      "flag_id": 948
+    },
+    {
+      "id": 14041698,
+      "name": "Forest Crate: Near Thornvine Barn",
+      "count_id": null,
+      "flag_id": 949
+    },
+    {
+      "id": 14041699,
+      "name": "Forest Crate: Behind Dark Attic",
+      "count_id": null,
+      "flag_id": 950
+    },
+    {
+      "id": 14041700,
+      "name": "Forest Crate: In Thornvine Barn",
+      "count_id": null,
+      "flag_id": 951
+    },
+    {
+      "id": 14041701,
+      "name": "Castle Crate: Behind Mausoleum Entrance",
+      "count_id": null,
+      "flag_id": 952
+    }
+  ],
+  "flag_aliases": {
+    "835": [
+      14041442,
+      14041558
+    ],
+    "800": [
+      14041443,
+      14041478
+    ],
+    "840": [
+      14041448,
+      14041479
+    ],
+    "805": [
+      14041453,
+      14041480
+    ],
+    "875": [
+      14041455,
+      14041490
+    ],
+    "810": [
+      14041460,
+      14041491
+    ],
+    "850": [
+      14041465,
+      14041492
+    ],
+    "885": [
+      14041466,
+      14041515
+    ],
+    "820": [
+      14041467,
+      14041520
+    ],
+    "860": [
+      14041468,
+      14041525
+    ],
+    "865": [
+      14041472,
+      14041533
+    ],
+    "890": [
+      14041473,
+      14041538
+    ],
+    "830": [
+      14041474,
+      14041543
+    ],
+    "870": [
+      14041475,
+      14041548
+    ],
+    "895": [
+      14041476,
+      14041553
+    ],
+    "845": [
+      14041484,
+      14041485
+    ],
+    "880": [
+      14041497,
+      14041498
+    ],
+    "815": [
+      14041503,
+      14041504
+    ],
+    "855": [
+      14041509,
+      14041510
+    ],
+    "825": [
+      14041530,
+      14041531
+    ]
+  }
+}
