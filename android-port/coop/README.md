@@ -13,9 +13,9 @@ Independent exploration remains the default. Players may use
 different maps while collectible and progression synchronization continues;
 the remote model and combat pause until they share a map again. A join-side
 **Follow host** option restores coordinated travel through 169 reviewed ordinary routes.
-Version 0.40's live application for 11 permanent gate and door flags is retained:
-29 affected loaded objects enter their vanilla completed script state without a
-room reload, while complex changes keep the reload fallback. Galleon water and
+Live application now covers 17 permanent gate, hut, switch and door flags:
+41 affected loaded objects enter their flag-positive vanilla script state without
+a room reload, while complex changes keep the reload fallback. Galleon water and
 Fungi day/night now use their loaded vanilla switch scripts too. This version
 shares bounded damage phases for Army Dillo, Dogadon, Mad Jack, Pufftoss, King
 Kut Out, all five K. Rool rounds, and Tiny's shoe/toe sequence. It also retains

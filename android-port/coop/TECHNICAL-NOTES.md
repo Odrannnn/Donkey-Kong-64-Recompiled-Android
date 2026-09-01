@@ -1356,21 +1356,22 @@ pending cleanup. Gameplay validation remains pending.
 
 ## Reviewed live world scripts (0.40)
 
-The opt-in automatic world refresh now tries a reviewed live path before queuing
-the v0.39 same-map rebuild. The pinned US instance-script metadata identifies 11
-flags whose every reader in its main map is a simple loaded prop. These cover 29
-objects: the Japes first and painting-cave gates, Factory testing-area gate,
-Galleon's three weapon gates, two Aztec permanent doors, and three Fungi tunnel
+The opt-in automatic world refresh tries a reviewed live path before queuing the
+v0.39 same-map rebuild. The pinned US instance-script metadata now identifies 17
+flags whose affected main-map readers can safely enter their flag-positive state.
+These cover 41 objects: the Japes first, shell/hive and painting-cave gates plus
+all four switch huts; Factory's testing-area gate and revealed arcade lever;
+Galleon's three weapon gates; two Aztec permanent doors; and three Fungi tunnel
 gates.
 
-For each row, the flag-positive state-0 initializer does only one operation: it
-selects a known completed state. Every immediate block in that state was limited
-to the vanilla local model, collision, interpolation and script-state operations
-`1`, `17`, `20`, `26`, and `38`. After the permanent flag write succeeds, the
+For each row, the pinned flag-positive state-0 initializer selects the reviewed
+state. Gate/hut model and collision changes use their vanilla state 20 path;
+the four already-open hut switches resume their normal local state 7 interaction
+checks. After the permanent flag write succeeds, the
 adapter resolves each pinned object ID through the loaded 600-slot instance-script
 table and calls vanilla `func_global_asm_8063DA40(slot, completed_state)`. It does
-not rerun state 0, the interaction that earned the flag, a reward, a cutscene, or
-an arbitrary function supplied by the peer.
+not rerun state 0, manufacture the interaction that earned the flag, grant a
+reward, start a cutscene, or call an arbitrary function supplied by the peer.
 
 Live success requires every reviewed object for that map and flag to resolve. A
 missing object, unreviewed flag, mixed side-effect script, actor spawn, global

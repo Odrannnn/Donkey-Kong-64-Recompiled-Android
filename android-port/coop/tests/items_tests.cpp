@@ -420,6 +420,21 @@ static void world_refresh_checks() {
     g.refresh_enabled = 1; coop_items_apply(&g, 1);
     CHECK(flags[0] && live_calls == 1 && g.refresh_pending && g.refresh_map == 7);
 
+    // The full Japes shell gate and each hut's switch plus door use the exact
+    // flag-positive initializer states audited from the pinned US scripts.
+    reset_engine(); current_map = 7;
+    D_global_asm_807F6240[1] = 0x34; D_global_asm_807F6240[2] = 0x35;
+    D_global_asm_807F6240[3] = 0x33;
+    CHECK(coop_live_world_refresh(0x007) && live_calls == 3 && live_state == 20);
+    live_calls = 0; D_global_asm_807F6240[1] = 0x38; D_global_asm_807F6240[2] = 0x41;
+    D_global_asm_807F6240[3] = -1;
+    CHECK(coop_live_world_refresh(0x00D) && live_calls == 2 && live_state == 7);
+
+    // Factory's revealed arcade lever uses its exact flag-positive state and
+    // no longer requires a map rebuild.
+    reset_engine(); current_map = 26; D_global_asm_807F6240[6] = 0x2D;
+    CHECK(coop_live_world_refresh(0x081) && live_calls == 1 && live_state == 20);
+
     // Reversible world state remains blocked by default, then starts the exact
     // loaded vanilla up/down switch sequence instead of rebuilding the map.
     reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = 1;
