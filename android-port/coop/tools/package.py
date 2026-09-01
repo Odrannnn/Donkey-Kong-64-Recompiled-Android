@@ -12,6 +12,7 @@ parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument("--nrm", type=Path, default=root / "dist" / "dk64_lan_coop.nrm")
 parser.add_argument("--android-library", type=Path, default=root / "build" / "android" / "dk64_coop_bridge.so")
 parser.add_argument("--windows-library", type=Path, default=root / "build" / "windows" / "dk64_coop_bridge.dll")
+parser.add_argument("--apk", type=Path, help="Verified compatible Android application APK to include in checksums")
 parser.add_argument("--dist", type=Path, default=root / "dist")
 args = parser.parse_args()
 dist = args.dist.resolve()
@@ -35,8 +36,8 @@ with zipfile.ZipFile(nrm) as archive:
     if any(name.endswith((".dll", ".so")) for name in archive.namelist()):
         raise ValueError("NRM must not embed companion libraries")
     options = {option["id"]: option for option in manifest["config_schema"]["options"]}
-    if (options["role"]["default"], options["combat"]["default"], options["shared_items"]["default"],
-            options["automatic_world_refresh"]["default"]) != ("Off", "Off", "Off", "Off"):
+    if (options["role"]["default"], options["combat"]["default"], options["same_area_events"]["default"],
+            options["shared_items"]["default"], options["automatic_world_refresh"]["default"]) != ("Off", "Off", "Off", "Off", "Off"):
         raise ValueError("NRM experimental options must default to Off")
     if options["shared_items"]["options"] != ["Off", "Unique collectibles"] or options["combat"]["options"] != ["Off", "Shots and enemy defeats", "Shots, defeats and enemy movement", "Shots, defeats, movement and enemy pose"]:
         raise ValueError("NRM option schema is malformed")
@@ -87,6 +88,12 @@ artifacts.append(source)
 with zipfile.ZipFile(source) as bundle:
     if any("coop/" + file.relative_to(root).as_posix() not in bundle.namelist() for file in source_files):
         raise ValueError("source archive is missing current build, native, or test sources")
-lines = [f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}" for path in artifacts + [nrm]]
+checksum_artifacts = artifacts + [nrm]
+if args.apk:
+    apk = args.apk.resolve()
+    if not apk.is_file() or apk.parent != dist:
+        raise ValueError("Verified APK must already be a file in the selected dist directory")
+    checksum_artifacts.append(apk)
+lines = [f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}" for path in checksum_artifacts]
 (dist / "SHA256SUMS.txt").write_text("\n".join(lines) + "\n")
 print("\n".join(lines))

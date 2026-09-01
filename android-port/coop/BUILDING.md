@@ -27,9 +27,13 @@ and installs the completed Android ZIP into a temporary build directory,
 verifying that the NRM and native companion arrive byte-for-byte unchanged.
 
 Results are written beneath `coop/build/build-v<manifest-version>/`, including
-individual command logs and `build-status.json`. It also writes the release archives and
-`SHA256SUMS.txt` to `coop/dist/`. The entry point does not install, launch,
-commit, push, or publish anything, and it does not perform gameplay testing.
+individual command logs and `build-status.json`. It also builds and verifies the
+compatible Android application, then writes its APK, the release archives, and
+`SHA256SUMS.txt` to `coop/dist/`. The APK and Android co-op ZIP remain separate
+because Android installs the application while the in-app mod importer installs
+the ZIP, but both are produced and checksummed by the same release run. The entry
+point does not install, launch, commit, push, or publish anything, and it does not
+perform gameplay testing.
 
 If an earlier run failed, its directory is retained for inspection and the
 default command refuses to overwrite it. After inspection, rerun with the

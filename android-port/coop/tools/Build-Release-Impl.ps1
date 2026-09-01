@@ -216,8 +216,27 @@ function Find-WorkingPython {
 }
 $python = Find-WorkingPython
 $toolVersions.python = (& $python --version | Select-Object -First 1)
+
+# Build the compatible Android application as part of this release run. The
+# app and mod stay as separate installable files, but are produced, checked and
+# checksummed together so the GitHub release cannot omit the required APK.
+$appGradle = Require-File (Join-Path $workspace 'android/app/build.gradle') 'Android app Gradle manifest'
+$appGradleText = Get-Content -LiteralPath $appGradle -Raw
+if ($appGradleText -notmatch 'versionName\s+[''"]([^''"]+)[''"]') { throw 'Android app has no versionName' }
+$appVersion = $Matches[1]
+if ($appVersion -notmatch '^[0-9A-Za-z][0-9A-Za-z._-]+$') { throw "Unsafe Android app version for artifact name: $appVersion" }
+$currentPowerShell = Require-File (Join-Path $PSHOME 'pwsh.exe') 'PowerShell host'
+$appBuildLog = Join-Path $logsRoot '07a-android-app-build.log'
+Invoke-Logged 'Compatible Android application build' $currentPowerShell @('-NoProfile', '-File', (Join-Path $workspace 'tools/Build-Android.ps1'), '-SdkPath', $sdkRoot, '-PythonPath', $python, '-Variant', 'Release') $appBuildLog $workspace
+$builtApk = Require-File (Join-Path $workspace 'android/app/build/outputs/apk/release/app-release.apk') 'Compatible Android release APK'
+$apkVerifyLog = Join-Path $logsRoot '07b-android-apk-check.log'
+Invoke-Logged 'Compatible Android APK checks' $python @((Join-Path $workspace 'tools/verify_apk.py'), $builtApk) $apkVerifyLog $workspace
+if ((Get-Content -LiteralPath $apkVerifyLog -Raw) -notmatch 'APK verified:') { throw 'Android APK verification produced no PASS marker' }
+$releaseApk = Join-Path $coopRoot "dist/DK64-Recompiled-Android-$appVersion.apk"
+Copy-Item -LiteralPath $builtApk -Destination $releaseApk -Force
+
 $packageLog = Join-Path $logsRoot '07-package.log'
-Invoke-Logged 'Release packaging' $python @((Join-Path $coopRoot 'tools/package.py'), '--nrm', $releaseNrm, '--android-library', $androidLibrary, '--windows-library', $windowsLibrary, '--dist', (Join-Path $coopRoot 'dist')) $packageLog $coopRoot
+Invoke-Logged 'Release packaging' $python @((Join-Path $coopRoot 'tools/package.py'), '--nrm', $releaseNrm, '--android-library', $androidLibrary, '--windows-library', $windowsLibrary, '--apk', $releaseApk, '--dist', (Join-Path $coopRoot 'dist')) $packageLog $coopRoot
 
 # Compile the app's real importer classes and install the finished Android ZIP
 # into a temporary host directory. This catches package-layout and transaction
@@ -244,18 +263,20 @@ $importRunLog = Join-Path $logsRoot '08b-android-importer-run.log'
 Invoke-Logged 'Android importer smoke test' $java @('-cp', "$importClasses;$jsonJar", 'io.github.dk64port.BundleImportSmoke', $androidBundle, $importScratch) $importRunLog $workspace
 if ((Get-Content -LiteralPath $importRunLog -Raw) -notmatch 'PASS: actual Android co-op ZIP imports') { throw 'Android importer smoke test produced no PASS marker' }
 
-$artifacts = @($releaseNrm, (Join-Path $mipsRoot 'mod.elf'), $androidLibrary, $windowsLibrary, (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-android-prototype.zip"), (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-windows-prototype.zip"), (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-source.zip"), (Join-Path $coopRoot 'dist/SHA256SUMS.txt'))
+$artifacts = @($releaseNrm, (Join-Path $mipsRoot 'mod.elf'), $androidLibrary, $windowsLibrary, $releaseApk, (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-android-prototype.zip"), (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-windows-prototype.zip"), (Join-Path $coopRoot "dist/DK64-LAN-Coop-$version-source.zip"), (Join-Path $coopRoot 'dist/SHA256SUMS.txt'))
 $hashes = [ordered]@{}
 foreach ($artifact in $artifacts) { $hashes[[IO.Path]::GetFileName($artifact)] = (Get-FileHash -Algorithm SHA256 -LiteralPath (Require-File $artifact 'Release artifact')).Hash.ToLowerInvariant() }
 $status = [ordered]@{
     version = $version
     protocol = $protocolVersion
     expected_export = $expectedTick
+    android_app_version = $appVersion
     generated_utc = [DateTime]::UtcNow.ToString('o')
     workspace = $workspace
     toolchains = $toolVersions
     validation = [ordered]@{ suite = 'Linux Debug ASan/UBSan native CTest'; result = "$expectedHostTests/$expectedHostTests passed"; log = '01-host-tests.log' }
     importer_validation = [ordered]@{ suite = 'Android ModStore bundle import smoke'; result = 'passed'; log = '08b-android-importer-run.log' }
+    apk_validation = [ordered]@{ suite = 'Compatible Android APK architecture/alignment/content checks'; result = 'passed'; log = '07b-android-apk-check.log' }
     commands = $commands
     artifacts_sha256 = $hashes
     not_performed = @('gameplay testing', 'device installation', 'game launch', 'commit', 'push', 'publish')
