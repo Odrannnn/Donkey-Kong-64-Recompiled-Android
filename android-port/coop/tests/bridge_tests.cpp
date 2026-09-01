@@ -9,7 +9,7 @@
 
 extern "C" void dk64_coop_start(uint8_t*, recomp_context*);
 extern "C" void dk64_coop_local_ipv4(uint8_t*, recomp_context*);
-extern "C" void dk64_coop_tick_v46(uint8_t*, recomp_context*);
+extern "C" void dk64_coop_tick_v47(uint8_t*, recomp_context*);
 extern "C" void dk64_coop_stop(uint8_t*, recomp_context*);
 #define CHECK(expr) do { if (!(expr)) { std::fprintf(stderr, "ABI FAIL %d: %s\n", __LINE__, #expr); return 1; } } while (0)
 int main() {
@@ -29,7 +29,7 @@ int main() {
         auto now = dkcoop::clock_ms(); host.tick(h, now);
         ctx.r4 = int64_t(int32_t(0x80000200u)); ctx.r5 = int64_t(int32_t(0x80000300u));
         ctx.r6 = int64_t(int32_t(0x80000400u)); ctx.r7 = int64_t(int32_t(0x80001000u));
-        dk64_coop_tick_v46(rdram.data(), &ctx);
+        dk64_coop_tick_v47(rdram.data(), &ctx);
         std::array<uint32_t, dkcoop::state_words> remote{};
         std::memcpy(remote.data(), rdram.data() + 768, dkcoop::state_words * 4);
         if (remote == dkcoop::state_to_words(h) && dkcoop::state_to_words(host.remote(now)) == local) { exchanged = true; break; }
@@ -45,13 +45,14 @@ int main() {
     hc.shots[0] = {123, COOP_GRAPE, std::bit_cast<unsigned>(12.5f), std::bit_cast<unsigned>(-8.0f),
         std::bit_cast<unsigned>(4.0f), 4095, std::bit_cast<unsigned>(0.75f)};
     std::memcpy(rdram.data() + 1024 + sizeof(dkcoop::ProgressInput), &gc, sizeof(gc));
-    rdram[4096 + sizeof(dkcoop::ProgressResult) + sizeof(CoopCombatResult) + sizeof(CoopItemResult) + sizeof(CoopWorldResult)] = 0xA5;
+    rdram[4096 + sizeof(dkcoop::ProgressResult) + sizeof(CoopCombatResult) + sizeof(CoopItemResult)
+        + sizeof(CoopWorldResult) + sizeof(CoopTransientResult)] = 0xA5;
     bool shot_exchanged = false;
     for (unsigned i = 0; i < 1000; ++i) {
         auto now = dkcoop::clock_ms(); host.tick(h, now, {}, hc);
         ctx.r4 = int64_t(int32_t(0x80000200u)); ctx.r5 = int64_t(int32_t(0x80000300u));
         ctx.r6 = int64_t(int32_t(0x80000400u)); ctx.r7 = int64_t(int32_t(0x80001000u));
-        dk64_coop_tick_v46(rdram.data(), &ctx);
+        dk64_coop_tick_v47(rdram.data(), &ctx);
         CoopCombatResult combat{};
         std::memcpy(&combat, rdram.data() + 4096 + sizeof(dkcoop::ProgressResult), sizeof(combat));
         if (combat.status == COOP_COMBAT_SHOTS && combat.hands == 7 && combat.shots[0].x == hc.shots[0].x
@@ -59,7 +60,8 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     CHECK(shot_exchanged);
-    CHECK(rdram[4096 + sizeof(dkcoop::ProgressResult) + sizeof(CoopCombatResult) + sizeof(CoopItemResult) + sizeof(CoopWorldResult)] == 0xA5);
+    CHECK(rdram[4096 + sizeof(dkcoop::ProgressResult) + sizeof(CoopCombatResult) + sizeof(CoopItemResult)
+        + sizeof(CoopWorldResult) + sizeof(CoopTransientResult)] == 0xA5);
     // Exercise all four ABI arguments with the actual progression structures.
     h.map = g.map = 7;
     local = dkcoop::state_to_words(g); std::memcpy(rdram.data() + 512, local.data(), dkcoop::state_words * 4);
@@ -72,7 +74,7 @@ int main() {
     bool moved = false;
     for (unsigned i = 0; i < 1000; ++i) {
         host.tick(h, dkcoop::clock_ms(), {}, hc);
-        dk64_coop_tick_v46(rdram.data(), &ctx);
+        dk64_coop_tick_v47(rdram.data(), &ctx);
         CoopCombatResult combat{};
         std::memcpy(&combat, rdram.data() + 4096 + sizeof(dkcoop::ProgressResult), sizeof(combat));
         if (combat.motion[0].life == 20 && combat.motion[0].kind == COOP_KREMLING
@@ -81,7 +83,8 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     CHECK(moved);
-    CHECK(rdram[4096 + sizeof(dkcoop::ProgressResult) + sizeof(CoopCombatResult) + sizeof(CoopItemResult) + sizeof(CoopWorldResult)] == 0xA5);
+    CHECK(rdram[4096 + sizeof(dkcoop::ProgressResult) + sizeof(CoopCombatResult) + sizeof(CoopItemResult)
+        + sizeof(CoopWorldResult) + sizeof(CoopTransientResult)] == 0xA5);
     // The former four-word combat tail now carries a reciprocally bound boss
     // phase without changing packet size or accepting overlay pointers.
     h.map = g.map = 8;
@@ -92,7 +95,7 @@ int main() {
     bool boss_exchanged = false;
     for (unsigned i = 0; i < 1000; ++i) {
         host.tick(h, dkcoop::clock_ms(), {}, hc);
-        dk64_coop_tick_v46(rdram.data(), &ctx);
+        dk64_coop_tick_v47(rdram.data(), &ctx);
         CoopCombatResult combat{};
         std::memcpy(&combat, rdram.data() + 4096 + sizeof(dkcoop::ProgressResult), sizeof(combat));
         if (combat.status == COOP_COMBAT_READY && combat.boss.kind == COOP_BOSS_ARMY_DILLO
@@ -102,7 +105,7 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     CHECK(boss_exchanged && rdram[4096 + sizeof(dkcoop::ProgressResult) + sizeof(CoopCombatResult)
-        + sizeof(CoopItemResult) + sizeof(CoopWorldResult)] == 0xA5);
+        + sizeof(CoopItemResult) + sizeof(CoopWorldResult) + sizeof(CoopTransientResult)] == 0xA5);
     h.map = g.map = 83;
     local = dkcoop::state_to_words(g); std::memcpy(rdram.data() + 512, local.data(), dkcoop::state_words * 4);
     hc = {}; hc.enabled = 1; hc.file = 1; hc.pages = 1; hc.boss = {COOP_BOSS_DOGADON, 900, 0, 4};
@@ -111,7 +114,7 @@ int main() {
     boss_exchanged = false;
     for (unsigned i = 0; i < 1000; ++i) {
         host.tick(h, dkcoop::clock_ms(), {}, hc);
-        dk64_coop_tick_v46(rdram.data(), &ctx);
+        dk64_coop_tick_v47(rdram.data(), &ctx);
         CoopCombatResult combat{};
         std::memcpy(&combat, rdram.data() + 4096 + sizeof(dkcoop::ProgressResult), sizeof(combat));
         if (combat.status == COOP_COMBAT_READY && combat.boss.kind == COOP_BOSS_DOGADON
@@ -121,7 +124,7 @@ int main() {
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     CHECK(boss_exchanged && rdram[4096 + sizeof(dkcoop::ProgressResult) + sizeof(CoopCombatResult)
-        + sizeof(CoopItemResult) + sizeof(CoopWorldResult)] == 0xA5);
+        + sizeof(CoopItemResult) + sizeof(CoopWorldResult) + sizeof(CoopTransientResult)] == 0xA5);
     h.map = g.map = 7;
     local = dkcoop::state_to_words(g); std::memcpy(rdram.data() + 512, local.data(), dkcoop::state_words * 4);
     // v45 retires the standalone Japes gate. Nonzero data in its reserved
@@ -130,7 +133,7 @@ int main() {
     std::memcpy(rdram.data() + 1024, &progress, sizeof(progress));
     ctx.r4 = int64_t(int32_t(0x80000200u)); ctx.r5 = int64_t(int32_t(0x80000300u));
     ctx.r6 = int64_t(int32_t(0x80000400u)); ctx.r7 = int64_t(int32_t(0x80001000u));
-    dk64_coop_tick_v46(rdram.data(), &ctx);
+    dk64_coop_tick_v47(rdram.data(), &ctx);
     dkcoop::ProgressResult retired{}; std::memcpy(&retired, rdram.data() + 4096, sizeof(retired));
     const dkcoop::ProgressResult zero_progress{};
     CHECK(std::memcmp(&retired, &zero_progress, sizeof(retired)) == 0);
@@ -144,7 +147,7 @@ int main() {
     for (unsigned i = 0; i < 1000; ++i) {
         auto now = dkcoop::clock_ms(); host.tick(h, now, {1, 2, 1, 1}, hc, host_items);
         std::memcpy(rdram.data() + item_in, &guest_items.input, sizeof(CoopItemInput));
-        dk64_coop_tick_v46(rdram.data(), &ctx);
+        dk64_coop_tick_v47(rdram.data(), &ctx);
         CoopItemResult result{}; std::memcpy(&result, rdram.data() + item_out, sizeof(result));
         coop_items_receive(&guest_items, result);
         for (unsigned j = 0; j < COOP_ITEM_WORDS; ++j) guest_items.input.owned[j] |= result.apply[j];
@@ -163,31 +166,32 @@ int main() {
         auto now = dkcoop::clock_ms(); host.tick(h, now, {1, 2, 1, 1}, hc, host_items);
         auto hr = host.items(now); for (unsigned j = 0; j < COOP_ITEM_WORDS; ++j) host_items.owned[j] |= hr.apply[j];
         std::memcpy(rdram.data() + item_in, &guest_items.input, sizeof(CoopItemInput));
-        dk64_coop_tick_v46(rdram.data(), &ctx);
+        dk64_coop_tick_v47(rdram.data(), &ctx);
         CoopItemResult result{}; std::memcpy(&result, rdram.data() + item_out, sizeof(result));
         coop_items_receive(&guest_items, result);
         if (host_items.owned[2] == 0x1C000u && !guest_items.input.request[2]) { items_exchanged = true; break; }
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
-    CHECK(items_exchanged && rdram[item_out + sizeof(CoopItemResult) + sizeof(CoopWorldResult)] == 0xA5);
+    CHECK(items_exchanged && rdram[item_out + sizeof(CoopItemResult) + sizeof(CoopWorldResult)
+        + sizeof(CoopTransientResult)] == 0xA5);
     for (uint32_t bad : {0u, 0x7fffffffu, 0x80000201u, 0x9ffffffcu, 0xffffffffu}) {
-        ctx.r4 = bad; ctx.r5 = 0x80000300u; dk64_coop_tick_v46(rdram.data(), &ctx);
+        ctx.r4 = bad; ctx.r5 = 0x80000300u; dk64_coop_tick_v47(rdram.data(), &ctx);
         CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
     }
     for (uint32_t bad : {0u, 0x80000401u, 0x9ffffc78u, 0x9ffffd00u, 0x9ffffe00u, 0x9ffffffcu, 0xffffffffu}) {
         ctx.r4 = 0x80000200u; ctx.r5 = 0x80000300u; ctx.r6 = bad; ctx.r7 = 0x80001000u;
-        dk64_coop_tick_v46(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
+        dk64_coop_tick_v47(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
         ctx.r6 = 0x80000400u; ctx.r7 = bad;
-        dk64_coop_tick_v46(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
+        dk64_coop_tick_v47(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
     }
-    ctx.r6 = 0x80000400u; ctx.r7 = 0x9ffffb00u; // 1280 bytes remain: full v46 result cannot fit.
-    dk64_coop_tick_v46(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
-    ctx.r7 = 0x9ffffa48u; // 1464 bytes remain: older results fit, full v46 must fail.
-    dk64_coop_tick_v46(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
-    ctx.r6 = 0xA0000000u - 2636u; ctx.r7 = 0x80001000u; // Four bytes short of v46 input.
-    dk64_coop_tick_v46(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
-    ctx.r6 = 0x80000400u; ctx.r7 = 0xA0000000u - 3320u; // Four bytes short of v46 result.
-    dk64_coop_tick_v46(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
+    ctx.r6 = 0x80000400u; ctx.r7 = 0x9ffffb00u; // 1280 bytes remain: full v47 result cannot fit.
+    dk64_coop_tick_v47(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
+    ctx.r7 = 0x9ffffa48u; // 1464 bytes remain: older results fit, full v47 must fail.
+    dk64_coop_tick_v47(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
+    ctx.r6 = 0xA0000000u - 2788u; ctx.r7 = 0x80001000u; // Four bytes short of v47 input.
+    dk64_coop_tick_v47(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
+    ctx.r6 = 0x80000400u; ctx.r7 = 0xA0000000u - 3464u; // Four bytes short of v47 result.
+    dk64_coop_tick_v47(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
     ctx.r4 = 2; ctx.r5 = 0; ctx.r6 = 6464; ctx.r7 = 123456;
     dk64_coop_start(rdram.data(), &ctx); CHECK(ctx.r2 == uint32_t(dkcoop::Status::error));
     dk64_coop_stop(rdram.data(), &ctx); CHECK(ctx.r2 == 0);
@@ -197,5 +201,5 @@ int main() {
     const uint32_t local_ipv4 = uint32_t(ctx.r2);
     CHECK(!local_ipv4 || (local_ipv4 >> 24) != 127);
     dk64_coop_stop(rdram.data(), &ctx); CHECK(ctx.r2 == 0);
-    std::puts("PASS: v46 native ABI, host IPv4 reporting, retired gate isolation, coordinated transitions, Army Dillo/Dogadon phases, sign-extended pointers, pose/shot/enemy movement, item grants/requests and invalid address guards");
+    std::puts("PASS: v47 native ABI, host IPv4 reporting, transient span isolation, coordinated transitions, Army Dillo/Dogadon phases, sign-extended pointers, pose/shot/enemy movement, item grants/requests and invalid address guards");
 }

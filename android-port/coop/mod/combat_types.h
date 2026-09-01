@@ -9,7 +9,7 @@
 #define COOP_COMBAT_FRAME_WORDS (12 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + 4)
 // Compact network form: identity + life pair + position + packed yaw/health.
 // Page metadata is packed into the first wire word, so the four-word boss record,
-// all following offsets and the 1200-byte packet remain unchanged.
+// all following established core offsets remain unchanged.
 #define COOP_COMBAT_WIRE_WORDS 204
 #define COOP_COMBAT_RESULT_WORDS (10 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + COOP_ENEMIES * 9 + 4)
 enum { COOP_ENEMY_ABSENT, COOP_ENEMY_ALIVE, COOP_ENEMY_DEFEATED, COOP_ENEMY_REQUEST };

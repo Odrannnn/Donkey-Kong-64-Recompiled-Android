@@ -15,7 +15,7 @@ public:
     Session(const Session&) = delete;
     Session& operator=(const Session&) = delete;
     bool start(const Config& config, uint64_t now_ms);
-    void tick(const State& local, uint64_t now_ms, const ProgressInput& progress = {}, const CoopCombatFrame& combat = {}, const CoopItemInput& items = {}, const CoopWorldInput& world = {});
+    void tick(const State& local, uint64_t now_ms, const ProgressInput& progress = {}, const CoopCombatFrame& combat = {}, const CoopItemInput& items = {}, const CoopWorldInput& world = {}, const CoopTransientInput& transient = {});
     void stop();
     Status status() const;
     State remote(uint64_t now_ms) const;
@@ -23,6 +23,7 @@ public:
     CoopCombatResult combat(uint64_t now_ms) const;
     CoopItemResult items(uint64_t now_ms) const;
     CoopWorldResult world(uint64_t now_ms) const;
+    CoopTransientResult transient(uint64_t now_ms) const;
     uint16_t bound_port() const;
     uint32_t local_ipv4() const;
     const std::string& error() const;

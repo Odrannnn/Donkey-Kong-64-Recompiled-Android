@@ -61,6 +61,9 @@ Bytes encode(const Packet& p) {
         put32(b.data() + world_offset + 4 * i, world[i + world_prefix_words]);
     put32(b.data() + transition_offset, words[10]);
     put32(b.data() + transition_offset + 4, words[11]);
+    auto transient = transient_words(p.transient);
+    for (size_t i = 0; i < transient.size(); ++i)
+        put32(b.data() + transient_offset + 4 * i, transient[i]);
     return b;
 }
 bool decode(const uint8_t* b, size_t size, Packet& output) {
@@ -76,6 +79,10 @@ bool decode(const uint8_t* b, size_t size, Packet& output) {
     words[10] = get32(b + transition_offset);
     words[11] = get32(b + transition_offset + 4);
     p.player = state_from_words(words);
+    std::array<uint32_t, COOP_TRANSIENT_WIRE_WORDS> transient{};
+    for (size_t i = 0; i < transient.size(); ++i)
+        transient[i] = get32(b + transient_offset + 4 * i);
+    p.transient = transient_from_words(transient);
     std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat{};
     for (size_t i = 0; i < combat.size(); ++i) combat[i] = get32(b + 104 + 4 * i);
     p.combat = combat_from_words(combat);
@@ -97,6 +104,7 @@ bool decode(const uint8_t* b, size_t size, Packet& output) {
             if (get32(b + world_offset + 4 * i)) return false;
     }
     if (!valid_world(p.world) || (p.kind != Kind::state && p.world.feature)) return false;
+    if (!valid_transient(p.transient) || (p.kind != Kind::state && p.transient.feature)) return false;
     if (p.world.feature && (!p.items.feature || p.world.file != p.items.file
             || (p.world.ready && !p.items.ready))) return false;
     if (!valid_items(p.items) || (p.kind != Kind::state && p.items.feature)) return false;

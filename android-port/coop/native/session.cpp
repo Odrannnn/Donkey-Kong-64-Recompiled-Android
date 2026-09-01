@@ -135,6 +135,9 @@ struct Session::Impl {
     CoopWorldInput local_world{};
     WorldWire remote_world{};
     WorldSync world_sync;
+    CoopTransientInput local_transient{};
+    TransientWire remote_transient{};
+    TransientSync transient_sync;
     CoopCombatFrame remote_combat{};
     CombatSync combat_sync;
     Statistics stats{};
@@ -165,6 +168,7 @@ struct Session::Impl {
         if (packet.items.ready) {
             packet.items.page = (item_page_turn++ / 2) % COOP_ITEM_PAGES;
         }
+        if (kind == Kind::state) packet.transient = transient_sync.wire();
         auto bytes = encode(packet);
         int result = int(sendto(socket, reinterpret_cast<const char*>(bytes.data()), int(bytes.size()), 0,
             reinterpret_cast<const sockaddr*>(&target), sizeof(target)));
@@ -174,6 +178,7 @@ struct Session::Impl {
     void clear_peer(uint64_t now) {
         has_peer = false; session = 0; received_sequence = false; remote = {}; remote_progress = {};
         remote_items = {}; remote_world = {}; world_sync.reset();
+        local_transient = {}; remote_transient = {}; transient_sync.reset();
         for (auto& time : item_page_time) time = 0;
         animation.reset();
         remote_combat = {}; combat_sync.reset();
@@ -240,10 +245,10 @@ void Session::stop() {
     s.remote_items = {}; s.remote_world = {}; s.world_sync.reset(); for (auto& time : s.item_page_time) time = 0; s.local_items = {};
     s.animation.reset();
     s.remote_combat = {}; s.combat_sync.reset();
-    s.local_world = {};
+    s.local_world = {}; s.local_transient = {}; s.remote_transient = {}; s.transient_sync.reset();
     s.status = Status::off; s.bound_port = 0; s.local_ipv4 = 0;
 }
-void Session::tick(const State& local, uint64_t now, const ProgressInput& progress, const CoopCombatFrame& combat, const CoopItemInput& items, const CoopWorldInput& world) {
+void Session::tick(const State& local, uint64_t now, const ProgressInput& progress, const CoopCombatFrame& combat, const CoopItemInput& items, const CoopWorldInput& world, const CoopTransientInput& transient) {
     auto& s = *impl;
     if (s.socket == invalid_socket) return;
     State outgoing = valid_state(local) ? local : State{};
@@ -251,6 +256,7 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
     s.local_items = valid_items_input(items) ? items : CoopItemInput{};
     s.local_world = valid_world_input(world) && s.local_items.enabled
         && world.file == s.local_items.file && (!world.ready || s.local_items.ready) ? world : CoopWorldInput{};
+    s.local_transient = valid_transient_input(transient) ? transient : CoopTransientInput{};
     if (outgoing.map != japes_map) s.local_progress.ready = 0;
     if (s.has_peer && now - s.last_receive > timeout_ms) s.clear_peer(now);
     if (now - s.last_state > stale_ms) s.remote_progress = {};
@@ -272,6 +278,7 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
                 s.peer = from; s.has_peer = true; s.session = random_id(); s.nonce = packet.nonce;
                 s.last_receive = now; s.received_sequence = false; s.remote = {};
                 s.remote_items = {}; s.remote_world = {}; s.world_sync.reset(); for (auto& time : s.item_page_time) time = 0;
+                s.remote_transient = {}; s.transient_sync.reset();
                 s.animation.reset();
                 s.remote_combat = {}; s.combat_sync.reset();
             }
@@ -313,6 +320,7 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
         }
         s.remote_combat = packet.combat;
         s.remote_world = packet.world;
+        s.remote_transient = packet.transient;
         s.animation.receive(s.remote, now);
         if (s.remote.map != japes_map) s.remote_progress = {};
         s.status = Status::connected;
@@ -325,6 +333,9 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
     s.world_sync.update(s.config.role == Role::host, s.local_world, s.remote_world,
         s.status == Status::connected, now - s.last_state <= stale_ms,
         item_status == 2 || item_status == 3, s.session);
+    s.transient_sync.update(s.config.role == Role::host, outgoing, s.local_transient,
+        s.remote, s.remote_transient, s.status == Status::connected,
+        now - s.last_state <= stale_ms, s.session);
     if (s.config.role == Role::join && !s.has_peer && now - s.last_hello >= retry_ms) {
         s.send(Kind::hello, s.destination); s.last_hello = now;
     }
@@ -354,6 +365,10 @@ CoopWorldResult Session::world(uint64_t now) const {
     auto result = impl->world_sync.result();
     if (now - impl->last_state > stale_ms) { result.apply = 0; if (result.status) result.status = 1; }
     return result;
+}
+CoopTransientResult Session::transient(uint64_t now) const {
+    if (impl->status != Status::connected || now - impl->last_state > stale_ms) return {};
+    return impl->transient_sync.result();
 }
 CoopCombatResult Session::combat(uint64_t now) const {
     if (impl->status != Status::connected || now - impl->last_state > stale_ms) return {};

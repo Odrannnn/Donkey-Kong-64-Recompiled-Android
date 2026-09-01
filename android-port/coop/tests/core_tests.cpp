@@ -25,8 +25,8 @@ static void protocol_tests() {
     Packet p{Kind::state, 0x12345678, 0x0102030405060708ULL, 0x1122334455667788ULL, 123456,
         {34, 3, 4, active, 1.0f, -2.5f, 0.0f, 4095, 5, 3.5f, 11, 0x000007A9u}};
     auto bytes = encode(p); Packet decoded;
-    CHECK(bytes.size() == 1200);
-    const std::array<uint8_t, 40> header{0x44,0x4b,0x43,0x50,0,46,0,3,0,1,1,0x2E,0x12,0x34,0x56,0x78,
+    CHECK(bytes.size() == packet_size);
+    const std::array<uint8_t, 40> header{0x44,0x4b,0x43,0x50,0,47,0,3,0,1,1,0x2F,0x12,0x34,0x56,0x78,
         1,2,3,4,5,6,7,8,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0,1,0xe2,0x40,0,0,0,0};
     for (size_t i = 0; i < header.size(); ++i) CHECK(bytes[i] == header[i]);
     CHECK(bytes[56] == 0x3f && bytes[57] == 0x80 && bytes[60] == 0xc0 && bytes[61] == 0x20);

@@ -79,7 +79,7 @@ static void protocol_checks() {
     p.items = {1, 2, 1, 2, {0x80000001, 0x12345678, 0x8000, 0x80000000, 0x12345678}, {1, 0, 0x8000, 0, 0x10000000}};
     p.world = {1, 2, 2, 1, 5, 5, {1, 2, 3}};
     Packet out{}; auto b = encode(p);
-    CHECK(b.size() == 1200 && decode(b.data(), b.size(), out));
+    CHECK(b.size() == packet_size && decode(b.data(), b.size(), out));
     CHECK(item_words(out.items) == item_words(p.items));
     CHECK(world_words(out.world) == world_words(p.world));
     CHECK(b[96] == 0x57 && b[97] == 0x4F && b[98] == 0x52 && b[99] == 0x4C);

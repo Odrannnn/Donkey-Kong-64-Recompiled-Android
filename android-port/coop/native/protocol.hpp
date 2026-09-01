@@ -6,22 +6,24 @@
 #include "combat.hpp"
 #include "items.hpp"
 #include "world.hpp"
+#include "transient.hpp"
 
 namespace dkcoop {
-constexpr uint16_t protocol_version = 46;
-constexpr uint32_t compatibility = 0x0001012E; // DK64 US 1.0.1 / complete vanilla collectible contract 46.
+constexpr uint16_t protocol_version = 47;
+constexpr uint32_t compatibility = 0x0001012F; // DK64 US 1.0.1 / same-area transient contract 47.
 constexpr size_t item_offset = 104 + COOP_COMBAT_WIRE_WORDS * 4;
 constexpr size_t world_offset = item_offset + COOP_ITEM_WIRE_WORDS * 4;
 // Four new world words reuse the retired Japes-gate wire prefix at bytes
 // 80..95. The remaining fifteen stay at the established world offset, so all
-// combat/item offsets and the 1200-byte datagram remain unchanged.
+// combat/item offsets and the established 1200-byte core remain unchanged.
 constexpr size_t world_prefix_offset = 80, world_prefix_words = 4;
 constexpr uint32_t world_prefix_marker = 0x574F524Cu; // "WORL" in retired gate value.
 constexpr size_t world_suffix_words = COOP_WORLD_WIRE_WORDS - world_prefix_words;
 constexpr size_t transition_offset = world_offset + world_suffix_words * 4;
-constexpr size_t packet_size = transition_offset + 8;
+constexpr size_t transient_offset = transition_offset + 8;
+constexpr size_t packet_size = transient_offset + COOP_TRANSIENT_WIRE_WORDS * 4;
 static_assert(COOP_WORLD_WIRE_WORDS == 19 && world_suffix_words == 15
-    && transition_offset == 1192 && packet_size == 1200);
+    && transition_offset == 1192 && transient_offset == 1200 && packet_size == 1352);
 constexpr size_t state_words = 12;
 enum class Kind : uint16_t { hello = 1, welcome = 2, state = 3, bye = 4, busy = 5 };
 enum : uint32_t { active = 1, cutscene = 2 };
@@ -44,6 +46,7 @@ struct Packet {
     CoopCombatFrame combat{};
     ItemWire items{};
     WorldWire world{};
+    TransientWire transient{};
 };
 using Bytes = std::array<uint8_t, packet_size>;
 bool valid_state(const State& state);
