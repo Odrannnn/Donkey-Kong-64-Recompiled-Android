@@ -6,8 +6,10 @@ typedef struct {
     CoopWorldResult result;
     unsigned baseline, previous;
 } CoopWorld;
-static const unsigned short coop_world_flags[COOP_WORLD_TOGGLES] = {0xA0, 0xCE};
-static const unsigned char coop_world_levels[COOP_WORLD_TOGGLES] = {3, 4};
+static const unsigned short coop_world_flags[COOP_WORLD_TOGGLES] = {0xA0, 0xCE, 0x19D};
+// The lobby switch is sampled as reversible authority, but applies only after
+// leaving its loaded lobby, so it has no excluded main-world level.
+static const unsigned char coop_world_levels[COOP_WORLD_TOGGLES] = {3, 4, 255};
 static inline void coop_world_capture(CoopWorld* w, const CoopItems* g) {
     w->input.enabled = g->input.enabled && !g->counter_error;
     w->input.file = g->input.file;

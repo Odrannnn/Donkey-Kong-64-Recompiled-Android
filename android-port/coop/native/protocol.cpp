@@ -41,13 +41,24 @@ Bytes encode(const Packet& p) {
     for (size_t i = 0; i < 10; i++) put32(b.data() + 40 + 4 * i, words[i]);
     const auto& g = p.progress;
     std::array<uint32_t, 6> progress{g.feature, g.file, g.ready, g.scope, g.value, g.ack};
-    for (size_t i = 0; i < progress.size(); i++) put32(b.data() + 80 + 4 * i, progress[i]);
     auto combat = combat_words(p.combat);
     for (size_t i = 0; i < combat.size(); ++i) put32(b.data() + 104 + 4 * i, combat[i]);
     auto items = item_words(p.items);
     for (size_t i = 0; i < items.size(); ++i) put32(b.data() + item_offset + 4 * i, items[i]);
     auto world = world_words(p.world);
-    for (size_t i = 0; i < world.size(); ++i) put32(b.data() + world_offset + 4 * i, world[i]);
+    if (p.world.feature) {
+        for (size_t i = 0; i < world_prefix_words; ++i)
+            put32(b.data() + world_prefix_offset + 4 * i, world[i]);
+        put32(b.data() + 96, world_prefix_marker);
+        // Any retired-progress content alongside world state is noncanonical.
+        uint32_t progress_nonzero = 0;
+        for (uint32_t value : progress) progress_nonzero |= value;
+        put32(b.data() + 100, progress_nonzero ? 1 : 0);
+    } else {
+        for (size_t i = 0; i < progress.size(); i++) put32(b.data() + 80 + 4 * i, progress[i]);
+    }
+    for (size_t i = 0; i < world_suffix_words; ++i)
+        put32(b.data() + world_offset + 4 * i, world[i + world_prefix_words]);
     put32(b.data() + transition_offset, words[10]);
     put32(b.data() + transition_offset + 4, words[11]);
     return b;
@@ -65,7 +76,6 @@ bool decode(const uint8_t* b, size_t size, Packet& output) {
     words[10] = get32(b + transition_offset);
     words[11] = get32(b + transition_offset + 4);
     p.player = state_from_words(words);
-    p.progress = {get32(b + 80), get32(b + 84), get32(b + 88), get32(b + 92), get32(b + 96), get32(b + 100)};
     std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat{};
     for (size_t i = 0; i < combat.size(); ++i) combat[i] = get32(b + 104 + 4 * i);
     p.combat = combat_from_words(combat);
@@ -73,8 +83,19 @@ bool decode(const uint8_t* b, size_t size, Packet& output) {
     for (size_t i = 0; i < items.size(); ++i) items[i] = get32(b + item_offset + 4 * i);
     p.items = items_from_words(items);
     std::array<uint32_t, COOP_WORLD_WIRE_WORDS> world{};
-    for (size_t i = 0; i < world.size(); ++i) world[i] = get32(b + world_offset + 4 * i);
-    p.world = world_from_words(world);
+    if (get32(b + 96) == world_prefix_marker) {
+        if (get32(b + 100)) return false;
+        for (size_t i = 0; i < world_prefix_words; ++i)
+            world[i] = get32(b + world_prefix_offset + 4 * i);
+        for (size_t i = 0; i < world_suffix_words; ++i)
+            world[i + world_prefix_words] = get32(b + world_offset + 4 * i);
+        p.world = world_from_words(world);
+    } else {
+        p.progress = {get32(b + 80), get32(b + 84), get32(b + 88), get32(b + 92), get32(b + 96), get32(b + 100)};
+        // The world suffix is reserved zero when the retired progress frame is used.
+        for (size_t i = 0; i < world_suffix_words; ++i)
+            if (get32(b + world_offset + 4 * i)) return false;
+    }
     if (!valid_world(p.world) || (p.kind != Kind::state && p.world.feature)) return false;
     if (p.world.feature && (!p.items.feature || p.world.file != p.items.file
             || (p.world.ready && !p.items.ready))) return false;

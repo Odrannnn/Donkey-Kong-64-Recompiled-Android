@@ -8,13 +8,20 @@
 #include "world.hpp"
 
 namespace dkcoop {
-constexpr uint16_t protocol_version = 44;
-constexpr uint32_t compatibility = 0x0001012C; // DK64 US 1.0.1 / boss motion contract 44.
+constexpr uint16_t protocol_version = 45;
+constexpr uint32_t compatibility = 0x0001012D; // DK64 US 1.0.1 / three-state world contract 45.
 constexpr size_t item_offset = 104 + COOP_COMBAT_WIRE_WORDS * 4;
 constexpr size_t world_offset = item_offset + COOP_ITEM_WIRE_WORDS * 4;
-constexpr size_t transition_offset = world_offset + COOP_WORLD_WIRE_WORDS * 4;
+// Four new world words reuse the retired Japes-gate wire prefix at bytes
+// 80..95. The remaining fifteen stay at the established world offset, so all
+// combat/item offsets and the 1200-byte datagram remain unchanged.
+constexpr size_t world_prefix_offset = 80, world_prefix_words = 4;
+constexpr uint32_t world_prefix_marker = 0x574F524Cu; // "WORL" in retired gate value.
+constexpr size_t world_suffix_words = COOP_WORLD_WIRE_WORDS - world_prefix_words;
+constexpr size_t transition_offset = world_offset + world_suffix_words * 4;
 constexpr size_t packet_size = transition_offset + 8;
-static_assert(transition_offset == 1192 && packet_size == 1200);
+static_assert(COOP_WORLD_WIRE_WORDS == 19 && world_suffix_words == 15
+    && transition_offset == 1192 && packet_size == 1200);
 constexpr size_t state_words = 12;
 enum class Kind : uint16_t { hello = 1, welcome = 2, state = 3, bye = 4, busy = 5 };
 enum : uint32_t { active = 1, cutscene = 2 };

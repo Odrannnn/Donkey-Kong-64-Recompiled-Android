@@ -1,4 +1,4 @@
-> Current source: 0.44.0, protocol/native ABI v44. All eight native suites pass
+> Current source: 0.45.0, protocol/native ABI v45. All eight native suites pass
 > in the pinned Linux GNU C++ 15.2.0 Debug ASan/UBSan build. MIPS NRM, Android
 > ARM64, Windows x64, format/export and packaging checks also pass. Gameplay
 > validation remains pending.
@@ -1515,3 +1515,23 @@ the combined bridge spans to 2636 and 3324 bytes. The compact combat section and
 all subsequent offsets remain unchanged, so packets stay 1200 bytes. Protocol 44,
 compatibility `0x0001012C`, export `dk64_coop_tick_v44`, and manifest 0.44.0 reject
 older peers and native companions.
+
+## Third reversible world state (0.45.0)
+
+The host-authoritative reversible channel now includes the Caves-lobby pressure
+switch flag `0x19D` alongside Galleon water and Fungi day/night. It has its own
+monotonic revision, guest request, host acknowledgement and readback bit. A local
+change is observed only from a complete safe inventory frame. Incoming state is
+written and saved outside the loaded lobby; the next lobby entry lets its twelve
+pinned vanilla readers initialize the switch and linked doors normally. No remote
+pressure interaction, animation, player position or temporary script state is
+invented.
+
+Three independent revision/request/base/ack lanes require nineteen world words.
+Four new words reuse bytes 80..95 of the retired standalone Japes-gate wire area,
+with a fixed marker in its old value word; the remaining fifteen world words keep
+their established offset. Progress and world encodings are mutually exclusive,
+the final retired word remains canonical zero, combat/item offsets do not move,
+and the UDP packet stays 1200 bytes. The game/native input span grows to 2640
+bytes while the result remains 3324 bytes. Protocol 45, compatibility
+`0x0001012D`, export `dk64_coop_tick_v45`, and manifest 0.45.0 reject older sets.

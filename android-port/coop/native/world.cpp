@@ -2,15 +2,18 @@
 #include "protocol.hpp"
 
 namespace dkcoop {
-static_assert(sizeof(CoopWorldInput) == 36 && sizeof(CoopWorldResult) == 28);
+static_assert(sizeof(CoopWorldInput) == 40 && sizeof(CoopWorldResult) == 28);
 std::array<uint32_t, COOP_WORLD_WIRE_WORDS> world_words(const WorldWire& w) {
     return {w.feature, w.file, w.scope, w.ready, w.values, w.desired,
-        w.revision[0], w.revision[1], w.request[0], w.request[1],
-        w.base[0], w.base[1], w.request_values, w.ack[0], w.ack[1]};
+        w.revision[0], w.revision[1], w.revision[2],
+        w.request[0], w.request[1], w.request[2],
+        w.base[0], w.base[1], w.base[2], w.request_values,
+        w.ack[0], w.ack[1], w.ack[2]};
 }
 WorldWire world_from_words(const std::array<uint32_t, COOP_WORLD_WIRE_WORDS>& w) {
-    return {w[0], w[1], w[2], w[3], w[4], w[5], {w[6], w[7]}, {w[8], w[9]},
-        {w[10], w[11]}, w[12], {w[13], w[14]}};
+    return {w[0], w[1], w[2], w[3], w[4], w[5], {w[6], w[7], w[8]},
+        {w[9], w[10], w[11]}, {w[12], w[13], w[14]}, w[15],
+        {w[16], w[17], w[18]}};
 }
 bool valid_world(const WorldWire& w) {
     if (!w.feature) {
@@ -19,11 +22,14 @@ bool valid_world(const WorldWire& w) {
     }
     if (w.feature != 1 || w.file > 3 || w.scope > 3 || w.ready > 1
             || ((w.values | w.desired | w.request_values) & ~COOP_WORLD_MASK)) return false;
-    if ((!w.file && (w.scope || w.values)) || (!!w.revision[0] != !!w.revision[1])) return false;
+    if ((!w.file && (w.scope || w.values)) || (!!w.revision[0] != !!w.revision[1])
+            || (!!w.revision[0] != !!w.revision[2])) return false;
     if (w.ready && (!w.file || !w.scope || !w.revision[0])) return false;
     if (w.revision[0] && (!w.file || !w.scope)) return false;
-    if (!w.revision[0] && (w.desired || w.request_values || w.request[0] || w.request[1]
-            || w.base[0] || w.base[1] || w.ack[0] || w.ack[1])) return false;
+    if (!w.revision[0] && (w.desired || w.request_values
+            || w.request[0] || w.request[1] || w.request[2]
+            || w.base[0] || w.base[1] || w.base[2]
+            || w.ack[0] || w.ack[1] || w.ack[2])) return false;
     for (unsigned i = 0; i < COOP_WORLD_TOGGLES; ++i) {
         if (!!w.request[i] != !!w.base[i]) return false;
         if (!w.request[i] && (w.request_values & (1u << i))) return false;
@@ -67,9 +73,10 @@ void WorldSync::update(bool host, const CoopWorldInput& l, const WorldWire& r,
     output.session_lo = uint32_t(session); output.scope = scope;
     const bool bound = l.session_hi == output.session_hi && l.session_lo == output.session_lo && l.scope == scope;
     // Guest revisions are only echoes; only the host can publish authority.
-    const bool peer_bound = r.scope == scope && r.revision[0] && r.revision[1];
-    const bool peer_role_valid = host ? (!r.ack[0] && !r.ack[1])
-        : (!r.request[0] && !r.request[1] && !r.base[0] && !r.base[1] && !r.request_values);
+    const bool peer_bound = r.scope == scope && r.revision[0] && r.revision[1] && r.revision[2];
+    const bool peer_role_valid = host ? (!r.ack[0] && !r.ack[1] && !r.ack[2])
+        : (!r.request[0] && !r.request[1] && !r.request[2]
+            && !r.base[0] && !r.base[1] && !r.base[2] && !r.request_values);
     outgoing.ready = 0;
     if (!bound || !fresh || !permitted || !peer_role_valid) return;
     if (!initialized) {

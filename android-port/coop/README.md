@@ -1,7 +1,7 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
-Version **0.44.0** keeps item pages synchronized while players occupy different
+Version **0.45.0** keeps item pages synchronized while players occupy different
 areas by publishing each device's last verified safe inventory snapshot through
 shops, bosses, minigames, and other unsafe overlays. Incoming writes remain queued
 until that device reaches a safe gameplay frame. It retains v0.41.1's Android/Wi-Fi
@@ -46,7 +46,7 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.44.0 passes all
+**This is experimental, not complete campaign co-op. Version 0.45.0 passes all
 eight native suites in a pinned Linux Debug ASan/UBSan build, plus the MIPS NRM,
 Android ARM64, Windows x64, format, export and package checks. Gameplay validation
 remains pending.**
@@ -56,7 +56,7 @@ Back up experimental saves before using the build.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.44.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.45.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
    Import the complete Android ZIP through **Manage Mods -> Import**.
@@ -319,8 +319,8 @@ Tags remain independent; no partner pad is activated automatically.
 
 The permanent-unlock pass covers saved outcomes, not every door's live state.
 Version 0.15 adds the separate day/night and water-height path described below.
-The Caves-lobby pressure switch, temporary/timed puzzle steps, shop spending, physical
-animation timing, tutorial bookkeeping and the ending sequence remain local. **Full campaign co-op is not complete.** New flags may
+Temporary/timed puzzle steps, shop spending, physical animation timing, tutorial
+bookkeeping and the ending sequence remain local. **Full campaign co-op is not complete.** New flags may
 expose pre-existing guest-only progress as **GUEST SAVE AHEAD**; no automatic
 merge, reset or normal-save migration is performed.
 
@@ -369,12 +369,15 @@ coins, player ammo/health, other boss combat and feeding animations remain local
 ## Reversible world state (0.15, untested)
 
 Enable the existing **Shared collectibles and upgrades -> Unique collectibles**
-option on both peers; this also enables the two reversible states. No new loader,
+option on both peers; this also enables the three reversible states. No new loader,
 extra companion, save migration or device installation is required by the code.
 Install both files from the matching platform ZIP with the game closed.
 
 - **Galleon:** either player can raise or lower the water with the normal switches.
 - **Fungi:** either player can select day or night with the normal clock switches.
+- **Caves lobby:** either player can operate the reversible pressure switch. Leave
+  the lobby after changing it; the peer receives the saved state in a safe map and
+  its next lobby entry initializes the linked doors from that state.
 - Connect and wait for **LAN ITEMS: SYNCED** and **LAN WORLD: SYNCED** before
   operating switches on the guest. Its pre-existing/offline toggle values are
   replaced by host state, not merged into the host save.
@@ -397,9 +400,9 @@ Install both files from the matching platform ZIP with the game closed.
   Wait for WORLD: SYNCED before disconnecting. SYNCED confirms state readback,
   not completion of the game's asynchronous disk write.
 
-Only flags `0xA0` and `0xCE` use this channel. First-use switch cutscenes, the
-Caves-lobby pressure switch, timers, carried objects and other reversible puzzles
-remain local. Fungi lighting/actor state and Galleon water physics are not patched
+Only flags `0xA0`, `0xCE` and `0x19D` use this channel. First-use switch cutscenes,
+timers, carried objects and other reversible puzzles remain local. Fungi
+lighting/actor state and Galleon water physics are not patched
 live; the optional reload asks vanilla initialization to rebuild them. Existing
 permanent-item IDs and isolated `items_host_v6` / `items_guest_v6`
 saves are unchanged. Back up these experimental saves before upgrading.
@@ -507,7 +510,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v44 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v45 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -556,7 +559,7 @@ That version's tablet-host/Windows-guest **synthetic** LAN probe exchanged all 2
 not load the ROM or exercise real pickups. Package verification checks the actual
 Android importer, same NRM on both platforms, 16 KiB ELF load alignment and native
 dependencies. Historical results: `build/verification-v0.10.0`. Current build status:
-`build/build-v0.44.0`; package hashes: `dist/SHA256SUMS.txt`.
+`build/build-v0.45.0`; package hashes: `dist/SHA256SUMS.txt`.
 
 Version 0.10 actual gameplay testing connected the tablet host and a fresh
 portable Windows 1.0.1 guest. Both displayed the other Kong and ITEMS: SYNCED

@@ -6,7 +6,8 @@
 namespace dkcoop {
 struct WorldWire {
     uint32_t feature = 0, file = 0, scope = 0, ready = 0, values = 0, desired = 0;
-    uint32_t revision[2]{}, request[2]{}, base[2]{}, request_values = 0, ack[2]{};
+    uint32_t revision[COOP_WORLD_TOGGLES]{}, request[COOP_WORLD_TOGGLES]{},
+        base[COOP_WORLD_TOGGLES]{}, request_values = 0, ack[COOP_WORLD_TOGGLES]{};
 };
 bool valid_world(const WorldWire& wire);
 bool valid_world_input(const CoopWorldInput& input);
@@ -23,7 +24,7 @@ private:
     WorldWire outgoing{};
     CoopWorldResult output{};
     uint64_t binding = 0;
-    uint32_t file = 0, scope = 0, peer_file = 0, last_change[2]{}, pending = 0;
+    uint32_t file = 0, scope = 0, peer_file = 0, last_change[COOP_WORLD_TOGGLES]{}, pending = 0;
     bool initialized = false;
 };
 }

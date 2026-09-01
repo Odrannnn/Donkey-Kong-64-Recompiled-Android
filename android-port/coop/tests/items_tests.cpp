@@ -55,11 +55,12 @@ static void seed_gbs(unsigned level, unsigned kong, unsigned count) {
 static unsigned hud_updates = 0, mutate_counter = 0;
 static void func_global_asm_806F8278(unsigned player) { CHECK(player == 0 && D_global_asm_80754280); ++hud_updates; }
 static unsigned isFlagSet(int flag, unsigned type) {
-    CHECK(type == 0 && (coop_item_id(flag) >= 0 || flag == 0x180 || flag == 0xA0 || flag == 0xCE));
+    CHECK(type == 0 && (coop_item_id(flag) >= 0 || flag == 0x180
+        || flag == 0xA0 || flag == 0xCE || flag == 0x19D));
     return flags[flag];
 }
 static void setFlag(int flag, unsigned value, unsigned type) {
-    unsigned reversible_world = flag == 0xA0 || flag == 0xCE;
+    unsigned reversible_world = flag == 0xA0 || flag == 0xCE || flag == 0x19D;
     CHECK(type == 0 && value <= 1 && (coop_item_id(flag) >= 0 || reversible_world));
     // Execute the production flag observation policy on incoming applications too.
     coop_items_observe(current_game, 1, flag, value, type, flags[flag], 1, 0);
@@ -76,9 +77,17 @@ static bool any(const unsigned* words) { for (unsigned i = 0; i < COOP_ITEM_WORD
 static void protocol_checks() {
     Packet p{Kind::state, 10, 123, 456, 123456};
     p.items = {1, 2, 1, 2, {0x80000001, 0x12345678, 0x8000, 0x80000000, 0x12345678}, {1, 0, 0x8000, 0, 0x10000000}};
+    p.world = {1, 2, 2, 1, 5, 5, {1, 2, 3}};
     Packet out{}; auto b = encode(p);
     CHECK(b.size() == 1200 && decode(b.data(), b.size(), out));
     CHECK(item_words(out.items) == item_words(p.items));
+    CHECK(world_words(out.world) == world_words(p.world));
+    CHECK(b[96] == 0x57 && b[97] == 0x4F && b[98] == 0x52 && b[99] == 0x4C);
+    WorldWire malformed_world = p.world; malformed_world.revision[2] = 0;
+    CHECK(!valid_world(malformed_world));
+    malformed_world = {}; malformed_world.feature = malformed_world.file = 1;
+    malformed_world.request[2] = 1; malformed_world.base[2] = 1;
+    CHECK(!valid_world(malformed_world));
     CHECK(b[943] == 1 && b[940] == 0x80 && b[947] == 0x78);
     for (unsigned offset : {923u, 927u, 931u, 935u, 939u, 1036u}) {
         auto bad = b; bad[offset] = 255; CHECK(!decode(bad.data(), bad.size(), out));
@@ -86,6 +95,8 @@ static void protocol_checks() {
     auto bad = b; bad[5] = 6; CHECK(!decode(bad.data(), bad.size(), out));
     bad = b; bad[5] = 9; CHECK(!decode(bad.data(), bad.size(), out)); // v9 has the same size but different ID rules.
     CHECK(!decode(b.data(), 920, out));
+    Packet overlap = p; overlap.progress = {1, 2, 1, 2, 1, 0};
+    auto overlap_bytes = encode(overlap); CHECK(!decode(overlap_bytes.data(), overlap_bytes.size(), out));
     for (Kind kind : {Kind::hello, Kind::welcome, Kind::bye, Kind::busy}) {
         p.kind = kind; if (kind == Kind::hello || kind == Kind::busy) p.session = 0;
         b = encode(p); CHECK(!decode(b.data(), b.size(), out));
@@ -463,6 +474,55 @@ static void world_refresh_checks() {
     g.refresh_enabled = 1; coop_world_apply(&w, &g, 1);
     CHECK(flags[0xCE] && writes == 1 && live_calls == 1 && live_slot == 7
         && live_state == 10 && !g.refresh_pending);
+
+    // The reversible Caves-lobby pressure switch uses the same host-authority
+    // channel. It applies and saves only after leaving the loaded lobby; the
+    // next lobby entry initializes its linked doors from the desired flag.
+    reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = 1;
+    w = {}; w.input.ready = 1; w.result.scope = 1; w.result.status = 2;
+    w.result.apply = w.result.desired = 4; current_map = 7; mock_level = 0;
+    coop_world_apply(&w, &g, 1);
+    CHECK(flags[0x19D] && writes == 1 && g.save_pending && !g.refresh_pending);
+
+    // Capture exposes all three bits and gives the lobby state its own
+    // monotonic change counter rather than aliasing water or day/night.
+    w = {}; g.deferred = 0; g.input.enabled = g.input.ready = g.bound = 1;
+    g.input.file = 1; coop_world_capture(&w, &g);
+    CHECK(w.input.ready && w.input.values == 4 && !w.input.change[2]);
+    flags[0x19D] = 0; coop_world_capture(&w, &g);
+    CHECK(w.input.ready && w.input.values == 0 && w.input.change[2] == 1
+        && !w.input.change[0] && !w.input.change[1]);
+}
+static void world_authority_checks() {
+    WorldSync host, guest;
+    CoopWorldInput h{1, 1, 1}, g{1, 2, 1};
+    constexpr uint64_t session = 0x123456789ULL;
+    auto exchange = [&] {
+        WorldWire hw = host.wire(), gw = guest.wire();
+        host.update(true, h, gw, true, true, true, session);
+        guest.update(false, g, hw, true, true, true, session);
+    };
+    exchange(); exchange();
+    h.session_hi = g.session_hi = unsigned(session >> 32);
+    h.session_lo = g.session_lo = unsigned(session);
+    h.scope = g.scope = 1;
+    for (unsigned i = 0; i < 6; ++i) exchange();
+    CHECK(host.result().scope == 1 && guest.result().scope == 1
+        && host.wire().revision[0] == 1 && host.wire().revision[1] == 1
+        && host.wire().revision[2] == 1);
+
+    // A guest lobby-switch change uses only lane 2. Host authority accepts it,
+    // requests local readback, and acknowledges without touching the two older lanes.
+    g.values = 4; g.change[2] = 1;
+    for (unsigned i = 0; i < 4; ++i) exchange();
+    CHECK((host.result().apply & 4) && !(host.result().apply & 3)
+        && host.wire().revision[0] == 1 && host.wire().revision[1] == 1
+        && host.wire().revision[2] == 2 && host.wire().ack[2] == 1);
+    h.values = 4;
+    for (unsigned i = 0; i < 6; ++i) exchange();
+    CHECK(host.result().status == 3 && guest.result().status == 3
+        && host.wire().desired == 4 && guest.wire().desired == 4
+        && !host.result().pending && !guest.result().pending);
 }
 static void cross_area_cache_checks() {
     reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
@@ -614,6 +674,6 @@ static void live_checks() {
 #include "progression_checks.h"
 #include "training_checks.h"
 int main() {
-    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); progression_checks(); training_checks(); world_refresh_checks(); cross_area_cache_checks(); live_checks();
+    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
     std::printf("PASS: %u item, all GBs/1700 pickups adapter, inventory preservation, authority, deduplication, lossy UDP and reconnect checks\n", checks);
 }
