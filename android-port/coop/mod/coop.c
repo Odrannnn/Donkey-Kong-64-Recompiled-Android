@@ -148,6 +148,8 @@ extern u8 func_global_asm_8060E3B0(u16 ordinal, u8 level);
 extern void func_global_asm_8060E430(u16 ordinal, u8 value, u8 level);
 extern s16 func_global_asm_80631C20(u8 level);
 extern s16 D_global_asm_807F6240[];
+extern Prop* D_global_asm_807F6000;
+extern s16 func_global_asm_80659470(s32 object);
 extern void func_global_asm_8063DA40(s16 script_slot, s16 state);
 extern u8 getLevelIndex(Maps map, u8 include_lobbies);
 extern s8 is_cutscene_active;
@@ -179,6 +181,9 @@ static u32 shared_items;
 static u32 merge_guest_progress;
 static u32 automatic_world_refresh;
 static u32 follow_host_transitions;
+static u32 transient_enabled, transient_revision = 1, transient_page;
+static CoopTransientInput transient_input;
+static CoopTransientResult transient_result;
 static CoopItems items;
 static u32 combat_enabled;
 static CoopCombatFrame combat_input;
@@ -203,6 +208,7 @@ static f32 bits_float(u32 value) { union { f32 f; u32 u; } bits; bits.u = value;
 #include "world_live_game.h"
 #include "items_game.h"
 #include "world_game.h"
+#include "transient_game.h"
 static CoopWorld world;
 _Static_assert(PERMFLAG_PROGRESS_IS_GALLEON_WATER_RAISED == 0xA0
     && PERMFLAG_PROGRESS_IS_NIGHTTIME == 0xCE && MAP_CAVES_LOBBY == 194
@@ -263,6 +269,7 @@ static void coop_select_save(void) {
     follow_host_transitions = recomp_get_config_u32("follow_host_transitions") == 1;
     combat_enabled = recomp_get_config_u32("combat");
     if (combat_enabled > 3) combat_enabled = 0;
+    transient_enabled = recomp_get_config_u32("same_area_events") == 1;
     if (shared_items) recomp_change_save_file(role == ROLE_HOST ? item_host_saves[save_profile] : item_guest_saves[save_profile]);
     else recomp_change_save_file(role == ROLE_HOST ? presence_host_saves[save_profile] : presence_guest_saves[save_profile]);
     recomp_printf("[dk64-coop] Using isolated co-op campaign %d save.\n", save_profile + 1);
@@ -326,7 +333,8 @@ RECOMP_CALLBACK("*", recomp_on_init) void coop_initialize(void) {
     status = dk64_coop_start(role, ip, recomp_get_config_u32("port"), recomp_get_config_u32("room"));
     recomp_free_config_string(ip);
     local_ipv4 = role == ROLE_HOST ? dk64_coop_local_ipv4() : 0;
-    recomp_printf("[dk64-coop] Prototype initialized. Experimental combat %s; remote visual actors never collide.\n", combat_enabled ? "ON" : "OFF");
+    recomp_printf("[dk64-coop] Prototype initialized. Experimental combat %s; same-area events %s; remote visual actors never collide.\n",
+        combat_enabled ? "ON" : "OFF", transient_enabled ? "ON" : "OFF");
 }
 
 RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
@@ -336,6 +344,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     addActorToTextOverlayRenderArray(draw_coop_status, NULL, 5);
     if (previous_map != (s32)current_map) {
         previous_map = current_map; epoch++; remove_remote();
+        transient_page = 0; transient_result = (CoopTransientResult){0};
         // A normal transition already rebuilt the old map, so a queued refresh
         // for it is no longer needed.
         if (items.refresh_pending && items.refresh_map != (u32)current_map) items.refresh_pending = 0;
@@ -374,13 +383,16 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     // Rising-bit capture recovers local awards when regular play resumes.
     coop_items_capture(&items, shared_items ? (merge_guest_progress ? 2 : 1) : 0, playing, current_file);
     coop_world_capture(&world, &items);
+    coop_transient_capture(playing);
     // Keep the retired v1-v40 gate words canonical zero so the established
     // combat/item/world bridge offsets remain unchanged.
-    CoopExtraInput extra = {{0}, combat_input, items.input, world.input, {0}};
+    CoopExtraInput extra = {{0}, combat_input, items.input, world.input, transient_input};
     CoopExtraResult extra_result = {0};
     status = dk64_coop_tick_v47(local_state, remote_state, &extra, &extra_result);
     coop_items_receive(&items, extra_result.items);
     coop_world_receive(&world, extra_result.world);
+    transient_result = extra_result.transient;
+    coop_transient_apply();
     coop_world_apply(&world, &items, playing);
     coop_items_save_world_lobby(&items, playing && loading_zone_transition_speed == 0.0f);
     // Shops, bonus games and transitions may have partially completed awards.
@@ -516,6 +528,15 @@ static Gfx* draw_coop_status(Gfx* dl, Actor* unused) {
         if (items.file_changed || items.counter_error || items.result.status == 4)
             world_text = "LAN WORLD: ITEM SAVE CONFLICT";
         dl = printStyledText(dl, 6, 14 * 4, 46 * 4, (u8*)world_text, 1);
+    }
+    if (transient_enabled) {
+        char* event_text = "LAN EVENTS: DIFFERENT AREA";
+        if (status != NET_CONNECTED) event_text = "LAN EVENTS: WAITING FOR PEER";
+        else if (remote_state[STATE_MAP] == (u32)current_map)
+            event_text = transient_result.status >= COOP_TRANSIENT_APPLYING
+                ? "LAN EVENTS: HOST AUTHORITY ACTIVE"
+                : "LAN EVENTS: WAITING FOR ROOM EPOCH";
+        dl = printStyledText(dl, 6, 14 * 4, (shared_items ? 59 : 33) * 4, (u8*)event_text, 1);
     }
     return dl;
 }

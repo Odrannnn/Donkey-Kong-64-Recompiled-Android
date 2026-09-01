@@ -1,0 +1,108 @@
+// Run the same-area game adapter against a recording engine boundary. This
+// proves that network records can only touch reviewed loaded script objects.
+#include "../mod/transient_types.h"
+#include <algorithm>
+#include <array>
+#include <cstdio>
+#include <cstdlib>
+
+using u8 = unsigned char; using s8 = signed char; using u16 = unsigned short;
+using s16 = short; using u32 = unsigned; using s32 = int; using f32 = float;
+enum { ROLE_HOST = 1, ROLE_JOIN = 2 };
+
+struct Prop_ScriptData { u8 unk48[1]{}; };
+struct Prop { Prop_ScriptData* unk7C{}; };
+
+static unsigned checks, script_calls, last_object, last_state;
+#define CHECK(x) do { ++checks; if (!(x)) { std::fprintf(stderr, "TRANSIENT ADAPTER FAIL %d: %s\n", __LINE__, #x); std::exit(1); } } while (0)
+
+static u32 role = ROLE_HOST, current_file, current_map = 7, epoch = 9;
+static u32 transient_enabled = 1, transient_revision = 1, transient_page;
+static CoopTransientInput transient_input{};
+static CoopTransientResult transient_result{};
+static f32 loading_zone_transition_speed;
+static s16 D_global_asm_807F6240[600];
+static std::array<Prop, 256> props;
+static std::array<Prop_ScriptData, 256> scripts;
+static Prop* D_global_asm_807F6000 = props.data();
+
+static s16 func_global_asm_80659470(s32 object) {
+    return object >= 0 && object < 256 ? static_cast<s16>(object) : -1;
+}
+static void func_global_asm_8063DA40(s16 slot, s16 state) {
+    CHECK(slot >= 0 && slot < 600);
+    unsigned object = static_cast<unsigned short>(D_global_asm_807F6240[slot]);
+    CHECK(object < scripts.size() && props[object].unk7C == &scripts[object]);
+    scripts[object].unk48[0] = static_cast<u8>(state);
+    ++script_calls; last_object = object; last_state = static_cast<unsigned short>(state);
+}
+
+#include "../mod/world_live_game.h"
+#include "../mod/transient_game.h"
+
+static void reset() {
+    std::fill(std::begin(D_global_asm_807F6240), std::end(D_global_asm_807F6240), static_cast<s16>(-1));
+    props = {}; scripts = {};
+    role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
+    transient_enabled = 1; transient_revision = 1; transient_page = 0;
+    transient_input = {}; transient_result = {};
+    loading_zone_transition_speed = 0;
+    script_calls = last_object = last_state = 0;
+}
+static void load(unsigned slot, unsigned object, unsigned state) {
+    CHECK(slot < 600 && object < scripts.size());
+    D_global_asm_807F6240[slot] = static_cast<s16>(object);
+    scripts[object].unk48[0] = static_cast<u8>(state);
+    props[object].unk7C = &scripts[object];
+}
+static bool contains(unsigned kind, unsigned key, unsigned state) {
+    for (unsigned i = 0; i < transient_input.count; ++i) {
+        const auto& record = transient_input.records[i];
+        if (record.kind == kind && record.key == key && record.state == state) return true;
+    }
+    return false;
+}
+
+static void capture_checks() {
+    reset();
+    load(0, 0x1A, 2); load(1, 0x1B, 3); load(2, 0x34, 4);
+    coop_transient_capture(1);
+    CHECK(transient_input.enabled && transient_input.map == 7 && transient_input.epoch == 9);
+    CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x1A, 2));
+    CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x1B, 3));
+    CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x34, 4));
+
+    reset(); current_map = 30; load(0, 0, 10); load(1, 1, 6);
+    coop_transient_capture(1);
+    coop_transient_capture(1); // Galleon's reviewed script rows occupy page zero.
+    CHECK(contains(COOP_TRANSIENT_TIMER, 0, 10));
+    CHECK(contains(COOP_TRANSIENT_TIMER, 1, 6));
+
+    reset(); current_map = 194; load(0, 6, 2);
+    coop_transient_capture(1);
+    CHECK(contains(COOP_TRANSIENT_PLATFORM, 6, 2));
+
+    reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
+    coop_transient_capture(1); CHECK(!transient_input.enabled);
+}
+
+static void object_apply_checks() {
+    reset(); role = ROLE_JOIN; load(0, 0x1A, 2);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
+        {{COOP_TRANSIENT_SCRIPT, 0x1A, 20, 0}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x1A && last_state == 20 && scripts[0x1A].unk48[0] == 20);
+
+    transient_result.records[0] = {COOP_TRANSIENT_SCRIPT, 0x99, 7, 0};
+    coop_transient_apply(); CHECK(script_calls == 1); // Arbitrary object.
+    transient_result.records[0] = {COOP_TRANSIENT_TIMER, 0x1A, 7, 0};
+    coop_transient_apply(); CHECK(script_calls == 1); // Wrong reviewed kind.
+    transient_result.records[0] = {COOP_TRANSIENT_SCRIPT, 0x1A, 7, 0};
+    transient_result.epoch = 8; coop_transient_apply(); CHECK(script_calls == 1);
+    transient_result.epoch = 9; role = ROLE_HOST; coop_transient_apply(); CHECK(script_calls == 1);
+}
+
+int main() {
+    capture_checks(); object_apply_checks();
+    std::printf("PASS: %u reviewed script adapter checks\n", checks);
+}
