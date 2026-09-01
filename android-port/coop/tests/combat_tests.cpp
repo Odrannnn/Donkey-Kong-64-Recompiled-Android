@@ -26,14 +26,16 @@ static CoopCombatFrame frame(unsigned life) {
     f.enemies[0] = {17, life, COOP_ENEMY_ALIVE, 0, COOP_BLUE_BEAVER,
         bits(100), bits(200), bits(300), coop_enemy_pack(2048, 5)};
     f.shots[0] = {11, COOP_COCONUT, bits(12.5f), bits(-4.25f), bits(6), 4095, bits(0.75f)};
+    f.pages = 1;
     return f;
 }
 static CoopCombatFrame boss_frame(unsigned life, unsigned phase, unsigned kind = COOP_BOSS_ARMY_DILLO) {
     CoopCombatFrame f{1, 1, 0, 0, {}, {}, {kind, life, 0, phase}};
+    f.pages = 1;
     return f;
 }
 static void protocol_checks() {
-    static_assert(COOP_ENEMIES == 20 && COOP_COMBAT_FRAME_WORDS == 244 && COOP_COMBAT_WIRE_WORDS == 204);
+    static_assert(COOP_ENEMIES == 20 && COOP_COMBAT_FRAME_WORDS == 246 && COOP_COMBAT_WIRE_WORDS == 204);
     auto f = frame(100); CHECK(valid_combat(f));
     CHECK(coop_enemy_yaw(f.enemies[0]) == 2048 && coop_enemy_health(f.enemies[0]) == 5);
     CHECK(combat_words(combat_from_words(combat_words(f))) == combat_words(f));
@@ -44,6 +46,8 @@ static void protocol_checks() {
     auto bad = [&](CoopCombatFrame input) { CHECK(!valid_combat(input)); p.combat = input; auto raw = encode(p); CHECK(!decode(raw.data(), raw.size(), out)); };
     auto x = f; x.enabled = 4; bad(x); x = f; x.enabled = 0; bad(x);
     x = f; x.file = 0; bad(x); x = f; x.file = 4; bad(x);
+    x = f; x.pages = 0; bad(x); x = f; x.pages = COOP_COMBAT_PAGES + 1; bad(x);
+    x = f; x.pages = 2; x.page = 2; bad(x);
     x = f; x.hands = 65536; bad(x); x = f; x.layout = 0; bad(x);
     x = f; x.enemies[0].key = 257; bad(x); x = f; x.enemies[0].life = 0; bad(x);
     x = f; x.enemies[0].state = 4; bad(x); x = f; x.enemies[1] = x.enemies[0]; bad(x);
@@ -313,6 +317,39 @@ static void movement_checks() {
     CHECK(pose.g.result().movement == COOP_COMBAT_MOVEMENT
         && pose.g.result().motion[0].key); // Pose requires explicit opt-in on both peers.
 }
+static void paging_checks() {
+    CombatSync host, guest;
+    State hs{7, 10, 0, active}, gs{7, 20, 1, active};
+    CoopCombatFrame hi[2]{frame(100), frame(101)}, gi[2]{frame(200), frame(201)};
+    for (unsigned page = 0; page < 2; ++page) {
+        hi[page].page = gi[page].page = page;
+        hi[page].pages = gi[page].pages = 2;
+        hi[page].enemies[0].key = gi[page].enemies[0].key = page ? 42 : 17;
+    }
+    for (unsigned round = 0; round < 16; ++round) {
+        const unsigned page = round & 1;
+        const auto hw = host.wire(page), gw = guest.wire(page);
+        host.update(true, hs, hi[page], gs, gw, true);
+        guest.update(false, gs, gi[page], hs, hw, true);
+    }
+    CHECK(coop_enemy_peer_life(host.wire(0).enemies[0]) == 200
+        && coop_enemy_peer_life(host.wire(1).enemies[0]) == 201);
+    CHECK(coop_enemy_peer_life(guest.wire(0).enemies[0]) == 100
+        && coop_enemy_peer_life(guest.wire(1).enemies[0]) == 101);
+    gi[1].enemies[0].state = COOP_ENEMY_DEFEATED; gi[1].enemies[0].yaw = 0;
+    bool requested = false;
+    for (unsigned round = 0; round < 16; ++round) {
+        const unsigned page = round & 1;
+        const auto hw = host.wire(page), gw = guest.wire(page);
+        host.update(true, hs, hi[page], gs, gw, true);
+        guest.update(false, gs, gi[page], hs, hw, true);
+        if (page == 1 && host.result().apply[0].key == 42
+                && host.result().apply[0].state == COOP_ENEMY_DEFEATED) requested = true;
+    }
+    CHECK(requested);
+    auto wire_page = combat_from_words(combat_words(host.wire(1)));
+    CHECK(wire_page.page == 1 && wire_page.pages == 2 && wire_page.enemies[0].key == 42);
+}
 static void live_checks() {
     uint64_t now = 10000; Session host, guest;
     CHECK(host.start({Role::host, "", 0, 123456}, now));
@@ -359,6 +396,6 @@ static void live_checks() {
     CHECK(host.statistics().rejected + guest.statistics().rejected > 100);
 }
 int main() {
-    protocol_checks(); authority_checks(); boss_checks(); context_checks(); movement_checks(); live_checks();
+    protocol_checks(); authority_checks(); boss_checks(); context_checks(); movement_checks(); paging_checks(); live_checks();
     std::printf("PASS: %u combat checks (Army Dillo/Dogadon phases, host movement, enemy kinds/maps, shot bounds, spawn binding, host readback, role validation, stale/respawn guards, real UDP loss/replay)\n", checks);
 }

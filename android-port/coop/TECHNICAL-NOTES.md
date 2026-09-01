@@ -1,4 +1,4 @@
-> Current source: 0.42.0, protocol/native ABI v42. All eight native suites pass
+> Current source: 0.43.0, protocol/native ABI v43. All eight native suites pass
 > in the pinned Linux GNU C++ 15.2.0 Debug ASan/UBSan build. MIPS NRM, Android
 > ARM64, Windows x64, format/export and packaging checks also pass. Gameplay
 > validation remains pending.
@@ -137,7 +137,8 @@ Enemy identity is the local spawner index, allowlisted kind and immutable-layout
 local and peer life tokens. The mod assigns nonzero life tokens from a counter
 that survives map loads; the game's own actor counter can reset on re-entry.
 Transitions clear captured spawn records, including reloads into the same map.
-Up to twenty records are sent. Both copies must be observed alive, and each must
+Up to twenty records are sent per page. Every supported live or acknowledgement-pending
+record is captured across pages. Both copies must be observed alive, and each must
 echo the other's life before a defeat can apply. Bindings are keyed by identity,
 not snapshot order. Re-entry, respawn, a changed layout, pause/cutscene, another
 save slot, stale state or reconnect cannot bind an old death to a fresh live actor.
@@ -224,7 +225,7 @@ datagram ceiling.
 
 The game-thread socket is nonblocking, capped at 32 receives/tick and 20 Hz sends.
 Presence expires after 750 ms; transport expires after three seconds. The native
-bridge `dk64_coop_tick_v41` validates twelve-word presence spans, a **2604-byte**
+bridge `dk64_coop_tick_v43` validates twelve-word presence spans, a **2612-byte**
 gate/combat/item/world input and a **3300-byte** combined result before memory
 access. The new export rejects old NRM/companion pairs. Native structs are never
 serialized directly. No loader changes or background game-memory access are used.
@@ -1450,3 +1451,26 @@ cutscenes, player health, and resource counts remain local.
 The packet remains 1200 bytes, while protocol/native ABI v42, compatibility
 `0x0001012A`, and export `dk64_coop_tick_v42` reject older behavior sets and
 local companions. The manifest requires the matching 0.42.0 package.
+
+## Paged ordinary-enemy snapshots (0.43.0)
+
+The fixed twenty-record game snapshot is now one page rather than a global
+ceiling. The adapter walks every supported live or defeat-acknowledgement record
+in stable spawner order, reports the total page count, and rotates its captured
+page each game frame. The native bridge caches each local and remote page by the
+validated spawner key. Bindings remain keyed by layout, kind, local life and peer
+life, so a record changing page position cannot inherit another actor's damage.
+
+Network sends choose a page independently of the render-frame capture phase and
+send each selected page twice. This avoids frame/send cadence aliasing and gives
+periodic packet loss another copy. Missing pages delay only their own enemies;
+current shots, hands and the bounded boss record remain in every state packet.
+Page-count or session-context changes clear the corresponding caches. Respawn,
+map, layout, epoch and reconnect guards remain unchanged.
+
+The page number and count are appended only to the game/native frame and packed
+into the previously bounded first combat wire word. The combat section stays 204
+words, item/world/transition offsets stay fixed, and the LAN datagram remains
+1200 bytes. The combined bridge input grows from 2604 to 2612 bytes; the result
+remains 3300 bytes. Protocol/native ABI v43, compatibility `0x0001012B`, export
+`dk64_coop_tick_v43`, and the 0.43.0 manifest reject older peers and companions.

@@ -124,7 +124,7 @@ struct Session::Impl {
     uint32_t local_ipv4 = 0;
     bool has_peer = false, received_sequence = false;
     uint64_t session = 0, nonce = 0, last_receive = 0, last_state = 0, last_send = 0, last_hello = 0;
-    uint32_t send_sequence = 0, receive_sequence = 0, item_page_turn = 0;
+    uint32_t send_sequence = 0, receive_sequence = 0, item_page_turn = 0, combat_page_turn = 0;
     State remote{};
     AnimationTimeline animation;
     ProgressWire remote_progress{};
@@ -146,7 +146,11 @@ struct Session::Impl {
             reply_nonce ? reply_nonce : nonce, config.room, local};
         if (kind == Kind::state) packet.progress = progress_wire(config.role == Role::host,
             local_progress, remote_progress, status == Status::connected, session);
-        if (kind == Kind::state) packet.combat = combat_sync.wire();
+        if (kind == Kind::state) {
+            const auto& combat = combat_sync.wire();
+            packet.combat = combat.enabled && combat.pages
+                ? combat_sync.wire((combat_page_turn++ / 2) % combat.pages) : CoopCombatFrame{};
+        }
         if (kind == Kind::state) packet.items = items_wire(config.role == Role::host,
             local_items, remote_items, status == Status::connected, session);
         if (kind == Kind::state) {

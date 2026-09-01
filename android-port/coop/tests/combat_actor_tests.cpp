@@ -698,18 +698,26 @@ int main() {
     combat_enemy_behavior(); CHECK(ruler.control_state == 0x37 && combat_enemies[2].defeated);
     D_global_asm_807FBB70 = {}; current_map = MAP_JAPES;
 
-    // The compact wire representation raises the live snapshot ceiling to 20.
-    Actor crowd[COOP_ENEMIES]{}; EnemySpawner crowd_spawners[COOP_ENEMIES]{};
-    for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
+    // Game snapshots page every supported live record instead of starving keys
+    // after the first twenty.
+    enum { CROWD_COUNT = 24 };
+    Actor crowd[CROWD_COUNT]{}; EnemySpawner crowd_spawners[CROWD_COUNT]{};
+    for (unsigned i = 0; i < CROWD_COUNT; ++i) {
         crowd[i].unk58 = ACTOR_BEAVER_BLUE; crowd[i].unk54 = 1000 + i;
         crowd[i].health = 1; crowd[i].control_state = 1; crowd[i].object_properties_bitfield = 0x10;
         crowd_spawners[i].tied_actor = &crowd[i]; crowd_spawners[i].init.enemy_value = i + 1;
         crowd_spawners[i].init.x_pos = i * 10; register_actor(&crowd[i]);
     }
-    D_807FDC88.count = COOP_ENEMIES; D_807FDC88.first = crowd_spawners;
-    coop_combat_capture();
-    CHECK(combat_input.enemies[19].key == 20 && combat_input.enemies[19].life
-        && combat_input.enemies[19].kind == COOP_BLUE_BEAVER);
+    D_807FDC88.count = CROWD_COUNT; D_807FDC88.first = crowd_spawners;
+    unsigned saw_first = 0, saw_last = 0;
+    for (unsigned page = 0; page < 4; ++page) {
+        coop_combat_capture(); CHECK(combat_input.pages == 2 && combat_input.page < 2);
+        for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
+            saw_first |= combat_input.enemies[i].key == 1;
+            saw_last |= combat_input.enemies[i].key == CROWD_COUNT;
+        }
+    }
+    CHECK(saw_first && saw_last);
 
     // Save-slot switch is sticky for this process; returning to the old slot cannot re-enable damage.
     current_file = 1; coop_combat_capture(); CHECK(combat_file_changed && !combat_input.enabled);

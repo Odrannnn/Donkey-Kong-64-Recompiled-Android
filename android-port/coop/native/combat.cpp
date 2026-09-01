@@ -13,14 +13,30 @@ bool bounded_float(unsigned bits, float min, float max) {
     const float value = std::bit_cast<float>(bits);
     return std::isfinite(value) && value >= min && value <= max;
 }
-const CoopEnemy* find_enemy(const CoopCombatFrame& frame, unsigned key) {
-    for (const auto& enemy : frame.enemies) if (enemy.key == key && key) return &enemy;
+const CoopEnemy* find_enemy(const std::array<std::array<CoopEnemy, COOP_ENEMIES>, COOP_COMBAT_PAGES>& pages,
+        unsigned page_count, unsigned key) {
+    for (unsigned page = 0; page < page_count; ++page)
+        for (const auto& enemy : pages[page]) if (enemy.key == key && key) return &enemy;
     return nullptr;
+}
+void store_page(std::array<std::array<CoopEnemy, COOP_ENEMIES>, COOP_COMBAT_PAGES>& cache,
+        unsigned& page_count, const CoopCombatFrame& frame) {
+    if (page_count != frame.pages) { cache = {}; page_count = frame.pages; }
+    cache[frame.page] = {};
+    for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
+        const auto& incoming = frame.enemies[i];
+        if (incoming.key) for (unsigned page = 0; page < page_count; ++page) {
+            if (page == frame.page) continue;
+            for (auto& cached : cache[page]) if (cached.key == incoming.key) cached = {};
+        }
+        cache[frame.page][i] = incoming;
+    }
 }
 }
 bool valid_combat(const CoopCombatFrame& f) {
     if (f.enabled > 3 || f.file > 3 || f.hands > 65535 || (f.enabled && !f.file)) return false;
-    if (!f.enabled && (f.file || f.layout || f.hands)) return false;
+    if (!f.enabled && (f.file || f.layout || f.hands || f.page || f.pages)) return false;
+    if (f.enabled && (!f.pages || f.pages > COOP_COMBAT_PAGES || f.page >= f.pages)) return false;
     for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
         const auto& e = f.enemies[i];
         if (!e.key) { if (e.life || e.state || e.peer_life || e.kind || e.x || e.y || e.z || e.yaw) return false; continue; }
@@ -51,7 +67,8 @@ bool valid_combat(const CoopCombatFrame& f) {
 std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat_words(const CoopCombatFrame& f) {
     std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> w{};
     size_t n = 0;
-    w[n++] = f.enabled; w[n++] = f.file; w[n++] = f.layout; w[n++] = f.hands;
+    w[n++] = f.enabled | (f.page << 8) | (f.pages << 16);
+    w[n++] = f.file; w[n++] = f.layout; w[n++] = f.hands;
     for (const auto& e : f.enemies) {
         uint32_t identity = e.key | (e.state << COOP_ENEMY_STATE_SHIFT) | (e.kind << COOP_ENEMY_KIND_SHIFT);
         if (e.key > 256 || e.state > 3 || e.kind > COOP_ENEMY_KIND_MASK) identity |= 0x20000u;
@@ -66,7 +83,10 @@ std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat_words(const CoopCombatFrame&
 }
 CoopCombatFrame combat_from_words(const std::array<uint32_t, COOP_COMBAT_WIRE_WORDS>& w) {
     CoopCombatFrame f{}; size_t n = 0;
-    f.enabled = w[n++]; f.file = w[n++]; f.layout = w[n++]; f.hands = w[n++];
+    const uint32_t feature = w[n++];
+    f.enabled = feature & 0xFFu; f.page = (feature >> 8) & 0xFFu; f.pages = (feature >> 16) & 0xFFu;
+    if (feature & 0xFF000000u) f.enabled = 4; // Fail valid_combat.
+    f.file = w[n++]; f.layout = w[n++]; f.hands = w[n++];
     for (auto& e : f.enemies) {
         const uint32_t identity = w[n++];
         e.key = identity & COOP_ENEMY_KEY_MASK;
@@ -81,8 +101,29 @@ CoopCombatFrame combat_from_words(const std::array<uint32_t, COOP_COMBAT_WIRE_WO
     return f;
 }
 void CombatSync::reset() { *this = {}; }
+CoopCombatFrame CombatSync::wire(unsigned page) const {
+    if (!outgoing.enabled || !outgoing.pages || page >= outgoing.pages) return {};
+    CoopCombatFrame frame = outgoing;
+    frame.page = page;
+    for (unsigned i = 0; i < COOP_ENEMIES; ++i) frame.enemies[i] = local_pages[page][i];
+    for (auto& enemy : frame.enemies) {
+        if (!enemy.key) continue;
+        enemy.peer_life &= COOP_ENEMY_POSE_HASH_PACK_MASK;
+        const auto& binding = bindings[enemy.key - 1];
+        if (binding.key == enemy.key && binding.local_life == enemy.life && binding.kind == enemy.kind)
+            enemy.peer_life |= binding.peer_life;
+        if (!local_host && enemy.state == COOP_ENEMY_DEFEATED) {
+            const auto* peer = find_enemy(remote_pages, remote_page_count, enemy.key);
+            if (!peer || peer->state != COOP_ENEMY_DEFEATED
+                    || coop_enemy_peer_life(*peer) != enemy.life)
+                enemy.state = COOP_ENEMY_REQUEST;
+        }
+    }
+    return frame;
+}
 void CombatSync::update(bool host, const State& local, const CoopCombatFrame& input,
         const State& peer, const CoopCombatFrame& remote, bool fresh) {
+    local_host = host;
     outgoing = valid_combat(input) ? input : CoopCombatFrame{};
     output = {};
     for (auto& e : outgoing.enemies) {
@@ -90,20 +131,28 @@ void CombatSync::update(bool host, const State& local, const CoopCombatFrame& in
         // low reciprocal-life bits and all request/commit roles.
         e.peer_life &= COOP_ENEMY_POSE_HASH_PACK_MASK;
         if (e.state == COOP_ENEMY_REQUEST) { outgoing = {}; break; } // Not a game readback state.
-        if (!host && e.state == COOP_ENEMY_DEFEATED) e.state = COOP_ENEMY_REQUEST;
     }
     outgoing.boss.peer_life = 0; // The bridge owns reciprocal binding tokens.
-    if (!outgoing.enabled) { bindings = {}; boss_binding = {}; context = {}; return; }
+    if (!outgoing.enabled) {
+        bindings = {}; boss_binding = {}; context = {}; local_pages = {}; remote_pages = {};
+        local_page_count = remote_page_count = 0; return;
+    }
+    store_page(local_pages, local_page_count, outgoing);
     output.status = COOP_COMBAT_WAITING;
     if (!fresh || !valid_combat(remote) || !remote.enabled || !valid_state(local) || !valid_state(peer)
         || local.flags != active || peer.flags != active || local.map != peer.map) {
-        bindings = {}; boss_binding = {}; context = {}; return;
+        bindings = {}; boss_binding = {}; context = {}; remote_pages = {}; remote_page_count = 0; return;
     }
     output.status = COOP_COMBAT_SHOTS;
     output.hands = remote.hands;
     for (unsigned i = 0; i < COOP_SHOTS; ++i) output.shots[i] = remote.shots[i];
     const std::array<uint32_t, 7> next{local.epoch, peer.epoch, outgoing.file, remote.file, outgoing.layout, remote.layout, local.map};
-    if (context != next) { bindings = {}; boss_binding = {}; context = next; }
+    if (context != next) {
+        bindings = {}; boss_binding = {}; local_pages = {}; remote_pages = {};
+        local_page_count = remote_page_count = 0; context = next;
+        store_page(local_pages, local_page_count, outgoing);
+    }
+    store_page(remote_pages, remote_page_count, remote);
     const unsigned expected_boss = coop_boss_kind(local.map);
     if (expected_boss && outgoing.boss.kind == expected_boss
             && remote.boss.kind == expected_boss) {
@@ -126,15 +175,12 @@ void CombatSync::update(bool host, const State& local, const CoopCombatFrame& in
     output.status = COOP_COMBAT_READY;
     if (outgoing.enabled >= 2 && remote.enabled >= 2) output.movement |= COOP_COMBAT_MOVEMENT;
     if (outgoing.enabled == 3 && remote.enabled == 3) output.movement |= COOP_COMBAT_POSE;
-    const auto previous = bindings;
-    bindings = {};
     for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
-        auto& e = outgoing.enemies[i]; auto& b = bindings[i];
-        const auto* p = find_enemy(remote, e.key);
+        auto& e = outgoing.enemies[i];
+        if (!e.key) continue;
+        auto& b = bindings[e.key - 1];
+        const auto* p = find_enemy(remote_pages, remote_page_count, e.key);
         if (!p || e.kind != p->kind) { b = {}; continue; }
-        // Snapshot order may change as other actors load or unload.
-        for (const auto& candidate : previous)
-            if (candidate.key == e.key && candidate.local_life == e.life && candidate.peer_life == p->life && candidate.kind == e.kind) { b = candidate; break; }
         if (b.key != e.key || b.local_life != e.life || b.peer_life != p->life) {
             b = {};
             // Both copies must have been seen alive in this session. Never bind
@@ -179,5 +225,6 @@ void CombatSync::update(bool host, const State& local, const CoopCombatFrame& in
             output.apply[i] = {e.key, e.life, COOP_ENEMY_DEFEATED, p->life, e.kind, 0, 0, 0, 0};
         }
     }
+    outgoing = wire(input.page);
 }
 }

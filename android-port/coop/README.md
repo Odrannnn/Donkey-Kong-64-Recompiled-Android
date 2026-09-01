@@ -1,7 +1,7 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
-Version **0.42.0** keeps item pages synchronized while players occupy different
+Version **0.43.0** keeps item pages synchronized while players occupy different
 areas by publishing each device's last verified safe inventory snapshot through
 shops, bosses, minigames, and other unsafe overlays. Incoming writes remain queued
 until that device reaches a safe gameplay frame. It retains v0.41.1's Android/Wi-Fi
@@ -45,7 +45,7 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.42.0 passes all
+**This is experimental, not complete campaign co-op. Version 0.43.0 passes all
 eight native suites in a pinned Linux Debug ASan/UBSan build, plus the MIPS NRM,
 Android ARM64, Windows x64, format, export and package checks. Gameplay validation
 remains pending.**
@@ -55,7 +55,7 @@ Back up experimental saves before using the build.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.42.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.43.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
    Import the complete Android ZIP through **Manage Mods -> Import**.
@@ -434,10 +434,11 @@ encounter controllers and all other unlisted kinds remain local.
 If another mod has replaced any supported behavior handler before initialization,
 enemy synchronization is disabled without replacing any of those handlers.
 
-**Capacity is now 20 enemy records in spawner order**, while active or awaiting reciprocal defeat acknowledgement. Confirmed records
-retire only after both peers report the same bound defeat, freeing later slots. There is no rotation,
-historical kill replay or remote spawning. The HUD's linked count is not a promise
-that every enemy in the map is synchronized. Partial health converges to the
+Every supported live or acknowledgement-pending enemy is now covered by compact
+20-record pages. The game captures pages in stable spawner order while the native
+bridge caches them by enemy key; actual UDP sends rotate duplicated pages independently
+of render-frame timing. Confirmed records retire only after both peers report the
+same bound defeat. There is no historical kill replay or remote spawning. Partial health converges to the
 lower value accepted by the host; values can never heal an enemy. Damage amounts,
 hit reactions, drops and player health/ammo remain local. Guest hits are
 speculative until the host reads back the lower health, with no rollback.
@@ -496,7 +497,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v42 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v43 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility.
@@ -543,7 +544,7 @@ That version's tablet-host/Windows-guest **synthetic** LAN probe exchanged all 2
 not load the ROM or exercise real pickups. Package verification checks the actual
 Android importer, same NRM on both platforms, 16 KiB ELF load alignment and native
 dependencies. Historical results: `build/verification-v0.10.0`. Current build status:
-`build/build-v0.42.0`; package hashes: `dist/SHA256SUMS.txt`.
+`build/build-v0.43.0`; package hashes: `dist/SHA256SUMS.txt`.
 
 Version 0.10 actual gameplay testing connected the tablet host and a fresh
 portable Windows 1.0.1 guest. Both displayed the other Kong and ITEMS: SYNCED

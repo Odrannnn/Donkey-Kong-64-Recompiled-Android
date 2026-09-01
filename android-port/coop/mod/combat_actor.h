@@ -75,7 +75,7 @@ typedef struct {
 static CoopEnemySlot combat_enemies[256];
 static CoopShotSlot combat_shots[COOP_SHOTS];
 static CoopBossSlot combat_boss;
-static u32 combat_layout, combat_file, combat_file_changed, combat_hooks;
+static u32 combat_layout, combat_file, combat_file_changed, combat_hooks, combat_capture_page;
 static u32 combat_life_counter; // Does not reset with the game's per-map actor counter.
 static EnemySpawner* combat_spawner_table;
 static s32 combat_map = -1;
@@ -494,6 +494,7 @@ static void coop_combat_capture(void) {
     combat_input = (CoopCombatFrame){0};
     if (combat_map != (s32)current_map) {
         combat_map = current_map; combat_layout = 0;
+        combat_capture_page = 0;
         combat_spawner_table = NULL;
         combat_boss = (CoopBossSlot){0};
         for (unsigned i = 0; i < 256; ++i) combat_enemies[i] = (CoopEnemySlot){0};
@@ -512,6 +513,7 @@ static void coop_combat_capture(void) {
     coop_boss_hook();
     if (!combat_game_ready() || D_global_asm_807FBB34 > 64) return;
     combat_input.enabled = combat_enabled; combat_input.file = combat_file; combat_input.hands = gPlayerPointer->unk146;
+    combat_input.pages = 1;
     const unsigned boss_kind = coop_boss_kind(current_map);
     const unsigned boss_bit = boss_kind ? 1u << (boss_kind - 1) : 0;
     if (boss_kind && (boss_hooks & boss_bit)) {
@@ -550,11 +552,12 @@ static void coop_combat_capture(void) {
             hash = hash ? hash : 1;
             if (combat_layout != hash || combat_spawner_table != D_807FDC88.first) {
                 for (unsigned i = 0; i < 256; ++i) combat_enemies[i] = (CoopEnemySlot){0};
+                combat_capture_page = 0;
                 combat_layout = hash; combat_spawner_table = D_807FDC88.first;
             }
         }
         combat_input.layout = combat_layout;
-        unsigned n = 0;
+        unsigned eligible = 0;
         for (unsigned i = 0; i < (unsigned)D_807FDC88.count; ++i) {
             CoopEnemySlot* slot = &combat_enemies[i];
             Actor* actor = D_807FDC88.first[i].tied_actor;
@@ -574,7 +577,23 @@ static void coop_combat_capture(void) {
                 }
                 if (actor->health <= 0 && !slot->defeated) live = 0; // Unobserved/scripted death is not replicated.
             } else live = 0;
-            if (n < COOP_ENEMIES && slot->life && (live || slot->defeated)) {
+            if (slot->life && (live || slot->defeated)) ++eligible;
+        }
+        combat_input.pages = (eligible + COOP_ENEMIES - 1) / COOP_ENEMIES;
+        if (!combat_input.pages) combat_input.pages = 1;
+        combat_input.page = combat_capture_page++ % combat_input.pages;
+        const unsigned first = combat_input.page * COOP_ENEMIES;
+        unsigned seen = 0, n = 0;
+        for (unsigned i = 0; i < (unsigned)D_807FDC88.count && n < COOP_ENEMIES; ++i) {
+            CoopEnemySlot* slot = &combat_enemies[i];
+            Actor* actor = slot->actor;
+            const unsigned live = actor && D_807FDC88.first[i].tied_actor == actor
+                && combat_actor_live(actor, slot->generation)
+                && combat_enemy_kind(actor->unk58) == slot->kind
+                && (actor->object_properties_bitfield & 0x10) && actor->health > 0;
+            if (!slot->life || (!live && !slot->defeated)) continue;
+            if (seen++ < first) continue;
+            {
                 CoopEnemy* state = &combat_input.enemies[n++];
                 *state = (CoopEnemy){i + 1, slot->life, slot->defeated ? COOP_ENEMY_DEFEATED : COOP_ENEMY_ALIVE, 0, slot->kind, 0, 0, 0, 0};
                 if (live && !slot->defeated) {

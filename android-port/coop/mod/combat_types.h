@@ -3,13 +3,15 @@
 // Fixed 32-bit ABI words, also used by the native bridge. Network serialization
 // remains explicit; no host pointers, actor types or arbitrary damage amounts cross it.
 #define COOP_ENEMIES 20
+#define COOP_ENEMY_KEYS 256
+#define COOP_COMBAT_PAGES ((COOP_ENEMY_KEYS + COOP_ENEMIES - 1) / COOP_ENEMIES)
 #define COOP_SHOTS 8
-#define COOP_COMBAT_FRAME_WORDS (4 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + 4)
+#define COOP_COMBAT_FRAME_WORDS (6 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + 4)
 // Compact network form: identity + life pair + position + packed yaw/health.
-// The four-word boss record reuses the former reserved tail, preserving every
-// established combat offsets; v42 retains transition state after the old 1192-byte body.
+// Page metadata is packed into the first wire word, so the four-word boss record,
+// all following offsets and the 1200-byte packet remain unchanged.
 #define COOP_COMBAT_WIRE_WORDS 204
-#define COOP_COMBAT_RESULT_WORDS (COOP_COMBAT_FRAME_WORDS + COOP_ENEMIES * 9)
+#define COOP_COMBAT_RESULT_WORDS (4 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + COOP_ENEMIES * 9 + 4)
 enum { COOP_ENEMY_ABSENT, COOP_ENEMY_ALIVE, COOP_ENEMY_DEFEATED, COOP_ENEMY_REQUEST };
 enum { COOP_COMBAT_OFF, COOP_COMBAT_WAITING, COOP_COMBAT_SHOTS, COOP_COMBAT_READY, COOP_COMBAT_LAYOUT_MISMATCH };
 enum { COOP_COMBAT_MOVEMENT = 1, COOP_COMBAT_POSE = 2 };
@@ -68,6 +70,7 @@ typedef struct {
     CoopEnemy enemies[COOP_ENEMIES];
     CoopShot shots[COOP_SHOTS];
     CoopBoss boss;
+    unsigned page, pages; // Game/native ABI only; packed into wire feature word.
 } CoopCombatFrame;
 typedef struct {
     unsigned status, paired, hands, movement;
