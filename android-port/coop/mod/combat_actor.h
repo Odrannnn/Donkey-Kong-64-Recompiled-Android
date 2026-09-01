@@ -29,6 +29,8 @@ extern void func_global_asm_806BC148(void);
 extern void func_global_asm_806AD9F4(void);
 extern void func_global_asm_806B24B8(void);
 extern void func_global_asm_806BC1AC(void);
+extern void func_global_asm_806B52DC(void);
+extern void func_global_asm_806BB400(void);
 extern void func_boss_800254D0(void);
 extern void func_boss_8002A92C(void);
 extern void func_boss_80033AF0(void);
@@ -124,6 +126,8 @@ combat_enemy_types[COOP_ENEMY_KIND_COUNT] = {
     {ACTOR_SPIDERLING, func_global_asm_806AD9F4},
     {ACTOR_FIREBALL_WITH_GLASSES, func_global_asm_806B24B8},
     {ACTOR_RULER, func_global_asm_806BC1AC},
+    {ACTOR_BOOK, func_global_asm_806B52DC},
+    {ACTOR_TOY_MONSTER, func_global_asm_806BB400},
 };
 static const struct { unsigned type; void (*original)(void); }
 combat_boss_types[COOP_BOSS_KIND_COUNT] = {
@@ -144,12 +148,13 @@ static unsigned combat_explosive_kind(unsigned kind) {
 }
 static unsigned combat_defeat_state(unsigned kind) {
     if (kind == COOP_PUFFTUP) return 0x27;
-    if (kind == COOP_FIREBALL_WITH_GLASSES) return 0x40;
+    if (kind == COOP_FIREBALL_WITH_GLASSES || kind == COOP_TOY_MONSTER) return 0x40;
     return 0x37;
 }
 static unsigned combat_nonhealth_defeat_kind(unsigned kind) {
     return combat_explosive_kind(kind) || kind == COOP_PUFFTUP
-        || kind == COOP_FIREBALL_WITH_GLASSES;
+        || kind == COOP_FIREBALL_WITH_GLASSES || kind == COOP_BOOK
+        || kind == COOP_TOY_MONSTER;
 }
 
 static unsigned combat_actor_live(Actor* actor, unsigned generation) {
@@ -233,10 +238,11 @@ static void combat_enemy_behavior(void) {
                     actor->health = 0;
                     D_global_asm_807FBB70.unk200 = 9;
                     D_global_asm_807FBB70.unk1FC = NULL;
-                    if (combat_explosive_kind(kind) || kind == COOP_PUFFTUP) {
+                    if (combat_explosive_kind(kind) || kind == COOP_PUFFTUP
+                            || kind == COOP_BOOK || kind == COOP_TOY_MONSTER) {
                         // These two handlers own an explicit explosion state
                         // rather than the ordinary health-based death helper.
-                        actor->control_state = combat_defeat_state(kind);
+                        actor->control_state = kind == COOP_TOY_MONSTER ? 0x37 : combat_defeat_state(kind);
                         actor->control_state_progress = 0;
                     }
                     applied = 1;

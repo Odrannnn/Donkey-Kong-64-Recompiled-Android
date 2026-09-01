@@ -60,7 +60,9 @@ enum {
     COOP_SPIDERLING,
     COOP_FIREBALL_WITH_GLASSES,
     COOP_RULER,
-    COOP_ENEMY_KIND_COUNT = COOP_RULER
+    COOP_BOOK,
+    COOP_TOY_MONSTER,
+    COOP_ENEMY_KIND_COUNT = COOP_TOY_MONSTER
 };
 typedef struct { unsigned key, life, state, peer_life, kind, x, y, z, yaw; } CoopEnemy;
 typedef struct { unsigned id, kind, x, y, z, yaw, scale; } CoopShot;

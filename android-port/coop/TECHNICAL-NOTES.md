@@ -124,11 +124,11 @@ registry. This makes short-lived fire visible to the 20 Hz sender without invent
 motion, collision or an impact. Snapshots older than 150 ms still hide remote shots.
 
 The original blue/gold beavers and regular Kremlings (actors 178/212/238), plus
-the twenty-nine kinds documented in the versioned sections below, are eligible
+the thirty-one kinds documented in the versioned sections below, are eligible
 for shared defeat in 58 reviewed vanilla gameplay maps. Every numeric map value
 is statically checked against the game's enum. Bosses, bonus games, races, crown
 battles and reward controllers remain excluded.
-On initialization all thirty-two behavior entries must match the pinned original handlers;
+On initialization all thirty-four behavior entries must match the pinned original handlers;
 otherwise the mod leaves them untouched and disables defeat sharing. The wrapper
 still calls the original handler for every actor update. It records collision
 result 9 only from the actual local player or one of that player's projectiles,
@@ -1476,3 +1476,19 @@ words, item/world/transition offsets stay fixed, and the LAN datagram remains
 1200 bytes. The combined bridge input grows from 2604 to 2612 bytes; the result
 remains 3300 bytes. Protocol/native ABI v43, compatibility `0x0001012B`, export
 `dk64_coop_tick_v43`, and the 0.43.0 manifest reject older peers and companions.
+
+## Book and Toy Monster defeat adapters (0.43.0)
+
+Actor 181 (`ACTOR_BOOK`, pinned handler `func_global_asm_806B52DC`) and actor 228
+(`ACTOR_TOY_MONSTER`, pinned handler `func_global_asm_806BB400`) join the ordinary
+combat allowlist. Neither uses the normal health-driven enemy death helper. A Book
+fades through state `0x37`; Toy Monster enters `0x37` and its own handler advances
+to terminal state `0x40`. The wrapper records those states only when the collision
+source is the real local player or that player's owned projectile.
+
+A validated remote command enters the same pinned local state and then calls the
+original handler. No pointer, script, animation, damage amount or effect crosses
+the network. Giant Clam remains excluded because its handler only opens and closes
+the environmental hazard and exposes no defeat path. Tomatoes remain encounter
+controllers rather than ordinary enemies. All thirty-four supported handlers must
+still match the pinned US actor table before any ordinary combat hook is installed.

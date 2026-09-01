@@ -16,7 +16,7 @@ enum { ACTOR_PUSHABLE_BOX = 21, ACTOR_BEAVER_BLUE = 178, ACTOR_BEAVER_GOLD = 212
     ACTOR_KASPLAT_DK = 241, ACTOR_KASPLAT_DIDDY = 242, ACTOR_KASPLAT_LANKY = 243,
     ACTOR_KASPLAT_TINY = 244, ACTOR_KASPLAT_CHUNKY = 245, ACTOR_SHURI = 267, ACTOR_GIMPFISH = 268,
     ACTOR_KLAPTRAP_GREEN = 205, ACTOR_KLAPTRAP_PURPLE = 208, ACTOR_KLAPTRAP_RED = 209, ACTOR_KROSSBONES = 262,
-    ACTOR_KABOOM = 175, ACTOR_KLOBBER = 182, ACTOR_PUFFTUP_0 = 290, ACTOR_KRITTER_IN_A_SHEET = 289, ACTOR_MR_DICE_0 = 269, ACTOR_SIR_DOMINO = 270, ACTOR_MR_DICE_1 = 271, ACTOR_SPIDERLING = 276, ACTOR_FIREBALL_WITH_GLASSES = 273, ACTOR_RULER = 230,
+    ACTOR_KABOOM = 175, ACTOR_BOOK = 181, ACTOR_KLOBBER = 182, ACTOR_TOY_MONSTER = 228, ACTOR_PUFFTUP_0 = 290, ACTOR_KRITTER_IN_A_SHEET = 289, ACTOR_MR_DICE_0 = 269, ACTOR_SIR_DOMINO = 270, ACTOR_MR_DICE_1 = 271, ACTOR_SPIDERLING = 276, ACTOR_FIREBALL_WITH_GLASSES = 273, ACTOR_RULER = 230,
     ACTOR_BOSS_KUTOUT_TAG = 165, ACTOR_BOSS_ARMY_DILLO = 185,
     ACTOR_BOSS_MAD_JACK = 204, ACTOR_BOSS_PUFFTOSS = 216, ACTOR_BOSS_DOGADON = 236,
     ACTOR_BOSS_KROOL_FOOT = 227, ACTOR_BOSS_KROOL_DK = 281,
@@ -141,6 +141,13 @@ void func_global_asm_806B24B8() {
     if (D_global_asm_807FBB70.unk200 == 9) gCurrentActorPointer->control_state = 0x40;
 }
 void func_global_asm_806BC1AC() { fake_beaver(); }
+void func_global_asm_806B52DC() {
+    if (D_global_asm_807FBB70.unk200 == 9) gCurrentActorPointer->control_state = 0x37;
+}
+void func_global_asm_806BB400() {
+    if (D_global_asm_807FBB70.unk200 == 9) gCurrentActorPointer->control_state = 0x37;
+    if (gCurrentActorPointer->control_state == 0x37) gCurrentActorPointer->control_state = 0x40;
+}
 void func_boss_800254D0() {
     auto* data = (CoopBossData*)gCurrentActorPointer->unk178;
     if (data && D_global_asm_807FBB70.unk200 == 4 && data->phase < 4) {
@@ -269,7 +276,7 @@ int main() {
     projectile.unk11C = &player; projectile.unk124 = &shot_params;
     gPlayerPointer = &player;
     for (auto* a : {&player, &blue, &gold, &projectile}) register_actor(a);
-    EnemySpawner spawners[3]{}; spawners[0].tied_actor = &blue; spawners[1].tied_actor = &gold;
+    EnemySpawner spawners[5]{}; spawners[0].tied_actor = &blue; spawners[1].tied_actor = &gold;
     spawners[0].init.enemy_value = 1; spawners[1].init.enemy_value = 2;
     D_807FDC88.count = 2; D_807FDC88.first = spawners;
     for (const auto& entry : combat_enemy_types)
@@ -696,6 +703,28 @@ int main() {
     ruler.health = 1; ruler.control_state = 1; ruler.unk54++;
     coop_combat_capture(); ruler.health = 0; D_global_asm_807FBB70 = {9, &projectile};
     combat_enemy_behavior(); CHECK(ruler.control_state == 0x37 && combat_enemies[2].defeated);
+    D_global_asm_807FBB70 = {};
+
+    // Book and Toy Monster use non-health disappearance paths. Remote commands
+    // enter only their pinned vanilla terminal states; Clam has no defeat path.
+    Actor book{}, toy{};
+    book.unk58 = ACTOR_BOOK; book.unk54 = 810; book.health = 1;
+    book.object_properties_bitfield = 0x10; book.control_state = 1;
+    toy.unk58 = ACTOR_TOY_MONSTER; toy.unk54 = 811; toy.health = 1;
+    toy.object_properties_bitfield = 0x10; toy.control_state = 0x23;
+    register_actor(&book); register_actor(&toy);
+    spawners[3].tied_actor = &book; spawners[3].init.enemy_value = 6;
+    spawners[4].tied_actor = &toy; spawners[4].init.enemy_value = 7;
+    D_807FDC88.count = 5; current_map = 87; coop_combat_capture();
+    CHECK(combat_enemies[3].kind == COOP_BOOK && combat_enemies[4].kind == COOP_TOY_MONSTER);
+    combat_result.apply[0] = {4, combat_enemies[3].life, COOP_ENEMY_DEFEATED, 900,
+        COOP_BOOK, 0, 0, 0, 0};
+    gCurrentActorPointer = &book; combat_enemy_behavior();
+    CHECK(book.health == 0 && book.control_state == 0x37 && combat_enemies[3].defeated);
+    combat_result.apply[0] = {5, combat_enemies[4].life, COOP_ENEMY_DEFEATED, 901,
+        COOP_TOY_MONSTER, 0, 0, 0, 0};
+    gCurrentActorPointer = &toy; combat_enemy_behavior();
+    CHECK(toy.health == 0 && toy.control_state == 0x40 && combat_enemies[4].defeated);
     D_global_asm_807FBB70 = {}; current_map = MAP_JAPES;
 
     // A short-lived owned projectile remains advertised for six capture frames,

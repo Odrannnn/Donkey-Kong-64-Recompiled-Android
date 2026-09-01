@@ -26,7 +26,7 @@ normalized-frame sample once, and only when both peers already have matching loc
 No animation clip, AI state or attack is transferred. It retains the 20-record
 linked-enemy capacity, 58 reviewed vanilla gameplay maps, downward partial
 enemy-health synchronization, loss-resilient collectible-page delivery, and
-optional **enemy defeat and movement synchronization** for thirty-two enemy kinds.
+optional **enemy defeat and movement synchronization** for thirty-four enemy kinds.
 It adds Pufftup and the sheeted Kritter alongside Kaboom and Klobber to all three Klaptrap colors, Krossbones and
 the earlier beavers, Kremlings, Klumps, Kasplats, flying and aquatic enemies. The
 glasses fireball retains its original immediate disappearance and local effect.
@@ -414,7 +414,8 @@ Both enemy copies must be loaded and linked while alive before health or kills c
 
 The supported kinds are blue/gold beavers, regular Kremlings, Klumps, Mushroom
 Men, Robo-Kremlings, Koshas, both Zinger variants, Robo-Zingers, bats, all five
-Kasplats, Shuris, Gimpfish, all three Klaptraps, Krossbones, Kaboom, Klobber, Pufftup, the sheeted Kritter and Ruler. They use
+Kasplats, Shuris, Gimpfish, all three Klaptraps, Krossbones, Kaboom, Klobber,
+Pufftup, the sheeted Kritter, Ruler, Book and Toy Monster. They use
 their own local death animations and behavior. Klump and Kremling commands wait
 until knockback ends. Flying enemies keep their local flight AI and attacks;
 position correction does not synchronize their full flight path or animation.
@@ -429,8 +430,10 @@ enemy interiors in Japes, Aztec, Galleon, Fungi, Caves and Castle; Hideout Helm;
 DK Isles; and four lobbies that contain supported enemies. This includes the
 Fungi Spider room and Chunky's Caves igloo. The ordinary-enemy channel excludes
 boss arenas, races, bonus games, crown battles and reward controllers; Army
-Dillo and Dogadon use the separate bounded channel below. Toy Monster, tomato
-encounter controllers and all other unlisted kinds remain local.
+Dillo and Dogadon use the separate bounded channel below. Giant Clam and tomato
+encounter controllers have no ordinary defeat path and remain local with all other
+unlisted kinds. Book and Toy Monster use their pinned vanilla disappearance states
+rather than a fabricated health-based death.
 If another mod has replaced any supported behavior handler before initialization,
 enemy synchronization is disabled without replacing any of those handlers.
 
@@ -503,7 +506,7 @@ mismatch is left alone rather than being overwritten later.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
   projectiles remain advertised for six capture frames after teardown so a fast
   shot cannot disappear entirely between 20 Hz sends.
-- Optional linked partial health and defeats for the thirty-two enemy kinds above in the 58
+- Optional linked partial health and defeats for the thirty-four enemy kinds above in the 58
   reviewed combat maps, plus optional host position/facing and guarded normalized
   pose corrections. Enable the same combat option on both peers and wait for the
   enemy-link HUD message.

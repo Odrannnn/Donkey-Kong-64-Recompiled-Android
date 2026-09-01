@@ -80,7 +80,8 @@ static void protocol_checks() {
         COOP_ENEMY_KIND_COUNT, 0, 0, 0, 0};
     CHECK(valid_combat(edge));
     auto edge_words = combat_words(edge);
-    CHECK(edge_words[4] == 0x10700u); // Maximum key/state/kind fields do not overlap.
+    CHECK(edge_words[4] == (256u | (COOP_ENEMY_REQUEST << COOP_ENEMY_STATE_SHIFT)
+        | (COOP_ENEMY_KIND_COUNT << COOP_ENEMY_KIND_SHIFT))); // Maximum fields do not overlap.
     auto edge_roundtrip = combat_from_words(edge_words);
     CHECK(edge_roundtrip.enemies[0].key == 256
         && edge_roundtrip.enemies[0].state == COOP_ENEMY_REQUEST
