@@ -1521,11 +1521,15 @@ older peers and native companions.
 The host-authoritative reversible channel now includes the Caves-lobby pressure
 switch flag `0x19D` alongside Galleon water and Fungi day/night. It has its own
 monotonic revision, guest request, host acknowledgement and readback bit. A local
-change is observed only from a complete safe inventory frame. Incoming state is
-written and saved outside the loaded lobby; the next lobby entry lets its twelve
-pinned vanilla readers initialize the switch and linked doors normally. No remote
-pressure interaction, animation, player position or temporary script state is
-invented.
+change is observed only from a complete reviewed inventory frame. With automatic
+world refresh enabled, an incoming change in map 194 resolves pinned object 6 and
+enters its exact vanilla state 2 (press) or state 6 (release); that script owns the
+linked-door animation and switch presentation. The reviewed lobby frame uses the
+ordinary isolated-save call without admitting any deferred item grant. A missing
+object saves the verified flag and falls back to a same-lobby vanilla rebuild.
+With refresh disabled, state still applies safely outside the lobby and its twelve
+readers initialize on the next entry. No player position, collision source or
+arbitrary script state is accepted from the peer.
 
 Three independent revision/request/base/ack lanes require nineteen world words.
 Four new words reuse bytes 80..95 of the retired standalone Japes-gate wire area,

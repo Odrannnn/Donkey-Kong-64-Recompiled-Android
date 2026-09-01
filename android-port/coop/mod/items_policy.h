@@ -24,7 +24,8 @@ typedef struct {
     // A verified snapshot remains publishable while the player is in a shop,
     // boss, minigame or other unsafe overlay. Writes stay deferred until a
     // later safe capture proves the live save layout again.
-    unsigned baseline, join, bound, deferred, previous[COOP_ITEM_WORDS];
+    unsigned baseline, join, bound, deferred, live_snapshot, world_save_pending,
+        previous[COOP_ITEM_WORDS];
 } CoopItems;
 static inline int coop_item_flag(unsigned id) {
     static const unsigned keys[8] = {0x1A, 0x4A, 0x8A, 0xA8, 0xEC, 0x124, 0x13D, 0x17C};
@@ -147,6 +148,7 @@ static inline void coop_items_prepare(CoopItems* g, unsigned enabled, unsigned a
     if (!g->input.enabled) {
         for (unsigned i = 0; i < COOP_ITEM_WORDS; ++i) g->input.request[i] = 0;
         g->save_pending = 0;
+        g->world_save_pending = 0;
         g->hud_pending = 0;
         g->refresh_pending = 0;
     }

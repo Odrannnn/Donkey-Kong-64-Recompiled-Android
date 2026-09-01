@@ -492,6 +492,44 @@ static void world_refresh_checks() {
     flags[0x19D] = 0; coop_world_capture(&w, &g);
     CHECK(w.input.ready && w.input.values == 0 && w.input.change[2] == 1
         && !w.input.change[0] && !w.input.change[1]);
+
+    // With automatic refresh, a peer already in the Caves lobby runs the exact
+    // vanilla press/release state on object 6 and saves without leaving.
+    reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = g.live_snapshot = 1;
+    g.refresh_enabled = 1; w = {}; w.input.ready = 1; w.result.scope = 1; w.result.status = 2;
+    w.result.apply = w.result.desired = 4; current_map = 194; mock_level = 7;
+    D_global_asm_807F6240[12] = 6;
+    coop_world_apply(&w, &g, 1);
+    CHECK(flags[0x19D] && writes == 1 && live_calls == 1 && live_slot == 12
+        && live_state == 2 && g.save_pending && g.world_save_pending && !g.refresh_pending);
+    coop_items_save_world_lobby(&g, 0); CHECK(!saves && g.world_save_pending);
+    coop_items_save_world_lobby(&g, 1);
+    CHECK(saves == 1 && !g.save_pending && !g.world_save_pending);
+
+    reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = g.live_snapshot = 1;
+    g.refresh_enabled = 1; w = {}; w.input.ready = 1; w.result.scope = 1; w.result.status = 2;
+    w.result.apply = 4; current_map = 194; mock_level = 7; flags[0x19D] = 1;
+    D_global_asm_807F6240[5] = 6;
+    coop_world_apply(&w, &g, 1);
+    CHECK(!flags[0x19D] && live_calls == 1 && live_state == 6 && !g.refresh_pending);
+
+    // Missing switch object keeps the verified flag/save and falls back to the
+    // existing same-map vanilla rebuild instead of claiming partial live success.
+    reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = g.live_snapshot = 1;
+    g.refresh_enabled = 1; w = {}; w.input.ready = 1; w.result.scope = 1; w.result.status = 2;
+    w.result.apply = w.result.desired = 4; current_map = 194; mock_level = 7;
+    coop_world_apply(&w, &g, 1);
+    CHECK(flags[0x19D] && !live_calls && g.refresh_pending && g.refresh_map == 194
+        && g.world_save_pending);
+
+    // The reviewed lobby frame is live for reversible capture even though item
+    // grants remain deferred there.
+    reset_engine(); g = {}; current_game = &g; current_map = 194; mock_level = 7;
+    coop_items_capture(&g, 1, 1, 0); g.bound = 1;
+    w = {}; coop_world_capture(&w, &g);
+    CHECK(g.deferred && g.live_snapshot && w.input.ready && !w.input.values);
+    flags[0x19D] = 1; coop_world_capture(&w, &g);
+    CHECK(w.input.values == 4 && w.input.change[2] == 1);
 }
 static void world_authority_checks() {
     WorldSync host, guest;

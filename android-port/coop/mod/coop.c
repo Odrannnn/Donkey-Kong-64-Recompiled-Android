@@ -335,6 +335,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
         // A normal transition already rebuilt the old map, so a queued refresh
         // for it is no longer needed.
         if (items.refresh_pending && items.refresh_map != (u32)current_map) items.refresh_pending = 0;
+        if (items.world_save_pending && (u32)current_map != 194) items.world_save_pending = 0;
     }
     local_state[STATE_MAP] = current_map;
     local_state[STATE_EPOCH] = epoch;
@@ -377,6 +378,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     coop_items_receive(&items, extra_result.items);
     coop_world_receive(&world, extra_result.world);
     coop_world_apply(&world, &items, playing);
+    coop_items_save_world_lobby(&items, playing && loading_zone_transition_speed == 0.0f);
     // Shops, bonus games and transitions may have partially completed awards.
     coop_items_apply(&items, playing && coop_items_safe_map());
     u8 world_refresh_started = 0;

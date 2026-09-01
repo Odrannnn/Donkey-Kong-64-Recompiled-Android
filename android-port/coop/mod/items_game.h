@@ -54,6 +54,7 @@ static inline unsigned coop_items_counters_valid(void) {
 static inline void coop_items_capture(CoopItems* g, unsigned enabled, unsigned adventure, unsigned file) {
     coop_items_prepare(g, enabled, adventure, file);
     g->deferred = 0;
+    g->live_snapshot = 0;
     if (!g->input.ready) return;
     // Boss/minigame overlays can temporarily replace upgrades or melon counts.
     // Keep publishing the last complete safe snapshot instead of exporting the
@@ -100,10 +101,19 @@ static inline void coop_items_capture(CoopItems* g, unsigned enabled, unsigned a
     }
     for (unsigned i = 0; i < COOP_ITEM_WORDS; ++i) g->previous[i] = g->input.owned[i];
     g->baseline = 1;
+    g->live_snapshot = 1;
     // A reviewed ordinary interior can publish this freshly verified state,
     // including as the first snapshot of a session. Applications still wait
     // for the narrower save-safe map set above.
     if (!coop_items_safe_map()) g->deferred = 1;
+}
+static inline void coop_items_save_world_lobby(CoopItems* g, unsigned stable) {
+    if (!g->world_save_pending || !stable || current_map != 194 || D_global_asm_807FD730) return;
+    // No item grant is admitted in this publish-only lobby. This saves only
+    // already-verified pending writes, including the reversible switch flag.
+    func_global_asm_8060DEC8();
+    g->world_save_pending = 0;
+    g->save_pending = 0;
 }
 static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
     g->troff_pending = 0;

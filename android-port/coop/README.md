@@ -375,14 +375,16 @@ Install both files from the matching platform ZIP with the game closed.
 
 - **Galleon:** either player can raise or lower the water with the normal switches.
 - **Fungi:** either player can select day or night with the normal clock switches.
-- **Caves lobby:** either player can operate the reversible pressure switch. Leave
-  the lobby after changing it; the peer receives the saved state in a safe map and
-  its next lobby entry initializes the linked doors from that state.
+- **Caves lobby:** either player can operate the reversible pressure switch. With
+  automatic world refresh enabled on a receiver already in that lobby, it runs
+  the pinned vanilla press/release sequence immediately. Otherwise leave the
+  lobby to exchange the saved state and initialize it on the next entry.
 - Connect and wait for **LAN ITEMS: SYNCED** and **LAN WORLD: SYNCED** before
   operating switches on the guest. Its pre-existing/offline toggle values are
   replaced by host state, not merged into the host save.
-- Both peers must be in supported safe maps (Isles, a main level or DK treehouse),
-  outside cutscenes and collectible-credit queues, to exchange changes. With
+- Both peers must have a current reviewed inventory snapshot and be outside
+  cutscenes and collectible-credit queues to exchange changes. Ordinary item
+  writes still require Isles, a main level or DK's treehouse. With
   **Auto-refresh shared world** enabled, an incoming Galleon water or Fungi
   day/night change may apply from that level's main map; the mod saves and reloads
   the map once through its current entrance. With the option Off, leave for Isles,
@@ -403,7 +405,9 @@ Install both files from the matching platform ZIP with the game closed.
 Only flags `0xA0`, `0xCE` and `0x19D` use this channel. First-use switch cutscenes,
 timers, carried objects and other reversible puzzles remain local. Fungi
 lighting/actor state and Galleon water physics are not patched
-live; the optional reload asks vanilla initialization to rebuild them. Existing
+live; their optional reload asks vanilla initialization to rebuild them. The
+Caves-lobby switch uses its exact loaded state-2/state-6 sequence and falls back
+to a same-lobby reload if object 6 is absent. Existing
 permanent-item IDs and isolated `items_host_v6` / `items_guest_v6`
 saves are unchanged. Back up these experimental saves before upgrading.
 

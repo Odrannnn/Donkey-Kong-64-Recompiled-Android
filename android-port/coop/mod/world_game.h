@@ -16,7 +16,8 @@ static inline void coop_world_capture(CoopWorld* w, const CoopItems* g) {
     // Item snapshots may use a last-known-safe cache in overlay maps. Reversible
     // world toggles must still be sampled live, so never derive a revision from
     // that deferred frame.
-    w->input.ready = w->input.enabled && g->input.ready && !g->deferred && g->bound;
+    w->input.ready = w->input.enabled && g->input.ready
+        && (!g->deferred || g->live_snapshot) && g->bound;
     if (!w->input.ready) return;
     unsigned values = 0;
     for (unsigned i = 0; i < COOP_WORLD_TOGGLES; ++i)
@@ -37,12 +38,14 @@ static inline void coop_world_receive(CoopWorld* w, CoopWorldResult result) {
 }
 static inline void coop_world_apply(CoopWorld* w, CoopItems* g, unsigned playing) {
     if (!playing || !w->input.ready || !g->input.ready || !g->bound || g->file_changed
-            || g->counter_error || !coop_items_safe_map() || D_global_asm_807FD730
+            || g->counter_error || D_global_asm_807FD730
             || !w->result.scope || !w->result.status) return;
     unsigned here = getLevelIndex(current_map, 1);
     for (unsigned i = 0; i < COOP_WORLD_TOGGLES; ++i) {
         unsigned bit = 1u << i;
-        unsigned refresh = here == coop_world_levels[i];
+        unsigned lobby_live = i == 2 && current_map == 194;
+        if (!coop_items_safe_map() && !lobby_live) continue;
+        unsigned refresh = lobby_live || here == coop_world_levels[i];
         if (!(w->result.apply & bit) || (refresh && !g->refresh_enabled)) continue;
         unsigned desired = (w->result.desired & bit) != 0;
         if ((isFlagSet(coop_world_flags[i], 0) != 0) == desired) continue;
@@ -50,6 +53,7 @@ static inline void coop_world_apply(CoopWorld* w, CoopItems* g, unsigned playing
         if ((isFlagSet(coop_world_flags[i], 0) != 0) == desired) {
             w->previous = (w->previous & ~bit) | (w->result.desired & bit);
             g->save_pending = 1; // Use the existing isolated-save request path.
+            if (lobby_live) g->world_save_pending = 1;
             if (refresh) {
                 if (!coop_live_reversible_refresh(i, desired)) {
                     g->refresh_pending = 1;
