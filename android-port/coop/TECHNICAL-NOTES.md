@@ -1,4 +1,4 @@
-> Current source: 0.43.0, protocol/native ABI v43. All eight native suites pass
+> Current source: 0.44.0, protocol/native ABI v44. All eight native suites pass
 > in the pinned Linux GNU C++ 15.2.0 Debug ASan/UBSan build. MIPS NRM, Android
 > ARM64, Windows x64, format/export and packaging checks also pass. Gameplay
 > validation remains pending.
@@ -227,8 +227,8 @@ datagram ceiling.
 
 The game-thread socket is nonblocking, capped at 32 receives/tick and 20 Hz sends.
 Presence expires after 750 ms; transport expires after three seconds. The native
-bridge `dk64_coop_tick_v43` validates twelve-word presence spans, a **2612-byte**
-gate/combat/item/world input and a **3300-byte** combined result before memory
+bridge `dk64_coop_tick_v44` validates twelve-word presence spans, a **2636-byte**
+gate/combat/item/world input and a **3324-byte** combined result before memory
 access. The new export rejects old NRM/companion pairs. Native structs are never
 serialized directly. No loader changes or background game-memory access are used.
 Room/session identifiers are not authentication or encryption; trusted LAN only.
@@ -1492,3 +1492,25 @@ the network. Giant Clam remains excluded because its handler only opens and clos
 the environmental hazard and exposes no defeat path. Tomatoes remain encounter
 controllers rather than ordinary enemies. All thirty-four supported handlers must
 still match the pinned US actor table before any ordinary combat hook is installed.
+
+## Reciprocally bound boss movement (0.44.0)
+
+Combat modes 2 and 3 now carry the host boss position and facing to the guest for
+all ten bounded boss rounds. The command requires the expected map-selected kind,
+the receiver's current boss life token, the reciprocal tail-record binding, the
+pinned live actor generation, normal gameplay state, and finite bounded coordinates.
+The host never accepts guest motion. The guest uses the ordinary 40% correction
+and 500-unit snap threshold; motion expires after 150 ms without a fresh packet.
+
+Boss motion occupies the otherwise empty first ordinary-enemy wire slot on boss
+maps. A reserved kind range distinguishes it during explicit serialization, and
+the decoder removes it before ordinary-enemy validation. No actor type, pointer,
+overlay address or arbitrary state is accepted. Boss AI, attacks, timers, animation,
+projectiles, arena scripts and player damage remain local; the existing bounded
+phase channel still owns damage agreement.
+
+The game/native frame and result each gain a six-word typed motion record, growing
+the combined bridge spans to 2636 and 3324 bytes. The compact combat section and
+all subsequent offsets remain unchanged, so packets stay 1200 bytes. Protocol 44,
+compatibility `0x0001012C`, export `dk64_coop_tick_v44`, and manifest 0.44.0 reject
+older peers and native companions.

@@ -370,6 +370,22 @@ static void coop_boss_behavior(void) {
     const unsigned phase = combat_boss_phase(kind, actor, data);
     const unsigned bit = kind ? 1u << index : 0;
     const CoopBoss command = combat_result.boss;
+    const CoopBossMotion motion = combat_result.boss_motion;
+    if (role == ROLE_JOIN && combat_enabled >= 2 && (combat_result.movement & COOP_COMBAT_MOVEMENT)
+            && kind && motion.kind == kind && motion.life == combat_boss.life
+            && combat_result.status == COOP_COMBAT_READY && combat_game_ready()
+            && coop_boss_kind(current_map) == kind && combat_boss.actor == actor
+            && combat_boss.generation == actor->unk54 && combat_actor_live(actor, actor->unk54)
+            && (actor->object_properties_bitfield & 0x10) && motion.yaw < 4096) {
+        float x = bits_float(motion.x), y = bits_float(motion.y), z = bits_float(motion.z);
+        if (x >= -100000.0f && x <= 100000.0f && y >= -100000.0f && y <= 100000.0f
+                && z >= -100000.0f && z <= 100000.0f) {
+            float dx = x - actor->x_position, dy = y - actor->y_position, dz = z - actor->z_position;
+            float blend = dx * dx + dy * dy + dz * dz > 250000.0f ? 1.0f : 0.4f;
+            actor->x_position += dx * blend; actor->y_position += dy * blend; actor->z_position += dz * blend;
+            actor->y_rotation = actor->unkEE = motion.yaw;
+        }
+    }
     if (kind && (boss_hooks & bit) && boss_behaviors[index] == combat_boss_types[index].original
             && D_global_asm_8074C0A0[combat_boss_types[index].type] == coop_boss_behavior
             && data && command.kind == kind && command.life == combat_boss.life && command.peer_life
@@ -550,8 +566,13 @@ static void coop_combat_capture(void) {
             if (phase >= combat_boss.phase) combat_boss.phase = phase;
         }
         if (combat_boss.life && combat_boss.kind == boss_kind
-                && (phase <= 4 || combat_boss.phase == 4))
+                && (phase <= 4 || combat_boss.phase == 4)) {
             combat_input.boss = (CoopBoss){boss_kind, combat_boss.life, 0, combat_boss.phase};
+            if (combat_enabled >= 2 && actor)
+                combat_input.boss_motion = (CoopBossMotion){boss_kind, combat_boss.life,
+                    float_bits(actor->x_position), float_bits(actor->y_position),
+                    float_bits(actor->z_position), (unsigned)actor->y_rotation & 0xFFF};
+        }
     }
     if (coop_combat_map(current_map) && combat_hooks && D_807FDC88.count > 0 && D_807FDC88.count <= 256 && D_807FDC88.first) {
         {

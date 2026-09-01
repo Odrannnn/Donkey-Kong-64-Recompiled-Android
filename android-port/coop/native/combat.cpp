@@ -9,6 +9,7 @@ static_assert(sizeof(CoopCombatFrame) == COOP_COMBAT_FRAME_WORDS * 4);
 static_assert(sizeof(CoopCombatResult) == COOP_COMBAT_RESULT_WORDS * 4);
 static_assert(std::is_trivially_copyable_v<CoopCombatFrame>);
 namespace {
+constexpr unsigned boss_wire_kind_base = 48;
 bool bounded_float(unsigned bits, float min, float max) {
     const float value = std::bit_cast<float>(bits);
     return std::isfinite(value) && value >= min && value <= max;
@@ -62,6 +63,12 @@ bool valid_combat(const CoopCombatFrame& f) {
         if (b.life || b.peer_life || b.phase) return false;
     } else if (!f.enabled || b.kind > COOP_BOSS_KIND_COUNT || !b.life
             || b.life > COOP_ENEMY_LIFE_MASK || b.peer_life > COOP_ENEMY_LIFE_MASK || b.phase > 4) return false;
+    const auto& m = f.boss_motion;
+    if (!m.kind) {
+        if (m.life || m.x || m.y || m.z || m.yaw) return false;
+    } else if (f.enabled < 2 || m.kind != b.kind || m.life != b.life || m.yaw >= 4096
+            || !bounded_float(m.x, -100000, 100000) || !bounded_float(m.y, -100000, 100000)
+            || !bounded_float(m.z, -100000, 100000)) return false;
     return true;
 }
 std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat_words(const CoopCombatFrame& f) {
@@ -69,7 +76,11 @@ std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat_words(const CoopCombatFrame&
     size_t n = 0;
     w[n++] = f.enabled | (f.page << 8) | (f.pages << 16);
     w[n++] = f.file; w[n++] = f.layout; w[n++] = f.hands;
-    for (const auto& e : f.enemies) {
+    for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
+        CoopEnemy e = f.enemies[i];
+        if (!i && f.boss_motion.kind) e = {1, f.boss_motion.life, COOP_ENEMY_ALIVE, 0,
+            boss_wire_kind_base + f.boss_motion.kind, f.boss_motion.x, f.boss_motion.y,
+            f.boss_motion.z, f.boss_motion.yaw};
         uint32_t identity = e.key | (e.state << COOP_ENEMY_STATE_SHIFT) | (e.kind << COOP_ENEMY_KIND_SHIFT);
         if (e.key > 256 || e.state > 3 || e.kind > COOP_ENEMY_KIND_MASK) identity |= 0x20000u;
         w[n++] = identity;
@@ -87,7 +98,8 @@ CoopCombatFrame combat_from_words(const std::array<uint32_t, COOP_COMBAT_WIRE_WO
     f.enabled = feature & 0xFFu; f.page = (feature >> 8) & 0xFFu; f.pages = (feature >> 16) & 0xFFu;
     if (feature & 0xFF000000u) f.enabled = 4; // Fail valid_combat.
     f.file = w[n++]; f.layout = w[n++]; f.hands = w[n++];
-    for (auto& e : f.enemies) {
+    for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
+        auto& e = f.enemies[i];
         const uint32_t identity = w[n++];
         e.key = identity & COOP_ENEMY_KEY_MASK;
         e.state = (identity >> COOP_ENEMY_STATE_SHIFT) & 3u;
@@ -95,6 +107,11 @@ CoopCombatFrame combat_from_words(const std::array<uint32_t, COOP_COMBAT_WIRE_WO
         if (identity & ~COOP_ENEMY_IDENTITY_MASK) e.key = 257; // Fail valid_combat.
         e.life = w[n++]; e.peer_life = w[n++];
         e.x = w[n++]; e.y = w[n++]; e.z = w[n++]; e.yaw = w[n++];
+        if (!i && e.key == 1 && e.state == COOP_ENEMY_ALIVE
+                && e.kind > boss_wire_kind_base && e.kind <= boss_wire_kind_base + COOP_BOSS_KIND_COUNT) {
+            f.boss_motion = {e.kind - boss_wire_kind_base, e.life, e.x, e.y, e.z, e.yaw};
+            e = {};
+        }
     }
     for (auto& s : f.shots) { s.id = w[n++]; s.kind = w[n++]; s.x = w[n++]; s.y = w[n++]; s.z = w[n++]; s.yaw = w[n++]; s.scale = w[n++]; }
     f.boss.kind = w[n++]; f.boss.life = w[n++]; f.boss.peer_life = w[n++]; f.boss.phase = w[n++];
@@ -163,6 +180,14 @@ void CombatSync::update(bool host, const State& local, const CoopCombatFrame& in
         if (remote.boss.peer_life == outgoing.boss.life) {
             output.status = COOP_COMBAT_READY;
             ++output.paired;
+            if (outgoing.enabled >= 2 && remote.enabled >= 2) {
+                output.movement |= COOP_COMBAT_MOVEMENT;
+                if (!host && remote.boss_motion.kind == expected_boss
+                        && remote.boss_motion.life == remote.boss.life) {
+                    output.boss_motion = remote.boss_motion;
+                    output.boss_motion.life = outgoing.boss.life;
+                }
+            }
             const unsigned target = host
                 ? (outgoing.boss.phase > remote.boss.phase ? outgoing.boss.phase : remote.boss.phase)
                 : remote.boss.phase;

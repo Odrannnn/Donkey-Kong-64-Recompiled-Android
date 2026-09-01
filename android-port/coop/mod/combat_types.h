@@ -6,12 +6,12 @@
 #define COOP_ENEMY_KEYS 256
 #define COOP_COMBAT_PAGES ((COOP_ENEMY_KEYS + COOP_ENEMIES - 1) / COOP_ENEMIES)
 #define COOP_SHOTS 8
-#define COOP_COMBAT_FRAME_WORDS (6 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + 4)
+#define COOP_COMBAT_FRAME_WORDS (12 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + 4)
 // Compact network form: identity + life pair + position + packed yaw/health.
 // Page metadata is packed into the first wire word, so the four-word boss record,
 // all following offsets and the 1200-byte packet remain unchanged.
 #define COOP_COMBAT_WIRE_WORDS 204
-#define COOP_COMBAT_RESULT_WORDS (4 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + COOP_ENEMIES * 9 + 4)
+#define COOP_COMBAT_RESULT_WORDS (10 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + COOP_ENEMIES * 9 + 4)
 enum { COOP_ENEMY_ABSENT, COOP_ENEMY_ALIVE, COOP_ENEMY_DEFEATED, COOP_ENEMY_REQUEST };
 enum { COOP_COMBAT_OFF, COOP_COMBAT_WAITING, COOP_COMBAT_SHOTS, COOP_COMBAT_READY, COOP_COMBAT_LAYOUT_MISMATCH };
 enum { COOP_COMBAT_MOVEMENT = 1, COOP_COMBAT_POSE = 2 };
@@ -67,12 +67,14 @@ enum {
 typedef struct { unsigned key, life, state, peer_life, kind, x, y, z, yaw; } CoopEnemy;
 typedef struct { unsigned id, kind, x, y, z, yaw, scale; } CoopShot;
 typedef struct { unsigned kind, life, peer_life, phase; } CoopBoss;
+typedef struct { unsigned kind, life, x, y, z, yaw; } CoopBossMotion;
 typedef struct {
     unsigned enabled, file, layout, hands;
     CoopEnemy enemies[COOP_ENEMIES];
     CoopShot shots[COOP_SHOTS];
     CoopBoss boss;
     unsigned page, pages; // Game/native ABI only; packed into wire feature word.
+    CoopBossMotion boss_motion; // ABI only; encoded in enemy wire slot zero on boss maps.
 } CoopCombatFrame;
 typedef struct {
     unsigned status, paired, hands, movement;
@@ -80,6 +82,7 @@ typedef struct {
     CoopShot shots[COOP_SHOTS];
     CoopEnemy motion[COOP_ENEMIES]; // Guest-only commands, with the guest's local life token.
     CoopBoss boss; // One-step game-thread boss phase target with the receiver's life token.
+    CoopBossMotion boss_motion; // Guest-only host position/facing correction.
 } CoopCombatResult;
 
 // Enemy facing needs 12 bits. Alive records use the next 15 bits for positive

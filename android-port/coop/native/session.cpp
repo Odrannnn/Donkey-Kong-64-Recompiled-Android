@@ -361,6 +361,7 @@ CoopCombatResult Session::combat(uint64_t now) const {
     if (now - impl->last_state > 150) {
         for (auto& shot : result.shots) shot = {};
         for (auto& motion : result.motion) motion = {};
+        result.boss_motion = {};
         result.movement = 0;
     }
     return result;

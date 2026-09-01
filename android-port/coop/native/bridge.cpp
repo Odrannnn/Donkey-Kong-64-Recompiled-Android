@@ -56,13 +56,13 @@ COOP_EXPORT void dk64_coop_local_ipv4(uint8_t*, recomp_context* ctx) {
     ctx->r2 = session.local_ipv4();
 }
 // A new export rejects older NRM/library pairs before reading the larger spans.
-COOP_EXPORT void dk64_coop_tick_v43(uint8_t* rdram, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_tick_v44(uint8_t* rdram, recomp_context* ctx) {
     uint32_t local_address = uint32_t(ctx->r4), remote_address = uint32_t(ctx->r5);
     uint32_t progress_address = uint32_t(ctx->r6), result_address = uint32_t(ctx->r7);
     constexpr size_t bytes = dkcoop::state_words * sizeof(uint32_t);
     static_assert(sizeof(dkcoop::ProgressInput) == dkcoop::progress_input_words * 4);
     static_assert(sizeof(dkcoop::ProgressResult) == dkcoop::progress_result_words * 4);
-    static_assert(sizeof(ExtraInput) == 2612 && sizeof(ExtraResult) == 3300);
+    static_assert(sizeof(ExtraInput) == 2636 && sizeof(ExtraResult) == 3324);
     if (!valid_span(local_address, bytes) || !valid_span(remote_address, bytes)
             || !valid_span(progress_address, sizeof(ExtraInput))
             || !valid_span(result_address, sizeof(ExtraResult))) {
@@ -75,7 +75,7 @@ COOP_EXPORT void dk64_coop_tick_v43(uint8_t* rdram, recomp_context* ctx) {
         std::memcpy(&progress, rdram + (progress_address - rdram_base), sizeof(progress));
         auto now = dkcoop::clock_ms();
         // The former Japes-only gate experiment is retired. Its fixed-size
-        // bridge and wire slots remain reserved and canonical zero in v43.
+        // bridge and wire slots remain reserved and canonical zero in v44.
         if (!failed) session.tick(dkcoop::state_from_words(local), now, {}, progress.combat, progress.items, progress.world);
         auto remote = dkcoop::state_to_words(session.remote(now));
         std::memcpy(rdram + (remote_address - rdram_base), remote.data(), bytes);

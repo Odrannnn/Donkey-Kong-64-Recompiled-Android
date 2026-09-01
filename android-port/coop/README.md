@@ -1,7 +1,7 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
-Version **0.43.0** keeps item pages synchronized while players occupy different
+Version **0.44.0** keeps item pages synchronized while players occupy different
 areas by publishing each device's last verified safe inventory snapshot through
 shops, bosses, minigames, and other unsafe overlays. Incoming writes remain queued
 until that device reaches a safe gameplay frame. It retains v0.41.1's Android/Wi-Fi
@@ -23,15 +23,16 @@ the 0.34 enemy-pose correction that
 prevents one 20 Hz network sample from being reapplied on every render frame.
 After exact enemy identity and life binding, the guest accepts each new host
 normalized-frame sample once, and only when both peers already have matching local clips.
-No animation clip, AI state or attack is transferred. It retains the 20-record
-linked-enemy capacity, 58 reviewed vanilla gameplay maps, downward partial
+No animation clip, AI state or attack is transferred. Compact pages cover all
+supported linked enemies across 58 reviewed vanilla gameplay maps, with downward partial
 enemy-health synchronization, loss-resilient collectible-page delivery, and
 optional **enemy defeat and movement synchronization** for thirty-four enemy kinds.
 It adds Pufftup and the sheeted Kritter alongside Kaboom and Klobber to all three Klaptrap colors, Krossbones and
 the earlier beavers, Kremlings, Klumps, Kasplats, flying and aquatic enemies. The
 glasses fireball retains its original immediate disappearance and local effect.
-The compact 20-record limit remains. Boss AI, attacks, position, timers,
-projectiles and player damage remain local; only bounded damage phases are shared.
+Each page still carries 20 records. With the movement option, the guest also follows
+the host boss position and facing after reciprocal boss-life binding. Boss AI,
+attacks, timers, projectiles and player damage remain local.
 
 The earlier 2394 collectible/progression IDs and Fungi day/night/Galleon water
 state are retained. Feeding adds 3500 cumulative milestones, for 5894 shared
@@ -45,7 +46,7 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.43.0 passes all
+**This is experimental, not complete campaign co-op. Version 0.44.0 passes all
 eight native suites in a pinned Linux Debug ASan/UBSan build, plus the MIPS NRM,
 Android ARM64, Windows x64, format, export and package checks. Gameplay validation
 remains pending.**
@@ -55,7 +56,7 @@ Back up experimental saves before using the build.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.43.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.44.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
    Import the complete Android ZIP through **Manage Mods -> Import**.
@@ -452,8 +453,9 @@ advances the overlay's private phase counter; the host merges the higher observe
 phase, then each receiver enters the pinned vanilla collision-result-4 path one
 phase at a time. Commands wait through the vanilla `0x4D` hit reaction and cannot
 replace another local collision. The mod never writes the phase byte or script
-index directly. It does not synchronize Dillo movement, facing, AI decisions,
-attacks, missiles, barrel actors, animation, sounds, cutscenes or player damage.
+index directly. When both peers select enemy movement, the guest corrects Dillo's
+position and facing toward the host. AI decisions, attacks, missiles, barrel actors,
+animation, sounds, cutscenes and player damage remain local.
 If another mod owns the pinned Dillo handler, this boss channel disables itself.
 
 Dogadon uses the same four-word record in maps 83 and 197, but its vanilla
@@ -500,7 +502,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v43 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v44 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -549,7 +551,7 @@ That version's tablet-host/Windows-guest **synthetic** LAN probe exchanged all 2
 not load the ROM or exercise real pickups. Package verification checks the actual
 Android importer, same NRM on both platforms, 16 KiB ELF load alignment and native
 dependencies. Historical results: `build/verification-v0.10.0`. Current build status:
-`build/build-v0.43.0`; package hashes: `dist/SHA256SUMS.txt`.
+`build/build-v0.44.0`; package hashes: `dist/SHA256SUMS.txt`.
 
 Version 0.10 actual gameplay testing connected the tablet host and a fresh
 portable Windows 1.0.1 guest. Both displayed the other Kong and ITEMS: SYNCED

@@ -35,7 +35,7 @@ static CoopCombatFrame boss_frame(unsigned life, unsigned phase, unsigned kind =
     return f;
 }
 static void protocol_checks() {
-    static_assert(COOP_ENEMIES == 20 && COOP_COMBAT_FRAME_WORDS == 246 && COOP_COMBAT_WIRE_WORDS == 204);
+    static_assert(COOP_ENEMIES == 20 && COOP_COMBAT_FRAME_WORDS == 252 && COOP_COMBAT_WIRE_WORDS == 204);
     auto f = frame(100); CHECK(valid_combat(f));
     CHECK(coop_enemy_yaw(f.enemies[0]) == 2048 && coop_enemy_health(f.enemies[0]) == 5);
     CHECK(combat_words(combat_from_words(combat_words(f))) == combat_words(f));
@@ -100,6 +100,9 @@ static void protocol_checks() {
     x = boss; x.boss.kind = COOP_BOSS_KIND_COUNT + 1; bad(x);
     x = boss; x.boss.life = 0; bad(x); x = boss; x.boss.phase = 5; bad(x);
     x = boss; x.boss.peer_life = COOP_ENEMY_LIFE_MASK + 1; bad(x);
+    x = boss; x.enabled = 2; x.boss_motion = {x.boss.kind, x.boss.life, bits(1), bits(2), bits(3), 4095}; CHECK(valid_combat(x));
+    CHECK(combat_words(combat_from_words(combat_words(x))) == combat_words(x));
+    x.boss_motion.yaw = 4096; bad(x);
     p.combat = f; p.kind = Kind::welcome; b = encode(p); CHECK(!decode(b.data(), b.size(), out));
     p.kind = Kind::state; b = encode(p); b[5] = 4; CHECK(!decode(b.data(), b.size(), out));
 }
@@ -178,6 +181,9 @@ static void boss_checks() {
     CombatSync host, guest;
     State hs{8, 1, 0, active}, gs{8, 2, 1, active};
     auto hi = boss_frame(700, 0), gi = boss_frame(800, 0);
+    hi.enabled = gi.enabled = 2;
+    hi.boss_motion = {COOP_BOSS_ARMY_DILLO, 700, bits(100), bits(200), bits(300), 512};
+    gi.boss_motion = {COOP_BOSS_ARMY_DILLO, 800, bits(-100), bits(-200), bits(-300), 1024};
     auto tick = [&](unsigned count = 1) {
         for (unsigned i = 0; i < count; ++i) {
             auto hw = host.wire(), gw = guest.wire();
@@ -189,6 +195,9 @@ static void boss_checks() {
     CHECK(host.result().status == COOP_COMBAT_READY && guest.result().status == COOP_COMBAT_READY);
     CHECK(host.result().paired == 1 && guest.result().paired == 1
         && host.wire().boss.peer_life == 800 && guest.wire().boss.peer_life == 700);
+    CHECK(!host.result().boss_motion.kind && guest.result().boss_motion.kind == COOP_BOSS_ARMY_DILLO
+        && guest.result().boss_motion.life == 800 && guest.result().boss_motion.x == bits(100)
+        && guest.result().boss_motion.yaw == 512);
     gi.boss.phase = 1; tick(3);
     CHECK(host.result().boss.kind == COOP_BOSS_ARMY_DILLO && host.result().boss.life == 700
         && host.result().boss.peer_life == 800 && host.result().boss.phase == 1);
