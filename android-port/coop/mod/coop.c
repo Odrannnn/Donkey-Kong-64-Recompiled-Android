@@ -115,7 +115,7 @@ _Static_assert(COOP_MAP_JAPES_DILLO == 8 && COOP_MAP_FUNGI_DOGADON == 83
     "Pinned boss map IDs and wire kind count");
 
 _Static_assert(COOP_TROFF_FIRST == 2394 && COOP_TROFF_END == 5894 && COOP_JAPES_BOULDER_BUNCH == 5894
-    && COOP_ITEMS == 5895
+    && COOP_KROOL_DEFEATED == 5895 && COOP_ITEMS == 5896
     && COOP_TROFF_LEVELS == 7 && COOP_TROFF_KONGS == 5 && COOP_TROFF_CAPACITY == 100
     && COOP_ITEM_WORDS * 32 >= COOP_ITEMS, "Cumulative Troff feeding contract");
 

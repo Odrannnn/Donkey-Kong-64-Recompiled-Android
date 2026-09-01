@@ -434,6 +434,65 @@ static void japes_boulder_bunch_checks() {
     CHECK(writes == 1 && saves == 0
         && D_global_asm_807FC950[0].character_progress[4].coloured_bananas[0] == 5);
 }
+static void seed_krool_route() {
+    flags[coop_item_flag(COOP_LOBBY)] = 1;
+    for (unsigned i = 0; i < 8; ++i) {
+        flags[coop_item_flag(70 + i)] = 1;
+        flags[coop_item_flag(COOP_KEY_TURN_FIRST + i)] = 1;
+    }
+    flags[coop_item_flag(COOP_KLUMSY_FREE)] = 1;
+}
+static void krool_completion_checks() {
+    // The terminal completion bit is accepted only after the complete vanilla
+    // route: all keys, their K. Lumsy turn-ins, the lobby and K. Lumsy freed.
+    unsigned owned[COOP_ITEM_WORDS]{};
+    owned[COOP_KROOL_DEFEATED / 32] |= bit(COOP_KROOL_DEFEATED);
+    CHECK(!coop_items_full_dependencies(owned));
+    owned[COOP_LOBBY / 32] |= bit(COOP_LOBBY);
+    for (unsigned i = 0; i < 8; ++i) {
+        owned[(70 + i) / 32] |= bit(70 + i);
+        owned[(COOP_KEY_TURN_FIRST + i) / 32] |= bit(COOP_KEY_TURN_FIRST + i);
+    }
+    owned[COOP_KLUMSY_FREE / 32] |= bit(COOP_KLUMSY_FREE);
+    CHECK(coop_items_full_dependencies(owned));
+
+    // A receiver writes and saves only the persistent completion flag. No
+    // ending cutscene, transition, inventory counter or HUD path is invoked.
+    reset_engine(); CoopItems g{}; current_game = &g; g.join = 1; seed_krool_route();
+    current_map = 7; mock_level = 0;
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(g.input.ready && !coop_item_owned(COOP_KROOL_DEFEATED));
+    CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 323;
+    r.apply[COOP_KROOL_DEFEATED / 32] = bit(COOP_KROOL_DEFEATED);
+    coop_items_receive(&g, r);
+    block_write = 1; coop_items_apply(&g, 1);
+    CHECK(writes == 1 && !flags[0x1B0] && !saves && !hud_updates);
+    block_write = 0; coop_items_apply(&g, 1);
+    CHECK(writes == 2 && flags[0x1B0] && saves == 1 && !hud_updates && !any(g.input.request));
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(g.input.ready && coop_item_owned(COOP_KROOL_DEFEATED)
+        && coop_item_has(g.input.owned, COOP_KROOL_DEFEATED));
+
+    // A real local victory observed first wins the race. A later network copy
+    // neither rewrites nor resaves the already-owned completion flag.
+    reset_engine(); g = {}; current_game = &g; g.join = 1; seed_krool_route();
+    current_map = 7; mock_level = 0; coop_items_capture(&g, 1, 1, 0);
+    CoopItemResult ready{}; ready.status = 3; ready.scope = 1; ready.session_lo = 324;
+    coop_items_receive(&g, ready);
+    setFlag(0x1B0, 1, 0);
+    CHECK(coop_item_has(g.input.request, COOP_KROOL_DEFEATED));
+    coop_items_capture(&g, 1, 1, 0);
+    g.result.status = 2;
+    g.result.apply[COOP_KROOL_DEFEATED / 32] = bit(COOP_KROOL_DEFEATED);
+    coop_items_apply(&g, 1);
+    CHECK(writes == 1 && saves == 0 && flags[0x1B0]);
+
+    // A corrupt save that claims victory before the route is rejected and
+    // remains latched fail-closed for the process lifetime.
+    reset_engine(); g = {}; current_game = &g; flags[0x1B0] = 1;
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(g.counter_error && !g.input.ready && !writes && !saves);
+}
 static void world_refresh_checks() {
     // Default behavior preserves the old outside-level restriction.
     reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
@@ -750,6 +809,6 @@ static void live_checks() {
 #include "progression_checks.h"
 #include "training_checks.h"
 int main() {
-    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); japes_boulder_bunch_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
+    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
     std::printf("PASS: %u item, all GBs/1700 pickups adapter, inventory preservation, authority, deduplication, lossy UDP and reconnect checks\n", checks);
 }

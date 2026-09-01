@@ -134,7 +134,9 @@ Level 8 is Helm; all safe snapshot maps are outside it.
 | 0x1AB | tutorial/first-use/repeat-cutscene bookkeeping, not a persistent unlock |
 
 Paid arcade entry (0x83), level visits, captions, first-time actor dialogue,
-quit/ending/global flags and ongoing boss phases are not world unlocks.
+quit/global flags and ongoing boss phases are not world unlocks. Final K. Rool
+defeat (`0x1B0`) is synchronized separately as explicit item ID 5895 after the
+complete key/K. Lumsy dependency chain; its ending cutscene stays local.
 Temporary switches, timers, live actors, damage, water height and day/night
 need separate synchronization; they must not be ORed into this ownership set.
 

@@ -1558,3 +1558,15 @@ observed through the ordinary permanent-flag callback and its queued vanilla
 credit drains before snapshot capture. Existing IDs 0 through 5893 do not move.
 Protocol 46, compatibility `0x0001012E`, export `dk64_coop_tick_v46`, and
 manifest 0.46.0 reject older packages.
+
+The same release appends stable item ID 5895 for
+`PERMFLAG_PROGRESS_K_ROOL_DEFEATED` (`0x1B0`). The pinned final Chunky K. Rool
+handler writes this flag after the local winning sequence; the frontend later
+reads it for the ending and main-event menu state. A remote grant uses only the
+ordinary permanent-flag write, readback and isolated-save path in a safe gameplay
+map. It never invokes a cutscene, transition, boss handler, HUD or inventory path.
+Complete-snapshot validation requires the final K. Lumsy state, whose existing
+dependencies require the lobby, all eight key items and all eight turn-ins.
+Canceled writes retry, an already-local victory wins the race without a second
+save, and a save claiming victory without that route latches fail-closed. Existing
+IDs 0 through 5894 do not move; packet, bridge and protocol sizes are unchanged.

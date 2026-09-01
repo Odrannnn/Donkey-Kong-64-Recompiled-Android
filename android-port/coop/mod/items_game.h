@@ -25,6 +25,7 @@ static inline unsigned coop_items_snapshot_map(void) {
 #include "troff_game.h"
 static inline unsigned coop_item_owned(unsigned id) {
     if (id == COOP_JAPES_BOULDER_BUNCH) return isFlagSet(0x01D, 0) != 0;
+    if (id == COOP_KROOL_DEFEATED) return isFlagSet(0x1B0, 0) != 0;
     if (id >= COOP_TROFF_FIRST && id < COOP_TROFF_END) return coop_troff_owned(id);
     if (id >= COOP_PROGRESSION_FIRST) return coop_progression_owned(id);
     if (id < COOP_PICKUP_FIRST || id >= COOP_ACTOR_PICKUP_FIRST) return isFlagSet(coop_item_flag(id), 0) != 0;

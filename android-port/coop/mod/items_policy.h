@@ -4,7 +4,8 @@
 #include "progression_ids.h"
 #include "troff_ids.h"
 // Stable item IDs, never arbitrary flags supplied by a peer. All ABI fields are words.
-enum { COOP_JAPES_BOULDER_BUNCH = COOP_TROFF_END, COOP_ITEMS = COOP_JAPES_BOULDER_BUNCH + 1,
+enum { COOP_JAPES_BOULDER_BUNCH = COOP_TROFF_END, COOP_KROOL_DEFEATED = COOP_JAPES_BOULDER_BUNCH + 1,
+    COOP_ITEMS = COOP_KROOL_DEFEATED + 1,
     COOP_ITEM_WORDS = 192, COOP_ITEM_PAGE_WORDS = 24, COOP_ITEM_PAGES = 8,
     COOP_ITEM_WIRE_WORDS = 5 + 2 * COOP_ITEM_PAGE_WORDS,
     COOP_SNIDE_FIRST = 80, COOP_SNIDE_COUNT = 40, COOP_MEDAL_FIRST = 120,
@@ -37,6 +38,7 @@ static inline int coop_item_flag(unsigned id) {
     if (id == 78) return 0x84;
     if (id == 79) return 0x17B;
     if (id == COOP_JAPES_BOULDER_BUNCH) return 0x01D;
+    if (id == COOP_KROOL_DEFEATED) return 0x1B0;
     if (id < COOP_MEDAL_FIRST) return 0x1FD + id - COOP_SNIDE_FIRST;
     if (id < COOP_GB_FIRST) return 0x225 + id - COOP_MEDAL_FIRST;
     if (id < COOP_PICKUP_FIRST) return coop_golden_bananas[id - COOP_GB_FIRST].flag;
@@ -85,6 +87,9 @@ static inline unsigned coop_items_full_dependencies(const unsigned* words) {
     for (unsigned i = 0; i < 8; ++i)
         if (coop_item_has(words, COOP_KEY_TURN_FIRST + i)
                 && (!coop_item_has(words, 70 + i) || !coop_item_has(words, COOP_LOBBY))) return 0;
+    // Final defeat unlocks the ending/main-event menu bits. It cannot precede
+    // the vanilla all-keys K. Lumsy completion that opens the K. Rool route.
+    if (coop_item_has(words, COOP_KROOL_DEFEATED) && !coop_item_has(words, COOP_KLUMSY_FREE)) return 0;
     // Japes' hidden, taggable pad requires its GB reveal. That GB is on a
     // different wire page: check only complete ownership, never one page.
     for (unsigned i = 0; i < COOP_WARP_TAG_COUNT; ++i) {
@@ -119,6 +124,7 @@ static inline int coop_item_id(int flag) {
     for (unsigned id = 0; id < COOP_PICKUP_FIRST; ++id) if (coop_item_flag(id) == flag) return id;
     for (unsigned id = COOP_ACTOR_PICKUP_FIRST; id < COOP_PROGRESSION_END; ++id) if (coop_item_flag(id) == flag) return id;
     if (flag == 0x01D) return COOP_JAPES_BOULDER_BUNCH;
+    if (flag == 0x1B0) return COOP_KROOL_DEFEATED;
     return -1;
 }
 static inline unsigned coop_item_gb(unsigned id, unsigned* level, unsigned* kong) {

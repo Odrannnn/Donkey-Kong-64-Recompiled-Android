@@ -4,7 +4,10 @@ Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
 Version **0.46.0** adds the last vanilla colored-banana collectible that was
 outside the generated pickup tables: Chunky's five-banana bunch behind the rear
 Japes boulder. It uses the pickup's own permanent flag and credits the receiver
-only outside Japes, preventing the local actor from duplicating it. Item pages remain synchronized while players occupy different
+only outside Japes, preventing the local actor from duplicating it. It also
+shares the saved final K. Rool defeat after the complete K. Lumsy/key route has
+been proven. The receiver gets the persistent completion state without a forced
+ending cutscene or map transition. Item pages remain synchronized while players occupy different
 areas by publishing each device's last verified safe inventory snapshot through
 shops, bosses, minigames, and other unsafe overlays. Incoming writes remain queued
 until that device reaches a safe gameplay frame. It retains v0.41.1's Android/Wi-Fi
@@ -38,8 +41,8 @@ the host boss position and facing after reciprocal boss-life binding. Boss AI,
 attacks, timers, projectiles and player damage remain local.
 
 The earlier 2394 collectible/progression IDs and Fungi day/night/Galleon water
-state are retained. Feeding adds 3500 cumulative milestones and the boulder
-bunch appends one stable collectible ID, for 5895 shared IDs. The feeding IDs
+state are retained. Feeding adds 3500 cumulative milestones; the boulder bunch
+and final K. Rool completion append two stable IDs, for 5896 shared IDs. The feeding IDs
 are accounting thresholds, not additional collectible locations.
 Troff & Scoff feeding from 0.16 is retained: incoming cumulative payments consume
 matching available bananas outside their level and update the next boss-door visit.
@@ -128,6 +131,10 @@ no account, matchmaking, relay, router setup or firewall modification.
 - **Troff & Scoff feeding is shared from 0.16.** The missing cumulative amount
   is deducted from the matching available banana balance, not copied from the
   other player's balance. Collected totals and banana-medal credit are preserved.
+- **Final K. Rool completion is shared.** The terminal save flag applies only in
+  safe ordinary gameplay after the snapshot proves all eight keys, turn-ins,
+  the lobby and final K. Lumsy state. The winner sees the normal local ending;
+  the receiver gets no cutscene, transition, inventory change or HUD event.
 
 Both players may establish and refresh item/progression snapshots in regular
 gameplay in DK's treehouse, Isles, the seven main levels, and the reviewed
@@ -324,7 +331,8 @@ Tags remain independent; no partner pad is activated automatically.
 The permanent-unlock pass covers saved outcomes, not every door's live state.
 Version 0.15 adds the separate day/night and water-height path described below.
 Temporary/timed puzzle steps, shop spending, physical animation timing, tutorial
-bookkeeping and the ending sequence remain local. **Full campaign co-op is not complete.** New flags may
+bookkeeping and the ending cutscene remain local; only its saved final-completion
+outcome is shared. **Full campaign co-op is not complete.** New flags may
 expose pre-existing guest-only progress as **GUEST SAVE AHEAD**; no automatic
 merge, reset or normal-save migration is performed.
 
