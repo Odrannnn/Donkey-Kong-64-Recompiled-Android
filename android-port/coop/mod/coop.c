@@ -153,6 +153,9 @@ extern s16 func_global_asm_80659470(s32 object);
 extern void func_global_asm_8063DA40(s16 script_slot, s16 state);
 extern u8 getLevelIndex(Maps map, u8 include_lobbies);
 extern s8 is_cutscene_active;
+extern s16 D_global_asm_807476F8;
+extern u16 D_global_asm_807F5CF0;
+extern u16 D_global_asm_807F5CF4;
 extern u8 current_character_index[];
 extern void (*D_global_asm_8074C0A0[])(void);
 extern u16 D_global_asm_8074E814[];
@@ -355,8 +358,9 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     local_state[STATE_FLAGS] = 0;
     local_state[STATE_ANIM] = local_state[STATE_FRAME] = 0;
     unsigned pose_rows = animation_rows();
-    u8 playing = game_mode == GAME_MODE_ADVENTURE && is_cutscene_active == 0 && gPlayerPointer != NULL
+    u8 present = game_mode == GAME_MODE_ADVENTURE && gPlayerPointer != NULL
         && gPlayerPointer->animation_state != NULL && current_character_index[0] < 5;
+    u8 playing = present && is_cutscene_active == 0;
     if (playing) {
         local_state[STATE_FLAGS] = STATE_ACTIVE;
         local_state[STATE_KONG] = current_character_index[0];
@@ -365,6 +369,9 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
         local_state[STATE_Z] = float_bits(gPlayerPointer->z_position);
         local_state[STATE_YAW] = gPlayerPointer->y_rotation & 0xFFF;
         capture_pose(local_state[STATE_KONG], pose_rows);
+    } else if (present && is_cutscene_active == 1) {
+        local_state[STATE_FLAGS] = STATE_CUTSCENE;
+        local_state[STATE_KONG] = current_character_index[0];
     }
     unsigned transition_ticket = 0, transition_route = 0;
     coop_transition_capture(&transition_capture,
@@ -383,7 +390,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     // Rising-bit capture recovers local awards when regular play resumes.
     coop_items_capture(&items, shared_items ? (merge_guest_progress ? 2 : 1) : 0, playing, current_file);
     coop_world_capture(&world, &items);
-    coop_transient_capture(playing);
+    coop_transient_capture(present);
     // Keep the retired v1-v40 gate words canonical zero so the established
     // combat/item/world bridge offsets remain unchanged.
     CoopExtraInput extra = {{0}, combat_input, items.input, world.input, transient_input};

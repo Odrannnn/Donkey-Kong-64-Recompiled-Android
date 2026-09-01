@@ -88,7 +88,7 @@ default = "Off"
 [[manifest.config_options]]
 id = "same_area_events"
 name = "Same-area events (restart)"
-description = "Enable on BOTH peers. While both players occupy the same stable map and room epoch, the host publishes only reviewed loaded vanilla scripts for gates, doors, reversible water/day-night switches, timers and linked platforms. The guest invokes the existing local script-state path; packets cannot name arbitrary objects or functions. Different maps, loading, stale epochs and unsupported objects fail closed. Host state is authoritative and temporary state is not saved. Experimental and gameplay validation is pending."
+description = "Enable on BOTH peers. While both players occupy the same stable map and room epoch, the host publishes only reviewed loaded vanilla scripts for gates, doors, reversible water/day-night switches, timers and linked platforms. The guest invokes the existing local script-state path; packets cannot name arbitrary objects or functions. Matching cutscenes may advance one camera phase at a time only when both games already run the same cutscene with the same flags. A packet cannot start a cutscene, award an item, force a transition or replay an ending. Different maps, loading, stale epochs and unsupported objects fail closed. Host state is authoritative and temporary state is not saved. Experimental and gameplay validation is pending."
 type = "Enum"
 options = ["Off", "Reviewed host-authoritative events"]
 default = "Off"

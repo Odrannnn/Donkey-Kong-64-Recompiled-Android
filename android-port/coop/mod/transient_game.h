@@ -74,6 +74,15 @@ static void coop_transient_capture(unsigned present) {
             coop_transient_add_object(entry->object, entry->kind,
                 transient_page, &ordinal, &transient_input);
     }
+    // Cutscene records only align two already-running copies. Instance scripts
+    // start their own local cutscene, so packets cannot launch rewards/endings.
+    if (is_cutscene_active == 1 && D_global_asm_807476F8 >= 0 && D_global_asm_807476F8 < 0xFF
+            && D_global_asm_807F5CF0 <= 0xFF
+            && transient_input.count < COOP_TRANSIENT_RECORDS) {
+        transient_input.records[transient_input.count++] = (CoopTransientRecord){
+            COOP_TRANSIENT_CUTSCENE, (unsigned)D_global_asm_807476F8 + 1,
+            (unsigned)D_global_asm_807F5CF0, (unsigned)D_global_asm_807F5CF4 & 0xFF};
+    }
     unsigned pages = (ordinal + COOP_TRANSIENT_RECORDS - 1) / COOP_TRANSIENT_RECORDS;
     transient_page = pages ? (transient_page + 1) % pages : 0;
 }
@@ -84,6 +93,14 @@ static void coop_transient_apply(void) {
             || loading_zone_transition_speed != 0.0f) return;
     for (unsigned i = 0; i < transient_result.count && i < COOP_TRANSIENT_RECORDS; ++i) {
         CoopTransientRecord record = transient_result.records[i];
+        if (record.kind == COOP_TRANSIENT_CUTSCENE) {
+            unsigned local_id = D_global_asm_807476F8 >= 0 ? (unsigned)D_global_asm_807476F8 + 1 : 0;
+            if (is_cutscene_active == 1 && record.key == local_id
+                    && record.value == ((unsigned)D_global_asm_807F5CF4 & 0xFF)
+                    && record.state == (unsigned)D_global_asm_807F5CF0 + 1)
+                D_global_asm_807F5CF0 = record.state;
+            continue;
+        }
         unsigned kind = coop_transient_object_kind(current_map, record.key);
         if (kind != record.kind || record.state > 0xFF) continue;
         Prop_ScriptData* script = coop_transient_script(record.key);

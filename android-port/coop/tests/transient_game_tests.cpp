@@ -1,5 +1,6 @@
 // Run the same-area game adapter against a recording engine boundary. This
-// proves that network records can only touch reviewed loaded script objects.
+// proves that network records can only touch reviewed loaded script objects and
+// can only align an already-running matching cutscene by one camera phase.
 #include "../mod/transient_types.h"
 #include <algorithm>
 #include <array>
@@ -21,6 +22,9 @@ static u32 transient_enabled = 1, transient_revision = 1, transient_page;
 static CoopTransientInput transient_input{};
 static CoopTransientResult transient_result{};
 static f32 loading_zone_transition_speed;
+static s8 is_cutscene_active;
+static s16 D_global_asm_807476F8 = -1;
+static u16 D_global_asm_807F5CF0, D_global_asm_807F5CF4;
 static s16 D_global_asm_807F6240[600];
 static std::array<Prop, 256> props;
 static std::array<Prop_ScriptData, 256> scripts;
@@ -46,7 +50,8 @@ static void reset() {
     role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
     transient_enabled = 1; transient_revision = 1; transient_page = 0;
     transient_input = {}; transient_result = {};
-    loading_zone_transition_speed = 0;
+    loading_zone_transition_speed = 0; is_cutscene_active = 0;
+    D_global_asm_807476F8 = -1; D_global_asm_807F5CF0 = D_global_asm_807F5CF4 = 0;
     script_calls = last_object = last_state = 0;
 }
 static void load(unsigned slot, unsigned object, unsigned state) {
@@ -102,7 +107,27 @@ static void object_apply_checks() {
     transient_result.epoch = 9; role = ROLE_HOST; coop_transient_apply(); CHECK(script_calls == 1);
 }
 
+static void cutscene_checks() {
+    reset(); current_map = 48; is_cutscene_active = 1;
+    D_global_asm_807476F8 = 12; D_global_asm_807F5CF0 = 3; D_global_asm_807F5CF4 = 0x41;
+    coop_transient_capture(1);
+    CHECK(contains(COOP_TRANSIENT_CUTSCENE, 13, 3));
+
+    role = ROLE_JOIN;
+    transient_result = {COOP_TRANSIENT_APPLYING, 48, 9, 1,
+        {{COOP_TRANSIENT_CUTSCENE, 13, 4, 0x41}}};
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4);
+    transient_result.records[0].state = 6;
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4); // Never skip camera phases.
+    transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 14, 5, 0x41};
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4); // Wrong cutscene ID.
+    transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 13, 5, 0x40};
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4); // Wrong control flags.
+    is_cutscene_active = 0; transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 13, 5, 0x41};
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4); // A packet cannot start one.
+}
+
 int main() {
-    capture_checks(); object_apply_checks();
-    std::printf("PASS: %u reviewed script adapter checks\n", checks);
+    capture_checks(); object_apply_checks(); cutscene_checks();
+    std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }
