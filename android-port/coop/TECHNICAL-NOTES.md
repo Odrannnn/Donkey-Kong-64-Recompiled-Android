@@ -118,8 +118,10 @@ translation matrix, then use the game's attached-sprite path. No collision spher
 projectile behavior, homing logic, player controller, sound or explosion callback
 is installed. Actor deletion removes the attached sprite. Active plus retiring
 shot slots stay bounded at eight; ownership checks include the live registry,
-actor type and generation. Snapshots older than 150 ms hide shots. Short-lived
-projectiles can be missed between 20 Hz samples; there is no reliable fire-event queue.
+actor type and generation. A bounded local queue retains the last position of a
+locally owned projectile for six capture frames after it leaves the live actor
+registry. This makes short-lived fire visible to the 20 Hz sender without inventing
+motion, collision or an impact. Snapshots older than 150 ms still hide remote shots.
 
 The original blue/gold beavers and regular Kremlings (actors 178/212/238), plus
 the twenty-nine kinds documented in the versioned sections below, are eligible

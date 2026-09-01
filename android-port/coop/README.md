@@ -500,7 +500,9 @@ mismatch is left alone rather than being overwritten later.
   after three seconds and can reconnect. Protocol/native ABI v43 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
-- Optional gun/orange projectile visuals and hand/weapon visibility.
+- Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
+  projectiles remain advertised for six capture frames after teardown so a fast
+  shot cannot disappear entirely between 20 Hz sends.
 - Optional linked partial health and defeats for the thirty-two enemy kinds above in the 58
   reviewed combat maps, plus optional host position/facing and guarded normalized
   pose corrections. Enable the same combat option on both peers and wait for the

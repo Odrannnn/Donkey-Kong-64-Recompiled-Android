@@ -56,6 +56,10 @@ typedef struct {
     u32 generation, retiring_generation, id, kind;
 } CoopShotSlot;
 typedef struct {
+    CoopShot shot;
+    u32 missed;
+} CoopLocalShotSlot;
+typedef struct {
     u8 pad[0x14];
     u8 phase, script;
 } CoopBossData;
@@ -74,6 +78,7 @@ typedef struct {
 } CoopBossSlot;
 static CoopEnemySlot combat_enemies[256];
 static CoopShotSlot combat_shots[COOP_SHOTS];
+static CoopLocalShotSlot combat_local_shots[COOP_SHOTS];
 static CoopBossSlot combat_boss;
 static u32 combat_layout, combat_file, combat_file_changed, combat_hooks, combat_capture_page;
 static u32 combat_life_counter; // Does not reset with the game's per-map actor counter.
@@ -499,6 +504,7 @@ static void coop_combat_capture(void) {
         combat_boss = (CoopBossSlot){0};
         for (unsigned i = 0; i < 256; ++i) combat_enemies[i] = (CoopEnemySlot){0};
         for (unsigned i = 0; i < COOP_SHOTS; ++i) combat_retire_shot(&combat_shots[i]);
+        for (unsigned i = 0; i < COOP_SHOTS; ++i) combat_local_shots[i] = (CoopLocalShotSlot){0};
     }
     if (combat_enabled && game_mode == GAME_MODE_ADVENTURE && current_file < 3) {
         if (!combat_file) combat_file = current_file + 1;
@@ -509,6 +515,7 @@ static void coop_combat_capture(void) {
         combat_layout = 0; combat_spawner_table = NULL;
         combat_boss = (CoopBossSlot){0};
         for (unsigned i = 0; i < 256; ++i) combat_enemies[i] = (CoopEnemySlot){0};
+        for (unsigned i = 0; i < COOP_SHOTS; ++i) combat_local_shots[i] = (CoopLocalShotSlot){0};
     }
     coop_boss_hook();
     if (!combat_game_ready() || D_global_asm_807FBB34 > 64) return;
@@ -613,8 +620,12 @@ static void coop_combat_capture(void) {
             }
         }
     }
-    unsigned n = 0;
-    for (unsigned i = 0; i < D_global_asm_807FBB34 && n < COOP_SHOTS; ++i) {
+    enum { COOP_SHOT_HOLD_FRAMES = 6 };
+    for (unsigned i = 0; i < COOP_SHOTS; ++i) if (combat_local_shots[i].shot.id) {
+        if (++combat_local_shots[i].missed > COOP_SHOT_HOLD_FRAMES)
+            combat_local_shots[i] = (CoopLocalShotSlot){0};
+    }
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
         Actor* actor = D_global_asm_807FB930[i].actor;
         if (!actor || actor->unk11C != gPlayerPointer || !(actor->object_properties_bitfield & 0x10)) continue;
         unsigned kind = combat_projectile_kind(actor->unk58);
@@ -622,9 +633,21 @@ static void coop_combat_capture(void) {
         float scale = actor->unk124 ? actor->unk124->unkC : 1.0f;
         if (!(scale >= 0.01f && scale <= 4.0f)) scale = 1.0f;
         unsigned id = actor->unk54 + 1; if (!id) id = 1;
-        combat_input.shots[n++] = (CoopShot){id, kind, float_bits(actor->x_position), float_bits(actor->y_position),
+        CoopLocalShotSlot* slot = NULL;
+        for (unsigned s = 0; s < COOP_SHOTS; ++s)
+            if (combat_local_shots[s].shot.id == id && combat_local_shots[s].shot.kind == kind) {
+                slot = &combat_local_shots[s]; break;
+            }
+        if (!slot) for (unsigned s = 0; s < COOP_SHOTS; ++s)
+            if (!combat_local_shots[s].shot.id) { slot = &combat_local_shots[s]; break; }
+        if (!slot) continue;
+        slot->shot = (CoopShot){id, kind, float_bits(actor->x_position), float_bits(actor->y_position),
             float_bits(actor->z_position), (unsigned)actor->unkEE & 0xFFF, float_bits(scale)};
+        slot->missed = 0;
     }
+    unsigned n = 0;
+    for (unsigned i = 0; i < COOP_SHOTS && n < COOP_SHOTS; ++i)
+        if (combat_local_shots[i].shot.id) combat_input.shots[n++] = combat_local_shots[i].shot;
 }
 static void coop_combat_render(unsigned visible) {
     static const unsigned types[6] = {ACTOR_PROJECTILE_COCONUTS, ACTOR_PROJECTILE_PEANUT, ACTOR_PROJECTILE_GRAPE,

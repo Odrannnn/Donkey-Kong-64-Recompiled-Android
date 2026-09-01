@@ -698,6 +698,16 @@ int main() {
     combat_enemy_behavior(); CHECK(ruler.control_state == 0x37 && combat_enemies[2].defeated);
     D_global_asm_807FBB70 = {}; current_map = MAP_JAPES;
 
+    // A short-lived owned projectile remains advertised for six capture frames,
+    // long enough for the 20 Hz network sampler to observe it, then retires.
+    coop_combat_capture(); CHECK(combat_input.shots[0].id == 301);
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i)
+        if (D_global_asm_807FB930[i].actor == &projectile) D_global_asm_807FB930[i].actor = NULL;
+    for (unsigned i = 0; i < 6; ++i) {
+        coop_combat_capture(); CHECK(combat_input.shots[0].id == 301);
+    }
+    coop_combat_capture(); CHECK(!combat_input.shots[0].id);
+
     // Game snapshots page every supported live record instead of starving keys
     // after the first twenty.
     enum { CROWD_COUNT = 24 };
