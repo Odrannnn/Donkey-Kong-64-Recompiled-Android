@@ -126,9 +126,9 @@ no account, matchmaking, relay, router setup or firewall modification.
   other player's balance. Collected totals and banana-medal credit are preserved.
 
 Both players may establish and refresh item/progression snapshots in regular
-gameplay in DK's treehouse, Isles, the seven main levels, and the 58 reviewed
-ordinary combat maps, including their ordinary interiors, four lobbies and
-Hideout Helm. Interior/lobby/Helm snapshots are publish-only: received writes
+gameplay in DK's treehouse, Isles, the seven main levels, and the reviewed
+ordinary gameplay maps, including their ordinary interiors, all seven lobbies
+and Hideout Helm. Interior/lobby/Helm snapshots are publish-only: received writes
 and saves still wait until that device reaches DK's treehouse, Isles or a main
 level. Shops, unreviewed interiors, training grounds/barrels, boss arenas,
 minigames, cutscenes and pending reward queues retain the last verified snapshot;

@@ -17,7 +17,10 @@ static inline unsigned coop_items_snapshot_map(void) {
     // ownership snapshot, but remain deferred so no remote write or save runs
     // while an interior/lobby/Helm script is loaded. Bosses, shops, races,
     // bonuses and other overlays are absent from coop_combat_map().
-    return coop_items_safe_map() || coop_combat_map(current_map);
+    // Galleon, Fungi and Caves lobbies have no supported enemy, so they are
+    // absent from the combat allowlist despite using the same stable inventory.
+    return coop_items_safe_map() || coop_combat_map(current_map)
+        || current_map == 174 || current_map == 178 || current_map == 194;
 }
 #include "troff_game.h"
 static inline unsigned coop_item_owned(unsigned id) {

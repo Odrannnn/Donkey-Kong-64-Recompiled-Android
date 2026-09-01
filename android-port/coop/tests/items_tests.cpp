@@ -506,6 +506,14 @@ static void cross_area_cache_checks() {
     coop_items_apply(&g, 1);
     CHECK(!flags[0x84] && !writes && !saves);
 
+    // Peaceful Galleon/Fungi/Caves lobbies are explicit snapshot maps even
+    // though they contain no enemy and therefore are not combat-map entries.
+    for (unsigned lobby : {174u, 178u, 194u}) {
+        reset_engine(); g = {}; current_game = &g; current_map = lobby; mock_level = 7;
+        coop_items_capture(&g, 1, 1, 0);
+        CHECK(g.input.ready && g.baseline && g.deferred);
+    }
+
     // An unreviewed overlay still cannot become the first snapshot.
     reset_engine(); g = {}; current_game = &g;
     current_map = 5; mock_level = 0;

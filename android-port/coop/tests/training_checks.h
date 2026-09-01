@@ -30,7 +30,8 @@ static void training_checks() {
         reset_engine(); CoopItems g{}; current_game = &g; current_map = map;
         bool apply_allowed = map == 7 || map == 26 || map == 30 || map == 34 || map == 38
             || map == 48 || map == 72 || map == 87 || map == 171;
-        bool snapshot_allowed = apply_allowed || coop_combat_map(map);
+        bool snapshot_allowed = apply_allowed || coop_combat_map(map)
+            || map == 174 || map == 178 || map == 194;
         coop_items_capture(&g, 1, 1, 0);
         CHECK(bool(g.input.ready) == snapshot_allowed && bool(g.deferred) == (snapshot_allowed && !apply_allowed)
             && !g.counter_error);
