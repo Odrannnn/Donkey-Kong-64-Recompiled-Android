@@ -1,7 +1,10 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
-Version **0.45.0** keeps item pages synchronized while players occupy different
+Version **0.46.0** adds the last vanilla colored-banana collectible that was
+outside the generated pickup tables: Chunky's five-banana bunch behind the rear
+Japes boulder. It uses the pickup's own permanent flag and credits the receiver
+only outside Japes, preventing the local actor from duplicating it. Item pages remain synchronized while players occupy different
 areas by publishing each device's last verified safe inventory snapshot through
 shops, bosses, minigames, and other unsafe overlays. Incoming writes remain queued
 until that device reaches a safe gameplay frame. It retains v0.41.1's Android/Wi-Fi
@@ -35,8 +38,9 @@ the host boss position and facing after reciprocal boss-life binding. Boss AI,
 attacks, timers, projectiles and player damage remain local.
 
 The earlier 2394 collectible/progression IDs and Fungi day/night/Galleon water
-state are retained. Feeding adds 3500 cumulative milestones, for 5894 shared
-IDs; these are accounting thresholds, not additional collectible locations.
+state are retained. Feeding adds 3500 cumulative milestones and the boulder
+bunch appends one stable collectible ID, for 5895 shared IDs. The feeding IDs
+are accounting thresholds, not additional collectible locations.
 Troff & Scoff feeding from 0.16 is retained: incoming cumulative payments consume
 matching available bananas outside their level and update the next boss-door visit.
 See [the permanent-unlock coverage table](WORLD-UNLOCKS.md).
@@ -46,17 +50,17 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.45.0 passes all
-eight native suites in a pinned Linux Debug ASan/UBSan build, plus the MIPS NRM,
-Android ARM64, Windows x64, format, export and package checks. Gameplay validation
-remains pending.**
+**This is experimental, not complete campaign co-op. Version 0.46.0 passes all
+eight native suites in a pinned Linux Debug ASan/UBSan build plus the MIPS NRM
+build. The complete Android ARM64, Windows x64, format, export and package pass
+is still pending. Gameplay validation remains pending.**
 Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
 Back up experimental saves before using the build.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.45.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.46.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
    Import the complete Android ZIP through **Manage Mods -> Import**.
@@ -351,9 +355,9 @@ between feeding visits if you want to avoid unnecessary payments.
 **LAN ITEMS: FEEDING PENDING** means the receiver is still in the affected level,
 lacks corresponding available bananas, or is waiting for earlier milestones.
 Existing pickup synchronization supplies missing available bananas first; feeding
-never creates bananas or makes a balance negative. The unshared Japes boulder
-bunch can leave up to five Chunky bananas requiring local collection. No special
-credit is invented for it.
+never creates bananas or makes a balance negative. The rear Japes boulder bunch
+now supplies its exact five-banana credit through permanent flag `0x01D`; a
+receiver applies it only after leaving Japes.
 
 Incoming deductions preserve `available + fed`, so they do not create extra
 banana medals or collected totals. Readback advances acknowledgement and the
@@ -514,7 +518,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v45 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v46 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -538,9 +542,8 @@ it does not synchronize attacks, sounds, effects or damage. Enemy health
 from the guest is speculative until host acceptance; there is no rollback. Other enemies, boss behavior outside the bounded phase adapters, enemy drops, shared
 player damage/ammo, secondary animation layers, sounds/effects, other puzzles/doors,
 transitions outside the 169-route reviewed ordinary-route allowlist, host migration
-and world progression outside the allowlist are **not synchronized**. Chunky's five-banana
-actor drop from the rear Japes boulder is outside the supported pickup tables and
-remains local. The remote shot visuals cannot themselves hit enemies or switches.
+and world progression outside the allowlist are **not synchronized**. The remote
+shot visuals cannot themselves hit enemies or switches.
 Full Tag Anywhere compatibility is not established.
 
 ## Validation history and gameplay checklist
@@ -562,8 +565,8 @@ For 0.10, the seven suites ran on Windows and the tablet; Linux used ASan/UBSan.
 That version's tablet-host/Windows-guest **synthetic** LAN probe exchanged all 2199 IDs. It does
 not load the ROM or exercise real pickups. Package verification checks the actual
 Android importer, same NRM on both platforms, 16 KiB ELF load alignment and native
-dependencies. Historical results: `build/verification-v0.10.0`. Current build status:
-`build/build-v0.45.0`; package hashes: `dist/SHA256SUMS.txt`.
+dependencies. Historical results: `build/verification-v0.10.0`. The current
+v0.46 full release build and package hashes are pending.
 
 Version 0.10 actual gameplay testing connected the tablet host and a fresh
 portable Windows 1.0.1 guest. Both displayed the other Kong and ITEMS: SYNCED

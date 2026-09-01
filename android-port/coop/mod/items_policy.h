@@ -4,7 +4,8 @@
 #include "progression_ids.h"
 #include "troff_ids.h"
 // Stable item IDs, never arbitrary flags supplied by a peer. All ABI fields are words.
-enum { COOP_ITEMS = COOP_TROFF_END, COOP_ITEM_WORDS = 192, COOP_ITEM_PAGE_WORDS = 24, COOP_ITEM_PAGES = 8,
+enum { COOP_JAPES_BOULDER_BUNCH = COOP_TROFF_END, COOP_ITEMS = COOP_JAPES_BOULDER_BUNCH + 1,
+    COOP_ITEM_WORDS = 192, COOP_ITEM_PAGE_WORDS = 24, COOP_ITEM_PAGES = 8,
     COOP_ITEM_WIRE_WORDS = 5 + 2 * COOP_ITEM_PAGE_WORDS,
     COOP_SNIDE_FIRST = 80, COOP_SNIDE_COUNT = 40, COOP_MEDAL_FIRST = 120,
     COOP_GB_FIRST = 160, COOP_PICKUP_FIRST = 321, COOP_ACTOR_PICKUP_FIRST = 2021 };
@@ -35,6 +36,7 @@ static inline int coop_item_flag(unsigned id) {
     if (id < 78) return keys[id - 70];
     if (id == 78) return 0x84;
     if (id == 79) return 0x17B;
+    if (id == COOP_JAPES_BOULDER_BUNCH) return 0x01D;
     if (id < COOP_MEDAL_FIRST) return 0x1FD + id - COOP_SNIDE_FIRST;
     if (id < COOP_GB_FIRST) return 0x225 + id - COOP_MEDAL_FIRST;
     if (id < COOP_PICKUP_FIRST) return coop_golden_bananas[id - COOP_GB_FIRST].flag;
@@ -116,6 +118,7 @@ static inline int coop_item_id(int flag) {
     if (flag < 0) return -1;
     for (unsigned id = 0; id < COOP_PICKUP_FIRST; ++id) if (coop_item_flag(id) == flag) return id;
     for (unsigned id = COOP_ACTOR_PICKUP_FIRST; id < COOP_PROGRESSION_END; ++id) if (coop_item_flag(id) == flag) return id;
+    if (flag == 0x01D) return COOP_JAPES_BOULDER_BUNCH;
     return -1;
 }
 static inline unsigned coop_item_gb(unsigned id, unsigned* level, unsigned* kong) {

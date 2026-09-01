@@ -56,7 +56,7 @@ COOP_EXPORT void dk64_coop_local_ipv4(uint8_t*, recomp_context* ctx) {
     ctx->r2 = session.local_ipv4();
 }
 // A new export rejects older NRM/library pairs before reading the larger spans.
-COOP_EXPORT void dk64_coop_tick_v45(uint8_t* rdram, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_tick_v46(uint8_t* rdram, recomp_context* ctx) {
     uint32_t local_address = uint32_t(ctx->r4), remote_address = uint32_t(ctx->r5);
     uint32_t progress_address = uint32_t(ctx->r6), result_address = uint32_t(ctx->r7);
     constexpr size_t bytes = dkcoop::state_words * sizeof(uint32_t);
@@ -75,7 +75,7 @@ COOP_EXPORT void dk64_coop_tick_v45(uint8_t* rdram, recomp_context* ctx) {
         std::memcpy(&progress, rdram + (progress_address - rdram_base), sizeof(progress));
         auto now = dkcoop::clock_ms();
         // The former Japes-only gate experiment is retired. Its fixed-size
-        // bridge result slots remain reserved and canonical zero in v45. Four
+        // bridge result slots remain reserved and canonical zero in v46. Four
         // retired wire words now carry the expanded world-state prefix.
         if (!failed) session.tick(dkcoop::state_from_words(local), now, {}, progress.combat, progress.items, progress.world);
         auto remote = dkcoop::state_to_words(session.remote(now));

@@ -24,7 +24,8 @@ static inline unsigned coop_items_snapshot_map(void) {
 }
 #include "troff_game.h"
 static inline unsigned coop_item_owned(unsigned id) {
-    if (id >= COOP_TROFF_FIRST) return coop_troff_owned(id);
+    if (id == COOP_JAPES_BOULDER_BUNCH) return isFlagSet(0x01D, 0) != 0;
+    if (id >= COOP_TROFF_FIRST && id < COOP_TROFF_END) return coop_troff_owned(id);
     if (id >= COOP_PROGRESSION_FIRST) return coop_progression_owned(id);
     if (id < COOP_PICKUP_FIRST || id >= COOP_ACTOR_PICKUP_FIRST) return isFlagSet(coop_item_flag(id), 0) != 0;
     unsigned index = id - COOP_PICKUP_FIRST, level = coop_pickup_level(index);
@@ -124,12 +125,12 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
         g->applying = 1;
         for (unsigned id = 0; id < COOP_ITEMS; ++id) {
             if (!coop_item_has(g->result.apply, id) || coop_item_owned(id)) continue;
-            if (id >= COOP_TROFF_FIRST) {
+            if (id >= COOP_TROFF_FIRST && id < COOP_TROFF_END) {
                 if (!coop_troff_apply(g, id, safe_to_save, here)) g->troff_pending = 1;
                 if (g->counter_error) break;
                 continue;
             }
-            if (id >= COOP_PROGRESSION_FIRST) {
+            if (id >= COOP_PROGRESSION_FIRST && id < COOP_PROGRESSION_END) {
                 if (!coop_progression_valid()) { g->counter_error = 1; break; }
                 unsigned refresh = id >= COOP_WORLD_FIRST
                     && here == coop_world_unlocks[id - COOP_WORLD_FIRST].level;
@@ -155,6 +156,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
             unsigned gb = coop_item_gb(id, &level, &kong);
             unsigned pickup = id >= COOP_PICKUP_FIRST && id < COOP_ACTOR_PICKUP_FIRST;
             unsigned actor = id >= COOP_ACTOR_PICKUP_FIRST && id < COOP_PROGRESSION_FIRST, rainbow = 0;
+            unsigned boulder_bunch = id == COOP_JAPES_BOULDER_BUNCH;
             unsigned rainbow_before[5] = {0};
             unsigned short* counter = 0;
             if (pickup) {
@@ -166,7 +168,8 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 const CoopActorPickup* a = &coop_actor_pickups[id - COOP_ACTOR_PICKUP_FIRST];
                 level = a->level; kong = a->kong; amount = a->amount; rainbow = !amount;
             }
-            if (gb || pickup || actor) {
+            if (boulder_bunch) { level = 0; kong = 4; amount = 5; }
+            if (gb || pickup || actor || boulder_bunch) {
                 // Outside the reward's level no stale prop/reward script remains
                 // loaded. Next entry sees the save bit and omits the old item.
                 // Snide's flag-guarded menu is safe outside HQ, as in v0.7.
@@ -203,7 +206,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 *counter = before + amount;
                 if (gb) g->hud_pending = 1;
                 // Remote CBs crossing 75 must still award that Kong's medal.
-                if (((pickup && coop_pickups[id - COOP_PICKUP_FIRST].amount) || actor) && level < 7) {
+                if (((pickup && coop_pickups[id - COOP_PICKUP_FIRST].amount) || actor || boulder_bunch) && level < 7) {
                     unsigned total = *counter + D_global_asm_807FC950[0].character_progress[kong].coloured_bananas_fed_to_tns[level];
                     unsigned medal = COOP_MEDAL_FIRST + level * 5 + kong;
                     if (total >= 75 && !coop_item_owned(medal)) {

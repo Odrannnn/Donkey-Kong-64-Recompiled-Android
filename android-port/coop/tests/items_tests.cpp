@@ -129,7 +129,9 @@ static void policy_checks() {
     unsigned seen[0x400]{};
     for (unsigned id = 0; id < COOP_ITEMS; ++id) {
         int f = coop_item_flag(id);
-        if ((id >= COOP_PICKUP_FIRST && id < COOP_ACTOR_PICKUP_FIRST) || (id >= COOP_MOVE_FIRST && id < COOP_TRAINING_FIRST) || id >= COOP_TROFF_FIRST) { CHECK(f == -1); continue; }
+        if ((id >= COOP_PICKUP_FIRST && id < COOP_ACTOR_PICKUP_FIRST)
+                || (id >= COOP_MOVE_FIRST && id < COOP_TRAINING_FIRST)
+                || (id >= COOP_TROFF_FIRST && id < COOP_TROFF_END)) { CHECK(f == -1); continue; }
         CHECK(f >= 0 && f < 0x400 && !seen[f]++); CHECK(coop_item_id(f) == int(id));
     }
     CHECK(coop_item_flag(COOP_ITEMS) == -1 && coop_item_flag(~0u) == -1);
@@ -143,6 +145,8 @@ static void policy_checks() {
         coop_items_observe(&g, 1, coop_item_flag(id), 1, 0, 0, 1, 0);
         CHECK(g.input.request[id / 32] & bit(id));
     }
+    coop_items_observe(&g, 1, 0x01D, 1, 0, 0, 1, 0);
+    CHECK(coop_item_has(g.input.request, COOP_JAPES_BOULDER_BUNCH));
     coop_items_prepare(&g, 1, 0, 0); CHECK(any(g.input.request)); // Map loading retains pending events.
     ready.status = 1; coop_items_receive(&g, ready); CHECK(any(g.input.request)); // Short network gap.
     ready.session_lo++; coop_items_receive(&g, ready); CHECK(!any(g.input.request));
@@ -395,6 +399,40 @@ static void actor_collectible_checks() {
     g.result.status = 2; g.result.apply[id / 32] = bit(id); coop_items_apply(&g, 1);
     CHECK(g.counter_error && !writes && !saves && !flags[a.flag]);
     CHECK(std::memcmp(expected, D_global_asm_807FC950, sizeof(expected)) == 0);
+}
+static void japes_boulder_bunch_checks() {
+    reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+    current_map = 38; mock_level = 1; // Outside Japes: no local boulder/drop actor is loaded.
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !coop_item_owned(COOP_JAPES_BOULDER_BUNCH));
+    CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 321;
+    r.apply[COOP_JAPES_BOULDER_BUNCH / 32] = bit(COOP_JAPES_BOULDER_BUNCH);
+    coop_items_receive(&g, r);
+    block_write = 1; coop_items_apply(&g, 1);
+    CHECK(writes == 1 && !flags[0x01D] && !saves
+        && D_global_asm_807FC950[0].character_progress[4].coloured_bananas[0] == 0);
+    block_write = 0; coop_items_apply(&g, 1);
+    CHECK(writes == 2 && flags[0x01D] && saves == 1
+        && D_global_asm_807FC950[0].character_progress[4].coloured_bananas[0] == 5
+        && !any(g.input.request));
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(coop_item_owned(COOP_JAPES_BOULDER_BUNCH)
+        && coop_item_has(g.input.owned, COOP_JAPES_BOULDER_BUNCH));
+
+    // The vanilla actor writes flag 0x01D before its queued five-banana credit.
+    // Observe it once, then let the queue drain; subsequent remote delivery is a no-op.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 7; mock_level = 0; coop_items_capture(&g, 1, 1, 0);
+    CoopItemResult ready{}; ready.status = 3; ready.scope = 1; ready.session_lo = 322;
+    coop_items_receive(&g, ready);
+    setFlag(0x01D, 1, 0);
+    D_global_asm_807FC950[0].character_progress[4].coloured_bananas[0] = 5;
+    CHECK(coop_item_has(g.input.request, COOP_JAPES_BOULDER_BUNCH));
+    coop_items_capture(&g, 1, 1, 0);
+    g.result.status = 2;
+    g.result.apply[COOP_JAPES_BOULDER_BUNCH / 32] = bit(COOP_JAPES_BOULDER_BUNCH);
+    coop_items_apply(&g, 1);
+    CHECK(writes == 1 && saves == 0
+        && D_global_asm_807FC950[0].character_progress[4].coloured_bananas[0] == 5);
 }
 static void world_refresh_checks() {
     // Default behavior preserves the old outside-level restriction.
@@ -712,6 +750,6 @@ static void live_checks() {
 #include "progression_checks.h"
 #include "training_checks.h"
 int main() {
-    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
+    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); japes_boulder_bunch_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
     std::printf("PASS: %u item, all GBs/1700 pickups adapter, inventory preservation, authority, deduplication, lossy UDP and reconnect checks\n", checks);
 }

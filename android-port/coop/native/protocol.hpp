@@ -8,8 +8,8 @@
 #include "world.hpp"
 
 namespace dkcoop {
-constexpr uint16_t protocol_version = 45;
-constexpr uint32_t compatibility = 0x0001012D; // DK64 US 1.0.1 / three-state world contract 45.
+constexpr uint16_t protocol_version = 46;
+constexpr uint32_t compatibility = 0x0001012E; // DK64 US 1.0.1 / complete vanilla collectible contract 46.
 constexpr size_t item_offset = 104 + COOP_COMBAT_WIRE_WORDS * 4;
 constexpr size_t world_offset = item_offset + COOP_ITEM_WIRE_WORDS * 4;
 // Four new world words reuse the retired Japes-gate wire prefix at bytes

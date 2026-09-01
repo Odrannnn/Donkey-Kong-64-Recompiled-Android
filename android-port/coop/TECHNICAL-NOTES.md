@@ -1,7 +1,7 @@
-> Current source: 0.45.0, protocol/native ABI v45. All eight native suites pass
-> in the pinned Linux GNU C++ 15.2.0 Debug ASan/UBSan build. MIPS NRM, Android
-> ARM64, Windows x64, format/export and packaging checks also pass. Gameplay
-> validation remains pending.
+> Current source: 0.46.0, protocol/native ABI v46. All eight native suites pass
+> in the pinned Linux GNU C++ 15.2.0 Debug ASan/UBSan build and the MIPS NRM
+> builds. The full Android ARM64, Windows x64, format/export and packaging pass
+> is pending. Gameplay validation remains pending.
 
 # Prototype integration and limits
 
@@ -267,7 +267,8 @@ IDs/counter mappings into `mod/collectible_ids.h`. Sources are the pinned decomp
   five-Kong +5 award. Setup CB totals also cross-check color assignments.
 
 No ROM assets or setup geometry are shipped. Chunky's Japes boulder actor bunch
-is outside both identity tables and remains local. Three surplus single-banana
+is outside both generated identity tables, so v0.46 appends its existing
+permanent flag `0x01D` as one explicit stable ID. Three surplus single-banana
 setup entries are included as identities but are not automatically granted:
 only observed pickups or host-owned bits can be shared. Vanilla counter caps
 still apply. There is no blanket flag OR or save-buffer transfer.
@@ -791,7 +792,7 @@ aggregate. Duplicate/already-owned milestones are skipped. Readback updates the
 previous-ownership baseline to prevent guest echo and requests the existing
 isolated-save writer. There is no refill, medal grant, forced boss door or
 transition. Missing pickup credits keep feeding pending instead of inventing
-currency; the currently unshared Japes boulder bunch remains a possible five-
+currency; the explicitly mapped Japes boulder bunch closes the former five-
 banana gap for Chunky.
 
 Pinned decomp evidence:
@@ -1539,3 +1540,21 @@ the final retired word remains canonical zero, combat/item offsets do not move,
 and the UDP packet stays 1200 bytes. The game/native input span grows to 2640
 bytes while the result remains 3324 bytes. Protocol 45, compatibility
 `0x0001012D`, export `dk64_coop_tick_v45`, and manifest 0.45.0 reject older sets.
+
+## Rear Japes boulder bunch (0.46.0)
+
+The final vanilla colored-banana location outside the two generated pickup
+tables now has stable item ID 5894. ROM/decomp tracing identifies actor 110
+(`ACTOR_CB_BUNCH`) and the rear Japes boulder actor handler. Boulder spawner 6
+checks permanent flag `0x01D` and passes that same flag to the spawned bunch.
+The item adapter therefore uses vanilla persistence instead of inventing a save
+bit or sidecar file.
+
+On remote receipt outside Japes, the adapter first writes and reads back flag
+`0x01D`, then adds exactly five available Japes bananas to Chunky under the
+existing 100-banana cap and medal derivation rules. Inside Japes it waits, so no
+loaded boulder or drop actor can race the write. A locally collected bunch is
+observed through the ordinary permanent-flag callback and its queued vanilla
+credit drains before snapshot capture. Existing IDs 0 through 5893 do not move.
+Protocol 46, compatibility `0x0001012E`, export `dk64_coop_tick_v46`, and
+manifest 0.46.0 reject older packages.
