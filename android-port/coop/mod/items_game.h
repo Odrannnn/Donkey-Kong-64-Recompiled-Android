@@ -11,6 +11,14 @@ static inline unsigned coop_items_safe_map(void) {
     // No training barrel, Cranky or fairy-queen reward actor is loaded here.
     return coop_items_main_world() || current_map == 171; // MAP_DK_HOUSE
 }
+static inline unsigned coop_items_snapshot_map(void) {
+    // Reviewed ordinary gameplay maps keep the same persistent inventory
+    // layout as the main worlds. They may establish and refresh a complete
+    // ownership snapshot, but remain deferred so no remote write or save runs
+    // while an interior/lobby/Helm script is loaded. Bosses, shops, races,
+    // bonuses and other overlays are absent from coop_combat_map().
+    return coop_items_safe_map() || coop_combat_map(current_map);
+}
 #include "troff_game.h"
 static inline unsigned coop_item_owned(unsigned id) {
     if (id >= COOP_TROFF_FIRST) return coop_troff_owned(id);
@@ -48,7 +56,7 @@ static inline void coop_items_capture(CoopItems* g, unsigned enabled, unsigned a
     // Keep publishing the last complete safe snapshot instead of exporting the
     // overlay. This lets peers exchange item pages from different areas. A
     // fresh session still waits for its first verified safe snapshot.
-    if (!coop_items_safe_map() || D_global_asm_807FD730) {
+    if (!coop_items_snapshot_map() || D_global_asm_807FD730) {
         if (g->baseline) {
             g->deferred = 1;
             // Once the local reward queue has drained, permanent flag-backed
@@ -89,6 +97,10 @@ static inline void coop_items_capture(CoopItems* g, unsigned enabled, unsigned a
     }
     for (unsigned i = 0; i < COOP_ITEM_WORDS; ++i) g->previous[i] = g->input.owned[i];
     g->baseline = 1;
+    // A reviewed ordinary interior can publish this freshly verified state,
+    // including as the first snapshot of a session. Applications still wait
+    // for the narrower save-safe map set above.
+    if (!coop_items_safe_map()) g->deferred = 1;
 }
 static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
     g->troff_pending = 0;

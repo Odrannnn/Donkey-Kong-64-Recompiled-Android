@@ -479,6 +479,23 @@ static void cross_area_cache_checks() {
     CHECK(g.input.ready && !g.deferred);
     coop_items_apply(&g, 1);
     CHECK(flags[0x17B] && writes == 1 && saves == 1);
+
+    // A fresh session may establish its complete snapshot in a reviewed
+    // ordinary interior. It publishes immediately but cannot apply/save there.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 4; mock_level = 0; // Japes mountain: reviewed ordinary map.
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(g.input.ready && g.baseline && g.deferred);
+    w = {}; w.input.ready = 1; coop_world_capture(&w, &g); CHECK(!w.input.ready);
+    g.result.status = 2; g.result.apply[78 / 32] = bit(78);
+    coop_items_apply(&g, 1);
+    CHECK(!flags[0x84] && !writes && !saves);
+
+    // An unreviewed overlay still cannot become the first snapshot.
+    reset_engine(); g = {}; current_game = &g;
+    current_map = 5; mock_level = 0;
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(!g.input.ready && !g.baseline && !g.deferred);
 }
 static void live_checks() {
     uint64_t now = 10000; Session host, guest;

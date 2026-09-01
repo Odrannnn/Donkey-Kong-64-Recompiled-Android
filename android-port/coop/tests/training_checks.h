@@ -22,15 +22,20 @@ static void training_checks() {
         coop_items_capture(&g, 1, 1, 0); coop_items_apply(&g, 1);
         CHECK(g.input.ready && !any(g.input.request) && saves == 1 && writes == 2);
     }
-    // Every map is rejected unless explicitly allowed. Covers grounds (176),
-    // training barrels, Fairy Island (189), Cranky (5), shops and boss overlays.
+    // Reviewed ordinary maps may publish a complete first snapshot. Only the
+    // narrower main-world/treehouse set may apply a training grant or save.
+    // Grounds (176), barrels, Fairy Island (189), Cranky (5), shops and boss
+    // overlays remain outside both sets.
     for (unsigned map = 0; map < 216; ++map) {
         reset_engine(); CoopItems g{}; current_game = &g; current_map = map;
-        bool allowed = map == 7 || map == 26 || map == 30 || map == 34 || map == 38
+        bool apply_allowed = map == 7 || map == 26 || map == 30 || map == 34 || map == 38
             || map == 48 || map == 72 || map == 87 || map == 171;
-        coop_items_capture(&g, 1, 1, 0); CHECK(bool(g.input.ready) == allowed && !g.counter_error);
+        bool snapshot_allowed = apply_allowed || coop_combat_map(map);
+        coop_items_capture(&g, 1, 1, 0);
+        CHECK(bool(g.input.ready) == snapshot_allowed && bool(g.deferred) == (snapshot_allowed && !apply_allowed)
+            && !g.counter_error);
         g.result.status = 2; g.result.apply[2198/32] = bit(2198); coop_items_apply(&g, 1);
-        CHECK(bool(flags[0x179]) == allowed && writes == unsigned(allowed));
+        CHECK(bool(flags[0x179]) == apply_allowed && writes == unsigned(apply_allowed));
     }
     // Fresh guest receives all training and the real host's first gift, then a
     // pending higher slam. Never replay the gift or downgrade on duplicate packets.

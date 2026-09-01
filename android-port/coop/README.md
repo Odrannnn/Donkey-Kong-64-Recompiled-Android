@@ -125,11 +125,16 @@ no account, matchmaking, relay, router setup or firewall modification.
   is deducted from the matching available banana balance, not copied from the
   other player's balance. Collected totals and banana-medal credit are preserved.
 
-Both players must be in regular gameplay in DK's treehouse, Isles or one of
-the seven main level maps for item/progression snapshots to synchronize. Shops, other interiors, training grounds/barrels,
-boss arenas, minigames, cutscenes and pending reward queues suspend sharing;
-local gains are picked up when you return. Numeric GB/banana/coin rewards still require main-world/Isles play; the
-treehouse is for unlocks and progression. Presence/combat use their own rules.
+Both players may establish and refresh item/progression snapshots in regular
+gameplay in DK's treehouse, Isles, the seven main levels, and the 58 reviewed
+ordinary combat maps, including their ordinary interiors, four lobbies and
+Hideout Helm. Interior/lobby/Helm snapshots are publish-only: received writes
+and saves still wait until that device reaches DK's treehouse, Isles or a main
+level. Shops, unreviewed interiors, training grounds/barrels, boss arenas,
+minigames, cutscenes and pending reward queues retain the last verified snapshot;
+local gains are picked up when the player returns to a reviewed map. Numeric
+GB/banana/coin rewards still require main-world/Isles play; the treehouse is for
+unlocks and progression. Presence/combat use their own rules.
 
 **Leave the reward's level to receive incoming numeric credits.** For example,
 a Japes reward applies when the recipient is playing in Isles or another main
