@@ -58,8 +58,9 @@ Android, `.dll` on Windows). No ROM or game assets are included.
 
 **This is experimental, not complete campaign co-op. Version 0.46.0 passes all
 eight native suites in a pinned Linux Debug ASan/UBSan build plus the MIPS NRM
-build. The complete Android ARM64, Windows x64, format, export and package pass
-is still pending. Gameplay validation remains pending.**
+build. The complete Android ARM64, Windows x64, binary-format, v46 export,
+package-contract and importer pass also succeeds. Gameplay validation remains
+pending.**
 Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
 Back up experimental saves before using the build.
@@ -579,8 +580,10 @@ For 0.10, the seven suites ran on Windows and the tablet; Linux used ASan/UBSan.
 That version's tablet-host/Windows-guest **synthetic** LAN probe exchanged all 2199 IDs. It does
 not load the ROM or exercise real pickups. Package verification checks the actual
 Android importer, same NRM on both platforms, 16 KiB ELF load alignment and native
-dependencies. Historical results: `build/verification-v0.10.0`. The current
-v0.46 full release build and package hashes are pending.
+dependencies. Historical results: `build/verification-v0.10.0`. The v0.46 full
+release record and artifact hashes are in `build/build-v0.46.0/build-status.json`;
+the distributable hash list is `dist/SHA256SUMS.txt`. Hashes are kept outside
+the source documentation so the source ZIP never contains its own checksum.
 
 Version 0.10 actual gameplay testing connected the tablet host and a fresh
 portable Windows 1.0.1 guest. Both displayed the other Kong and ITEMS: SYNCED

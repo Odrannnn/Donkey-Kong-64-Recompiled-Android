@@ -1,7 +1,7 @@
 > Current source: 0.46.0, protocol/native ABI v46. All eight native suites pass
 > in the pinned Linux GNU C++ 15.2.0 Debug ASan/UBSan build and the MIPS NRM
-> builds. The full Android ARM64, Windows x64, format/export and packaging pass
-> is pending. Gameplay validation remains pending.
+> build. The full Android ARM64, Windows x64, format/export, package-contract and
+> importer verification pass also succeeds. Gameplay validation remains pending.
 
 # Prototype integration and limits
 
