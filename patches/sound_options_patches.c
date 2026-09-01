@@ -629,6 +629,50 @@ RECOMP_PATCH void func_global_asm_806E6B98(void) {
     func_global_asm_806DF494(&gCurrentActorPointer->z_rotation, rot, phi_a2);
 }
 
+extern s16 D_global_asm_80753B44[];
+extern s16 D_global_asm_80753B54[];
+extern s16 D_global_asm_80753B64[];
+
+// @recomp: Stationary Swimming
+RECOMP_PATCH void func_global_asm_806E65BC(void) {
+    s32 phi_v0;
+    s16 phi_a1;
+    s16 phi_t1;
+    s16 temp;
+    s8 stick_x, stick_y;
+    s32 invX = 0;
+    s32 invY = 0;
+
+    phi_v0 = gCurrentActorPointer->y_rotation;
+
+    stick_x = D_global_asm_807FD610[cc_player_index].unk2E;
+    stick_y = D_global_asm_807FD610[cc_player_index].unk2F;
+    recomp_get_swimming_inverted_axes(&invX, &invY);
+    if (invX) stick_x = -stick_x;
+    if (!invY) stick_y = -stick_y;
+    phi_t1 = 0x10;
+    if (current_character_index[cc_player_index] == 7) {
+        phi_t1 = 0x19;
+    }
+    if (D_global_asm_807FD610[cc_player_index].unk30) {
+        gCurrentActorPointer->y_rotation = ((phi_v0 - (stick_x / 2)) & 0xFFF) & 0xFFF;
+        phi_v0 = stick_x >= 0 ? 1 : -1; \
+        phi_a1 = ((phi_v0 * D_global_asm_80753B54[D_global_asm_807FD584]) & 0xFFF & 0xFFF & 0xFFF);
+    } else {
+        phi_a1 = 0;
+    }
+    func_global_asm_806DF494(&gCurrentActorPointer->x_rotation, phi_a1, 0x10);
+    if (stick_y) {
+        temp = ((stick_y * D_global_asm_80753B44[D_global_asm_807FD584]) / 70) & 0xFFF & 0xFFF & 0xFFF;
+        func_global_asm_806DF494(
+            &gCurrentActorPointer->z_rotation, 
+            temp,
+            ABS(stick_y * 0.125) + phi_t1);
+        return;
+    }
+    func_global_asm_806DF494(&gCurrentActorPointer->z_rotation, D_global_asm_80753B64[D_global_asm_807FD584], 0x10);
+}
+
 f32 func_global_asm_806EA2D8(void);
 
 // @recomp: First person controls
