@@ -63,6 +63,7 @@ typedef enum interpolationIDs {
     MTXTAG_TAG3,
     MTXTAG_SKYBOXBLEND,
     MTXTAG_CAMERAPROJECTION,
+    MTXTAG_HELMTIMER,
     MTXTAG_MAINMENU_BARREL = 0xF00,
     MTXTAG_ACTORS = 0x1000, // 0x100 allocated per actor
     MTXTAG_PROP = 0x101000,

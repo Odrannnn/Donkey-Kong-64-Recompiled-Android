@@ -21,6 +21,8 @@ extern u8 D_menu_800339D0_02175720;
 extern s16 D_global_asm_807476F4;
 RECOMP_DECLARE_EVENT(recomp_on_init());
 RECOMP_DECLARE_EVENT(dk64recomp_every_frame());
+RECOMP_DECLARE_EVENT(recomp_on_map_load());
+RECOMP_DECLARE_EVENT(recomp_on_eeprom_load());
 #define TEXT_SCALE 0.25f
 #define ORIGINAL_TEXT_SCALE 0.5f
 
@@ -307,6 +309,7 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
         if (D_global_asm_8076A0B1 & 1 && !D_global_asm_8076A0B2) {
             func_global_asm_805FE7FC();
             clear_actor_interpolation_lockdowns();  // @recomp: flush actor interp lockdowns to prevent it getting clogged with stale references
+            recomp_on_map_load();
             if (D_global_asm_807444F8 == 2) {
                 global_properties_bitfield |= 0x200;
                 D_global_asm_80744504 = 8;
@@ -362,6 +365,32 @@ RECOMP_PATCH void func_global_asm_805FBFF4(s32 arg0) {
         }
         D_global_asm_807444F0 = is_cutscene_active;
     }
+}
+
+void func_global_asm_8060B7F0(void);
+void func_global_asm_8060E128(void *arg0);
+void func_global_asm_8060B8F8(s32 arg0);
+extern OSMesgQueue D_global_asm_807ECCF0;
+extern s32 D_global_asm_807EDEAC;
+extern OSMesgQueue D_global_asm_807EE0D0;
+extern u8 D_global_asm_807EDEB0[];
+extern OSMesg D_global_asm_807F0298[];
+extern OSMesgQueue D_global_asm_807F02B8;
+extern OSThread D_global_asm_807EE0E8;
+extern u8 D_global_asm_807467E0;
+extern OSMesg D_global_asm_807EE0B0[];
+
+// @recomp: Init EEPROM
+RECOMP_PATCH void func_global_asm_8060E1A8(void) {
+    func_global_asm_8060B7F0();
+    D_global_asm_807EDEAC = osEepromProbe(&D_global_asm_807ECCF0);
+    osCreateMesgQueue(&D_global_asm_807EE0D0, D_global_asm_807EE0B0, 8);
+    osCreateMesgQueue(&D_global_asm_807F02B8, D_global_asm_807F0298, 8);
+    osCreateThread(&D_global_asm_807EE0E8, 9, func_global_asm_8060E128, 0, &D_global_asm_807F0298, 0xC);
+    osStartThread(&D_global_asm_807EE0E8);
+    D_global_asm_807467E0 = 1;
+    func_global_asm_8060B8F8(0);
+    recomp_on_eeprom_load();
 }
 
 RECOMP_PATCH void func_global_asm_805FB7E4(void) {

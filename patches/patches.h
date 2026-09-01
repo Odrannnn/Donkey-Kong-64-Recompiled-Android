@@ -12,6 +12,8 @@
 
 // TODO fix renaming symbols in patch recompilation
 #define osCreateMesgQueue osCreateMesgQueue_recomp
+#define osCreateThread osCreateThread_recomp
+#define osStartThread osStartThread_recomp
 #define osRecvMesg osRecvMesg_recomp
 #define osSendMesg osSendMesg_recomp
 #define osViGetCurrentFramebuffer osViGetCurrentFramebuffer_recomp
@@ -46,6 +48,7 @@
 #define osAiSetNextBuffer osAiSetNextBuffer_recomp
 #define _sqrtf sqrtf_recomp
 #define osPiStartDma osPiStartDma_recomp
+#define osEepromProbe osEepromProbe_recomp
 
 #define sinf __sinf_recomp
 #define cosf __cosf_recomp
