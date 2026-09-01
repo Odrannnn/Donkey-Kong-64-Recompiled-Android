@@ -7,7 +7,9 @@ Japes boulder. It uses the pickup's own permanent flag and credits the receiver
 only outside Japes, preventing the local actor from duplicating it. It also
 shares the saved final K. Rool defeat after the complete K. Lumsy/key route has
 been proven. The receiver gets the persistent completion state without a forced
-ending cutscene or map transition. Item pages remain synchronized while players occupy different
+ending cutscene or map transition. The saved two-coin Arcade replay access also
+transfers once the lever and Arcade GB are owned, without charging the receiver.
+Item pages remain synchronized while players occupy different
 areas by publishing each device's last verified safe inventory snapshot through
 shops, bosses, minigames, and other unsafe overlays. Incoming writes remain queued
 until that device reaches a safe gameplay frame. It retains v0.41.1's Android/Wi-Fi
@@ -41,8 +43,9 @@ the host boss position and facing after reciprocal boss-life binding. Boss AI,
 attacks, timers, projectiles and player damage remain local.
 
 The earlier 2394 collectible/progression IDs and Fungi day/night/Galleon water
-state are retained. Feeding adds 3500 cumulative milestones; the boulder bunch
-and final K. Rool completion append two stable IDs, for 5896 shared IDs. The feeding IDs
+state are retained. Feeding adds 3500 cumulative milestones; the boulder bunch,
+final K. Rool completion and saved Arcade payment append three stable IDs, for
+5897 shared IDs. The feeding IDs
 are accounting thresholds, not additional collectible locations.
 Troff & Scoff feeding from 0.16 is retained: incoming cumulative payments consume
 matching available bananas outside their level and update the next boss-door visit.
@@ -267,6 +270,8 @@ The same item-sharing option adds eight permanent Factory flags:
 - The storage and R&D breakable metal grates, plus the completed storage
   question-mark box.
 - Arcade-lever reveal and the opened crown-pad grate.
+- The saved two-coin Arcade replay access after the lever and Arcade GB are
+  already owned. Receiving this outcome never deducts the other player's coins.
 
 **Leave Factory to receive these flags**, then return to reload its actors and
 scripts. Merely entering the Power Hut or another Factory interior is not enough;
@@ -274,10 +279,11 @@ resume safe gameplay in Isles, another main level or DK's treehouse. Progress
 earned in an interior is sent when its player returns to a safe snapshot map.
 
 This shares permanent completion only. Machine/platform timing, temporary Kong
-production switches and puzzle actions remain local. The arcade lever becomes
-available without forcing a game or paying its two-coin fee remotely. GBs,
-Nintendo Coin and the crown retain their existing IDs and award rules; these
-new flags do not credit additional rewards. No cutscene, live grate destruction
+production switches and puzzle actions remain local. The Arcade payment result
+waits outside Factory and applies only after the shared lever and Arcade GB; it
+does not deduct coins or force a game. GBs, Nintendo Coin and the crown retain
+their existing IDs and award rules; these new flags do not credit additional
+rewards. No cutscene, live grate destruction
 or map transition is triggered by a network grant. Other routes/puzzles may
 still need local actions. Older guest-only Factory progress can cause
 **GUEST SAVE AHEAD**; existing experimental saves are not merged or reset.

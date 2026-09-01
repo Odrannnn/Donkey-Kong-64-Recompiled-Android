@@ -493,6 +493,61 @@ static void krool_completion_checks() {
     coop_items_capture(&g, 1, 1, 0);
     CHECK(g.counter_error && !g.input.ready && !writes && !saves);
 }
+static void seed_arcade_payment_route() {
+    flags[0x081] = flags[0x082] = 1;
+    D_global_asm_807FC950[0].character_progress[0].golden_bananas[2] = 1;
+}
+static void arcade_payment_checks() {
+    unsigned owned[COOP_ITEM_WORDS]{};
+    owned[COOP_ARCADE_COINS_PAID / 32] |= bit(COOP_ARCADE_COINS_PAID);
+    CHECK(!coop_items_full_dependencies(owned));
+    owned[COOP_FACTORY_ARCADE_LEVER / 32] |= bit(COOP_FACTORY_ARCADE_LEVER);
+    CHECK(!coop_items_full_dependencies(owned));
+    owned[(COOP_GB_FIRST + 54) / 32] |= bit(COOP_GB_FIRST + 54);
+    CHECK(coop_items_full_dependencies(owned));
+
+    // Factory and its Arcade overlay must unload before the persistent access
+    // result changes. The receiver's coins are deliberately untouched.
+    reset_engine(); CoopItems g{}; current_game = &g; g.join = 1; seed_arcade_payment_route();
+    current_map = 26; mock_level = 2;
+    D_global_asm_807FC950[0].character_progress[0].coins = 17;
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(g.input.ready && !coop_item_owned(COOP_ARCADE_COINS_PAID));
+    CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 325;
+    r.apply[COOP_ARCADE_COINS_PAID / 32] = bit(COOP_ARCADE_COINS_PAID);
+    coop_items_receive(&g, r); coop_items_apply(&g, 1);
+    CHECK(!writes && !saves && !flags[0x083]
+        && D_global_asm_807FC950[0].character_progress[0].coins == 17);
+    current_map = 7; mock_level = 0;
+    block_write = 1; coop_items_apply(&g, 1);
+    CHECK(writes == 1 && !flags[0x083] && !saves);
+    block_write = 0; coop_items_apply(&g, 1);
+    CHECK(writes == 2 && flags[0x083] && saves == 1 && !hud_updates
+        && D_global_asm_807FC950[0].character_progress[0].coins == 17
+        && !any(g.input.request));
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(g.input.ready && coop_item_has(g.input.owned, COOP_ARCADE_COINS_PAID));
+
+    // A local payment observed first remains authoritative and is never charged
+    // again when the matching remote bit arrives.
+    reset_engine(); g = {}; current_game = &g; g.join = 1; seed_arcade_payment_route();
+    current_map = 7; mock_level = 0;
+    D_global_asm_807FC950[0].character_progress[0].coins = 11;
+    coop_items_capture(&g, 1, 1, 0);
+    CoopItemResult ready{}; ready.status = 3; ready.scope = 1; ready.session_lo = 326;
+    coop_items_receive(&g, ready); setFlag(0x083, 1, 0);
+    CHECK(coop_item_has(g.input.request, COOP_ARCADE_COINS_PAID));
+    coop_items_capture(&g, 1, 1, 0);
+    g.result.status = 2;
+    g.result.apply[COOP_ARCADE_COINS_PAID / 32] = bit(COOP_ARCADE_COINS_PAID);
+    coop_items_apply(&g, 1);
+    CHECK(writes == 1 && saves == 0
+        && D_global_asm_807FC950[0].character_progress[0].coins == 11);
+
+    reset_engine(); g = {}; current_game = &g; flags[0x083] = 1;
+    coop_items_capture(&g, 1, 1, 0);
+    CHECK(g.counter_error && !g.input.ready && !writes && !saves);
+}
 static void world_refresh_checks() {
     // Default behavior preserves the old outside-level restriction.
     reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
@@ -809,6 +864,6 @@ static void live_checks() {
 #include "progression_checks.h"
 #include "training_checks.h"
 int main() {
-    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
+    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); arcade_payment_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
     std::printf("PASS: %u item, all GBs/1700 pickups adapter, inventory preservation, authority, deduplication, lossy UDP and reconnect checks\n", checks);
 }

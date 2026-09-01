@@ -613,8 +613,9 @@ The following reload behavior is why grants wait outside the whole level:
   flag as well. These are persistent completions, not every live puzzle action.
 - Lever 0x2D initializes to its available state from 0x81 without repeating
   its reveal scene. Baboon Blast object 0 also reads that flag. Arcade GB
-  0x82, two-coin payment 0x83 and Nintendo Coin 0x84 are distinct: no payment
-  flag or coin deduction is added here. Existing GB/coin ownership sync stays.
+  0x82, two-coin payment 0x83 and Nintendo Coin 0x84 are distinct. The later
+  append-only payment ID is documented under 0.46; this original world row
+  neither charges coins nor changes temporary Arcade state.
 - Grate 0x4C initializes hidden/noncolliding from 0x97; objects 0x4E/0x106
   also read it. Crown ownership remains the separate collectible ID.
 
@@ -683,7 +684,7 @@ clears initialize naturally on return; no AI, HP, actor spawns, reward routines
 or cutscenes are directly invoked by the grant code. Existing numeric rewards
 retain original IDs, deduplication and deferral rules. Day/night (0xCE), Galleon
 water height (0xA0), Caves-lobby pressure switch (0x19D), temporary/timed puzzles,
-arcade payment, tutorial/first-use bits, level visits and ending flags are excluded.
+tutorial/first-use bits, level visits and ending global flags are excluded.
 Some doors only have temporary state or an already-shared GB condition; those
 cannot be turned into new monotonic unlock flags. This is not full campaign sync.
 
@@ -1570,3 +1571,14 @@ dependencies require the lobby, all eight key items and all eight turn-ins.
 Canceled writes retry, an already-local victory wins the race without a second
 save, and a save claiming victory without that route latches fail-closed. Existing
 IDs 0 through 5894 do not move; packet, bridge and protocol sizes are unchanged.
+
+Stable item ID 5896 covers `PERMFLAG_PROGRESS_ARCADE_2_COINS_PAID` (`0x083`).
+Pinned `func_global_asm_8064EA48` deducts two local coins and then writes this
+flag; `func_global_asm_8064EB3C` reads it only after the Factory Arcade GB
+(`0x082`) has been won. Complete-snapshot validation therefore requires both
+the existing Arcade-lever world row (`0x081`, item 2309) and Arcade GB item 214.
+The remote adapter waits outside Factory, writes and reads back only `0x083`,
+then requests the normal isolated save. It never changes a coin counter, starts
+Arcade, sets a temporary Arcade flag or grants either reward. A blocked write
+retries, a local payment wins the race, and invalid prerequisite snapshots fail
+closed. IDs 0 through 5895 remain unchanged.

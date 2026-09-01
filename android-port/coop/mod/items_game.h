@@ -26,6 +26,7 @@ static inline unsigned coop_items_snapshot_map(void) {
 static inline unsigned coop_item_owned(unsigned id) {
     if (id == COOP_JAPES_BOULDER_BUNCH) return isFlagSet(0x01D, 0) != 0;
     if (id == COOP_KROOL_DEFEATED) return isFlagSet(0x1B0, 0) != 0;
+    if (id == COOP_ARCADE_COINS_PAID) return isFlagSet(0x083, 0) != 0;
     if (id >= COOP_TROFF_FIRST && id < COOP_TROFF_END) return coop_troff_owned(id);
     if (id >= COOP_PROGRESSION_FIRST) return coop_progression_owned(id);
     if (id < COOP_PICKUP_FIRST || id >= COOP_ACTOR_PICKUP_FIRST) return isFlagSet(coop_item_flag(id), 0) != 0;
@@ -158,6 +159,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
             unsigned pickup = id >= COOP_PICKUP_FIRST && id < COOP_ACTOR_PICKUP_FIRST;
             unsigned actor = id >= COOP_ACTOR_PICKUP_FIRST && id < COOP_PROGRESSION_FIRST, rainbow = 0;
             unsigned boulder_bunch = id == COOP_JAPES_BOULDER_BUNCH;
+            unsigned arcade_paid = id == COOP_ARCADE_COINS_PAID;
             unsigned rainbow_before[5] = {0};
             unsigned short* counter = 0;
             if (pickup) {
@@ -170,6 +172,9 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 level = a->level; kong = a->kong; amount = a->amount; rainbow = !amount;
             }
             if (boulder_bunch) { level = 0; kong = 4; amount = 5; }
+            // This flag controls access to a later Arcade run. Let Factory and
+            // the Arcade overlay unload before changing it; never copy its fee.
+            if (arcade_paid && (!safe_to_save || here == 2)) continue;
             if (gb || pickup || actor || boulder_bunch) {
                 // Outside the reward's level no stale prop/reward script remains
                 // loaded. Next entry sees the save bit and omits the old item.
