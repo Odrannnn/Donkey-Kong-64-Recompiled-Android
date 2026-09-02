@@ -1,4 +1,4 @@
-> Current source: 0.57.0, protocol/native ABI v57. The protocol and persistent
+> Current source: 0.58.0, protocol/native ABI v58. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -1751,6 +1751,29 @@ movement, matching-local-clip pose checks and one-sample callback suppression
 remain unchanged. Spider AI, targeting, webs, wave timing and attacks still run
 locally. Protocol 57, compatibility `0x00010239`, the v57 exports and manifest
 0.57.0 reject older peers and companions.
+
+## Caves Ice Tomato board synchronization (0.58.0)
+
+Caves Ice Castle map 98 now publishes one typed same-area record for the
+sixteen-element `D_global_asm_807FC8C0` board. Actor 164 must be initialized,
+use the pinned private controller-mode byte at offset `0x38`, and already be in
+active state 3 or 4. The temporary board-active flag `0x30` must also be set.
+Each board cell is encoded as one of exactly three values: unclaimed, player,
+or Tomato. The fourth two-bit encoding invalidates the entire record.
+
+On Join, all sixteen encodings are validated before any write. A changed claimed
+cell updates the local board then enters that tile's existing secondary script
+state through `func_global_asm_8063DA78`; a host-unclaimed cell uses the stock
+primary-state reset path. Missing actors, wrong actor types, inactive flags,
+prompt/decision states, resolving states and finished states reject the update.
+This makes simultaneous local steps converge back to the host board without a
+room reload and without exposing a pointer, actor type, function, or arbitrary
+script key on the wire.
+
+The Tomato controller continues to own movement selection, timer state, score
+evaluation, win/loss modes 6 and 7, cutscenes, actor deletion, Golden Banana and
+exit. Packet size and bridge spans remain unchanged. Protocol 58, compatibility
+`0x0001023A`, v58 exports and manifest 0.58.0 reject older peers and companions.
 
 ## Third reversible world state (0.45.0)
 

@@ -1,7 +1,10 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.57.0** adds host-authoritative position, facing and guarded pose
+Version **0.58.0** synchronizes all 16 cells of the Caves Ice Tomato board while
+both local encounter controllers are active. Each copy retains its own timer,
+win/loss evaluation, cutscenes, reward and exit. Version 0.57.0 adds
+host-authoritative position, facing and guarded pose
 correction for the Fungi Spider while retaining every ordinary Spiderling
 record. Version 0.56.0 synchronizes the Spider's single final vulnerable hit
 after both copies have run their local Spiderling waves. The receiver enters the
@@ -21,7 +24,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 57 requires a matching peer and native
+address as a direct fallback. Protocol 58 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -174,9 +177,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.57.0 makes the
-bounded Fungi Spider adapter participate in guarded boss movement and pose correction
-without dropping Spiderling records, and retains the final-hit adapter,
+**This is experimental, not complete campaign co-op. Version 0.58.0 adds the
+bounded Ice Tomato board adapter and retains the Spider movement, pose and
+final-hit adapters,
 the actor-driven environment-cycle, and persistent
 recovery and authority-reconciliation suites. All 15 Linux
 ASan/UBSan suites and the complete maintained MIPS, Android ARM64, Windows x64,
@@ -193,7 +196,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.57
+While the native companion is loaded, `tools/query_trace.py` discovers v0.58
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -207,7 +210,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.57.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.58.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -667,8 +670,9 @@ Fungi Spider room and Chunky's Caves igloo. The ordinary-enemy channel excludes
 boss arenas, races, bonus games, crown battles and reward controllers; Army
 Dillo and Dogadon use the separate bounded channel below. Giant Clam is handled
 as a same-area environment cycle: the guest runs its own opening and closing
-animations and aligns the host's stable countdown. Tomato encounter controllers
-have no ordinary defeat path and remain local with all other unlisted kinds.
+animations and aligns the host's stable countdown. The Caves Ice Tomato uses a
+separate same-area board adapter described below; its controller has no ordinary
+defeat path. Other unlisted encounter kinds remain local.
 Book and Toy Monster use their pinned vanilla disappearance states
 rather than a fabricated health-based death.
 If another mod has replaced any supported behavior handler before initialization,
@@ -724,6 +728,14 @@ guard as other bosses. Slot zero is reserved for that boss record and the
 Spiderlings are paged through slots 1 through 19, so neither channel displaces
 the other.
 
+The Caves Ice Tomato board uses a single same-area record with a validated
+two-bit value for each of its 16 squares. The host board is authoritative only
+while both copies have already started the minigame and their local controllers
+are in states 3 or 4 with the temporary board-active flag set. Changed squares
+enter their reviewed local tile-script path; a cleared host square resets that
+local tile. The record cannot start or resume the encounter, choose a winner,
+advance a timer, play a cutscene, grant the Golden Banana or open an exit.
+
 ## Reviewed host-follow transitions (0.39; gameplay untested)
 
 As of 0.40.1, this is disabled by default. **Transition behavior -> Independent
@@ -755,7 +767,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v57 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v58 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

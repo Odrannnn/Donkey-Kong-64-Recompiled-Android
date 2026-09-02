@@ -24,7 +24,10 @@ enum {
     // A reviewed actor-driven environmental cycle. Key is a one-based entry
     // in the immutable enemy-spawner table; state/timer remain type-specific.
     COOP_TRANSIENT_ACTOR_CYCLE,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_ACTOR_CYCLE
+    // Caves Ice Tomato's sixteen-cell board while both local encounter
+    // controllers are active. Value contains sixteen validated two-bit cells.
+    COOP_TRANSIENT_TOMATO_BOARD,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_TOMATO_BOARD
 };
 enum {
     COOP_TRANSIENT_OFF,

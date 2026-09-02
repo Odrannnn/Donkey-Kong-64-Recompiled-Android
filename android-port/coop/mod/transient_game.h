@@ -9,6 +9,9 @@ typedef struct {
 // Character-spawner private data is not part of common_structs.h. Giant Clam
 // uses only the signed word at pinned offset 0x2C for its 90-frame countdown.
 typedef struct { unsigned char pad[0x2C]; int timer; } CoopClamData;
+// Ice Tomato's private controller mode is pinned at offset 0x38. The shared
+// global board contains -1 (unclaimed), 0 (player) or 1 (Tomato) per cell.
+typedef struct { unsigned char pad[0x38]; unsigned char state, menu_state; } CoopIceTomatoData;
 #ifndef DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
 #define DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
 typedef struct { s16 count, padding; EnemySpawner* first; } CoopEnemySpawnerTable;
@@ -456,6 +459,62 @@ static void coop_transient_apply_clam(CoopTransientRecord record) {
     }
 }
 
+static Actor* coop_transient_ice_tomato(void) {
+    if ((unsigned)current_map != MAP_CAVES_ICE_CASTLE) return 0;
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (actor && actor->unk58 == ACTOR_TOMATO_ICE
+                && (actor->object_properties_bitfield & 0x10) && actor->unk178)
+            return actor;
+    }
+    return 0;
+}
+
+static unsigned coop_transient_tomato_board_value(unsigned* valid) {
+    unsigned value = 0;
+    *valid = 1;
+    for (unsigned i = 0; i < 16; ++i) {
+        int cell = D_global_asm_807FC8C0[i];
+        if (cell < -1 || cell > 1) { *valid = 0; return 0; }
+        value |= (unsigned)(cell + 1) << (i * 2);
+    }
+    return value;
+}
+
+static void coop_transient_add_tomato_board(unsigned wanted_page, unsigned* ordinal,
+        CoopTransientInput* input) {
+    if ((unsigned)current_map != MAP_CAVES_ICE_CASTLE) return;
+    unsigned current = (*ordinal)++;
+    if (current / COOP_TRANSIENT_RECORDS != wanted_page
+            || input->count >= COOP_TRANSIENT_RECORDS) return;
+    Actor* actor = coop_transient_ice_tomato();
+    CoopIceTomatoData* data = actor ? (CoopIceTomatoData*)actor->unk178 : 0;
+    if (!data || (data->state != 3 && data->state != 4)
+            || !isFlagSet(TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE, FLAG_TYPE_TEMPORARY)) return;
+    unsigned valid = 0, value = coop_transient_tomato_board_value(&valid);
+    if (valid) input->records[input->count++] = (CoopTransientRecord){
+        COOP_TRANSIENT_TOMATO_BOARD, 0, 1, value};
+}
+
+static void coop_transient_apply_tomato_board(CoopTransientRecord record) {
+    if ((unsigned)current_map != MAP_CAVES_ICE_CASTLE || record.key || record.state != 1) return;
+    Actor* actor = coop_transient_ice_tomato();
+    CoopIceTomatoData* data = actor ? (CoopIceTomatoData*)actor->unk178 : 0;
+    if (!data || (data->state != 3 && data->state != 4)
+            || !isFlagSet(TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE, FLAG_TYPE_TEMPORARY)) return;
+    signed char wanted[16];
+    for (unsigned i = 0; i < 16; ++i) {
+        unsigned cell = (record.value >> (i * 2)) & 3u;
+        if (cell == 3u) return;
+        wanted[i] = (signed char)cell - 1;
+    }
+    for (unsigned i = 0; i < 16; ++i) if (D_global_asm_807FC8C0[i] != wanted[i]) {
+        D_global_asm_807FC8C0[i] = wanted[i];
+        if (wanted[i] < 0) func_global_asm_8063DA40((s16)i, 0);
+        else func_global_asm_8063DA78((s16)i, 1, 1);
+    }
+}
+
 static void coop_transient_capture(unsigned present) {
     transient_input = (CoopTransientInput){0};
     if (transient_enabled && present && current_file < 3) {
@@ -487,6 +546,7 @@ static void coop_transient_capture(unsigned present) {
                 transient_page, &ordinal, &transient_input);
     }
     coop_transient_add_clams(transient_page, &ordinal, &transient_input);
+    coop_transient_add_tomato_board(transient_page, &ordinal, &transient_input);
     // Cutscene records only align two already-running copies. Instance scripts
     // start their own local cutscene, so packets cannot launch rewards/endings.
     if (is_cutscene_active == 1 && D_global_asm_807476F8 >= 0 && D_global_asm_807476F8 < 0xFF
@@ -509,6 +569,10 @@ static void coop_transient_apply(void) {
         CoopTransientRecord record = transient_result.records[i];
         if (record.kind == COOP_TRANSIENT_ACTOR_CYCLE) {
             coop_transient_apply_clam(record);
+            continue;
+        }
+        if (record.kind == COOP_TRANSIENT_TOMATO_BOARD) {
+            coop_transient_apply_tomato_board(record);
             continue;
         }
         if (record.kind == COOP_TRANSIENT_CUTSCENE) {

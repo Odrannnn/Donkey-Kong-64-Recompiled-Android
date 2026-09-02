@@ -11,7 +11,7 @@ using u8 = unsigned char; using s8 = signed char; using u16 = unsigned short;
 using s16 = short; using u32 = unsigned; using s32 = int; using f32 = float;
 enum { ROLE_HOST = 1, ROLE_JOIN = 2 };
 
-struct Prop_ScriptData { s16 unk44[2]{}; u8 unk48[1]{}; };
+struct Prop_ScriptData { s16 unk44[2]{}; u8 unk48[2]{}; };
 struct Prop { Prop_ScriptData* unk7C{}; };
 struct CoopClamTestData { u8 pad[0x2C]{}; s32 timer{}; };
 struct Actor {
@@ -20,9 +20,12 @@ struct Actor {
     s16 unk132{};
     u8 control_state{}, control_state_progress{};
     void* additional_actor_data{};
+    void* unk178{};
 };
 struct EnemySpawner { Actor* tied_actor{}; };
-enum { MAP_JAPES_SHELL = 12, ACTOR_CLAM = 286 };
+enum { MAP_JAPES_SHELL = 12, MAP_CAVES_ICE_CASTLE = 98,
+    ACTOR_TOMATO_ICE = 164, ACTOR_CLAM = 286,
+    TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE = 0x30, FLAG_TYPE_TEMPORARY = 2 };
 
 static unsigned checks, script_calls, last_object, last_state;
 #define CHECK(x) do { ++checks; if (!(x)) { std::fprintf(stderr, "TRANSIENT ADAPTER FAIL %d: %s\n", __LINE__, #x); std::exit(1); } } while (0)
@@ -43,10 +46,17 @@ static Prop* D_global_asm_807F6000 = props.data();
 static std::array<EnemySpawner, 4> enemy_spawners;
 static std::array<Actor, 4> actors;
 static std::array<CoopClamTestData, 4> actor_data;
+static std::array<u8, 0x3A> tomato_data;
+static s8 D_global_asm_807FC8C0[16];
+static bool tomato_board_active;
+struct ActorListEntry { Actor* actor{}; u32 metadata{}; };
+static ActorListEntry D_global_asm_807FB930[4];
+static u16 D_global_asm_807FBB34;
 #define DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
 typedef struct { s16 count, padding; EnemySpawner* first; } CoopEnemySpawnerTable;
 static CoopEnemySpawnerTable D_807FDC88;
 static unsigned animation_calls, motion_calls, last_animation;
+static unsigned tile_activation_calls;
 
 static s16 func_global_asm_80659470(s32 object) {
     return object >= 0 && object < static_cast<s32>(scripts.size()) ? static_cast<s16>(object) : -1;
@@ -57,6 +67,17 @@ static void func_global_asm_8063DA40(s16 slot, s16 state) {
     CHECK(object < scripts.size() && props[object].unk7C == &scripts[object]);
     scripts[object].unk48[0] = static_cast<u8>(state);
     ++script_calls; last_object = object; last_state = static_cast<unsigned short>(state);
+}
+static void func_global_asm_8063DA78(s16 slot, s16 state, s16 state_index) {
+    CHECK(slot >= 0 && slot < 600 && state_index == 1);
+    unsigned object = static_cast<unsigned short>(D_global_asm_807F6240[slot]);
+    CHECK(object < scripts.size() && props[object].unk7C == &scripts[object]);
+    scripts[object].unk48[1] = static_cast<u8>(state);
+    ++tile_activation_calls;
+}
+static u8 isFlagSet(s16 flag, u8 type) {
+    CHECK(flag == TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE && type == FLAG_TYPE_TEMPORARY);
+    return tomato_board_active;
 }
 static void playActorAnimation(Actor*, s32 animation) {
     ++animation_calls; last_animation = static_cast<unsigned>(animation);
@@ -70,6 +91,9 @@ static void reset() {
     std::fill(std::begin(D_global_asm_807F6240), std::end(D_global_asm_807F6240), static_cast<s16>(-1));
     props = {}; scripts = {};
     enemy_spawners = {}; actors = {}; actor_data = {}; D_807FDC88 = {};
+    tomato_data = {}; tomato_board_active = false; D_global_asm_807FBB34 = 0;
+    std::fill(std::begin(D_global_asm_807FB930), std::end(D_global_asm_807FB930), ActorListEntry{});
+    std::fill(std::begin(D_global_asm_807FC8C0), std::end(D_global_asm_807FC8C0), static_cast<s8>(-1));
     role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
     transient_enabled = 1; transient_revision = 1; transient_page = 0;
     transient_file = transient_file_changed = 0;
@@ -80,6 +104,7 @@ static void reset() {
     D_global_asm_807476F8 = -1; D_global_asm_807F5CF0 = D_global_asm_807F5CF4 = 0;
     script_calls = last_object = last_state = 0;
     animation_calls = motion_calls = last_animation = 0;
+    tile_activation_calls = 0;
 }
 static void load(unsigned slot, unsigned object, unsigned state, unsigned timer = 0) {
     CHECK(slot < 600 && object < scripts.size());
@@ -98,6 +123,16 @@ static void load_clam(unsigned slot, unsigned state, int timer) {
     actors[slot].additional_actor_data = &actor_data[slot];
     actor_data[slot].timer = timer;
     enemy_spawners[slot].tied_actor = &actors[slot];
+}
+static void load_tomato(unsigned state) {
+    tomato_data[0x38] = static_cast<u8>(state);
+    actors[0].object_properties_bitfield = 0x10;
+    actors[0].unk58 = ACTOR_TOMATO_ICE;
+    actors[0].unk178 = tomato_data.data();
+    D_global_asm_807FB930[0].actor = &actors[0];
+    D_global_asm_807FBB34 = 1;
+    tomato_board_active = true;
+    for (unsigned i = 0; i < 16; ++i) load(i, i, 0);
 }
 static bool contains(unsigned kind, unsigned key, unsigned state) {
     for (unsigned i = 0; i < transient_input.count; ++i) {
@@ -592,6 +627,19 @@ static void capture_checks() {
     actors[0].object_properties_bitfield = 0; transient_page = 0;
     coop_transient_capture(1);
     CHECK(!contains(COOP_TRANSIENT_ACTOR_CYCLE, 1, 2));
+
+    reset(); current_map = MAP_CAVES_ICE_CASTLE; load_tomato(3);
+    unsigned tomato_value = 0;
+    for (unsigned i = 0; i < 16; ++i) {
+        D_global_asm_807FC8C0[i] = static_cast<s8>((i % 3) - 1);
+        tomato_value |= (i % 3) << (i * 2);
+    }
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TOMATO_BOARD, 0, 1, tomato_value));
+    tomato_data[0x38] = 2; transient_page = 0; coop_transient_capture(1);
+    CHECK(!contains(COOP_TRANSIENT_TOMATO_BOARD, 0, 1));
+    tomato_data[0x38] = 4; tomato_board_active = false; transient_page = 0;
+    coop_transient_capture(1); CHECK(!contains(COOP_TRANSIENT_TOMATO_BOARD, 0, 1));
 
     reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
     coop_transient_capture(1); CHECK(!transient_input.enabled);
@@ -1142,6 +1190,26 @@ static void object_apply_checks() {
     coop_transient_apply(); CHECK(actor_data[0].timer == 22);
     actors[0].unk58 = 0; transient_result.records[0].state = 2;
     coop_transient_apply(); CHECK(animation_calls == 1); // Wrong actor type fails closed.
+
+    reset(); role = ROLE_JOIN; current_map = MAP_CAVES_ICE_CASTLE; load_tomato(3);
+    D_global_asm_807FC8C0[0] = 0;
+    unsigned wanted = 0;
+    for (unsigned i = 0; i < 16; ++i) wanted |= ((i & 1) ? 2u : 1u) << (i * 2);
+    transient_result = {COOP_TRANSIENT_APPLYING, MAP_CAVES_ICE_CASTLE, 9, 1,
+        {{COOP_TRANSIENT_TOMATO_BOARD, 0, 1, wanted}}};
+    coop_transient_apply();
+    for (unsigned i = 0; i < 16; ++i)
+        CHECK(D_global_asm_807FC8C0[i] == static_cast<s8>(i & 1));
+    CHECK(tile_activation_calls == 15); // Cell zero already matched the host.
+    unsigned activations = tile_activation_calls;
+    coop_transient_apply(); CHECK(tile_activation_calls == activations); // Idempotent snapshot.
+    transient_result.records[0].value = 3; coop_transient_apply();
+    CHECK(tile_activation_calls == activations); // Reserved cell encoding rejects the whole record.
+    transient_result.records[0].value = wanted; tomato_data[0x38] = 2;
+    D_global_asm_807FC8C0[1] = -1; coop_transient_apply();
+    CHECK(D_global_asm_807FC8C0[1] == -1); // A packet cannot start or resume the encounter.
+    tomato_data[0x38] = 3; tomato_board_active = false; coop_transient_apply();
+    CHECK(D_global_asm_807FC8C0[1] == -1);
 }
 
 static void cutscene_checks() {
