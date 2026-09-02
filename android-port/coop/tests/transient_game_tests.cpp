@@ -89,16 +89,21 @@ static void capture_checks() {
     CHECK(transient_file == 1 && !transient_file_changed);
     CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x1A, 2));
     CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x1B, 3));
-    CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x34, 4));
+    CHECK(!contains(COOP_TRANSIENT_SCRIPT, 0x34, 4));
     load(3, 0x30, 1); load(4, 0x31, 2); load(5, 0x32, 3);
+    load(6, 0x34, 1); load(7, 0x35, 2);
     bool saw_japes_30 = false, saw_japes_31 = false, saw_japes_32 = false;
+    bool saw_japes_34 = false, saw_japes_35 = false;
     for (unsigned page = 0; page < 8; ++page) {
         coop_transient_capture(1);
         saw_japes_30 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 1, 2);
         saw_japes_31 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x31, 2, 2);
         saw_japes_32 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x32, 2, 2);
+        saw_japes_34 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x34, 1, 2);
+        saw_japes_35 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x35, 2, 2);
     }
     CHECK(saw_japes_30 && saw_japes_31 && saw_japes_32);
+    CHECK(saw_japes_34 && saw_japes_35);
 
     reset(); current_map = 30; load(0, 0, 10, 123); load(1, 1, 6, 45);
     coop_transient_capture(1);
@@ -210,6 +215,12 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x31, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x31 && last_state == 2);
+
+    reset(); role = ROLE_JOIN; load(0, 0x35, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x35, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x35 && last_state == 2);
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x31, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,

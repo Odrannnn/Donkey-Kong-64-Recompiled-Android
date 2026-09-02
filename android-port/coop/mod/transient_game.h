@@ -16,6 +16,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // shared vanilla cage counter; the cage/reward scripts remain local.
     {7, 0x30, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x31, COOP_TRANSIENT_TRIGGER, 2},
     {7, 0x32, COOP_TRANSIENT_TRIGGER, 2},
+    // Japes hive-area feather switches. The local state-2 blocks own the
+    // counter and gate sequence; completed-state refresh still uses flag 7.
+    {7, 0x34, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x35, COOP_TRANSIENT_TRIGGER, 2},
     {30, 0, COOP_TRANSIENT_TIMER, 0}, {30, 1, COOP_TRANSIENT_TIMER, 0},
     // Galleon's five instrument pads and Lanky/Tiny slam switches. State 2 is
     // the shared vanilla post-input entry; each linked door remains local.
@@ -195,8 +198,9 @@ static void coop_transient_capture(unsigned present) {
         for (unsigned earlier = 0; earlier < row; ++earlier)
             duplicate |= coop_live_world_states[earlier].map == state->map
                 && coop_live_world_states[earlier].object == state->object;
-        if (!duplicate) coop_transient_add_object(state->object, COOP_TRANSIENT_SCRIPT,
-            transient_page, &ordinal, &transient_input);
+        if (!duplicate && coop_transient_object_kind(state->map, state->object) == COOP_TRANSIENT_SCRIPT)
+            coop_transient_add_object(state->object, COOP_TRANSIENT_SCRIPT,
+                transient_page, &ordinal, &transient_input);
     }
     for (unsigned i = 0; i < sizeof(coop_transient_extra_objects) / sizeof(coop_transient_extra_objects[0]); ++i) {
         const CoopTransientObject* entry = &coop_transient_extra_objects[i];

@@ -1773,3 +1773,17 @@ state operations. The cage objects `0x2D` through `0x2F` observe that local
 counter and run their own timed opening and reward path; the packet never names
 a cage state, counter value, projectile or Diddy ownership flag. Permanent Diddy
 ownership remains in the item channel.
+
+## Japes hive-area feather switches (0.49.0)
+
+Jungle Japes map 7 objects `0x34` and `0x35` are the two feather switches for
+the hive-area gate. Their state-1 projectile checks enter state 2 and update the
+vanilla local counter observed by gate object `0x33`. Typed triggers now carry
+only that activation instead of exposing the switches through generic raw
+same-area script records.
+
+The existing flag-7 live-world table remains responsible for completed-state
+refresh of both switches and the gate. During the live sequence, the receiving
+switch runs its own sound, model, counter and timer operations. Packets cannot
+select gate state, counter value, projectile data or the permanent completion
+flag.
