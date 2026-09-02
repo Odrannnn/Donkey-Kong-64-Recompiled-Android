@@ -1957,6 +1957,16 @@ platform state. The slam script retains its 300-frame sequence and linked
 objects `6`, `7`, `9`, `0xA`, `0xB` and `0xC`. None of those linked objects,
 timers or player inputs can be selected by a packet.
 
+## Castle DK/Diddy/Chunky crypt switches (0.49.0)
+
+Castle crypt map 112 objects `0xD`, `0xE` and `0xF` are the pineapple,
+coconut and peanut switches. Each waits in state 1 and enters state 2 after
+its exact projectile check. Typed triggers mirror only those entries.
+
+Each local script retains its own switch animation, sound, shared door update
+and reset timing. Packets cannot name the door, a projectile or later states,
+and an already-running switch is never rewound.
+
 ## Galleon paired gun switches (0.49.0)
 
 Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired

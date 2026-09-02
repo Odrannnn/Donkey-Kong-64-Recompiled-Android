@@ -86,6 +86,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Castle Lanky/Tiny crypt grape and Simian Slam switches. Both enter their
     // local door/platform sequences through reviewed state 2.
     {108, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {108, 0x04, COOP_TRANSIENT_TRIGGER, 2},
+    // Castle DK/Diddy/Chunky crypt gun switches. Their state-2 entries retain
+    // all local sound, linked-door and reset behavior.
+    {112, 0x0D, COOP_TRANSIENT_TRIGGER, 2}, {112, 0x0E, COOP_TRANSIENT_TRIGGER, 2},
+    {112, 0x0F, COOP_TRANSIENT_TRIGGER, 2},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.
