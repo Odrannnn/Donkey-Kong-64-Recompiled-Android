@@ -83,6 +83,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Caves small/large boulder pads. The small pad accepts state 2 from ready
     // state 1; the large pad must finish its local reveal at state 12 first.
     {72, 0x2E, COOP_TRANSIENT_TRIGGER, 2}, {72, 0x2F, COOP_TRANSIENT_TRIGGER, 13},
+    // Chunky's Caves cabin gun targets. Each hit also advances the local
+    // Gorilla Gone controller by one reviewed step in the apply adapter.
+    {90, 0x03, COOP_TRANSIENT_TRIGGER, 2}, {90, 0x04, COOP_TRANSIENT_TRIGGER, 2},
+    {90, 0x05, COOP_TRANSIENT_TRIGGER, 2},
     // Castle Lanky/Tiny crypt grape and Simian Slam switches. Both enter their
     // local door/platform sequences through reviewed state 2.
     {108, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {108, 0x04, COOP_TRANSIENT_TRIGGER, 2},
@@ -341,8 +345,17 @@ static void coop_transient_apply(void) {
             unsigned activation = coop_transient_object_activation(current_map, record.key);
             if (record.value == activation && record.state == 2
                     && coop_transient_trigger_ready(current_map, record.key,
-                        script->unk48[0], activation))
+                        script->unk48[0], activation)) {
+                if ((unsigned)current_map == 90 && record.key >= 0x03 && record.key <= 0x05) {
+                    Prop_ScriptData* controller = coop_transient_script(0x06);
+                    if (!controller || controller->unk48[0] < 1 || controller->unk48[0] >= 4)
+                        continue;
+                    // Vanilla function 28 adds one to controller state index 0
+                    // before the target enters state 2.
+                    controller->unk48[0] += 1;
+                }
                 coop_live_world_set_object(record.key, activation);
+            }
             continue;
         }
         if (kind == COOP_TRANSIENT_SEQUENCE) {

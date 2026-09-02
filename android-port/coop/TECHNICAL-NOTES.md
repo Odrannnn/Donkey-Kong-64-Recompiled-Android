@@ -1957,6 +1957,18 @@ receiving pad runs its original dome notification, presentation and permanent
 flag `0x10E` update. Dome objects `0x27` and `0x2B` remain locally controlled,
 and the large pad cannot be activated before local state 12.
 
+## Chunky Caves cabin targets (0.49.0)
+
+Chunky's Caves cabin map 90 objects `3`, `4` and `5` are the three gun targets.
+Each enters state 2 from ready state 1 after a stock projectile hit. That same
+vanilla block increments Gorilla Gone controller object `6`, state index 0, by
+one before changing the target state.
+
+The receive adapter reproduces both parts in that order. It accepts a target
+only once and increments controller state only from 1 through 3; a missing,
+uninitialized or completed controller blocks the packet. Target state 20,
+Gorilla Gone activation, warp collision, reward and saved completion stay local.
+
 ## Castle Lanky/Tiny crypt switches (0.49.0)
 
 Castle crypt map 108 object `0` is Lanky's grape switch and object `4` is Tiny's

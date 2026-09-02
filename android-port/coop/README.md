@@ -33,6 +33,8 @@ The Isles trombone pad can mirror its rocket-barrel reveal only after the
 receiving pad has independently reached its barrel-ready state.
 Caves' small and large boulder pads mirror only their reviewed deposit entries;
 each local script still destroys its own dome and records permanent completion.
+Chunky's Caves cabin mirrors its three gun-target hits and advances the local
+Gorilla Gone controller once per newly received target.
 Castle's Lanky/Tiny crypt grape and Simian Slam switches now mirror their exact
 activation entries while local scripts retain the door and platform sequences.
 The three DK/Diddy/Chunky crypt gun switches also mirror their reviewed hit
