@@ -30,7 +30,10 @@ enum {
     // The same encounter's host countdown. State 1 carries 0..60 seconds
     // remaining; state 2 is the final expiry edge after the final board sample.
     COOP_TRANSIENT_TOMATO_CLOCK,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_TOMATO_CLOCK
+    // One of four exact vanilla Kremling Kosh controllers completed. This
+    // monotonic event is bidirectional; each copy runs its own success helper.
+    COOP_TRANSIENT_MINIGAME_SUCCESS,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_MINIGAME_SUCCESS
 };
 enum {
     COOP_TRANSIENT_OFF,

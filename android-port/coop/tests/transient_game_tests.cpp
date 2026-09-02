@@ -9,14 +9,15 @@
 
 using u8 = unsigned char; using s8 = signed char; using u16 = unsigned short;
 using s16 = short; using u32 = unsigned; using s32 = int; using f32 = float;
-enum { ROLE_HOST = 1, ROLE_JOIN = 2 };
+using Maps = u32;
+enum { ROLE_OFF, ROLE_HOST, ROLE_JOIN };
 
 struct Prop_ScriptData { s16 unk44[2]{}; u8 unk48[2]{}; };
 struct Prop { Prop_ScriptData* unk7C{}; };
 struct CoopClamTestData { u8 pad[0x2C]{}; s32 timer{}; };
 struct Actor {
     u32 object_properties_bitfield{};
-    u32 unk58{};
+    u32 unk54{}, unk58{};
     s16 unk132{};
     u8 control_state{}, control_state_progress{};
     void* additional_actor_data{};
@@ -24,8 +25,14 @@ struct Actor {
     Actor* unk11C{};
 };
 struct EnemySpawner { Actor* tied_actor{}; };
+struct CharacterSpawner {
+    u8 pad0[2]{}; s16 unk2{}, unk4{}, unk6{}, unk8{};
+    union { u8 unkA_u8[2]; u16 unkA_u16; s16 unkA_s16; };
+    u8 unkC{}, unkD{}, unkE{}, unkF{}, unk10{}, unk11{}, unk12{}, unk13{};
+};
 enum { MAP_JAPES_SHELL = 12, MAP_CAVES_ICE_CASTLE = 98,
     ACTOR_TOMATO_ICE = 164, ACTOR_TIMER_CONTROLLER = 177, ACTOR_CLAM = 286,
+    ACTOR_MINIGAME_CONTROLLER = 256,
     TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE = 0x30, FLAG_TYPE_TEMPORARY = 2 };
 
 static unsigned checks, script_calls, last_object, last_state;
@@ -65,6 +72,34 @@ typedef struct { s16 count, padding; EnemySpawner* first; } CoopEnemySpawnerTabl
 static CoopEnemySpawnerTable D_807FDC88;
 static unsigned animation_calls, motion_calls, last_animation;
 static unsigned tile_activation_calls;
+static CharacterSpawner character_spawners[2];
+static CharacterSpawner* D_global_asm_807FDC9C = character_spawners;
+static Actor* gCurrentActorPointer;
+static Actor* gPlayerPointer;
+static void (*D_global_asm_8074C0A0[300])(void);
+static Maps kosh_parent;
+static s32 kosh_exit;
+static bool kosh_parent_valid;
+static unsigned kosh_original_calls, kosh_success_calls, kosh_success_arg, kosh_success_text;
+
+static s32 func_global_asm_805FF800(Maps* map, s32* exit) {
+    if (!kosh_parent_valid) return 0;
+    *map = kosh_parent; *exit = kosh_exit; return 1;
+}
+static void func_bonus_80024158(void) {
+    ++kosh_original_calls;
+    if (gCurrentActorPointer && gCurrentActorPointer->control_state == 1)
+        ++gCurrentActorPointer->control_state;
+}
+static void func_bonus_800264E0(u8 success, u8 text) {
+    ++kosh_success_calls; kosh_success_arg = success; kosh_success_text = text;
+    if (gCurrentActorPointer) {
+        if (gCurrentActorPointer->unk11C) gCurrentActorPointer->unk11C->control_state = 0;
+        ++gCurrentActorPointer->control_state;
+    }
+    if (gPlayerPointer) gPlayerPointer->control_state = 0x44;
+}
+static void recomp_printf(const char*, ...) {}
 
 static s16 func_global_asm_80659470(s32 object) {
     return object >= 0 && object < static_cast<s32>(scripts.size()) ? static_cast<s16>(object) : -1;
@@ -115,6 +150,18 @@ static void reset() {
     script_calls = last_object = last_state = 0;
     animation_calls = motion_calls = last_animation = 0;
     tile_activation_calls = 0;
+    std::fill(std::begin(character_spawners), std::end(character_spawners), CharacterSpawner{});
+    D_global_asm_807FDC9C = character_spawners;
+    gCurrentActorPointer = gPlayerPointer = nullptr;
+    std::fill(std::begin(D_global_asm_8074C0A0), std::end(D_global_asm_8074C0A0), nullptr);
+    D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
+    kosh_parent = 0; kosh_exit = 0; kosh_parent_valid = false;
+    kosh_original_calls = kosh_success_calls = kosh_success_arg = kosh_success_text = 0;
+    coop_kosh_original = nullptr; coop_kosh_hook = 0;
+    coop_kosh_pending_epoch = coop_kosh_pending_key = 0;
+    coop_kosh_applied_epoch = coop_kosh_applied_key = 0;
+    coop_kosh_success_epoch = coop_kosh_success_key = 0;
+    coop_transient_init();
 }
 static void load(unsigned slot, unsigned object, unsigned state, unsigned timer = 0) {
     CHECK(slot < 600 && object < scripts.size());
@@ -149,6 +196,20 @@ static void load_tomato(unsigned state) {
     D_global_asm_807FBB34 = 1;
     tomato_board_active = true;
     for (unsigned i = 0; i < 16; ++i) load(i, i, 0);
+}
+static void load_kosh(unsigned key) {
+    CHECK(key >= 1 && key <= 4);
+    const auto& row = coop_kosh_identities[key - 1];
+    current_map = row.map; kosh_parent = row.parent; kosh_exit = 0; kosh_parent_valid = true;
+    character_spawners[1].pad0[0] = 2;
+    character_spawners[0].unkA_u8[0] = row.target;
+    static CoopKoshData data;
+    data = {}; data.intro = 2;
+    actors[0].object_properties_bitfield = 0x10;
+    actors[0].unk54 = 77; actors[0].unk58 = ACTOR_MINIGAME_CONTROLLER;
+    actors[0].unk178 = &data; actors[0].unk11C = &actors[1];
+    gCurrentActorPointer = &actors[0]; gPlayerPointer = &actors[2];
+    D_global_asm_807FB930[0].actor = &actors[0]; D_global_asm_807FBB34 = 1;
 }
 static bool contains(unsigned kind, unsigned key, unsigned state) {
     for (unsigned i = 0; i < transient_input.count; ++i) {
@@ -1294,7 +1355,94 @@ static void cutscene_checks() {
     coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 6); // A packet cannot start one.
 }
 
+static void kosh_checks() {
+    for (unsigned key = 1; key <= 4; ++key) {
+        reset(); load_kosh(key);
+        actors[0].control_state = 1; actors[2].control_state = 0x44;
+        D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER]();
+        CHECK(kosh_original_calls == 1 && !kosh_success_calls && actors[0].control_state == 2);
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_MINIGAME_SUCCESS, key, 1, 0));
+
+        for (unsigned receiver_role : {ROLE_HOST, ROLE_JOIN}) {
+            reset(); load_kosh(key); role = receiver_role;
+            transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+                {{COOP_TRANSIENT_MINIGAME_SUCCESS, key, 1, 0}}};
+            coop_transient_apply();
+            CHECK(!kosh_success_calls && coop_kosh_pending_key == key);
+            D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER]();
+            CHECK(kosh_success_calls == 1 && kosh_success_arg == 1 && kosh_success_text == 0xE);
+            CHECK(kosh_original_calls == 1 && actors[0].control_state == 2
+                && actors[2].control_state == 0x44);
+            coop_transient_apply();
+            D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER]();
+            CHECK(kosh_success_calls == 1); // Persistent result is idempotent.
+            coop_transient_capture(1);
+            CHECK(contains_value(COOP_TRANSIENT_MINIGAME_SUCCESS, key, 1, 0));
+        }
+    }
+
+    // Exact record, room epoch and loading context are mandatory before a
+    // remote success can even become pending.
+    reset(); load_kosh(1); role = ROLE_JOIN;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_MINIGAME_SUCCESS, 1, 1, 0}}};
+    for (unsigned scenario = 0; scenario < 6; ++scenario) {
+        coop_kosh_pending_key = 0;
+        auto saved = transient_result;
+        if (scenario == 0) transient_result.records[0].key = 2;
+        if (scenario == 1) transient_result.records[0].state = 2;
+        if (scenario == 2) transient_result.records[0].value = 1;
+        if (scenario == 3) transient_result.epoch = epoch - 1;
+        if (scenario == 4) transient_result.map = current_map + 1;
+        if (scenario == 5) loading_zone_transition_speed = 1.0f;
+        coop_transient_apply(); CHECK(!coop_kosh_pending_key);
+        transient_result = saved; loading_zone_transition_speed = 0.0f;
+    }
+
+    // Every controller-side identity check fails closed and still delegates to
+    // the original behavior. No score, timer, flag, or transition is written.
+    for (unsigned scenario = 0; scenario < 8; ++scenario) {
+        reset(); load_kosh(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_MINIGAME_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_kosh_pending_key == 1);
+        if (scenario == 0) kosh_parent = 25;
+        if (scenario == 1) character_spawners[0].unkA_u8[0] = 19;
+        if (scenario == 2) character_spawners[1].pad0[0] = 3;
+        if (scenario == 3) ((CoopKoshData*)actors[0].unk178)->intro = 1;
+        if (scenario == 4) D_global_asm_807FBB34 = 0;
+        if (scenario == 5) actors[0].object_properties_bitfield = 0;
+        if (scenario == 6) actors[0].unk11C = nullptr;
+        if (scenario == 7) D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
+        coop_kosh_behavior();
+        CHECK(!kosh_success_calls && kosh_original_calls == 1 && actors[0].control_state == 0);
+    }
+
+    reset(); load_kosh(1);
+    actors[0].control_state = 1; actors[2].control_state = 0x43;
+    D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER]();
+    coop_transient_capture(1);
+    CHECK(!contains(COOP_TRANSIENT_MINIGAME_SUCCESS, 1, 1)); // Failure never propagates.
+
+    for (unsigned scenario = 0; scenario < 2; ++scenario) {
+        reset(); load_kosh(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_MINIGAME_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_kosh_pending_key == 1);
+        if (!scenario) loading_zone_transition_speed = 1.0f;
+        else gPlayerPointer = nullptr;
+        D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER]();
+        CHECK(!kosh_success_calls && !coop_kosh_pending_key && kosh_original_calls == 1);
+    }
+
+    reset(); transient_enabled = 0; coop_kosh_hook = 0;
+    D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
+    coop_transient_init();
+    CHECK(!coop_kosh_hook && D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] == func_bonus_80024158);
+}
+
 int main() {
-    capture_checks(); object_apply_checks(); cutscene_checks();
+    capture_checks(); object_apply_checks(); cutscene_checks(); kosh_checks();
     std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }

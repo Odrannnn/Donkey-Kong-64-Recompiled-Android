@@ -1,4 +1,4 @@
-> Current source: 0.62.0, protocol/native ABI v62. The protocol and persistent
+> Current source: 0.63.0, protocol/native ABI v63. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -2616,3 +2616,26 @@ existing whole-level delay. Flag write, counter increment, HUD update and save
 remain one retryable operation; a failed flag write does not advance the
 counter. Protocol and packet sizes are unchanged. Protocol 62, compatibility
 `0x0001023E`, v62 exports and manifest 0.62.0 reject older peers and companions.
+
+## Kremling Kosh shared success (0.63.0)
+
+The four vanilla Kosh maps use the generic minigame controller actor 256 and
+behavior `func_bonus_80024158`. The adapter installs a wrapper only when that
+exact actor-table entry is unmodified, then identifies an instance by its bonus
+map, parent map and target count. The four accepted tuples are `(10,24,18)`,
+`(115,47,22)`, `(116,151,25)` and `(117,170,28)`.
+
+A success record contains only the immutable tuple index. It is the only
+bidirectional transient kind; scripts, timers, platforms, cutscenes, AI and all
+other records remain host-authoritative. The receiver also requires the exact
+map and room epoch, a live initialized actor with matching generation, Kosh
+type 2, a completed intro, target and parent-map agreement, controller state 0
+and the original wrapper still installed. It then calls the stock success
+helper once before the original controller, which performs its normal state
+advance, presentation and exit. Repeated packets are idempotent.
+
+Scores, timers, child-controller state, destinations and flags never cross the
+wire. The normal item transaction remains the only path that owns and saves the
+Golden Banana. Packet and bridge sizes remain unchanged. Protocol 63,
+compatibility `0x0001023F`, v63 exports and manifest 0.63.0 reject older peers
+and companions.

@@ -234,6 +234,115 @@ static unsigned coop_transient_applied_timer_epoch;
 static CoopTransientRecord coop_transient_last_cutscene;
 static unsigned coop_transient_cutscene_epoch, coop_transient_cutscene_hold;
 
+// The generic bonus controller is shared by many unrelated minigames. Admit
+// only the four vanilla Kosh identities whose current map, source map and
+// target all match this immutable table.
+typedef struct {
+    unsigned char map, parent, target;
+} CoopKoshIdentity;
+typedef struct {
+    unsigned short intro;
+    short remaining, initial;
+    unsigned char padding[3], text;
+} CoopKoshData;
+static const CoopKoshIdentity coop_kosh_identities[4] = {
+    {10, 24, 18}, {115, 47, 22}, {116, 151, 25}, {117, 170, 28},
+};
+static void coop_kosh_behavior(void);
+static void (*coop_kosh_original)(void);
+static unsigned coop_kosh_hook, coop_kosh_pending_epoch, coop_kosh_pending_key;
+static unsigned coop_kosh_applied_epoch, coop_kosh_applied_key;
+static unsigned coop_kosh_success_epoch, coop_kosh_success_key;
+
+extern CharacterSpawner* D_global_asm_807FDC9C;
+extern s32 func_global_asm_805FF800(Maps* map, s32* exit);
+extern void func_bonus_80024158(void);
+extern void func_bonus_800264E0(u8 success, u8 text);
+
+static unsigned coop_kosh_actor_live(Actor* actor, unsigned generation) {
+    if (!actor || D_global_asm_807FBB34 > 64) return 0;
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i)
+        if (D_global_asm_807FB930[i].actor == actor) return actor->unk54 == generation;
+    return 0;
+}
+
+static unsigned coop_kosh_identity(Actor* actor) {
+    if (!coop_kosh_hook || !actor || actor != gCurrentActorPointer
+            || actor->unk58 != ACTOR_MINIGAME_CONTROLLER
+            || !(actor->object_properties_bitfield & 0x10) || !actor->unk178
+            || !actor->unk11C || !D_global_asm_807FDC9C
+            || D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] != coop_kosh_behavior
+            || !coop_kosh_actor_live(actor, actor->unk54)) return 0;
+    CoopKoshData* data = (CoopKoshData*)actor->unk178;
+    if (data->intro < 2 || D_global_asm_807FDC9C[1].pad0[0] != 2) return 0;
+    Maps parent = current_map;
+    s32 exit = -1;
+    if (!func_global_asm_805FF800(&parent, &exit) || exit != 0) return 0;
+    unsigned target = D_global_asm_807FDC9C[0].unkA_u8[0];
+    for (unsigned i = 0; i < 4; ++i) {
+        const CoopKoshIdentity* row = &coop_kosh_identities[i];
+        if (row->map == (unsigned)current_map && row->parent == (unsigned)parent
+                && row->target == target) return i + 1;
+    }
+    return 0;
+}
+
+static void coop_kosh_behavior(void) {
+    Actor* actor = gCurrentActorPointer;
+    unsigned generation = actor ? actor->unk54 : 0;
+    unsigned key = coop_kosh_identity(actor);
+    if (coop_kosh_pending_key && (coop_kosh_pending_epoch != epoch
+            || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer)) coop_kosh_pending_key = 0;
+    if (key && coop_kosh_pending_epoch == epoch && coop_kosh_pending_key == key
+            && !(coop_kosh_applied_epoch == epoch && coop_kosh_applied_key == key)
+            && !transient_file_changed && loading_zone_transition_speed == 0.0f
+            && gPlayerPointer && actor->control_state == 0) {
+        coop_kosh_pending_key = 0;
+        func_bonus_800264E0(1, 0xE);
+        coop_kosh_applied_epoch = epoch;
+        coop_kosh_applied_key = key;
+    }
+    if (coop_kosh_original) coop_kosh_original();
+    if (key && coop_kosh_actor_live(actor, generation) && actor->control_state != 0
+            && gPlayerPointer && gPlayerPointer->control_state == 0x44) {
+        coop_kosh_success_epoch = epoch;
+        coop_kosh_success_key = key;
+        coop_kosh_applied_epoch = epoch;
+        coop_kosh_applied_key = key;
+        coop_kosh_pending_key = 0;
+    }
+}
+
+static void coop_transient_init(void) {
+    if (!transient_enabled) return;
+    coop_kosh_original = D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER];
+    if (coop_kosh_original != func_bonus_80024158) {
+        recomp_printf("[dk64-coop] Kosh controller modified by another mod; shared Kosh success disabled.\n");
+        coop_kosh_original = 0;
+        return;
+    }
+    D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = coop_kosh_behavior;
+    coop_kosh_hook = 1;
+}
+
+static void coop_transient_add_kosh(CoopTransientInput* input) {
+    if (coop_kosh_success_epoch != epoch || !coop_kosh_success_key
+            || coop_kosh_success_key > 4 || input->count >= COOP_TRANSIENT_RECORDS
+            || coop_kosh_identities[coop_kosh_success_key - 1].map != (unsigned)current_map) return;
+    input->records[input->count++] = (CoopTransientRecord){
+        COOP_TRANSIENT_MINIGAME_SUCCESS, coop_kosh_success_key, 1, 0};
+}
+
+static void coop_transient_apply_kosh(CoopTransientRecord record) {
+    if (!coop_kosh_hook || record.key < 1 || record.key > 4
+            || record.state != 1 || record.value
+            || coop_kosh_identities[record.key - 1].map != (unsigned)current_map
+            || (coop_kosh_applied_epoch == epoch && coop_kosh_applied_key == record.key)) return;
+    coop_kosh_pending_epoch = epoch;
+    coop_kosh_pending_key = record.key;
+}
+
 static unsigned coop_transient_timer_sample_is_new(CoopTransientRecord record) {
     if (coop_transient_applied_timer_epoch != epoch) {
         coop_transient_applied_timer_epoch = epoch;
@@ -617,6 +726,7 @@ static void coop_transient_capture(unsigned present) {
     coop_transient_add_clams(transient_page, &ordinal, &transient_input);
     coop_transient_add_tomato_board(transient_page, &ordinal, &transient_input);
     coop_transient_add_tomato_clock(transient_page, &ordinal, &transient_input);
+    coop_transient_add_kosh(&transient_input);
     // Retain the last same-epoch target briefly after the host finishes so a
     // lagging copy can consume missed phases. Apply still requires the Join to
     // be running the exact same cutscene and flags, so this cannot launch one.
@@ -643,12 +753,17 @@ static void coop_transient_capture(unsigned present) {
 }
 
 static void coop_transient_apply(void) {
-    if (!transient_enabled || transient_file_changed || role != ROLE_JOIN
+    if (!transient_enabled || transient_file_changed || role == ROLE_OFF
             || transient_result.status != COOP_TRANSIENT_APPLYING
             || transient_result.map != (unsigned)current_map || transient_result.epoch != epoch
             || loading_zone_transition_speed != 0.0f) return;
     for (unsigned i = 0; i < transient_result.count && i < COOP_TRANSIENT_RECORDS; ++i) {
         CoopTransientRecord record = transient_result.records[i];
+        if (record.kind == COOP_TRANSIENT_MINIGAME_SUCCESS) {
+            coop_transient_apply_kosh(record);
+            continue;
+        }
+        if (role != ROLE_JOIN) continue;
         if (record.kind == COOP_TRANSIENT_ACTOR_CYCLE) {
             coop_transient_apply_clam(record);
             continue;

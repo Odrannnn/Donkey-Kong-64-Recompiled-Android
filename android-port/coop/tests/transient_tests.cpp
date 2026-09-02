@@ -59,6 +59,11 @@ int main() {
     bad.records[5] = {COOP_TRANSIENT_TOMATO_CLOCK, 0, 2, 0}; CHECK(valid_transient(bad));
     bad.records[5].value = 1; CHECK(!valid_transient(bad));
     bad.records[5].key = 1; bad.records[5].value = 0; CHECK(!valid_transient(bad));
+    bad.records[5] = {COOP_TRANSIENT_MINIGAME_SUCCESS, 1, 1, 0}; CHECK(valid_transient(bad));
+    bad.records[5].key = 0; CHECK(!valid_transient(bad));
+    bad.records[5].key = 5; CHECK(!valid_transient(bad));
+    bad.records[5].key = 1; bad.records[5].state = 2; CHECK(!valid_transient(bad));
+    bad.records[5].state = 1; bad.records[5].value = 1; CHECK(!valid_transient(bad));
 
     State hs{7, 10, 0, active}, gs{7, 20, 1, active};
     auto guest_input = frame(7, 20, 8);
@@ -91,7 +96,34 @@ int main() {
     for (unsigned i = 0; i < guest.result().count; ++i)
         sequence_rewound |= guest.result().records[i].kind == COOP_TRANSIENT_SEQUENCE;
     CHECK(!sequence_rewound);
+
+    // Kosh completion is the sole bidirectional transient event. A guest can
+    // finish the host's matching instance, while its ordinary script record is
+    // still ignored by host authority.
+    guest_input = frame(7, 20, 12); guest_input.count = 2;
+    guest_input.records[0] = {COOP_TRANSIENT_SCRIPT, 0x34, 1, 0};
+    guest_input.records[1] = {COOP_TRANSIENT_MINIGAME_SUCCESS, 2, 1, 0};
+    for (unsigned i = 2; i < COOP_TRANSIENT_RECORDS; ++i) guest_input.records[i] = {};
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    CHECK(host.result().status == COOP_TRANSIENT_APPLYING && host.result().count == 1);
+    CHECK(host.result().records[0].kind == COOP_TRANSIENT_MINIGAME_SUCCESS
+        && host.result().records[0].key == 2);
+
+    host_input.count = 1;
+    host_input.records[0] = {COOP_TRANSIENT_MINIGAME_SUCCESS, 3, 1, 0};
+    for (unsigned i = 1; i < COOP_TRANSIENT_RECORDS; ++i) host_input.records[i] = {};
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    guest_input.count = 0;
+    for (auto& record : guest_input.records) record = {};
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    CHECK(guest.result().status == COOP_TRANSIENT_APPLYING && guest.result().count == 1);
+    CHECK(guest.result().records[0].kind == COOP_TRANSIENT_MINIGAME_SUCCESS
+        && guest.result().records[0].key == 3);
+
+    host_input = frame(7, 10, 4);
     guest_input = host_input; guest_input.epoch = 20;
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
     guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
     CHECK(guest.result().status == COOP_TRANSIENT_SYNCED && !guest.result().count);
 
@@ -114,7 +146,7 @@ int main() {
     auto bytes = encode(packet); Packet roundtrip{};
     CHECK(bytes.size() == 1368 && decode(bytes.data(), bytes.size(), roundtrip));
     CHECK(roundtrip.transient.count == 5 && roundtrip.transient.records[4].kind == COOP_TRANSIENT_SEQUENCE);
-    bytes[transient_offset + 6 * 4 + 1] = 9; // Kind 9 is outside the bounded enum.
+    bytes[transient_offset + 6 * 4 + 1] = 11; // Kind 11 is outside the bounded enum.
     CHECK(!decode(bytes.data(), bytes.size(), roundtrip));
 
     std::printf("PASS: %u same-area transient protocol checks (typed records, host authority, epochs, stale rejection, cutscene context)\n", checks);

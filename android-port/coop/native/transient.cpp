@@ -39,6 +39,9 @@ bool valid_record(const CoopTransientRecord& record) {
         case COOP_TRANSIENT_TOMATO_CLOCK:
             return !record.key && ((record.state == 1u && record.value <= 60u)
                 || (record.state == 2u && !record.value));
+        case COOP_TRANSIENT_MINIGAME_SUCCESS:
+            return record.key >= 1u && record.key <= 4u
+                && record.state == 1u && !record.value;
     }
     return false;
 }
@@ -126,10 +129,12 @@ void TransientSync::update(bool host, const State& local, const CoopTransientInp
         local.map, local.epoch, peer.epoch, input.file};
     if (context != next) context = next;
     output.map = local.map; output.epoch = local.epoch;
-    if (host) { output.status = COOP_TRANSIENT_SYNCED; return; }
     output.status = COOP_TRANSIENT_SYNCED;
     for (unsigned i = 0; i < remote.count && output.count < COOP_TRANSIENT_RECORDS; ++i) {
         const auto& wanted = remote.records[i];
+        // All established same-area state remains host-authoritative. Kosh
+        // success is monotonic and may originate on either peer.
+        if (host && wanted.kind != COOP_TRANSIENT_MINIGAME_SUCCESS) continue;
         const CoopTransientRecord* current = nullptr;
         for (unsigned j = 0; j < input.count; ++j)
             if (input.records[j].kind == wanted.kind && input.records[j].key == wanted.key) {
