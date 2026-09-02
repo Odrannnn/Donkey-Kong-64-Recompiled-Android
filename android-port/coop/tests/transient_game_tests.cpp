@@ -168,6 +168,9 @@ static void capture_checks() {
     reset(); current_map = 58; load(0, 0x00, 1);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x00, 1, 2));
+    reset(); current_map = 57; load(0, 0x03, 11);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x03, 2, 11));
     reset(); current_map = 59; load(0, 0x01, 2); load(1, 0x24, 1);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x01, 2, 2));
@@ -570,6 +573,13 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x00, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x00 && last_state == 2);
+    reset(); role = ROLE_JOIN; current_map = 57; load(0, 0x03, 10);
+    transient_result = {COOP_TRANSIENT_APPLYING, 57, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x03, 2, 11}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x03 && last_state == 11);
+    scripts[0x03].unk48[0] = 20; coop_transient_apply();
+    CHECK(script_calls == 1); // Saved completion cannot restart the winch.
 
     reset(); role = ROLE_JOIN; current_map = 108; load(0, 0x00, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 108, 9, 1,

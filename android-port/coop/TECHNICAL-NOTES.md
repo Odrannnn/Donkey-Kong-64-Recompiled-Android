@@ -1988,6 +1988,16 @@ Typed triggers mirror that activation edge. The local scripts retain their
 timers, sounds, room objects, enemies and permanent completion flags. Completed
 state 20 is never treated as a remotely startable action.
 
+## Fungi Winch Room up button (0.49.0)
+
+Fungi Winch Room map 57 object `3` is the Gorilla Grab up button. It waits in
+state 10 after its permanent-state initialization and enters state 11 only
+after the stock lever and move checks. A typed trigger mirrors that exact edge.
+
+The local state-11 script retains its 400-frame timer, camera, sound, winch
+objects `1` and `2`, reward spawn and permanent flag `212`. Initialization and
+completed states 20 through 22 cannot be remotely selected.
+
 ## Thornvine Barn slam boxes (0.49.0)
 
 Thornvine Barn map 59 objects `1` and `0x24` are the two DK slam boxes. Both

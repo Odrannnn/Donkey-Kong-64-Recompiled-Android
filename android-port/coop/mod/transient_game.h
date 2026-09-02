@@ -83,6 +83,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Fungi dark-attic guitar pad and Lanky attic slam switch. State 2 starts
     // each local room sequence after its exact vanilla move check.
     {56, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {58, 0x00, COOP_TRANSIENT_TRIGGER, 2},
+    // Fungi Winch Room up button waits at state 10 and enters its local
+    // 400-frame winch/reward sequence at state 11.
+    {57, 0x03, COOP_TRANSIENT_TRIGGER, 11},
     // Thornvine Barn's two DK slam boxes enter their local 60-frame sequences
     // at state 2 after the reviewed move and contact checks.
     {59, 0x01, COOP_TRANSIENT_TRIGGER, 2}, {59, 0x24, COOP_TRANSIENT_TRIGGER, 2},
