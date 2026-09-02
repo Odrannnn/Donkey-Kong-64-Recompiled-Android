@@ -35,6 +35,8 @@ Caves' small and large boulder pads mirror only their reviewed deposit entries;
 each local script still destroys its own dome and records permanent completion.
 Chunky's Caves cabin mirrors its three gun-target hits and advances the local
 Gorilla Gone controller once per newly received target.
+Fungi's dark-attic guitar pad and Lanky attic slam switch mirror their reviewed
+activation entries while their room sequences remain local.
 Castle's Lanky/Tiny crypt grape and Simian Slam switches now mirror their exact
 activation entries while local scripts retain the door and platform sequences.
 The three DK/Diddy/Chunky crypt gun switches also mirror their reviewed hit

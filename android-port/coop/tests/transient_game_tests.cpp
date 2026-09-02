@@ -154,6 +154,13 @@ static void capture_checks() {
     }
     CHECK(saw_fungi_18 && saw_fungi_19 && saw_fungi_1a && saw_fungi_1b && saw_fungi_1e);
 
+    reset(); current_map = 56; load(0, 0x00, 2);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x00, 2, 2));
+    reset(); current_map = 58; load(0, 0x00, 1);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x00, 1, 2));
+
     reset(); current_map = 173; load(0, 0x10, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x10, 2, 2));
@@ -501,6 +508,17 @@ static void object_apply_checks() {
     scripts[0x06].unk48[0] = 4; transient_result.records[0].key = 0x03;
     coop_transient_apply();
     CHECK(script_calls == 2); // Completed controller cannot receive another hit.
+
+    reset(); role = ROLE_JOIN; current_map = 56; load(0, 0x00, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 56, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x00, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x00 && last_state == 2);
+    reset(); role = ROLE_JOIN; current_map = 58; load(0, 0x00, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 58, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x00, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x00 && last_state == 2);
 
     reset(); role = ROLE_JOIN; current_map = 108; load(0, 0x00, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 108, 9, 1,

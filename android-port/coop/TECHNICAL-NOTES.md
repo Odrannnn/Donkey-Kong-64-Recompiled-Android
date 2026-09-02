@@ -1957,6 +1957,16 @@ receiving pad runs its original dome notification, presentation and permanent
 flag `0x10E` update. Dome objects `0x27` and `0x2B` remain locally controlled,
 and the large pad cannot be activated before local state 12.
 
+## Fungi attic activators (0.49.0)
+
+Fungi Rafters map 56 object `0` is the dark-attic guitar pad, and Mill Attic
+map 58 object `0` is Lanky's Simian Slam switch. Both initialize to ready state
+1 and enter state 2 only after their pinned vanilla move checks.
+
+Typed triggers mirror that activation edge. The local scripts retain their
+timers, sounds, room objects, enemies and permanent completion flags. Completed
+state 20 is never treated as a remotely startable action.
+
 ## Chunky Caves cabin targets (0.49.0)
 
 Chunky's Caves cabin map 90 objects `3`, `4` and `5` are the three gun targets.
