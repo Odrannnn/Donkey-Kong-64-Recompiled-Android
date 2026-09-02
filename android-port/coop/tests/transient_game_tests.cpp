@@ -156,6 +156,23 @@ static void capture_checks() {
     CHECK(saw_aztec_blueprint_d && saw_aztec_blueprint_e);
     CHECK(!contains(COOP_TRANSIENT_SCRIPT, 0x9D, 1));
 
+    reset(); current_map = 38;
+    load(0, 0x02, 1); load(1, 0x03, 2); load(2, 0x04, 1);
+    load(3, 0x05, 2); load(4, 0x9F, 1); load(5, 0xA0, 2);
+    bool saw_aztec_2 = false, saw_aztec_3 = false, saw_aztec_4 = false;
+    bool saw_aztec_5 = false, saw_aztec_9f = false, saw_aztec_a0 = false;
+    for (unsigned page = 0; page < 10; ++page) {
+        coop_transient_capture(1);
+        saw_aztec_2 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x02, 1, 2);
+        saw_aztec_3 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x03, 2, 2);
+        saw_aztec_4 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x04, 1, 2);
+        saw_aztec_5 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x05, 2, 2);
+        saw_aztec_9f |= contains_value(COOP_TRANSIENT_TRIGGER, 0x9F, 1, 2);
+        saw_aztec_a0 |= contains_value(COOP_TRANSIENT_TRIGGER, 0xA0, 2, 2);
+    }
+    CHECK(saw_aztec_2 && saw_aztec_3 && saw_aztec_4);
+    CHECK(saw_aztec_5 && saw_aztec_9f && saw_aztec_a0);
+
     reset(); current_map = 30; load(0, 0, 10, 123); load(1, 1, 6, 45);
     bool saw_timer_0 = false, saw_timer_1 = false;
     for (unsigned page = 0; page < 8; ++page) {
@@ -587,7 +604,15 @@ static void object_apply_checks() {
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x9D && last_state == 2);
     transient_result.records[0].key = 0x9F; coop_transient_apply();
-    CHECK(script_calls == 1); // The linked door cannot be named as a trigger.
+    CHECK(script_calls == 1); // The other switch is not loaded in this setup.
+
+    reset(); role = ROLE_JOIN; current_map = 38; load(0, 0x9F, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 38, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x9F, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x9F && last_state == 2);
+    scripts[0x9F].unk48[0] = 20; coop_transient_apply();
+    CHECK(script_calls == 1); // Completed presentation cannot restart.
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x31, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,

@@ -2236,3 +2236,15 @@ Typed triggers mirror only those five entries. Their local scripts retain all
 timers, animations, cutscenes, sounds, linked machinery and permanent flags.
 Object-specific readiness prevents an arbitrary zero-state model-two object or
 an already-running/completed Factory sequence from using these packets.
+
+## Remaining Aztec exterior weapon switches (0.49.0)
+
+Aztec map 38 objects `2`, `3`, `4` and `5` are the peanut, pineapple, grape and
+feather switches for four exterior gates. Objects `0x9F` and `0xA0` are the two
+remaining pineapple switches beside the previously reviewed blueprint-door
+objects `0x9D` and `0x9E`. All six wait in state 1 and enter state 2 after the
+matching projectile hit.
+
+Typed triggers mirror only those activation entries. Each local script retains
+its sound, timer, animation, linked door and permanent flag. Completed state 20
+and every linked object remain local and cannot be selected or replayed.
