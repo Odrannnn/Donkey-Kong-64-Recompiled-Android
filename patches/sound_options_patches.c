@@ -169,7 +169,7 @@ RECOMP_PATCH void func_global_asm_807144B8(s8 arg0) {
         recomp_on_dirty_file_start();
         fixHelmMedalsBug();
     } else {
-        recomp_on_file_start();
+        recomp_on_new_file_start();
     }
     func_global_asm_805FF4D8(map, exit); // initMapChange()
     game_mode = GAME_MODE_ADVENTURE;
