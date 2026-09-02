@@ -1641,6 +1641,17 @@ item transaction and only during regular play with no loading or reward queue.
 Every other remotely-startable cutscene remains prohibited; the generic
 same-area cutscene channel still only aligns two already-running matching scenes.
 
+## Factory Snatch Room grate (0.49.0)
+
+Factory map 26 object `0x15` is the Snatch Room punchable grate. It uniquely
+waits in state 0 and enters state 1 after the stock Chunky punch checks. The
+typed-trigger wire now accepts activation state 1, while the game adapter
+permits a state-zero receiver only for this exact map and object.
+
+The local state-1 script retains its camera, sound, grate animation and reset
+through states 2 to 4. No packet can name those later states, a player move or
+a linked object, and an active local sequence is never rewound.
+
 ## Factory production switch triggers (0.49.0)
 
 The four production-room slam switches in Factory map 26 are pinned to objects

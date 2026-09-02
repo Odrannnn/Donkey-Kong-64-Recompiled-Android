@@ -194,6 +194,12 @@ static void capture_checks() {
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x01, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x09, 2, 5));
 
+    reset(); current_map = 26; load(0, 0x15, 0);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x15, 1, 1));
+    scripts[0x15].unk48[0] = 1; transient_page = 0; coop_transient_capture(2);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x15, 2, 1));
+
     reset(); current_map = 30; load(0, 0x11, 1); load(1, 0x1C, 3);
     load(2, 6, 1); load(3, 7, 2); load(4, 8, 3); load(5, 9, 1);
     load(6, 0xA, 2); load(7, 0xB, 1);
@@ -260,12 +266,16 @@ static void capture_checks() {
     reset(); current_map = 26;
     load(0, 0x2E, 1); load(1, 0x2F, 2); load(2, 0x30, 3); load(3, 0x31, 20);
     load(4, 0x24, 2);
-    coop_transient_capture(1);
-    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x2E, 1, 2));
-    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x2F, 2, 2));
-    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 2, 2));
-    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x31, 1, 2));
-    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x24, 2, 2));
+    bool saw_2e = false, saw_2f = false, saw_30 = false, saw_31 = false, saw_24 = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_2e |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2E, 1, 2);
+        saw_2f |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2F, 2, 2);
+        saw_30 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 2, 2);
+        saw_31 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x31, 1, 2);
+        saw_24 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x24, 2, 2);
+    }
+    CHECK(saw_2e && saw_2f && saw_30 && saw_31 && saw_24);
 
     reset(); current_map = 26;
     load(0, 0x37, 1); load(1, 0x38, 2); load(2, 0x3B, 3);
@@ -503,6 +513,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x09 && last_state == 5);
     scripts[0x09].unk48[0] = 2; coop_transient_apply();
     CHECK(script_calls == 1); // Only the reviewed ready state may enter state 5.
+
+    reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x15, 0);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x15, 2, 1}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x15 && last_state == 1);
+    scripts[0x15].unk48[0] = 2; coop_transient_apply();
+    CHECK(script_calls == 1); // Active grate animation is never rewound.
 
     reset(); role = ROLE_JOIN; current_map = 30; load(0, 0x13, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 30, 9, 1,

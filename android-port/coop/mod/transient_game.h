@@ -98,6 +98,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // state-5 activation edge; each local script owns its door and reset.
     {164, 0x01, COOP_TRANSIENT_TRIGGER, 2}, {164, 0x09, COOP_TRANSIENT_TRIGGER, 5},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
+    // Factory Snatch Room grate. Unlike ordinary triggers, its reviewed punch
+    // edge enters state 1 directly from ready state 0.
+    {26, 0x15, COOP_TRANSIENT_TRIGGER, 1},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.
     {26, 0x2E, COOP_TRANSIENT_TRIGGER, 2}, {26, 0x2F, COOP_TRANSIENT_TRIGGER, 2},
@@ -220,6 +223,8 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
     // the vanilla initialization that enables contact and the sound actor.
     if (map == 20 && object >= 0x19 && object <= 0x28)
         return activation == 12 && raw == 11;
+    if (map == 26 && object == 0x15)
+        return activation == 1 && raw == 0;
     if (map == 34 && object == 0x31)
         return activation == 3 && raw == 2;
     if (map == 72 && object == 0x2F)
@@ -254,7 +259,7 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
         value = (unsigned short)script->unk44[0];
     } else if (kind == COOP_TRANSIENT_TRIGGER) {
         value = coop_transient_object_activation(current_map, object);
-        if (value < 2) return;
+        if (!value) return;
         state = coop_transient_trigger_fired(current_map, object, state, value) ? 2 : 1;
     } else if (kind == COOP_TRANSIENT_SEQUENCE) {
         if ((unsigned)current_map == 26 && object == 0x14)

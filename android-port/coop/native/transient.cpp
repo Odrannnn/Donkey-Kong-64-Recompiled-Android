@@ -25,7 +25,7 @@ bool valid_record(const CoopTransientRecord& record) {
             return record.key <= 0xFFu && record.state <= 0xFFu && record.value <= 0xFFu;
         case COOP_TRANSIENT_TRIGGER:
             return (record.state == 1u || record.state == 2u)
-                && record.value >= 2u && record.value <= 0xFFu;
+                && record.value >= 1u && record.value <= 0xFFu;
         case COOP_TRANSIENT_SEQUENCE:
             return record.state <= 25u && !record.value;
     }

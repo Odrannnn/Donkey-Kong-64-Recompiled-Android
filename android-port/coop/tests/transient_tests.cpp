@@ -28,13 +28,17 @@ int main() {
     CHECK(valid_transient(decoded) && decoded.records[2].value == 0x12345678);
     auto zero_object = decoded; zero_object.records[3].key = 0;
     CHECK(valid_transient(zero_object)); // Model-two object ID zero is not an empty record.
+    auto state_zero_trigger = decoded; state_zero_trigger.records[3].value = 1;
+    CHECK(valid_transient(state_zero_trigger)); // Factory grate uses activation state 1.
+    state_zero_trigger.records[3].value = 0;
+    CHECK(!valid_transient(state_zero_trigger));
     auto bad = decoded; bad.records[5].kind = COOP_TRANSIENT_SCRIPT; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[3].key = 0x10000; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[1].key = bad.records[0].key; bad.records[1].kind = bad.records[0].kind;
     CHECK(!valid_transient(bad));
     bad = decoded; bad.records[0].state = 0x100; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[3].state = 3; CHECK(!valid_transient(bad));
-    bad = decoded; bad.records[3].state = 2; bad.records[3].value = 1; CHECK(!valid_transient(bad));
+    bad = decoded; bad.records[3].state = 2; bad.records[3].value = 0x100; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[4].state = 26; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[4].state = 8; bad.records[4].value = 1; CHECK(!valid_transient(bad));
 

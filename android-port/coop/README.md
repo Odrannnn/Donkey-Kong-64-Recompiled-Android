@@ -16,6 +16,8 @@ Chunky's Factory cage switch also starts the stock rescue sequence on both peers
 the cage, cutscene and ownership award remain locally validated.
 Factory's triangle, guitar and trombone pads mirror their reviewed activation
 edge while their timers and linked production-room objects run locally.
+The Snatch Room grate mirrors its exact state-zero punch entry while its camera,
+animation, sound and reset sequence run locally.
 Japes' nine reviewed Diddy-cage, hive, painting-room, Diddy-cave and Rambi gun
 switches now run their local counters and gate sequences from state-2 activations.
 Aztec's three exterior llama switches share only their bounded projectile path;
