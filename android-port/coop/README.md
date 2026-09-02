@@ -1,9 +1,11 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.58.0** synchronizes all 16 cells of the Caves Ice Tomato board while
-both local encounter controllers are active. Each copy retains its own timer,
-win/loss evaluation, cutscenes, reward and exit. Version 0.57.0 adds
+Version **0.59.0** synchronizes all 16 cells of the Caves Ice Tomato board and
+the host's remaining countdown while both local encounter controllers are
+active. The host sends one final board snapshot before its expiry edge, then
+each local vanilla controller evaluates that board and owns its own win/loss
+sequence, cutscenes, reward and exit. Version 0.57.0 adds
 host-authoritative position, facing and guarded pose
 correction for the Fungi Spider while retaining every ordinary Spiderling
 record. Version 0.56.0 synchronizes the Spider's single final vulnerable hit
@@ -24,7 +26,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 58 requires a matching peer and native
+address as a direct fallback. Protocol 59 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -177,7 +179,7 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.58.0 adds the
+**This is experimental, not complete campaign co-op. Version 0.59.0 adds the
 bounded Ice Tomato board adapter and retains the Spider movement, pose and
 final-hit adapters,
 the actor-driven environment-cycle, and persistent
@@ -196,7 +198,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.58
+While the native companion is loaded, `tools/query_trace.py` discovers v0.59
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -210,7 +212,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.58.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.59.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -767,7 +769,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v58 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v59 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

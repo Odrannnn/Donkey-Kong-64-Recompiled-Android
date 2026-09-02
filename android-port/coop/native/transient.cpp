@@ -32,10 +32,13 @@ bool valid_record(const CoopTransientRecord& record) {
             return record.key >= 1u && record.key <= 256u
                 && record.state <= 3u && record.value <= 90u;
         case COOP_TRANSIENT_TOMATO_BOARD:
-            if (record.key || record.state != 1u) return false;
+            if (record.key || (record.state != 1u && record.state != 2u)) return false;
             for (unsigned i = 0; i < 16; ++i)
                 if (((record.value >> (i * 2)) & 3u) == 3u) return false;
             return true;
+        case COOP_TRANSIENT_TOMATO_CLOCK:
+            return !record.key && ((record.state == 1u && record.value <= 60u)
+                || (record.state == 2u && !record.value));
     }
     return false;
 }

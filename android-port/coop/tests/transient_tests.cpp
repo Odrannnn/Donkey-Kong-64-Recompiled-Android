@@ -52,6 +52,13 @@ int main() {
     bad.records[5].key = 1; CHECK(!valid_transient(bad));
     bad.records[5].key = 0; bad.records[5].state = 0; CHECK(!valid_transient(bad));
     bad.records[5].state = 1; bad.records[5].value = 3; CHECK(!valid_transient(bad));
+    bad.records[5] = {COOP_TRANSIENT_TOMATO_BOARD, 0, 2, 0xA5A5A5A5u};
+    CHECK(valid_transient(bad));
+    bad.records[5] = {COOP_TRANSIENT_TOMATO_CLOCK, 0, 1, 60}; CHECK(valid_transient(bad));
+    bad.records[5].value = 61; CHECK(!valid_transient(bad));
+    bad.records[5] = {COOP_TRANSIENT_TOMATO_CLOCK, 0, 2, 0}; CHECK(valid_transient(bad));
+    bad.records[5].value = 1; CHECK(!valid_transient(bad));
+    bad.records[5].key = 1; bad.records[5].value = 0; CHECK(!valid_transient(bad));
 
     State hs{7, 10, 0, active}, gs{7, 20, 1, active};
     auto guest_input = frame(7, 20, 8);

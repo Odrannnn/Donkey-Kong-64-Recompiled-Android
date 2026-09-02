@@ -27,7 +27,10 @@ enum {
     // Caves Ice Tomato's sixteen-cell board while both local encounter
     // controllers are active. Value contains sixteen validated two-bit cells.
     COOP_TRANSIENT_TOMATO_BOARD,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_TOMATO_BOARD
+    // The same encounter's host countdown. State 1 carries 0..60 seconds
+    // remaining; state 2 is the final expiry edge after the final board sample.
+    COOP_TRANSIENT_TOMATO_CLOCK,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_TOMATO_CLOCK
 };
 enum {
     COOP_TRANSIENT_OFF,
@@ -39,6 +42,15 @@ enum {
 typedef struct {
     unsigned kind, key, state, value;
 } CoopTransientRecord;
+
+// Pinned private layout of DK64's stock countdown actor. It lives here so the
+// MIPS translation unit can assert offsets before including the game adapter.
+typedef struct {
+    unsigned long long started;
+    unsigned elapsed;
+    int duration;
+    unsigned char text;
+} CoopCountdownData;
 
 typedef struct {
     unsigned enabled, file, map, epoch, revision, count;

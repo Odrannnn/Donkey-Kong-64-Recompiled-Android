@@ -470,6 +470,14 @@ static Actor* coop_transient_ice_tomato(void) {
     return 0;
 }
 
+static Actor* coop_transient_tomato_clock(Actor* tomato) {
+    Actor* timer = tomato ? tomato->unk11C : 0;
+    if (!timer || timer->unk58 != ACTOR_TIMER_CONTROLLER
+            || !timer->additional_actor_data || timer->control_state < 2
+            || timer->control_state > 5) return 0;
+    return timer;
+}
+
 static unsigned coop_transient_tomato_board_value(unsigned* valid) {
     unsigned value = 0;
     *valid = 1;
@@ -489,15 +497,19 @@ static void coop_transient_add_tomato_board(unsigned wanted_page, unsigned* ordi
             || input->count >= COOP_TRANSIENT_RECORDS) return;
     Actor* actor = coop_transient_ice_tomato();
     CoopIceTomatoData* data = actor ? (CoopIceTomatoData*)actor->unk178 : 0;
-    if (!data || (data->state != 3 && data->state != 4)
-            || !isFlagSet(TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE, FLAG_TYPE_TEMPORARY)) return;
+    if (!data) return;
+    unsigned active = (data->state == 3 || data->state == 4)
+        && isFlagSet(TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE, FLAG_TYPE_TEMPORARY);
+    unsigned finished = data->state == 6 || data->state == 7;
+    if (!active && !finished) return;
     unsigned valid = 0, value = coop_transient_tomato_board_value(&valid);
     if (valid) input->records[input->count++] = (CoopTransientRecord){
-        COOP_TRANSIENT_TOMATO_BOARD, 0, 1, value};
+        COOP_TRANSIENT_TOMATO_BOARD, 0, finished ? 2u : 1u, value};
 }
 
 static void coop_transient_apply_tomato_board(CoopTransientRecord record) {
-    if ((unsigned)current_map != MAP_CAVES_ICE_CASTLE || record.key || record.state != 1) return;
+    if ((unsigned)current_map != MAP_CAVES_ICE_CASTLE || record.key
+            || (record.state != 1 && record.state != 2)) return;
     Actor* actor = coop_transient_ice_tomato();
     CoopIceTomatoData* data = actor ? (CoopIceTomatoData*)actor->unk178 : 0;
     if (!data || (data->state != 3 && data->state != 4)
@@ -513,6 +525,55 @@ static void coop_transient_apply_tomato_board(CoopTransientRecord record) {
         if (wanted[i] < 0) func_global_asm_8063DA40((s16)i, 0);
         else func_global_asm_8063DA78((s16)i, 1, 1);
     }
+}
+
+static void coop_transient_add_tomato_clock(unsigned wanted_page, unsigned* ordinal,
+        CoopTransientInput* input) {
+    if ((unsigned)current_map != MAP_CAVES_ICE_CASTLE) return;
+    unsigned current = (*ordinal)++;
+    if (current / COOP_TRANSIENT_RECORDS != wanted_page
+            || input->count >= COOP_TRANSIENT_RECORDS) return;
+    Actor* tomato = coop_transient_ice_tomato();
+    CoopIceTomatoData* tomato_data = tomato ? (CoopIceTomatoData*)tomato->unk178 : 0;
+    if (!tomato_data) return;
+    if (tomato_data->state == 6 || tomato_data->state == 7) {
+        input->records[input->count++] = (CoopTransientRecord){
+            COOP_TRANSIENT_TOMATO_CLOCK, 0, 2, 0};
+        return;
+    }
+    if ((tomato_data->state != 3 && tomato_data->state != 4)
+            || !isFlagSet(TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE, FLAG_TYPE_TEMPORARY)) return;
+    Actor* timer = coop_transient_tomato_clock(tomato);
+    if (!timer) return;
+    CoopCountdownData* timer_data = (CoopCountdownData*)timer->additional_actor_data;
+    if (timer_data->duration < 0 || timer_data->duration > 60
+            || timer_data->elapsed > (unsigned)timer_data->duration) return;
+    unsigned remaining = (unsigned)timer_data->duration - timer_data->elapsed;
+    input->records[input->count++] = (CoopTransientRecord){
+        COOP_TRANSIENT_TOMATO_CLOCK, 0, timer->control_state == 5 ? 2u : 1u,
+        timer->control_state == 5 ? 0u : remaining};
+}
+
+static void coop_transient_apply_tomato_clock(CoopTransientRecord record) {
+    if ((unsigned)current_map != MAP_CAVES_ICE_CASTLE || record.key
+            || (record.state != 1 && record.state != 2)
+            || (record.state == 1 && record.value > 60)
+            || (record.state == 2 && record.value)) return;
+    Actor* tomato = coop_transient_ice_tomato();
+    CoopIceTomatoData* tomato_data = tomato ? (CoopIceTomatoData*)tomato->unk178 : 0;
+    if (!tomato_data || (tomato_data->state != 3 && tomato_data->state != 4)
+            || !isFlagSet(TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE, FLAG_TYPE_TEMPORARY)) return;
+    Actor* timer = coop_transient_tomato_clock(tomato);
+    if (!timer || !coop_transient_timer_sample_is_new(record)) return;
+    CoopCountdownData* timer_data = (CoopCountdownData*)timer->additional_actor_data;
+    if (record.state == 2) {
+        timer->control_state = 5;
+        timer->control_state_progress = 0;
+        return;
+    }
+    if (timer->control_state != 2 && timer->control_state != 4) return;
+    if (timer_data->elapsed > 60 || timer_data->elapsed + record.value > 60) return;
+    timer_data->duration = (int)(timer_data->elapsed + record.value);
 }
 
 static void coop_transient_capture(unsigned present) {
@@ -547,6 +608,7 @@ static void coop_transient_capture(unsigned present) {
     }
     coop_transient_add_clams(transient_page, &ordinal, &transient_input);
     coop_transient_add_tomato_board(transient_page, &ordinal, &transient_input);
+    coop_transient_add_tomato_clock(transient_page, &ordinal, &transient_input);
     // Cutscene records only align two already-running copies. Instance scripts
     // start their own local cutscene, so packets cannot launch rewards/endings.
     if (is_cutscene_active == 1 && D_global_asm_807476F8 >= 0 && D_global_asm_807476F8 < 0xFF
@@ -573,6 +635,10 @@ static void coop_transient_apply(void) {
         }
         if (record.kind == COOP_TRANSIENT_TOMATO_BOARD) {
             coop_transient_apply_tomato_board(record);
+            continue;
+        }
+        if (record.kind == COOP_TRANSIENT_TOMATO_CLOCK) {
+            coop_transient_apply_tomato_clock(record);
             continue;
         }
         if (record.kind == COOP_TRANSIENT_CUTSCENE) {

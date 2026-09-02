@@ -1,4 +1,4 @@
-> Current source: 0.58.0, protocol/native ABI v58. The protocol and persistent
+> Current source: 0.59.0, protocol/native ABI v59. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -1774,6 +1774,27 @@ The Tomato controller continues to own movement selection, timer state, score
 evaluation, win/loss modes 6 and 7, cutscenes, actor deletion, Golden Banana and
 exit. Packet size and bridge spans remain unchanged. Protocol 58, compatibility
 `0x0001023A`, v58 exports and manifest 0.58.0 reject older peers and companions.
+
+## Caves Ice Tomato countdown synchronization (0.59.0)
+
+The same controller now publishes a second typed record for its stock timer
+actor. While the board-active flag and controller states 3/4 agree, state 1
+carries only the bounded 0..60 whole seconds remaining. The receiver keeps its
+engine-owned start timestamp and elapsed count, adjusting the configured
+duration relative to that elapsed count. Persisted bridge results are applied
+once per changed sample, so the render loop cannot repeatedly restart a second.
+
+When the host reaches controller state 6 or 7, it publishes the three-valued
+final board as state 2 immediately before a separate state-2 clock expiry. The
+Join applies those records in order and moves only its verified timer actor 177
+to the stock expired state 5. On the following local actor update, the unchanged
+vanilla Tomato controller counts that synchronized board and chooses its own
+win/loss state, cutscene, reward and exit. A packet cannot start the encounter,
+choose a result, name an actor, replace a clock timestamp or apply after the
+local board-active gate closes.
+
+Packet and bridge sizes remain unchanged. Protocol 59, compatibility
+`0x0001023B`, v59 exports and manifest 0.59.0 reject older peers and companions.
 
 ## Third reversible world state (0.45.0)
 

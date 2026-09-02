@@ -21,10 +21,11 @@ struct Actor {
     u8 control_state{}, control_state_progress{};
     void* additional_actor_data{};
     void* unk178{};
+    Actor* unk11C{};
 };
 struct EnemySpawner { Actor* tied_actor{}; };
 enum { MAP_JAPES_SHELL = 12, MAP_CAVES_ICE_CASTLE = 98,
-    ACTOR_TOMATO_ICE = 164, ACTOR_CLAM = 286,
+    ACTOR_TOMATO_ICE = 164, ACTOR_TIMER_CONTROLLER = 177, ACTOR_CLAM = 286,
     TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE = 0x30, FLAG_TYPE_TEMPORARY = 2 };
 
 static unsigned checks, script_calls, last_object, last_state;
@@ -47,6 +48,13 @@ static std::array<EnemySpawner, 4> enemy_spawners;
 static std::array<Actor, 4> actors;
 static std::array<CoopClamTestData, 4> actor_data;
 static std::array<u8, 0x3A> tomato_data;
+struct CoopCountdownTestData {
+    unsigned long long started{};
+    u32 elapsed{};
+    s32 duration{};
+    u8 text{};
+};
+static CoopCountdownTestData tomato_clock_data;
 static s8 D_global_asm_807FC8C0[16];
 static bool tomato_board_active;
 struct ActorListEntry { Actor* actor{}; u32 metadata{}; };
@@ -91,7 +99,7 @@ static void reset() {
     std::fill(std::begin(D_global_asm_807F6240), std::end(D_global_asm_807F6240), static_cast<s16>(-1));
     props = {}; scripts = {};
     enemy_spawners = {}; actors = {}; actor_data = {}; D_807FDC88 = {};
-    tomato_data = {}; tomato_board_active = false; D_global_asm_807FBB34 = 0;
+    tomato_data = {}; tomato_clock_data = {}; tomato_board_active = false; D_global_asm_807FBB34 = 0;
     std::fill(std::begin(D_global_asm_807FB930), std::end(D_global_asm_807FB930), ActorListEntry{});
     std::fill(std::begin(D_global_asm_807FC8C0), std::end(D_global_asm_807FC8C0), static_cast<s8>(-1));
     role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
@@ -129,6 +137,12 @@ static void load_tomato(unsigned state) {
     actors[0].object_properties_bitfield = 0x10;
     actors[0].unk58 = ACTOR_TOMATO_ICE;
     actors[0].unk178 = tomato_data.data();
+    actors[0].unk11C = &actors[1];
+    actors[1].unk58 = ACTOR_TIMER_CONTROLLER;
+    actors[1].control_state = 2;
+    actors[1].additional_actor_data = &tomato_clock_data;
+    tomato_clock_data.elapsed = 12;
+    tomato_clock_data.duration = 60;
     D_global_asm_807FB930[0].actor = &actors[0];
     D_global_asm_807FBB34 = 1;
     tomato_board_active = true;
@@ -636,10 +650,16 @@ static void capture_checks() {
     }
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TOMATO_BOARD, 0, 1, tomato_value));
+    CHECK(contains_value(COOP_TRANSIENT_TOMATO_CLOCK, 0, 1, 48));
     tomato_data[0x38] = 2; transient_page = 0; coop_transient_capture(1);
     CHECK(!contains(COOP_TRANSIENT_TOMATO_BOARD, 0, 1));
+    CHECK(!contains(COOP_TRANSIENT_TOMATO_CLOCK, 0, 1));
     tomato_data[0x38] = 4; tomato_board_active = false; transient_page = 0;
     coop_transient_capture(1); CHECK(!contains(COOP_TRANSIENT_TOMATO_BOARD, 0, 1));
+    CHECK(!contains(COOP_TRANSIENT_TOMATO_CLOCK, 0, 1));
+    tomato_data[0x38] = 6; transient_page = 0; coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TOMATO_BOARD, 0, 2, tomato_value));
+    CHECK(contains_value(COOP_TRANSIENT_TOMATO_CLOCK, 0, 2, 0));
 
     reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
     coop_transient_capture(1); CHECK(!transient_input.enabled);
@@ -1210,6 +1230,22 @@ static void object_apply_checks() {
     CHECK(D_global_asm_807FC8C0[1] == -1); // A packet cannot start or resume the encounter.
     tomato_data[0x38] = 3; tomato_board_active = false; coop_transient_apply();
     CHECK(D_global_asm_807FC8C0[1] == -1);
+
+    reset(); role = ROLE_JOIN; current_map = MAP_CAVES_ICE_CASTLE; load_tomato(4);
+    tomato_clock_data.elapsed = 17; tomato_clock_data.duration = 60;
+    transient_result = {COOP_TRANSIENT_APPLYING, MAP_CAVES_ICE_CASTLE, 9, 1,
+        {{COOP_TRANSIENT_TOMATO_CLOCK, 0, 1, 25}}};
+    coop_transient_apply();
+    CHECK(tomato_clock_data.duration == 42 && actors[1].control_state == 2);
+    tomato_clock_data.elapsed = 18; coop_transient_apply();
+    CHECK(tomato_clock_data.duration == 42); // Persisted result is evaluated once.
+    transient_result.records[0].value = 24; coop_transient_apply();
+    CHECK(tomato_clock_data.duration == 42); // New sample preserves 24 seconds remaining.
+    transient_result.records[0] = {COOP_TRANSIENT_TOMATO_CLOCK, 0, 2, 0};
+    coop_transient_apply();
+    CHECK(actors[1].control_state == 5 && actors[1].control_state_progress == 0);
+    actors[1].control_state = 2; tomato_data[0x38] = 2; coop_transient_apply();
+    CHECK(actors[1].control_state == 2); // A packet cannot start or resume the encounter.
 }
 
 static void cutscene_checks() {
