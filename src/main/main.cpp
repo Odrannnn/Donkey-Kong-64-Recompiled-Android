@@ -872,6 +872,8 @@ int main(int argc, char** argv) {
     recomp::mods::register_mod_container_type("rtz", std::vector{ texture_pack_content_type_id }, false);
 
     recomp::Configuration cfg {
+        .argc = argc,
+        .argv = argv,
         .project_version = project_version,
         .window_handle = {},
         .rsp_callbacks = rsp_callbacks,
