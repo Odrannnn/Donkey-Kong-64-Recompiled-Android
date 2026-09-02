@@ -26,6 +26,8 @@ int main() {
     for (unsigned i = 0; i < COOP_TRANSIENT_RECORDS; ++i) wire.records[i] = host_input.records[i];
     auto decoded = transient_from_words(transient_words(wire));
     CHECK(valid_transient(decoded) && decoded.records[2].value == 0x12345678);
+    auto zero_object = decoded; zero_object.records[3].key = 0;
+    CHECK(valid_transient(zero_object)); // Model-two object ID zero is not an empty record.
     auto bad = decoded; bad.records[5].kind = COOP_TRANSIENT_SCRIPT; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[3].key = 0x10000; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[1].key = bad.records[0].key; bad.records[1].kind = bad.records[0].kind;

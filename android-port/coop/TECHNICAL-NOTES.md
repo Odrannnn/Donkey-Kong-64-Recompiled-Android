@@ -1738,6 +1738,12 @@ No other script field or timer is exposed. The cache resets on room epoch change
 records remain constrained to the four allowlisted objects, and malformed timer
 values are rejected by the native protocol validator.
 
+Model-two object ID zero is valid and is distinguished from an unused record by
+the nonzero record kind. The native validator therefore accepts key zero for a
+typed record while still requiring every kind-zero tail record to contain only
+zero words. This covers Galleon water switch `0` and Tiny Temple opening switch
+`0` without weakening the record allowlist enforced by the game adapter.
+
 ## Galleon instrument and slam switches (0.49.0)
 
 Galleon map 30 objects `0x11`, `0x12`, `0x13`, `0x14` and `0x1B` are the five

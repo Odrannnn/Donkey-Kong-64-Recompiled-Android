@@ -9,7 +9,10 @@ static_assert(sizeof(CoopTransientResult) == COOP_TRANSIENT_RESULT_WORDS * 4);
 namespace {
 bool valid_record(const CoopTransientRecord& record) {
     if (!record.kind) return !record.key && !record.state && !record.value;
-    if (record.kind > COOP_TRANSIENT_KIND_COUNT || !record.key || record.key > 0xFFFFu)
+    // Model-two object ID zero is valid (for example Tiny Temple's opening
+    // switch and Galleon's first water switch). Kind zero, rather than key
+    // zero, is the empty-record discriminator.
+    if (record.kind > COOP_TRANSIENT_KIND_COUNT || record.key > 0xFFFFu)
         return false;
     switch (record.kind) {
         case COOP_TRANSIENT_SCRIPT:
