@@ -73,7 +73,7 @@ COOP_EXPORT void dk64_coop_start(uint8_t* rdram, recomp_context* ctx) {
 COOP_EXPORT void dk64_coop_local_ipv4(uint8_t*, recomp_context* ctx) {
     ctx->r2 = session.local_ipv4();
 }
-COOP_EXPORT void dk64_coop_recovery_configure_v53(uint8_t* rdram, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_recovery_configure_v54(uint8_t* rdram, recomp_context* ctx) {
     try {
         auto bytes = read_string(rdram, uint32_t(ctx->r4), 4095);
         auto path = std::filesystem::path(std::u8string(bytes.begin(), bytes.end()));
@@ -85,16 +85,16 @@ COOP_EXPORT void dk64_coop_recovery_configure_v53(uint8_t* rdram, recomp_context
         ctx->r2 = COOP_RECOVERY_STORAGE_ERROR;
     }
 }
-COOP_EXPORT void dk64_coop_recovery_status_v53(uint8_t*, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_recovery_status_v54(uint8_t*, recomp_context* ctx) {
     ctx->r2 = recovery_journal.status();
 }
-COOP_EXPORT void dk64_coop_recovery_promote_v53(uint8_t*, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_recovery_promote_v54(uint8_t*, recomp_context* ctx) {
     const bool promoted = recovery_journal.promote(recovery_room);
     ctx->r2 = promoted && session.set_authority(recovery_journal.authority_term(),
         recovery_journal.node_id()) ? 1 : 0;
 }
 // A new export rejects older NRM/library pairs before reading the larger spans.
-COOP_EXPORT void dk64_coop_tick_v53(uint8_t* rdram, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_tick_v54(uint8_t* rdram, recomp_context* ctx) {
     uint32_t local_address = uint32_t(ctx->r4), remote_address = uint32_t(ctx->r5);
     uint32_t progress_address = uint32_t(ctx->r6), result_address = uint32_t(ctx->r7);
     constexpr size_t bytes = dkcoop::state_words * sizeof(uint32_t);

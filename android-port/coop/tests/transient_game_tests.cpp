@@ -13,6 +13,16 @@ enum { ROLE_HOST = 1, ROLE_JOIN = 2 };
 
 struct Prop_ScriptData { s16 unk44[2]{}; u8 unk48[1]{}; };
 struct Prop { Prop_ScriptData* unk7C{}; };
+struct CoopClamTestData { u8 pad[0x2C]{}; s32 timer{}; };
+struct Actor {
+    u32 object_properties_bitfield{};
+    u32 unk58{};
+    s16 unk132{};
+    u8 control_state{}, control_state_progress{};
+    void* additional_actor_data{};
+};
+struct EnemySpawner { Actor* tied_actor{}; };
+enum { MAP_JAPES_SHELL = 12, ACTOR_CLAM = 286 };
 
 static unsigned checks, script_calls, last_object, last_state;
 #define CHECK(x) do { ++checks; if (!(x)) { std::fprintf(stderr, "TRANSIENT ADAPTER FAIL %d: %s\n", __LINE__, #x); std::exit(1); } } while (0)
@@ -30,6 +40,13 @@ static s16 D_global_asm_807F6240[600];
 static std::array<Prop, 512> props;
 static std::array<Prop_ScriptData, 512> scripts;
 static Prop* D_global_asm_807F6000 = props.data();
+static std::array<EnemySpawner, 4> enemy_spawners;
+static std::array<Actor, 4> actors;
+static std::array<CoopClamTestData, 4> actor_data;
+#define DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
+typedef struct { s16 count, padding; EnemySpawner* first; } CoopEnemySpawnerTable;
+static CoopEnemySpawnerTable D_807FDC88;
+static unsigned animation_calls, motion_calls, last_animation;
 
 static s16 func_global_asm_80659470(s32 object) {
     return object >= 0 && object < static_cast<s32>(scripts.size()) ? static_cast<s16>(object) : -1;
@@ -41,6 +58,10 @@ static void func_global_asm_8063DA40(s16 slot, s16 state) {
     scripts[object].unk48[0] = static_cast<u8>(state);
     ++script_calls; last_object = object; last_state = static_cast<unsigned short>(state);
 }
+static void playActorAnimation(Actor*, s32 animation) {
+    ++animation_calls; last_animation = static_cast<unsigned>(animation);
+}
+static void func_global_asm_80614D00(Actor*, f32, f32) { ++motion_calls; }
 
 #include "../mod/world_live_game.h"
 #include "../mod/transient_game.h"
@@ -48,6 +69,7 @@ static void func_global_asm_8063DA40(s16 slot, s16 state) {
 static void reset() {
     std::fill(std::begin(D_global_asm_807F6240), std::end(D_global_asm_807F6240), static_cast<s16>(-1));
     props = {}; scripts = {};
+    enemy_spawners = {}; actors = {}; actor_data = {}; D_807FDC88 = {};
     role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
     transient_enabled = 1; transient_revision = 1; transient_page = 0;
     transient_file = transient_file_changed = 0;
@@ -57,6 +79,7 @@ static void reset() {
     loading_zone_transition_speed = 0; is_cutscene_active = 0;
     D_global_asm_807476F8 = -1; D_global_asm_807F5CF0 = D_global_asm_807F5CF4 = 0;
     script_calls = last_object = last_state = 0;
+    animation_calls = motion_calls = last_animation = 0;
 }
 static void load(unsigned slot, unsigned object, unsigned state, unsigned timer = 0) {
     CHECK(slot < 600 && object < scripts.size());
@@ -64,6 +87,17 @@ static void load(unsigned slot, unsigned object, unsigned state, unsigned timer 
     scripts[object].unk48[0] = static_cast<u8>(state);
     scripts[object].unk44[0] = static_cast<s16>(timer);
     props[object].unk7C = &scripts[object];
+}
+static void load_clam(unsigned slot, unsigned state, int timer) {
+    CHECK(slot < actors.size());
+    D_807FDC88.count = static_cast<s16>(slot + 1);
+    D_807FDC88.first = enemy_spawners.data();
+    actors[slot].object_properties_bitfield = 0x10;
+    actors[slot].unk58 = ACTOR_CLAM;
+    actors[slot].control_state = static_cast<u8>(state);
+    actors[slot].additional_actor_data = &actor_data[slot];
+    actor_data[slot].timer = timer;
+    enemy_spawners[slot].tied_actor = &actors[slot];
 }
 static bool contains(unsigned kind, unsigned key, unsigned state) {
     for (unsigned i = 0; i < transient_input.count; ++i) {
@@ -548,6 +582,16 @@ static void capture_checks() {
     scripts[0x00].unk48[0] = 50; transient_page = 0;
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_SEQUENCE, 0x00, 0, 0));
+
+    reset(); current_map = MAP_JAPES_SHELL; load_clam(0, 2, 47);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_ACTOR_CYCLE, 1, 2, 47));
+    actor_data[0].timer = 200; transient_page = 0;
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_ACTOR_CYCLE, 1, 2, 90));
+    actors[0].object_properties_bitfield = 0; transient_page = 0;
+    coop_transient_capture(1);
+    CHECK(!contains(COOP_TRANSIENT_ACTOR_CYCLE, 1, 2));
 
     reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
     coop_transient_capture(1); CHECK(!transient_input.enabled);
@@ -1078,6 +1122,26 @@ static void object_apply_checks() {
     CHECK(script_calls == 4); // Reward states are entered only by the local script.
     scripts[0x00].unk48[0] = 50; coop_transient_apply();
     CHECK(script_calls == 4); // A failure branch cannot be advanced remotely.
+
+    reset(); role = ROLE_JOIN; current_map = MAP_JAPES_SHELL; load_clam(0, 0, 70);
+    transient_result = {COOP_TRANSIENT_APPLYING, MAP_JAPES_SHELL, 9, 1,
+        {{COOP_TRANSIENT_ACTOR_CYCLE, 1, 2, 33}}};
+    coop_transient_apply();
+    CHECK(actors[0].control_state == 1 && !actors[0].control_state_progress);
+    CHECK(animation_calls == 1 && last_animation == 0x35D && motion_calls == 1);
+    coop_transient_apply();
+    CHECK(animation_calls == 1 && motion_calls == 1); // Opening animation cannot be skipped.
+    actors[0].control_state = 2; actor_data[0].timer = 80;
+    coop_transient_apply();
+    CHECK(actor_data[0].timer == 33); // Stable open countdown follows the host.
+    transient_result.records[0] = {COOP_TRANSIENT_ACTOR_CYCLE, 1, 0, 22};
+    coop_transient_apply();
+    CHECK(actors[0].control_state == 3 && actors[0].unk132 == 2 && motion_calls == 2);
+    coop_transient_apply(); CHECK(motion_calls == 2); // Closing animation cannot be skipped.
+    actors[0].control_state = 0; actor_data[0].timer = 80;
+    coop_transient_apply(); CHECK(actor_data[0].timer == 22);
+    actors[0].unk58 = 0; transient_result.records[0].state = 2;
+    coop_transient_apply(); CHECK(animation_calls == 1); // Wrong actor type fails closed.
 }
 
 static void cutscene_checks() {

@@ -1,4 +1,4 @@
-> Current source: 0.53.0, protocol/native ABI v53. The protocol and persistent
+> Current source: 0.54.0, protocol/native ABI v54. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -184,6 +184,32 @@ it does not combine campaign progress created on both sides of a partition.
 Existing save-ahead detection and the explicit validated permanent-progress
 merge remain the boundary for that case. Protocol compatibility `0x00010235`,
 version 53 and export `dk64_coop_tick_v53` reject older peers and companions.
+
+## Giant Clam environmental cycle (0.54.0)
+
+Giant Clam actor 286 in Japes Shell map 12 uses the pinned vanilla handler
+`func_global_asm_806B3420`. Its four states alternate a 90-frame closed wait,
+the opening animation, a 90-frame open wait and the closing animation. It is an
+environmental hazard with no health or defeat path, so it remains outside the
+ordinary-enemy contract.
+
+A new typed same-area record identifies the Clam by its one-based immutable
+enemy-spawner-table position and carries only state 0 through 3 plus the bounded
+0 through 90 countdown. The receiving adapter accepts that record only in map
+12, for a live initialized actor whose local type is exactly `ACTOR_CLAM`. In a
+stable matching state it aligns the countdown. To catch up from the opposite
+stable phase, it reproduces only the pinned vanilla opening or closing edge:
+animation `0x35D` and the stock motion initializer for opening, or collision
+mode 2 and the stock motion initializer for closing. It never copies animation
+progress or skips an animation callback.
+
+Spawner-table bounds, actor type, initialization, additional-data presence,
+phase and timer are all checked before access. A packet cannot name an actor
+pointer, actor type, animation, handler or offset. The same-map/epoch/file and
+fresh-session gates of the transient channel still apply, so independent-area
+play pauses this cycle and each local Clam continues normally. Protocol
+compatibility `0x00010236`, version 54 and the v54 recovery/tick exports reject
+older peers and native companions. Packet and bridge spans are unchanged.
 
 ## Remote actor ownership
 

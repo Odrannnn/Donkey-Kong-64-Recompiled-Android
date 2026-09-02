@@ -21,7 +21,10 @@ enum {
     // A reviewed ordered controller. State is bounded logical progress; the
     // game adapter may execute only its next pinned local step.
     COOP_TRANSIENT_SEQUENCE,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_SEQUENCE
+    // A reviewed actor-driven environmental cycle. Key is a one-based entry
+    // in the immutable enemy-spawner table; state/timer remain type-specific.
+    COOP_TRANSIENT_ACTOR_CYCLE,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_ACTOR_CYCLE
 };
 enum {
     COOP_TRANSIENT_OFF,

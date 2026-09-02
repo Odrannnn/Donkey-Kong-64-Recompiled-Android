@@ -28,6 +28,9 @@ bool valid_record(const CoopTransientRecord& record) {
                 && record.value >= 1u && record.value <= 0xFFu;
         case COOP_TRANSIENT_SEQUENCE:
             return record.state <= 25u && !record.value;
+        case COOP_TRANSIENT_ACTOR_CYCLE:
+            return record.key >= 1u && record.key <= 256u
+                && record.state <= 3u && record.value <= 90u;
     }
     return false;
 }

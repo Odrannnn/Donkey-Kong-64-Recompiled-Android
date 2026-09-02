@@ -41,6 +41,12 @@ int main() {
     bad = decoded; bad.records[3].state = 2; bad.records[3].value = 0x100; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[4].state = 26; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[4].state = 8; bad.records[4].value = 1; CHECK(!valid_transient(bad));
+    bad = decoded; bad.count = 6;
+    bad.records[5] = {COOP_TRANSIENT_ACTOR_CYCLE, 1, 3, 90};
+    CHECK(valid_transient(bad));
+    bad.records[5].key = 257; CHECK(!valid_transient(bad));
+    bad.records[5].key = 1; bad.records[5].state = 4; CHECK(!valid_transient(bad));
+    bad.records[5].state = 3; bad.records[5].value = 91; CHECK(!valid_transient(bad));
 
     State hs{7, 10, 0, active}, gs{7, 20, 1, active};
     auto guest_input = frame(7, 20, 8);
@@ -96,7 +102,7 @@ int main() {
     auto bytes = encode(packet); Packet roundtrip{};
     CHECK(bytes.size() == 1368 && decode(bytes.data(), bytes.size(), roundtrip));
     CHECK(roundtrip.transient.count == 5 && roundtrip.transient.records[4].kind == COOP_TRANSIENT_SEQUENCE);
-    bytes[transient_offset + 6 * 4 + 1] = 7; // Kind 7 is outside the bounded enum.
+    bytes[transient_offset + 6 * 4 + 1] = 8; // Kind 8 is outside the bounded enum.
     CHECK(!decode(bytes.data(), bytes.size(), roundtrip));
 
     std::printf("PASS: %u same-area transient protocol checks (typed records, host authority, epochs, stale rejection, cutscene context)\n", checks);

@@ -6,6 +6,15 @@ typedef struct {
     unsigned char kind, activation;
 } CoopTransientObject;
 
+// Character-spawner private data is not part of common_structs.h. Giant Clam
+// uses only the signed word at pinned offset 0x2C for its 90-frame countdown.
+typedef struct { unsigned char pad[0x2C]; int timer; } CoopClamData;
+#ifndef DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
+#define DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
+typedef struct { s16 count, padding; EnemySpawner* first; } CoopEnemySpawnerTable;
+#endif
+extern CoopEnemySpawnerTable D_807FDC88;
+
 static Prop_ScriptData* coop_transient_script(unsigned object);
 
 // Pinned loaded scripts whose state drives a reviewed reversible switch,
@@ -395,6 +404,58 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
     input->records[input->count++] = (CoopTransientRecord){kind, object, state, value};
 }
 
+static void coop_transient_add_clams(unsigned wanted_page, unsigned* ordinal,
+        CoopTransientInput* input) {
+    if ((unsigned)current_map != MAP_JAPES_SHELL || D_807FDC88.count <= 0
+            || D_807FDC88.count > 256 || !D_807FDC88.first) return;
+    for (unsigned i = 0; i < (unsigned)D_807FDC88.count; ++i) {
+        Actor* actor = D_807FDC88.first[i].tied_actor;
+        if (!actor || actor->unk58 != ACTOR_CLAM
+                || !(actor->object_properties_bitfield & 0x10)
+                || !actor->additional_actor_data || actor->control_state > 3) continue;
+        unsigned current = (*ordinal)++;
+        if (current / COOP_TRANSIENT_RECORDS != wanted_page
+                || input->count >= COOP_TRANSIENT_RECORDS) continue;
+        CoopClamData* data = (CoopClamData*)actor->additional_actor_data;
+        unsigned timer = data->timer < 0 ? 0 : (unsigned)data->timer;
+        if (timer > 90) timer = 90;
+        input->records[input->count++] = (CoopTransientRecord){
+            COOP_TRANSIENT_ACTOR_CYCLE, i + 1, actor->control_state, timer};
+    }
+}
+
+static void coop_transient_apply_clam(CoopTransientRecord record) {
+    if ((unsigned)current_map != MAP_JAPES_SHELL || !record.key
+            || D_807FDC88.count <= 0 || record.key > (unsigned)D_807FDC88.count
+            || D_807FDC88.count > 256 || !D_807FDC88.first) return;
+    Actor* actor = D_807FDC88.first[record.key - 1].tied_actor;
+    if (!actor || actor->unk58 != ACTOR_CLAM
+            || !(actor->object_properties_bitfield & 0x10)
+            || !actor->additional_actor_data || actor->control_state > 3) return;
+    CoopClamData* data = (CoopClamData*)actor->additional_actor_data;
+    unsigned local = actor->control_state;
+    if (local == record.state) {
+        // Timers exist only in the two stable phases. Animation phases retain
+        // their local callbacks and progress and are never frame-skipped.
+        if (local == 0 || local == 2) data->timer = (s16)record.value;
+        return;
+    }
+    if (local == 0 && (record.state == 1 || record.state == 2)) {
+        // Reproduce the stock closed-to-opening edge. The original handler
+        // remains responsible for animation completion and the open timer.
+        playActorAnimation(actor, 0x35D);
+        func_global_asm_80614D00(actor, 0.5f, 0.0f);
+        actor->control_state = 1;
+        actor->control_state_progress = 0;
+    } else if (local == 2 && (record.state == 3 || record.state == 0)) {
+        // Reproduce the stock open-to-closing edge, including collision mode.
+        actor->unk132 = 2;
+        func_global_asm_80614D00(actor, 0.5f, 0.0f);
+        actor->control_state = 3;
+        actor->control_state_progress = 0;
+    }
+}
+
 static void coop_transient_capture(unsigned present) {
     transient_input = (CoopTransientInput){0};
     if (transient_enabled && present && current_file < 3) {
@@ -425,6 +486,7 @@ static void coop_transient_capture(unsigned present) {
             coop_transient_add_object(entry->object, entry->kind,
                 transient_page, &ordinal, &transient_input);
     }
+    coop_transient_add_clams(transient_page, &ordinal, &transient_input);
     // Cutscene records only align two already-running copies. Instance scripts
     // start their own local cutscene, so packets cannot launch rewards/endings.
     if (is_cutscene_active == 1 && D_global_asm_807476F8 >= 0 && D_global_asm_807476F8 < 0xFF
@@ -445,6 +507,10 @@ static void coop_transient_apply(void) {
             || loading_zone_transition_speed != 0.0f) return;
     for (unsigned i = 0; i < transient_result.count && i < COOP_TRANSIENT_RECORDS; ++i) {
         CoopTransientRecord record = transient_result.records[i];
+        if (record.kind == COOP_TRANSIENT_ACTOR_CYCLE) {
+            coop_transient_apply_clam(record);
+            continue;
+        }
         if (record.kind == COOP_TRANSIENT_CUTSCENE) {
             unsigned local_id = D_global_asm_807476F8 >= 0 ? (unsigned)D_global_asm_807476F8 + 1 : 0;
             if (is_cutscene_active == 1 && record.key == local_id

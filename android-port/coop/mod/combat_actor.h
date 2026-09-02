@@ -41,7 +41,11 @@ extern void func_boss_8002DE04(void);
 extern void func_boss_8002EA7C(void);
 extern void func_boss_8002FF74(void);
 extern void func_boss_80030EC4(void);
-extern struct { s16 count, padding; EnemySpawner* first; } D_807FDC88;
+#ifndef DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
+#define DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
+typedef struct { s16 count, padding; EnemySpawner* first; } CoopEnemySpawnerTable;
+#endif
+extern CoopEnemySpawnerTable D_807FDC88;
 extern struct { s16 type, model; s32 data[11]; } D_global_asm_8074E8B0[];
 extern u8 D_global_asm_807206A8[], D_global_asm_807200A0[], D_global_asm_8072029C[];
 extern u8 D_global_asm_807201A0[], D_global_asm_80720268[];

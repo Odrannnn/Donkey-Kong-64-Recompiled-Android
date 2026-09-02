@@ -1,7 +1,11 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.53.0** exchanges durable authority generations over LAN. A returning
+Version **0.54.0** synchronizes Giant Clam's four-phase open/close hazard cycle
+while both players are inside the Japes shell. It invokes only the two pinned
+vanilla phase edges, aligns the two stable 90-frame countdowns, and lets each
+copy finish its own opening and closing animation. Version 0.53.0 exchanges
+durable authority generations over LAN. A returning
 former host automatically yields to a newer promoted host, reopens as Join with
 its existing host save copy, and remembers that follower role across restarts.
 Same-generation hosts use stable node identities as a deterministic tie-break.
@@ -10,7 +14,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 53 requires a matching peer and native
+address as a direct fallback. Protocol 54 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -162,8 +166,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.53.0 expands the
-persistent recovery and protocol suites with authority reconciliation. All 15 Linux
+**This is experimental, not complete campaign co-op. Version 0.54.0 adds a
+bounded actor-driven environment-cycle contract and retains the persistent
+recovery and authority-reconciliation suites. All 15 Linux
 ASan/UBSan suites and the complete maintained MIPS, Android ARM64, Windows x64,
 ABI/export, APK, package and Android-importer pipeline pass. Gameplay and device
 validation remain pending.**
@@ -178,7 +183,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.53
+While the native companion is loaded, `tools/query_trace.py` discovers v0.54
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -192,7 +197,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.53.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.54.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -650,9 +655,11 @@ enemy interiors in Japes, Aztec, Galleon, Fungi, Caves and Castle; Hideout Helm;
 DK Isles; and four lobbies that contain supported enemies. This includes the
 Fungi Spider room and Chunky's Caves igloo. The ordinary-enemy channel excludes
 boss arenas, races, bonus games, crown battles and reward controllers; Army
-Dillo and Dogadon use the separate bounded channel below. Giant Clam and tomato
-encounter controllers have no ordinary defeat path and remain local with all other
-unlisted kinds. Book and Toy Monster use their pinned vanilla disappearance states
+Dillo and Dogadon use the separate bounded channel below. Giant Clam is handled
+as a same-area environment cycle: the guest runs its own opening and closing
+animations and aligns the host's stable countdown. Tomato encounter controllers
+have no ordinary defeat path and remain local with all other unlisted kinds.
+Book and Toy Monster use their pinned vanilla disappearance states
 rather than a fabricated health-based death.
 If another mod has replaced any supported behavior handler before initialization,
 enemy synchronization is disabled without replacing any of those handlers.
@@ -721,7 +728,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v53 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v54 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
