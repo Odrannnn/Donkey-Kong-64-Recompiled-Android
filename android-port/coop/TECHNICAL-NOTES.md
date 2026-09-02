@@ -1917,6 +1917,17 @@ its 200-frame timer and linked door update. Permanent lobby flags continue
 through the world transaction. Records are map-bound and cannot cross between
 the two lobbies or select their linked objects.
 
+## Isles rocket-barrel trombone pad (0.49.0)
+
+Isles object `0x31` is Lanky's trombone pad for the high rocket barrel. The
+script waits in state 1 until its local barrel actor is available, then waits in
+state 2 for the instrument. The same-area adapter may request state 3 only from
+local state 2, preserving that dependency before the script starts its reveal.
+
+The original script owns the presentation, linked actor state and permanent
+flag `0x1AA`. A guest still in state 1 is left untouched, and packets cannot
+name the barrel actor or force the later completion state.
+
 ## Galleon paired gun switches (0.49.0)
 
 Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired

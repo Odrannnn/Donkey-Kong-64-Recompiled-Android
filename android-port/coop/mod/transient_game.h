@@ -68,6 +68,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Aztec blueprint-door coconut switches. Override the completed live-world
     // rows with their narrower state-2 projectile activation while unfinished.
     {38, 0x9D, COOP_TRANSIENT_TRIGGER, 2}, {38, 0x9E, COOP_TRANSIENT_TRIGGER, 2},
+    // Isles trombone pad. Its local barrel dependency moves it to state 2;
+    // only then may the reviewed instrument activation enter state 3.
+    {34, 0x31, COOP_TRANSIENT_TRIGGER, 3},
     {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
     // Fungi green-tunnel feather/pineapple pairs and yellow-tunnel grape
     // switch. Each state-2 block owns its linked gate and completion locally.
@@ -200,6 +203,8 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
     // the vanilla initialization that enables contact and the sound actor.
     if (map == 20 && object >= 0x19 && object <= 0x28)
         return activation == 12 && raw == 11;
+    if (map == 34 && object == 0x31)
+        return activation == 3 && raw == 2;
     return raw > 0 && raw < activation;
 }
 

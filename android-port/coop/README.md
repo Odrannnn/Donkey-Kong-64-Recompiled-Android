@@ -27,6 +27,8 @@ Fungi's paired feather and pineapple tunnel switches and its yellow-tunnel grape
 switch now use the same bounded projectile-entry path.
 The Aztec and Fungi lobby feather switches also mirror only their stock
 projectile-hit entry while their linked panels and doors remain local.
+The Isles trombone pad can mirror its rocket-barrel reveal only after the
+receiving pad has independently reached its barrel-ready state.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
 progress advances one locally valid note at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied
