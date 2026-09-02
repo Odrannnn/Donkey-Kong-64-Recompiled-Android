@@ -1893,6 +1893,18 @@ The original scripts retain their 100-frame presentation and update linked door
 object `0x8D` plus permanent flag `0x30`. The linked door is not a trigger key,
 and its completed state still refreshes through the permanent world table.
 
+## Fungi tunnel gun switches (0.49.0)
+
+Fungi objects `0x18`/`0x19` are the green-tunnel feather pair, `0x1A`/`0x1B`
+are its pineapple pair, and `0x1E` is the yellow-tunnel grape switch. Each waits
+in state 1 and enters state 2 after its exact local projectile check. Typed
+trigger rows supersede broad raw-state mirroring for these five objects.
+
+The receiving scripts retain their 100-frame switch presentation and linked
+gate updates. Permanent flags `0xCF`, `0xD0` and `0xD2` still converge through
+the world transaction and their completed gate rows. Packets cannot name the
+linked gate objects, counters, projectiles or permanent flags.
+
 ## Galleon paired gun switches (0.49.0)
 
 Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired

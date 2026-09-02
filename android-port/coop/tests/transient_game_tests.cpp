@@ -139,6 +139,21 @@ static void capture_checks() {
     }
     CHECK(saw_timer_0 && saw_timer_1);
 
+    reset(); current_map = 48;
+    load(0, 0x18, 1); load(1, 0x19, 2); load(2, 0x1A, 1);
+    load(3, 0x1B, 2); load(4, 0x1E, 3);
+    bool saw_fungi_18 = false, saw_fungi_19 = false, saw_fungi_1a = false;
+    bool saw_fungi_1b = false, saw_fungi_1e = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_fungi_18 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x18, 1, 2);
+        saw_fungi_19 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x19, 2, 2);
+        saw_fungi_1a |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1A, 1, 2);
+        saw_fungi_1b |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1B, 2, 2);
+        saw_fungi_1e |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1E, 2, 2);
+    }
+    CHECK(saw_fungi_18 && saw_fungi_19 && saw_fungi_1a && saw_fungi_1b && saw_fungi_1e);
+
     reset(); current_map = 30; load(0, 0x11, 1); load(1, 0x1C, 3);
     load(2, 6, 1); load(3, 7, 2); load(4, 8, 3); load(5, 9, 1);
     load(6, 0xA, 2); load(7, 0xB, 1);
@@ -379,6 +394,14 @@ static void object_apply_checks() {
     transient_result.records[0] = {COOP_TRANSIENT_TIMER, 0, 4, 60};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_state == 4 && scripts[0].unk44[0] == 60);
+
+    reset(); role = ROLE_JOIN; current_map = 48; load(0, 0x1A, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 48, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x1A, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x1A && last_state == 2);
+    scripts[0x1A].unk48[0] = 20; coop_transient_apply();
+    CHECK(script_calls == 1); // Permanent completion cannot be rewound.
 
     reset(); role = ROLE_JOIN; current_map = 30; load(0, 0x13, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 30, 9, 1,

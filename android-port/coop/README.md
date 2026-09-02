@@ -23,6 +23,8 @@ their separate linked states remain local. Diddy's exterior guitar pad runs its
 own rotating-tower timer and linked-object sequence on both peers.
 The two Aztec blueprint-door switches likewise mirror only their exact
 projectile-hit entry; their doors and permanent flag remain locally scripted.
+Fungi's paired feather and pineapple tunnel switches and its yellow-tunnel grape
+switch now use the same bounded projectile-entry path.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
 progress advances one locally valid note at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied

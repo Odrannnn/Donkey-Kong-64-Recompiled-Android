@@ -69,6 +69,11 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // rows with their narrower state-2 projectile activation while unfinished.
     {38, 0x9D, COOP_TRANSIENT_TRIGGER, 2}, {38, 0x9E, COOP_TRANSIENT_TRIGGER, 2},
     {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
+    // Fungi green-tunnel feather/pineapple pairs and yellow-tunnel grape
+    // switch. Each state-2 block owns its linked gate and completion locally.
+    {48, 0x18, COOP_TRANSIENT_TRIGGER, 2}, {48, 0x19, COOP_TRANSIENT_TRIGGER, 2},
+    {48, 0x1A, COOP_TRANSIENT_TRIGGER, 2}, {48, 0x1B, COOP_TRANSIENT_TRIGGER, 2},
+    {48, 0x1E, COOP_TRANSIENT_TRIGGER, 2},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.
