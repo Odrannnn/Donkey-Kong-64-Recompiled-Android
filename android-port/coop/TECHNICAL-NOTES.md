@@ -2224,3 +2224,15 @@ map-and-object-specific zero-state readiness exception for this one gate.
 The local state-1 script retains its ten-frame delay, sounds, animation and
 permanent flag `0xB9` through state 3. State 1 is the only packet-selected raw
 state; a broken or already-running gate cannot be initialized or replayed.
+
+## Remaining Factory punch, grate and coconut switches (0.49.0)
+
+Factory map 26 objects `0x20` and `0x13A` are Primate Punch switches, while
+objects `0x3C` and `0x13C` are breakable metal grates. Those four actions enter
+state 1 directly from exact raw state 0. Coconut switch object `0x140` enters
+state 2 from ready state 1.
+
+Typed triggers mirror only those five entries. Their local scripts retain all
+timers, animations, cutscenes, sounds, linked machinery and permanent flags.
+Object-specific readiness prevents an arbitrary zero-state model-two object or
+an already-running/completed Factory sequence from using these packets.

@@ -164,6 +164,11 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Factory Snatch Room grate. Unlike ordinary triggers, its reviewed punch
     // edge enters state 1 directly from ready state 0.
     {26, 0x15, COOP_TRANSIENT_TRIGGER, 1},
+    // Remaining Factory punch switches and breakable metal grates also enter
+    // state 1 from exact raw state 0; the coconut switch enters state 2.
+    {26, 0x20, COOP_TRANSIENT_TRIGGER, 1}, {26, 0x3C, COOP_TRANSIENT_TRIGGER, 1},
+    {26, 0x13A, COOP_TRANSIENT_TRIGGER, 1}, {26, 0x13C, COOP_TRANSIENT_TRIGGER, 1},
+    {26, 0x140, COOP_TRANSIENT_TRIGGER, 2},
     // Japes Mountain's paired slam switches. A real hit occupies states 2-5;
     // states 10/11/15/16 are cross-linked presentation states, not hits.
     {4, 0x0A, COOP_TRANSIENT_TRIGGER, 2}, {4, 0x0B, COOP_TRANSIENT_TRIGGER, 2},
@@ -306,7 +311,9 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
     // the vanilla initialization that enables contact and the sound actor.
     if (map == 20 && object >= 0x19 && object <= 0x28)
         return activation == 12 && raw == 11;
-    if ((map == 26 && object == 0x15) || (map == 30 && object == 0x3F))
+    if ((map == 26 && (object == 0x15 || object == 0x20 || object == 0x3C
+                || object == 0x13A || object == 0x13C))
+            || (map == 30 && object == 0x3F))
         return activation == 1 && raw == 0;
     if (map == 34 && (object == 0x31 || object == 0x33))
         return activation == 3 && raw == 2;

@@ -288,6 +288,22 @@ static void capture_checks() {
     scripts[0x15].unk48[0] = 1; transient_page = 0; coop_transient_capture(2);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x15, 2, 1));
 
+    reset(); current_map = 26;
+    load(0, 0x20, 0); load(1, 0x3C, 1); load(2, 0x13A, 20);
+    load(3, 0x13C, 0); load(4, 0x140, 2);
+    bool saw_punch_20 = false, saw_grate_3c = false, saw_punch_13a = false;
+    bool saw_grate_13c = false, saw_coconut_140 = false;
+    for (unsigned page = 0; page < 10; ++page) {
+        coop_transient_capture(1);
+        saw_punch_20 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x20, 1, 1);
+        saw_grate_3c |= contains_value(COOP_TRANSIENT_TRIGGER, 0x3C, 2, 1);
+        saw_punch_13a |= contains_value(COOP_TRANSIENT_TRIGGER, 0x13A, 1, 1);
+        saw_grate_13c |= contains_value(COOP_TRANSIENT_TRIGGER, 0x13C, 1, 1);
+        saw_coconut_140 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x140, 2, 2);
+    }
+    CHECK(saw_punch_20 && saw_grate_3c && saw_punch_13a);
+    CHECK(saw_grate_13c && saw_coconut_140);
+
     reset(); current_map = 4; load(0, 0x0A, 2); load(1, 0x0B, 10);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x0A, 2, 2));
@@ -889,6 +905,20 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x3F && last_state == 1);
     scripts[0x3F].unk48[0] = 2; coop_transient_apply();
     CHECK(script_calls == 1); // A broken gate never replays its punch entry.
+
+    reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x13C, 0);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x13C, 2, 1}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x13C && last_state == 1);
+    scripts[0x13C].unk48[0] = 2; coop_transient_apply();
+    CHECK(script_calls == 1); // A breaking grate cannot restart.
+
+    reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x140, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x140, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x140 && last_state == 2);
 
     reset(); role = ROLE_JOIN; current_map = 16; load(0, 4, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,

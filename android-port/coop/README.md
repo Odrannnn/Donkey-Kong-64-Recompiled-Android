@@ -28,6 +28,8 @@ Factory's triangle, guitar and trombone pads mirror their reviewed activation
 edge while their timers and linked production-room objects run locally.
 The Snatch Room grate mirrors its exact state-zero punch entry while its camera,
 animation, sound and reset sequence run locally.
+Factory's two remaining punch switches, two breakable grates and coconut switch
+also mirror only their exact local activation entries.
 Japes Mountain's paired slam switches mirror each hit together with the stock
 state-10 update of the opposite switch.
 Its separate GB slam switch mirrors only the state-2 reward-sequence entry.
