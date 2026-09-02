@@ -1,7 +1,9 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.56.0** synchronizes the Fungi Spider's single final vulnerable hit
+Version **0.57.0** adds host-authoritative position, facing and guarded pose
+correction for the Fungi Spider while retaining every ordinary Spiderling
+record. Version 0.56.0 synchronizes the Spider's single final vulnerable hit
 after both copies have run their local Spiderling waves. The receiver enters the
 pinned collision path; vanilla still owns the death, reward, cutscene and exit.
 Version 0.55.0 adds guarded host boss-animation pose correction for all ten
@@ -19,7 +21,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 56 requires a matching peer and native
+address as a direct fallback. Protocol 57 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -153,7 +155,8 @@ optional **enemy defeat and movement synchronization** for thirty-four enemy kin
 It adds Pufftup and the sheeted Kritter alongside Kaboom and Klobber to all three Klaptrap colors, Krossbones and
 the earlier beavers, Kremlings, Klumps, Kasplats, flying and aquatic enemies. The
 glasses fireball retains its original immediate disappearance and local effect.
-Each page still carries 20 records. With the movement option, the guest also follows
+Each ordinary page carries 20 records, except the mixed Fungi Spider room, where
+one slot is reserved for boss motion and 19 carry Spiderlings. With the movement option, the guest also follows
 the host boss position and facing after reciprocal boss-life binding. Boss AI,
 attacks, timers, projectiles and player damage remain local.
 
@@ -171,8 +174,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.56.0 adds the
-bounded Fungi Spider final-hit adapter and retains guarded boss-pose correction,
+**This is experimental, not complete campaign co-op. Version 0.57.0 makes the
+bounded Fungi Spider adapter participate in guarded boss movement and pose correction
+without dropping Spiderling records, and retains the final-hit adapter,
 the actor-driven environment-cycle, and persistent
 recovery and authority-reconciliation suites. All 15 Linux
 ASan/UBSan suites and the complete maintained MIPS, Android ARM64, Windows x64,
@@ -189,7 +193,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.56
+While the native companion is loaded, `tools/query_trace.py` discovers v0.57
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -203,7 +207,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.56.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.57.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -671,7 +675,8 @@ If another mod has replaced any supported behavior handler before initialization
 enemy synchronization is disabled without replacing any of those handlers.
 
 Every supported live or acknowledgement-pending enemy is now covered by compact
-20-record pages. The game captures pages in stable spawner order while the native
+20-record pages. The Fungi Spider room uses 19 ordinary records plus one boss-motion
+record per page. The game captures pages in stable spawner order while the native
 bridge caches them by enemy key; actual UDP sends rotate duplicated pages independently
 of render-frame timing. Confirmed records retire only after both peers report the
 same bound defeat. There is no historical kill replay or remote spawning. Partial health converges to the
@@ -713,8 +718,11 @@ enemy records. A receiver waits for Spider state `0x27`, progress 2, its pinned
 initial health 6, and an empty local collision result before reproducing the
 stock final-hit result of health 1 plus collision class 4 for the
 pinned Spider handler. That handler owns the death sequence, Golden Banana,
-cutscene and exit. Boss movement and pose are deliberately disabled in this room
-so the boss pseudo-record cannot replace a Spiderling slot.
+cutscene and exit. With movement enabled, the guest can also follow the host
+Spider's position and facing. Full pose mode uses the same matching-local-clip
+guard as other bosses. Slot zero is reserved for that boss record and the
+Spiderlings are paged through slots 1 through 19, so neither channel displaces
+the other.
 
 ## Reviewed host-follow transitions (0.39; gameplay untested)
 
@@ -747,7 +755,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v56 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v57 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

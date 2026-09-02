@@ -685,14 +685,23 @@ int main() {
 
     // The Fungi Spider has one final vulnerable collision after its locally
     // simulated Spiderling waves. The pinned handler owns the full death path.
-    Actor spider{}; CoopBossData spider_data{};
+    Actor spider{}, spiderling{}; CoopBossData spider_data{};
     spider.unk58 = ACTOR_BOSS_SPIDER; spider.unk54 = 890; spider.health = 6;
     spider.object_properties_bitfield = 0x10; spider.control_state = 0x27;
     spider.control_state_progress = 1; spider.unk178 = &spider_data;
+    spider.x_position = 12; spider.y_position = 34; spider.z_position = 56; spider.y_rotation = 789;
+    spiderling.unk58 = ACTOR_SPIDERLING; spiderling.unk54 = 891; spiderling.health = 1;
+    spiderling.object_properties_bitfield = 0x10; spiderling.control_state = 1;
+    spawners[0].tied_actor = &spiderling; spawners[0].init.enemy_value = 20;
+    D_807FDC88.count = 1;
+    register_actor(&spiderling);
     register_actor(&spider); D_global_asm_8074C0A0[ACTOR_BOSS_SPIDER] = func_boss_8002C964;
-    current_map = MAP_FUNGI_SPIDER; D_global_asm_807FBD70 = 0; coop_combat_capture();
+    combat_enabled = 2; current_map = MAP_FUNGI_SPIDER; D_global_asm_807FBD70 = 0; coop_combat_capture();
     CHECK(boss_hooks == 1024 && combat_input.boss.kind == COOP_BOSS_FUNGI_SPIDER
-        && !combat_input.boss.phase && !combat_input.boss_motion.kind);
+        && !combat_input.boss.phase && combat_input.boss_motion.kind == COOP_BOSS_FUNGI_SPIDER
+        && combat_input.boss_motion.x == float_bits(12) && combat_input.boss_motion.yaw == 789
+        && !combat_input.enemies[0].key && combat_input.enemies[1].kind == COOP_SPIDERLING
+        && combat_input.pages == 1);
     combat_result = {}; combat_result.status = COOP_COMBAT_READY;
     combat_result.boss = {COOP_BOSS_FUNGI_SPIDER, combat_input.boss.life, 910, 1};
     gCurrentActorPointer = &spider; const unsigned spider_start = boss_impacts;
@@ -704,8 +713,9 @@ int main() {
     D_global_asm_807FBD70 = 0; D_global_asm_8074C0A0[ACTOR_BOSS_SPIDER]();
     CHECK(spider.health == 1 && spider.control_state == 0x28 && boss_impacts == spider_start + 1);
     D_global_asm_807FBD70 = 0; coop_combat_capture();
-    CHECK(combat_input.boss.phase == 1 && !combat_input.boss_motion.kind);
-    current_map = MAP_JAPES; combat_result = {}; combat_result.status = COOP_COMBAT_READY;
+    CHECK(combat_input.boss.phase == 1 && combat_input.boss_motion.kind == COOP_BOSS_FUNGI_SPIDER
+        && !combat_input.enemies[0].key && combat_input.enemies[1].kind == COOP_SPIDERLING);
+    combat_enabled = 1; current_map = MAP_JAPES; combat_result = {}; combat_result.status = COOP_COMBAT_READY;
 
     // The added enemy retains its own handler, including the knockback guard.
     Actor kremling{}; kremling.unk58 = ACTOR_KREMLING; kremling.unk54 = 500;

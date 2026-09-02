@@ -67,12 +67,16 @@ bool valid_combat(const CoopCombatFrame& f) {
     const auto& m = f.boss_motion;
     if (!m.kind) {
         if (m.life || m.x || m.y || m.z || m.yaw || m.pose || m.clip_hash) return false;
-    } else if (f.enabled < 2 || m.kind != b.kind || m.kind == COOP_BOSS_FUNGI_SPIDER
+    } else if (f.enabled < 2 || m.kind != b.kind
             || m.life != b.life || m.yaw >= 4096
             || m.pose > COOP_ENEMY_POSE_MASK || m.clip_hash > COOP_ENEMY_POSE_HASH_MASK
             || (!m.pose && m.clip_hash) || (f.enabled < 3 && m.pose)
             || !bounded_float(m.x, -100000, 100000) || !bounded_float(m.y, -100000, 100000)
             || !bounded_float(m.z, -100000, 100000)) return false;
+    // Wire slot zero carries boss motion. Refuse a frame that would silently
+    // replace an ordinary record; the game adapter reserves this slot on the
+    // only mixed boss/enemy map.
+    if (m.kind && f.enemies[0].key) return false;
     return true;
 }
 std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat_words(const CoopCombatFrame& f) {
@@ -82,12 +86,14 @@ std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat_words(const CoopCombatFrame&
     w[n++] = f.file; w[n++] = f.layout; w[n++] = f.hands;
     for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
         CoopEnemy e = f.enemies[i];
+        const bool boss_slot_collision = !i && f.boss_motion.kind && e.key;
         if (!i && f.boss_motion.kind) e = {1, f.boss_motion.life, COOP_ENEMY_ALIVE,
             f.boss_motion.pose | (f.boss_motion.clip_hash << 5),
             boss_wire_kind_base + f.boss_motion.kind, f.boss_motion.x, f.boss_motion.y,
             f.boss_motion.z, f.boss_motion.yaw};
         uint32_t identity = e.key | (e.state << COOP_ENEMY_STATE_SHIFT) | (e.kind << COOP_ENEMY_KIND_SHIFT);
-        if (e.key > 256 || e.state > 3 || e.kind > COOP_ENEMY_KIND_MASK) identity |= 0x20000u;
+        if (boss_slot_collision || e.key > 256 || e.state > 3 || e.kind > COOP_ENEMY_KIND_MASK)
+            identity |= 0x20000u;
         w[n++] = identity;
         w[n++] = e.life; w[n++] = e.peer_life;
         w[n++] = e.x; w[n++] = e.y; w[n++] = e.z; w[n++] = e.yaw;

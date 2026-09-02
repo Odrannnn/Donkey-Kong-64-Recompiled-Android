@@ -4,7 +4,13 @@
 // remains explicit; no host pointers, actor types or arbitrary damage amounts cross it.
 #define COOP_ENEMIES 20
 #define COOP_ENEMY_KEYS 256
-#define COOP_COMBAT_PAGES ((COOP_ENEMY_KEYS + COOP_ENEMIES - 1) / COOP_ENEMIES)
+// Boss motion occupies compact wire slot zero. Most boss arenas do not also
+// publish ordinary enemies, but the Fungi Spider room does. Reserving that slot
+// there leaves nineteen ordinary records per page and needs one additional
+// cache page in the theoretical 256-spawner case; the game/native ABI and wire
+// packet sizes remain unchanged.
+#define COOP_BOSS_ENEMY_SLOTS (COOP_ENEMIES - 1)
+#define COOP_COMBAT_PAGES ((COOP_ENEMY_KEYS + COOP_BOSS_ENEMY_SLOTS - 1) / COOP_BOSS_ENEMY_SLOTS)
 #define COOP_SHOTS 8
 #define COOP_COMBAT_FRAME_WORDS (14 + COOP_ENEMIES * 9 + COOP_SHOTS * 7 + 4)
 // Compact network form: identity + life pair + position + packed yaw/health.

@@ -111,7 +111,18 @@ static void protocol_checks() {
     x.boss_motion.pose = 0; x.boss_motion.clip_hash = 1; bad(x);
     x.enabled = 2; x.boss_motion.pose = 1; x.boss_motion.clip_hash = 0; bad(x);
     x = boss_frame(702, 0, COOP_BOSS_FUNGI_SPIDER); x.enabled = 2;
-    x.boss_motion = {COOP_BOSS_FUNGI_SPIDER, 702, bits(1), bits(2), bits(3), 0}; bad(x);
+    x.boss_motion = {COOP_BOSS_FUNGI_SPIDER, 702, bits(1), bits(2), bits(3), 0};
+    CHECK(valid_combat(x));
+    x.layout = 0x1234;
+    x.enemies[0] = {17, 703, COOP_ENEMY_ALIVE, 0, COOP_SPIDERLING,
+        bits(4), bits(5), bits(6), coop_enemy_pack(0, 1)}; bad(x);
+    x.enemies[0] = {}; x.enemies[1] = {17, 703, COOP_ENEMY_ALIVE, 0, COOP_SPIDERLING,
+        bits(4), bits(5), bits(6), coop_enemy_pack(0, 1)};
+    auto spider_words = combat_words(x); auto spider_roundtrip = combat_from_words(spider_words);
+    CHECK(valid_combat(spider_roundtrip)
+        && spider_roundtrip.boss_motion.kind == COOP_BOSS_FUNGI_SPIDER
+        && !spider_roundtrip.enemies[0].key
+        && spider_roundtrip.enemies[1].key == 17);
     x = boss_frame(702, 2, COOP_BOSS_FUNGI_SPIDER); bad(x);
     p.combat = f; p.kind = Kind::welcome; b = encode(p); CHECK(!decode(b.data(), b.size(), out));
     p.kind = Kind::state; b = encode(p); b[5] = 4; CHECK(!decode(b.data(), b.size(), out));
@@ -254,10 +265,22 @@ static void boss_checks() {
     hs.map = gs.map = 60;
     hi = boss_frame(1300, 0, COOP_BOSS_FUNGI_SPIDER);
     gi = boss_frame(1301, 0, COOP_BOSS_FUNGI_SPIDER);
-    hi.layout = gi.layout = 0x1234; tick(8);
+    hi.enabled = gi.enabled = 3; hi.layout = gi.layout = 0x1234;
+    hi.boss_motion = {COOP_BOSS_FUNGI_SPIDER, 1300, bits(10), bits(20), bits(30), 512, 9, 10};
+    gi.boss_motion = {COOP_BOSS_FUNGI_SPIDER, 1301, bits(-10), bits(-20), bits(-30), 1024, 8, 11};
+    hi.enemies[1] = {17, 1302, COOP_ENEMY_ALIVE, 0, COOP_SPIDERLING,
+        bits(40), bits(50), bits(60), coop_enemy_pack(100, 1)};
+    gi.enemies[1] = {17, 1303, COOP_ENEMY_ALIVE, 0, COOP_SPIDERLING,
+        bits(-40), bits(-50), bits(-60), coop_enemy_pack(200, 1)};
+    tick(8);
     CHECK(host.result().status == COOP_COMBAT_READY && guest.result().status == COOP_COMBAT_READY
-        && host.result().paired == 1 && guest.result().paired == 1
-        && !host.wire().boss_motion.kind && !guest.wire().boss_motion.kind);
+        && host.result().paired == 2 && guest.result().paired == 2
+        && !host.result().boss_motion.kind
+        && guest.result().boss_motion.kind == COOP_BOSS_FUNGI_SPIDER
+        && guest.result().boss_motion.life == 1301
+        && guest.result().boss_motion.x == bits(10)
+        && guest.result().motion[1].key == 17
+        && guest.result().motion[1].kind == COOP_SPIDERLING);
     gi.boss.phase = 1; tick(3);
     CHECK(host.result().boss.kind == COOP_BOSS_FUNGI_SPIDER && host.result().boss.phase == 1
         && !guest.result().boss.kind);

@@ -9,8 +9,8 @@
 #include "transient.hpp"
 
 namespace dkcoop {
-constexpr uint16_t protocol_version = 56;
-constexpr uint32_t compatibility = 0x00010238; // DK64 US ROM / Fungi Spider final-hit contract 56.
+constexpr uint16_t protocol_version = 57;
+constexpr uint32_t compatibility = 0x00010239; // DK64 US ROM / mixed Spider boss-motion contract 57.
 constexpr size_t item_offset = 104 + COOP_COMBAT_WIRE_WORDS * 4;
 constexpr size_t world_offset = item_offset + COOP_ITEM_WIRE_WORDS * 4;
 // Four new world words reuse the retired Japes-gate wire prefix at bytes

@@ -1,4 +1,4 @@
-> Current source: 0.56.0, protocol/native ABI v56. The protocol and persistent
+> Current source: 0.57.0, protocol/native ABI v57. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -1732,6 +1732,25 @@ pseudo-record cannot overwrite page slot zero. AI, targeting, webs, wave timing,
 position and animation remain local. No ABI or packet field grows, but protocol
 56, compatibility `0x00010238`, the v56 exports and manifest 0.56.0 reject older
 peers and companions.
+
+## Mixed Spider boss motion and enemy paging (0.57.0)
+
+Map 60 now reserves compact combat slot zero whenever movement synchronization
+is enabled. Its ordinary Spiderling records occupy slots 1 through 19, so the
+existing boss-motion pseudo-record can carry the Spider's position, facing and
+guarded normalized pose without replacing the first ordinary enemy. Page counts
+use a capacity of 19 on this mixed map; the cache maximum rises from 13 to 14 to
+cover the theoretical 256-spawner bound. Other combat maps retain 20 ordinary
+records per page.
+
+The game/native ABI sizes, 1368-byte UDP packet and all established offsets are
+unchanged. Native validation rejects any boss-motion input that also populates
+ordinary slot zero, and serialization marks that collision noncanonical so it
+cannot disappear during encode/decode. Boss life-token binding, guest-only
+movement, matching-local-clip pose checks and one-sample callback suppression
+remain unchanged. Spider AI, targeting, webs, wave timing and attacks still run
+locally. Protocol 57, compatibility `0x00010239`, the v57 exports and manifest
+0.57.0 reject older peers and companions.
 
 ## Third reversible world state (0.45.0)
 

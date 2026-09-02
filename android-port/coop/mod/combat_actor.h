@@ -616,9 +616,7 @@ static void coop_combat_capture(void) {
         if (combat_boss.life && combat_boss.kind == boss_kind
                 && (phase <= 4 || combat_boss.phase == 4)) {
             combat_input.boss = (CoopBoss){boss_kind, combat_boss.life, 0, combat_boss.phase};
-            // Map 60 also carries ordinary Spiderling records. Do not replace
-            // its first compact enemy slot with the boss-motion pseudo-record.
-            if (combat_enabled >= 2 && actor && boss_kind != COOP_BOSS_FUNGI_SPIDER) {
+            if (combat_enabled >= 2 && actor) {
                 combat_input.boss_motion = (CoopBossMotion){boss_kind, combat_boss.life,
                     float_bits(actor->x_position), float_bits(actor->y_position),
                     float_bits(actor->z_position), (unsigned)actor->y_rotation & 0xFFF, 0, 0};
@@ -672,11 +670,17 @@ static void coop_combat_capture(void) {
             } else live = 0;
             if (slot->life && (live || slot->defeated)) ++eligible;
         }
-        combat_input.pages = (eligible + COOP_ENEMIES - 1) / COOP_ENEMIES;
+        // Slot zero is the compact boss-motion record in the Spider room. Put
+        // ordinary enemies in slots 1..19 so its boss and Spiderling channels
+        // can coexist without silently dropping the first spawner record.
+        const unsigned reserve_boss_motion = boss_kind == COOP_BOSS_FUNGI_SPIDER
+            && combat_enabled >= 2;
+        const unsigned enemy_capacity = reserve_boss_motion ? COOP_BOSS_ENEMY_SLOTS : COOP_ENEMIES;
+        combat_input.pages = (eligible + enemy_capacity - 1) / enemy_capacity;
         if (!combat_input.pages) combat_input.pages = 1;
         combat_input.page = combat_capture_page++ % combat_input.pages;
-        const unsigned first = combat_input.page * COOP_ENEMIES;
-        unsigned seen = 0, n = 0;
+        const unsigned first = combat_input.page * enemy_capacity;
+        unsigned seen = 0, n = reserve_boss_motion;
         for (unsigned i = 0; i < (unsigned)D_807FDC88.count && n < COOP_ENEMIES; ++i) {
             CoopEnemySlot* slot = &combat_enemies[i];
             Actor* actor = slot->actor;
