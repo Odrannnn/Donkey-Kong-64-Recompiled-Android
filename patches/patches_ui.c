@@ -2051,6 +2051,8 @@ extern Gfx *func_global_asm_806AA09C(s16 x, s16 y, s16 arg2, s16 arg3, Gfx *dl, 
 extern s16 D_global_asm_807FC828[];
 extern u8 func_global_asm_80712628(void);
 extern void set_sprite_interpolation_lockdown(s32 value);
+extern Gfx *simple_set_model_matrix(Gfx *dl, u8 *pushed, s32 id, s32 sub_id);
+extern Gfx *simple_pop_model_matrix(Gfx *dl, u8 pushed);
 
 // @recomp: Pause Menu Text renderer
 RECOMP_PATCH Gfx* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
@@ -2091,6 +2093,7 @@ RECOMP_PATCH Gfx* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
     s32 y;
     s32 offset;
     u8 update_alignment;
+    u8 pushed_matrix_group;
 
     dl_copy = dl;
     sp15C = arg1->AAD_as_array[0];
@@ -2171,6 +2174,8 @@ RECOMP_PATCH Gfx* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
         }
         if (sp15C->unk17 != 3) {
             for (i = 0; i < 3; i++) {
+                pushed_matrix_group = FALSE;
+                dl = simple_set_model_matrix(dl, &pushed_matrix_group, MTXTAG_PAUSE_MAIN_OPTIONS, i);
                 if (i == sp15C->unk17) {
                     gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, var_s4);
                 } else {
@@ -2187,15 +2192,19 @@ RECOMP_PATCH Gfx* func_global_asm_806A92B4(Gfx *dl, Actor *arg1) {
                     j = 5;
                 }
                 dl = printText(dl, 0x280, var_s1, 0.7f, D_global_asm_807FC7E0[j]);
+                dl = simple_pop_model_matrix(dl, pushed_matrix_group);
                 var_s1 += 0x44;
             }
         } else {
+            pushed_matrix_group = FALSE;
+            dl = simple_set_model_matrix(dl, &pushed_matrix_group, MTXTAG_PAUSE_MAIN_AREYOUSURE, 0);
             gDPSetPrimColor(dl++, 0, 0, 0xFF, 0xFF, 0xFF, var_s4);
             dl = printText(dl, 0x280, 0x198, 0.7f, D_global_asm_807FC7E0[7]);
             _sprintf(sp160, "q %s", D_global_asm_807FC7E0[0x10]);
             dl = printText(dl, 0x280, 0x1E8, 1, sp160);
             _sprintf(sp160, "b %s", D_global_asm_807FC7E0[0x11]);
             dl = printText(dl, 0x280, 0x238, 1, sp160);
+            dl = simple_pop_model_matrix(dl, pushed_matrix_group);
         }
         break;
     case 1:

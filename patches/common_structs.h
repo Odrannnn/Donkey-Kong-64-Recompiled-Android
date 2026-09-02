@@ -73,6 +73,8 @@ typedef enum interpolationIDs {
     MTXTAG_FLUIDS = 0x400000,
     MTXTAG_SOLAR_FLARE = 0x400100,
     MTXTAG_RAP_LYRICS = 0x400200,
+    MTXTAG_PAUSE_MAIN_OPTIONS = 0x403000,
+    MTXTAG_PAUSE_MAIN_AREYOUSURE = 0x403010,
 } interpolationIDs;
 
 typedef struct AnimationStateUnk0_0 {

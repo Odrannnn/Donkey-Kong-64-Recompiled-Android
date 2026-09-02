@@ -1,13 +1,170 @@
 #include "common_structs.h"
 #include "ui.h"
 
+RECOMP_DECLARE_EVENT(recomp_on_asset_file_load_override(s32 tableIndex, s32 fileIndex, u8** outputFile));
+
 extern u8 cc_player_index;
 extern f32 func_global_asm_8065CFB8(s16 arg0, f32 arg1);
 extern f32 func_global_asm_8065D0FC(f32 arg0);
 extern Maps current_map;
 extern void func_global_asm_8065CE4C(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4, s16 *arg5);
 
-#define ACTOR_RATIO 0.0f
+f32 propDrawFilter(s32 prop_type) {
+    if (prop_type == 0xB5) return 0.0f; // Melon Crates
+    return 1.0f;
+}
+
+u16 valid_actors[] = {
+    ACTOR_DK,
+    ACTOR_DIDDY,
+    ACTOR_LANKY,
+    ACTOR_TINY,
+    ACTOR_CHUNKY,
+    ACTOR_KRUSHA,
+    ACTOR_RAMBI,
+    ACTOR_ENGUARDE,
+    ACTOR_CANNON_BARREL,
+    ACTOR_RAMBI_CRATE,
+    ACTOR_CANNON,
+    ACTOR_VULTURE_RACE_HOOP,
+    ACTOR_HUNKY_CHUNKY_BARREL,
+    ACTOR_BONUS_BARREL,
+    ACTOR_CASTLE_BRIDGE,
+    ACTOR_SWINGING_LIGHT,
+    ACTOR_VINE_BROWN,
+    ACTOR_LARGE_BRIDGE, // Unused
+    ACTOR_MINI_MONKEY_BARREL,
+    ACTOR_BOSS_PROJECTILE_LASER,
+    ACTOR_GOLDEN_BANANA, // Vulture, bonus barrels, probably some other places
+    ACTOR_ROCKETBARREL,
+    ACTOR_ORANGSTAND_SPRINT_BARREL,
+    ACTOR_STRONG_KONG_BARREL,
+    ACTOR_SWINGING_LIGHT_2,
+    ACTOR_BOULDER,
+    ACTOR_VASE_OVAL,
+    ACTOR_VASE_DOTS,
+    ACTOR_VASE_TRIANGLE,
+    ACTOR_VASE_PLUS,
+    ACTOR_CANNON_BALL,
+    ACTOR_VINE, // Green
+    ACTOR_BOSS_KEY,
+    ACTOR_GALLEON_CANNON, // Galleon Minigame
+    ACTOR_GALLEON_CANNON_BALL, // Galleon Minigame Projectile
+    ACTOR_CROWN,
+    ACTOR_BALLOON_DIDDY,
+    ACTOR_BONUS_BARREL_HELM,
+    ACTOR_RACE_CHECKPOINT,
+    ACTOR_BALLOON_CHUNKY,
+    ACTOR_BALLOON_TINY,
+    ACTOR_BALLOON_LANKY,
+    ACTOR_BALLOON_DK,
+    ACTOR_BEANSTALK,
+    ACTOR_HEADPHONES,
+    ACTOR_CRATE_ENGUARDE,
+    ACTOR_CRATE_ENGUARDE_0,
+    ACTOR_BARREL,
+    ACTOR_BONUS_TRAINING, // Training Barrel
+    ACTOR_B_LOCKER,
+    ACTOR_RAINBOW_COIN_PATCH,
+    ACTOR_RAINBOW_COIN,
+    ACTOR_BALLOON_KROOL,
+    ACTOR_ROPE,
+    ACTOR_FAIRY_QUEEN,
+    ACTOR_KRASH,
+    ACTOR_BOOK,
+    ACTOR_SNIDE,
+    ACTOR_CRANKY,
+    ACTOR_FUNKY,
+    ACTOR_CANDY,
+    ACTOR_BEETLE,
+    ACTOR_MERMAID,
+    ACTOR_VULTURE_SHOOTING,
+    ACTOR_CUTSCENE_DK,
+    ACTOR_CUTSCENE_DIDDY,
+    ACTOR_CUTSCENE_LANKY,
+    ACTOR_CUTSCENE_TINY,
+    ACTOR_CUTSCENE_CHUNKY,
+    ACTOR_LLAMA,
+    ACTOR_PADLOCK_TNS,
+    ACTOR_VULTURE_RACE,
+    ACTOR_TROFF,
+    ACTOR_TOY_BOX,
+    ACTOR_SCOFF,
+    ACTOR_SEAL,
+    ACTOR_OWL,
+    ACTOR_RABBIT_RACE,
+    ACTOR_CUTSCENE_OBJECT,
+    ACTOR_RABBIT_CAVES,
+    ACTOR_SEAL_0,
+    ACTOR_INSTRUMENT_LOGO,
+    ACTOR_SPOTLIGHT,
+    ACTOR_PADLOCK_KLUMSY,
+};
+
+f32 actorDrawFilter(Actor *actor) {
+    Actors actor_type;
+    u32 i;
+
+    actor_type = actor->unk58;
+    for (i = 0; i < (sizeof(valid_actors) >> 1); i++) {
+        if (actor_type == valid_actors[i]) {
+            return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
+f32 spawnerDrawFilter(ActorSpawner *spawner) {
+    Actors actor_type;
+    u32 i;
+
+    actor_type = (Actors)(spawner->actor_type + 0x10);
+    for (i = 0; i < (sizeof(valid_actors) >> 1); i++) {
+        if (actor_type == valid_actors[i]) {
+            return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
+u8 extended_enemies[] = {
+    1, // Clam
+    2, // Krash
+    3, // Book
+    0xE, // Beetle
+    0xF, // Mermaid,
+    0x11, // Vulture (Shooting)
+    0x13, // Cutscene DK
+    0x14, // Cutscene Diddy
+    0x15, // Cutscene Lanky
+    0x16, // Cutscene Tiny
+    0x17, // Cutscene Chunky
+    0x18, // T&S Padlock
+    0x19, // Llama
+    0x1D, // Vulture (Race)
+    0x2E, // Troff
+    0x34, // Toy Box
+    0x36, // Seal
+    0x37, // Scoff
+    0x43, // Seal
+    0x48, // Race Rabbit
+    0x49, // Owl
+    0x50, // CS Object
+    0x6F, // BFI Fairy
+};
+f32 enemyDrawFilter(EnemySpawner *enemy) {
+    s32 enemy_type;
+    u32 i;
+    
+    enemy_type = enemy->alternative_enemy_spawn;
+    for (i = 0; i < sizeof(extended_enemies); i++) {
+        if (enemy_type == extended_enemies[i]) {
+            return 1.0f;
+        }
+    }
+    return 0.0f;
+}
+
 f32 recomp_filter_draw(f32 value, f32 ratio) {
     f32 fl = recomp_get_draw_distance();
     fl *= ratio;
@@ -81,7 +238,7 @@ RECOMP_PATCH Gfx* func_global_asm_80630DCC(s32 arg0, Actor* arg1, Gfx* dl, s32 a
                     SQ(character_change_array[cc_player_index].unk220 - arg1->y_position) +
                     SQ(character_change_array[cc_player_index].unk224 - arg1->z_position)
                 );
-                if (func_global_asm_8065D0FC(recomp_filter_draw(arg1->draw_distance, ACTOR_RATIO)) < sp64) {
+                if (func_global_asm_8065D0FC(recomp_filter_draw(arg1->draw_distance, actorDrawFilter(arg1))) < sp64) {
                     return dl;
                 }
                 if (func_global_asm_80658E8C(arg1->x_position, arg1->y_position, arg1->z_position, arg1->unk130, arg1->unk131)) {
@@ -131,7 +288,7 @@ RECOMP_PATCH Gfx* func_global_asm_80630DCC(s32 arg0, Actor* arg1, Gfx* dl, s32 a
         gDPSetPrimColor(dl++, 0, 0xFF, spCB, spCA, spC9, 0xFF);
     }
     if (arg1->object_properties_bitfield & 0x8000) {
-        func_global_asm_8065CE4C(arg1->position.f[0], arg1->position.f[1], arg1->position.f[2], recomp_filter_draw(arg1->draw_distance, ACTOR_RATIO), -1, &arg1->shadow_opacity);
+        func_global_asm_8065CE4C(arg1->position.f[0], arg1->position.f[1], arg1->position.f[2], recomp_filter_draw(arg1->draw_distance, actorDrawFilter(arg1)), -1, &arg1->shadow_opacity);
     }
     if ((arg1->interactable != 0x80) && (arg1->interactable != 0x40) && (arg1->interactable != 8)) {
         if ((arg1->position.f[1] - 5.0f) < character_change_array[cc_player_index].unk220) {
@@ -276,30 +433,30 @@ f32 func_global_asm_80689DD4(f32 x, f32 y, f32 z);
 
 RECOMP_PATCH u8 func_global_asm_80689F80(ActorSpawner *spawner) {
     return func_global_asm_80652E58(spawner->unk4A)
-        && func_global_asm_80689DD4(spawner->unk10, spawner->unk14, spawner->unk18) < recomp_filter_draw_sq(spawner->unk54, ACTOR_RATIO);
+        && func_global_asm_80689DD4(spawner->unk10, spawner->unk14, spawner->unk18) < recomp_filter_draw_sq(spawner->unk54, spawnerDrawFilter(spawner));
 }
 
 RECOMP_PATCH u8 func_global_asm_80689FEC(ActorSpawner *spawner) {
     return (!func_global_asm_80652E58(spawner->tied_actor->unk12C)
-        || !(func_global_asm_80689DD4(spawner->unk10, spawner->unk14, spawner->unk18) < recomp_filter_draw_sq(spawner->unk54, ACTOR_RATIO)))
+        || !(func_global_asm_80689DD4(spawner->unk10, spawner->unk14, spawner->unk18) < recomp_filter_draw_sq(spawner->unk54, spawnerDrawFilter(spawner))))
     && spawner->tied_actor->unk114 == NULL;
 }
 
 RECOMP_PATCH u8 func_global_asm_8068A074(ActorSpawner *spawner) {
     return (!func_global_asm_80652E58(spawner->tied_actor->unk12C)
-        || !(func_global_asm_80689DD4(spawner->unk10, spawner->unk14, spawner->unk18) < recomp_filter_draw_sq(spawner->unk54, ACTOR_RATIO)))
+        || !(func_global_asm_80689DD4(spawner->unk10, spawner->unk14, spawner->unk18) < recomp_filter_draw_sq(spawner->unk54, spawnerDrawFilter(spawner))))
         && (spawner->tied_actor->unk114 == NULL
         && spawner->tied_actor->control_state == 0);
 }
 
 RECOMP_PATCH u8 func_global_asm_8068A118(ActorSpawner *arg0) {
     // TODO: idk why this temporary variable is needed but... yeah
-    u8 temp = func_global_asm_80689DD4(arg0->unk10, arg0->unk14, arg0->unk18) < recomp_filter_draw_sq(arg0->unk54, ACTOR_RATIO);
+    u8 temp = func_global_asm_80689DD4(arg0->unk10, arg0->unk14, arg0->unk18) < recomp_filter_draw_sq(arg0->unk54, spawnerDrawFilter(arg0));
     return temp;
 }
 
 RECOMP_PATCH u8 func_global_asm_8068A164(ActorSpawner *spawner) {
-    return !(func_global_asm_80689DD4(spawner->tied_actor->x_position, spawner->tied_actor->y_position, spawner->tied_actor->z_position) < recomp_filter_draw_sq(spawner->unk54, ACTOR_RATIO));
+    return !(func_global_asm_80689DD4(spawner->tied_actor->x_position, spawner->tied_actor->y_position, spawner->tied_actor->z_position) < recomp_filter_draw_sq(spawner->unk54, spawnerDrawFilter(spawner)));
 }
 
 typedef struct Struct807FDC90 Struct807FDC90;
@@ -413,7 +570,7 @@ RECOMP_PATCH void func_global_asm_80727958(void) {
         if ((var_s1 == 0) || (var_s0->properties_bitfield & 4) || (D_global_asm_807FBB64 & 0x100)) {
             var_s1 = 0x7FFFFFFF;
         } else if (var_s0->alternative_enemy_spawn != 0x44) { // Not a fairy
-            var_s1 = recomp_filter_draw_sq(var_s1, ACTOR_RATIO);
+            var_s1 = recomp_filter_draw_sq(var_s1, enemyDrawFilter(var_s0));
         }
         if ((temp_a1 != 0) && var_s0->tied_actor->control_state == 0x3B) {
             func_global_asm_8061CFCC(var_s0->tied_actor);
@@ -569,7 +726,12 @@ RECOMP_PATCH void *getPointerTableFile(enum pointertable_e pointerTableIndex, u3
     void *var_v0;
     s32 var_a1;
     void *sp40;
+    u8 *override_file = NULL;
 
+    recomp_on_asset_file_load_override(pointerTableIndex, fileIndex, &override_file);
+    if (override_file) {
+        return override_file;
+    }
     func_global_asm_8066B5F4(pointerTableIndex);
     if (!arg3) {
         if ((fileIndex >= 0x80000000) && (fileIndex < 0xA0000000)) {
