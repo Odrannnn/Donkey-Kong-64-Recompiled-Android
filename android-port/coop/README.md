@@ -13,6 +13,8 @@ Galleon's cannon game mirrors a target hit only when that same target is already
 exposed in both copies; target selection, timing and game startup remain local.
 Its Enguarde door also mirrors the exact charge result while each copy owns the
 door cutscene, animation and permanent completion.
+The main-map breakable gate mirrors its exact unbroken-to-breaking entry while
+the local script owns its sound, animation and saved removal.
 Llama Temple's sixteen matching-game heads now mirror individual grape hits
 only after both local copies have armed that head; sounds, pair validation,
 resets and the reward remain in each copy's original scripts.

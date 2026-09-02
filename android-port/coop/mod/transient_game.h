@@ -51,6 +51,8 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Enguarde door. Its reviewed state-2 entry starts the stock local door,
     // cutscene and permanent-completion path after an Enguarde charge.
     {30, 0x21, COOP_TRANSIENT_TRIGGER, 2},
+    // Galleon breakable gate enters state 1 directly from unbroken state 0.
+    {30, 0x3F, COOP_TRANSIENT_TRIGGER, 1},
     // Llama Temple coconut switch and DK bongo pad. Their local state-2
     // sequences own the cooling/llama-spit flags and linked gate presentation.
     {20, 0x12, COOP_TRANSIENT_TRIGGER, 2}, {20, 0x16, COOP_TRANSIENT_TRIGGER, 2},
@@ -304,7 +306,7 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
     // the vanilla initialization that enables contact and the sound actor.
     if (map == 20 && object >= 0x19 && object <= 0x28)
         return activation == 12 && raw == 11;
-    if (map == 26 && object == 0x15)
+    if ((map == 26 && object == 0x15) || (map == 30 && object == 0x3F))
         return activation == 1 && raw == 0;
     if (map == 34 && (object == 0x31 || object == 0x33))
         return activation == 3 && raw == 2;

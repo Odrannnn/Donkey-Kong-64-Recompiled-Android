@@ -2214,3 +2214,13 @@ trigger mirrors only that activation entry.
 The receiving script retains its five-frame delay, local cutscene, door action,
 sound and permanent flag `0x9F` through state 4. A packet cannot control
 Enguarde, select a linked object or later state, or replay a completed door.
+
+## Galleon breakable gate (0.49.0)
+
+Galleon map 30 object `0x3F` is the breakable gate. Its punch/contact checks
+run while the gate is in raw state 0 and enter state 1. A typed trigger uses a
+map-and-object-specific zero-state readiness exception for this one gate.
+
+The local state-1 script retains its ten-frame delay, sounds, animation and
+permanent flag `0xB9` through state 3. State 1 is the only packet-selected raw
+state; a broken or already-running gate cannot be initialized or replayed.

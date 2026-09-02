@@ -336,6 +336,14 @@ static void capture_checks() {
     }
     CHECK(saw_enguarde_door);
 
+    reset(); current_map = 30; load(0, 0x3F, 0);
+    bool saw_breakable_gate = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_breakable_gate |= contains_value(COOP_TRANSIENT_TRIGGER, 0x3F, 1, 1);
+    }
+    CHECK(saw_breakable_gate);
+
     reset(); current_map = 19; load(0, 0x04, 1); load(1, 0x05, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x04, 1, 2));
@@ -873,6 +881,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x21 && last_state == 2);
     scripts[0x21].unk48[0] = 4; coop_transient_apply();
     CHECK(script_calls == 1); // Completion cannot replay the charge sequence.
+
+    reset(); role = ROLE_JOIN; current_map = 30; load(0, 0x3F, 0);
+    transient_result = {COOP_TRANSIENT_APPLYING, 30, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x3F, 2, 1}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x3F && last_state == 1);
+    scripts[0x3F].unk48[0] = 2; coop_transient_apply();
+    CHECK(script_calls == 1); // A broken gate never replays its punch entry.
 
     reset(); role = ROLE_JOIN; current_map = 16; load(0, 4, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,
