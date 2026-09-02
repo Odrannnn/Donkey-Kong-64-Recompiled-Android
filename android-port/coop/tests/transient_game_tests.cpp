@@ -107,6 +107,8 @@ static void reset() {
     transient_file = transient_file_changed = 0;
     coop_transient_applied_timer_epoch = 0;
     std::fill(std::begin(coop_transient_applied_timers), std::end(coop_transient_applied_timers), CoopTransientRecord{});
+    coop_transient_last_cutscene = {};
+    coop_transient_cutscene_epoch = coop_transient_cutscene_hold = 0;
     transient_input = {}; transient_result = {};
     loading_zone_transition_speed = 0; is_cutscene_active = 0;
     D_global_asm_807476F8 = -1; D_global_asm_807F5CF0 = D_global_asm_807F5CF4 = 0;
@@ -1253,9 +1255,29 @@ static void cutscene_checks() {
     D_global_asm_807476F8 = 12; D_global_asm_807F5CF0 = 3; D_global_asm_807F5CF4 = 0x41;
     coop_transient_capture(1);
     CHECK(contains(COOP_TRANSIENT_CUTSCENE, 13, 3));
+    is_cutscene_active = 0;
+    coop_transient_capture(1);
+    CHECK(contains(COOP_TRANSIENT_CUTSCENE, 13, 3)); // Same-epoch target survives host completion.
+    epoch++;
+    coop_transient_capture(1);
+    CHECK(!contains(COOP_TRANSIENT_CUTSCENE, 13, 3)); // Never retain across a room epoch.
+    epoch--;
+
+    reset(); current_map = 7; is_cutscene_active = 1;
+    D_global_asm_807476F8 = 12; D_global_asm_807F5CF0 = 3; D_global_asm_807F5CF4 = 0x41;
+    unsigned slot = 0;
+    for (const auto& entry : coop_transient_extra_objects) if (entry.map == 7)
+        load(slot++, entry.object, entry.activation);
+    bool saw_full_cutscene_page = false;
+    for (unsigned page = 0; page < 16; ++page) {
+        coop_transient_capture(1);
+        saw_full_cutscene_page |= transient_input.count == COOP_TRANSIENT_RECORDS
+            && contains(COOP_TRANSIENT_CUTSCENE, 13, 3);
+    }
+    CHECK(saw_full_cutscene_page); // Cutscene target has priority on a full page.
 
     role = ROLE_JOIN;
-    transient_result = {COOP_TRANSIENT_APPLYING, 48, 9, 1,
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
         {{COOP_TRANSIENT_CUTSCENE, 13, 4, 0x41}}};
     coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4);
     transient_result.records[0].state = 6;

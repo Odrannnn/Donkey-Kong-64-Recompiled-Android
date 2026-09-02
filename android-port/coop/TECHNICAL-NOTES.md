@@ -1,4 +1,4 @@
-> Current source: 0.60.0, protocol/native ABI v60. The protocol and persistent
+> Current source: 0.61.0, protocol/native ABI v61. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -1813,6 +1813,24 @@ phase, advance beyond the host or rewind a locally advanced cutscene.
 
 Packet and bridge sizes remain unchanged. Protocol 60, compatibility
 `0x0001023C`, v60 exports and manifest 0.60.0 reject older peers and companions.
+
+## Retained cutscene target (0.61.0)
+
+The last valid active-cutscene record is retained for 90 rendered frames after
+the host cutscene closes, only within the current map-load epoch. A map load
+clears the record before capture. This gives a lagging Join time to consume the
+one-phase-per-frame recovery path even though the host no longer publishes an
+active camera state.
+
+An active or retained cutscene record takes the final slot when an eight-record
+transient page is full. This delays one ordinary script observation for that
+page rotation but prevents a dense room from starving a short camera phase.
+The receive guard is unchanged: the Join must already run the same cutscene ID
+with the same flags, and equal/older phases do nothing. Retention therefore
+cannot launch, replay or cross a room boundary.
+
+Packet and bridge sizes remain unchanged. Protocol 61, compatibility
+`0x0001023D`, v61 exports and manifest 0.61.0 reject older peers and companions.
 
 ## Third reversible world state (0.45.0)
 

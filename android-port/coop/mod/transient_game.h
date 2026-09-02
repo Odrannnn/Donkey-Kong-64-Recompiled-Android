@@ -230,6 +230,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
 // being reset to the same network value on every render frame.
 static CoopTransientRecord coop_transient_applied_timers[COOP_TRANSIENT_RECORDS];
 static unsigned coop_transient_applied_timer_epoch;
+#define COOP_TRANSIENT_CUTSCENE_HOLD_FRAMES 90
+static CoopTransientRecord coop_transient_last_cutscene;
+static unsigned coop_transient_cutscene_epoch, coop_transient_cutscene_hold;
 
 static unsigned coop_transient_timer_sample_is_new(CoopTransientRecord record) {
     if (coop_transient_applied_timer_epoch != epoch) {
@@ -578,6 +581,11 @@ static void coop_transient_apply_tomato_clock(CoopTransientRecord record) {
 
 static void coop_transient_capture(unsigned present) {
     transient_input = (CoopTransientInput){0};
+    if (coop_transient_cutscene_epoch != epoch) {
+        coop_transient_cutscene_epoch = epoch;
+        coop_transient_cutscene_hold = 0;
+        coop_transient_last_cutscene = (CoopTransientRecord){0};
+    }
     if (transient_enabled && present && current_file < 3) {
         if (!transient_file) transient_file = current_file + 1;
         else if (transient_file != current_file + 1) transient_file_changed = 1;
@@ -609,14 +617,26 @@ static void coop_transient_capture(unsigned present) {
     coop_transient_add_clams(transient_page, &ordinal, &transient_input);
     coop_transient_add_tomato_board(transient_page, &ordinal, &transient_input);
     coop_transient_add_tomato_clock(transient_page, &ordinal, &transient_input);
-    // Cutscene records only align two already-running copies. Instance scripts
-    // start their own local cutscene, so packets cannot launch rewards/endings.
+    // Retain the last same-epoch target briefly after the host finishes so a
+    // lagging copy can consume missed phases. Apply still requires the Join to
+    // be running the exact same cutscene and flags, so this cannot launch one.
+    CoopTransientRecord cutscene = {0};
     if (is_cutscene_active == 1 && D_global_asm_807476F8 >= 0 && D_global_asm_807476F8 < 0xFF
-            && D_global_asm_807F5CF0 <= 0xFF
-            && transient_input.count < COOP_TRANSIENT_RECORDS) {
-        transient_input.records[transient_input.count++] = (CoopTransientRecord){
+            && D_global_asm_807F5CF0 <= 0xFF) {
+        cutscene = (CoopTransientRecord){
             COOP_TRANSIENT_CUTSCENE, (unsigned)D_global_asm_807476F8 + 1,
             (unsigned)D_global_asm_807F5CF0, (unsigned)D_global_asm_807F5CF4 & 0xFF};
+        coop_transient_last_cutscene = cutscene;
+        coop_transient_cutscene_hold = COOP_TRANSIENT_CUTSCENE_HOLD_FRAMES;
+    } else if (coop_transient_cutscene_hold && coop_transient_last_cutscene.kind) {
+        cutscene = coop_transient_last_cutscene;
+        coop_transient_cutscene_hold--;
+    }
+    if (cutscene.kind) {
+        if (transient_input.count < COOP_TRANSIENT_RECORDS)
+            transient_input.records[transient_input.count++] = cutscene;
+        else
+            transient_input.records[COOP_TRANSIENT_RECORDS - 1] = cutscene;
     }
     unsigned pages = (ordinal + COOP_TRANSIENT_RECORDS - 1) / COOP_TRANSIENT_RECORDS;
     transient_page = pages ? (transient_page + 1) % pages : 0;
