@@ -267,6 +267,16 @@ static void capture_checks() {
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x05, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x06, 2, 2));
 
+    for (unsigned map = 21; map <= 24; ++map) {
+        reset(); current_map = map; load(0, 0x04, 1); load(1, 0x05, 2);
+        if (map == 24) load(2, 0x07, 1);
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x04, 1, 2));
+        CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x05, 2, 2));
+        if (map == 24)
+            CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x07, 1, 2));
+    }
+
     reset(); current_map = 164; load(0, 0x01, 2); load(1, 0x09, 5);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x01, 2, 2));
@@ -820,6 +830,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x04 && last_state == 2);
     scripts[0x04].unk48[0] = 3; coop_transient_apply();
     CHECK(script_calls == 1); // Panel animation states remain locally owned.
+
+    reset(); role = ROLE_JOIN; current_map = 24; load(0, 0x07, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 24, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x07, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x07 && last_state == 2);
+    transient_result.records[0].key = 0x06; coop_transient_apply();
+    CHECK(script_calls == 1); // A linked wall panel is not an allowed trigger.
 
     reset(); role = ROLE_JOIN; current_map = 16; load(0, 4, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,

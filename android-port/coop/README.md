@@ -7,8 +7,8 @@ Tiny's six dartboard targets, Galleon's six gun/five instrument/two slam switche
 Llama Temple's coconut/bongo switches. Tiny Temple's opening switch, Diddy
 guitar pad and charge switch use the same pinned activation path, and its KONG
 letters advance through a bounded four-step sequence.
-DK's five-door temple also mirrors both coconut-panel hits while each copy owns
-its wall textures, animation and completion sequence.
+All five-door temples mirror their reviewed weapon-panel hits while each copy
+owns its wall textures, animation and completion sequence.
 Llama Temple's sixteen matching-game heads now mirror individual grape hits
 only after both local copies have armed that head; sounds, pair validation,
 resets and the reward remain in each copy's original scripts.

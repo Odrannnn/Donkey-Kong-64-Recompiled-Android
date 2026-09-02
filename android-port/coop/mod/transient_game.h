@@ -50,6 +50,13 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // DK's five-door-temple coconut panels. Each state-2 script owns its four
     // local wall-panel updates and texture sequence.
     {19, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {19, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    // Diddy, Tiny, Lanky and Chunky five-door-temple weapon panels. Their
+    // state-2 scripts retain all linked wall-panel and texture operations.
+    {21, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {21, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    {22, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {22, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    {23, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {23, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    {24, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {24, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    {24, 0x07, COOP_TRANSIENT_TRIGGER, 2},
     // Llama Temple matching game heads. Every head is armed in state 11 and
     // enters state 12 after a local grape hit. Its own script supplies the
     // sound, five-frame debounce and matching-controller notification.

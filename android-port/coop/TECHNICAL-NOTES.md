@@ -2180,3 +2180,15 @@ only those two activation edges.
 Each local state-2 script retains its sound, delays, animation, four linked
 wall-panel updates and texture writes through state 4. Packets cannot name a
 panel target, projectile, timer, texture operation or later state.
+
+## Remaining five-door-temple weapon panels (0.49.0)
+
+The Diddy, Tiny and Lanky five-door temples on maps 21, 22 and 23 each use
+objects `4` and `5` for their peanut, feather or grape panels. Chunky's map 24
+uses pineapple-panel objects `4`, `5` and `7`. Every panel waits in state 1 and
+enters state 2 after its matching projectile hit.
+
+These nine typed triggers complete all eleven activation entries across the five
+temples. Each local script retains its delays, sounds, linked wall-panel updates
+and texture writes. No packet can select a projectile, linked panel, timer,
+texture operation or later state.
