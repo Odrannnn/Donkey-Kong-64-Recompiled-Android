@@ -13,7 +13,7 @@ static CoopTransientInput frame(unsigned map, unsigned epoch, unsigned revision)
     input.records[0] = {COOP_TRANSIENT_SCRIPT, 0x34, 20, 0};
     input.records[1] = {COOP_TRANSIENT_TIMER, 0x25, 3, 240};
     input.records[2] = {COOP_TRANSIENT_PLATFORM, 0x27, 4, 0x12345678};
-    input.records[3] = {COOP_TRANSIENT_TRIGGER, 0x31, 2, 0};
+    input.records[3] = {COOP_TRANSIENT_TRIGGER, 0x31, 2, 2};
     return input;
 }
 

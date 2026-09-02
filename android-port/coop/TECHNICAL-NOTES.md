@@ -1649,3 +1649,18 @@ missing or unlisted script is ignored. Persistent production GB ownership remain
 in the item channel. Both players must be in the same Factory room epoch with
 **Same-area events** enabled. Protocol 49, compatibility `0x00010131`, export
 `dk64_coop_tick_v49` and manifest 0.49.0 reject mixed semantic versions.
+
+## Factory 3-1-2-4 room switches (0.49.0)
+
+Diddy's timed R&D room uses Factory objects `0x3F`, `0x40` and `0x41`. Their
+scripts use states 1–4 for the currently accepted number and enter state 5 only
+after the correct local switch hit. The same-area adapter publishes a typed
+fired observation while the host script is in states 5–19. A receiving script
+may enter state 5 only while its own state is one of 1–4. The allowlist also
+pins activation value 5, so a packet cannot select another script entry.
+
+Each receiving script then runs the original 120-frame sequence, cutscene,
+switch hiding, enemy spawn and final reward path. States 20 and above are treated
+as finished or reset observations and never rewind the peer. Missing scripts,
+wrong activation values and repeated packets fail closed. Both players must be
+in the same Factory room epoch.

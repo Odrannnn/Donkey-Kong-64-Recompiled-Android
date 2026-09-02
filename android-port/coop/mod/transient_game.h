@@ -3,21 +3,33 @@
 
 typedef struct {
     unsigned short map, object;
-    unsigned char kind;
+    unsigned char kind, activation;
 } CoopTransientObject;
 
 // Pinned loaded scripts whose state drives a reviewed reversible switch,
 // timer-driven presentation, or linked platform. Permanent gate/door readers
 // come from coop_live_world_states below.
 static const CoopTransientObject coop_transient_extra_objects[] = {
-    {30, 0, COOP_TRANSIENT_TIMER}, {30, 1, COOP_TRANSIENT_TIMER},
-    {48, 4, COOP_TRANSIENT_TIMER}, {48, 5, COOP_TRANSIENT_TIMER},
-    {194, 6, COOP_TRANSIENT_PLATFORM},
+    {30, 0, COOP_TRANSIENT_TIMER, 0}, {30, 1, COOP_TRANSIENT_TIMER, 0},
+    {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
+    {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.
-    {26, 0x2E, COOP_TRANSIENT_TRIGGER}, {26, 0x2F, COOP_TRANSIENT_TRIGGER},
-    {26, 0x30, COOP_TRANSIENT_TRIGGER}, {26, 0x31, COOP_TRANSIENT_TRIGGER},
+    {26, 0x2E, COOP_TRANSIENT_TRIGGER, 2}, {26, 0x2F, COOP_TRANSIENT_TRIGGER, 2},
+    {26, 0x30, COOP_TRANSIENT_TRIGGER, 2}, {26, 0x31, COOP_TRANSIENT_TRIGGER, 2},
+    // Diddy's 3-1-2-4 switch room. Each local script owns its long cutscene,
+    // switch hiding, enemy spawn and final reward after state 5 is entered.
+    {26, 0x3F, COOP_TRANSIENT_TRIGGER, 5}, {26, 0x40, COOP_TRANSIENT_TRIGGER, 5},
+    {26, 0x41, COOP_TRANSIENT_TRIGGER, 5},
 };
+
+static unsigned coop_transient_object_activation(unsigned map, unsigned object) {
+    for (unsigned i = 0; i < sizeof(coop_transient_extra_objects) / sizeof(coop_transient_extra_objects[0]); ++i) {
+        const CoopTransientObject* entry = &coop_transient_extra_objects[i];
+        if (entry->map == map && entry->object == object) return entry->activation;
+    }
+    return 0;
+}
 
 static unsigned coop_transient_object_kind(unsigned map, unsigned object) {
     for (unsigned i = 0; i < sizeof(coop_transient_extra_objects) / sizeof(coop_transient_extra_objects[0]); ++i) {
@@ -50,9 +62,13 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
     if (!script) return;
     unsigned state = script->unk48[0];
     if (state > 0xFF) return;
-    if (kind == COOP_TRANSIENT_TRIGGER)
-        state = state >= 2 && state < 20 ? 2 : 1;
-    input->records[input->count++] = (CoopTransientRecord){kind, object, state, 0};
+    unsigned value = 0;
+    if (kind == COOP_TRANSIENT_TRIGGER) {
+        value = coop_transient_object_activation(current_map, object);
+        if (value < 2) return;
+        state = state >= value && state < 20 ? 2 : 1;
+    }
+    input->records[input->count++] = (CoopTransientRecord){kind, object, state, value};
 }
 
 static void coop_transient_capture(unsigned present) {
@@ -119,8 +135,10 @@ static void coop_transient_apply(void) {
         if (kind == COOP_TRANSIENT_TRIGGER) {
             // Never copy a later timer/presentation state or rewind a local
             // action. The only remote command is the reviewed vanilla entry.
-            if (record.state == 2 && script->unk48[0] == 1)
-                coop_live_world_set_object(record.key, 2);
+            unsigned activation = coop_transient_object_activation(current_map, record.key);
+            if (record.value == activation && record.state == 2
+                    && script->unk48[0] > 0 && script->unk48[0] < activation)
+                coop_live_world_set_object(record.key, activation);
             continue;
         }
         if (script->unk48[0] == record.state) continue;

@@ -69,6 +69,14 @@ static bool contains(unsigned kind, unsigned key, unsigned state) {
     }
     return false;
 }
+static bool contains_value(unsigned kind, unsigned key, unsigned state, unsigned value) {
+    for (unsigned i = 0; i < transient_input.count; ++i) {
+        const auto& record = transient_input.records[i];
+        if (record.kind == kind && record.key == key && record.state == state
+                && record.value == value) return true;
+    }
+    return false;
+}
 
 static void capture_checks() {
     reset();
@@ -93,10 +101,21 @@ static void capture_checks() {
     reset(); current_map = 26;
     load(0, 0x2E, 1); load(1, 0x2F, 2); load(2, 0x30, 3); load(3, 0x31, 20);
     coop_transient_capture(1);
-    CHECK(contains(COOP_TRANSIENT_TRIGGER, 0x2E, 1));
-    CHECK(contains(COOP_TRANSIENT_TRIGGER, 0x2F, 2));
-    CHECK(contains(COOP_TRANSIENT_TRIGGER, 0x30, 2));
-    CHECK(contains(COOP_TRANSIENT_TRIGGER, 0x31, 1));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x2E, 1, 2));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x2F, 2, 2));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 2, 2));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x31, 1, 2));
+
+    reset(); current_map = 26;
+    load(0, 0x3F, 4); load(1, 0x40, 5); load(2, 0x41, 10);
+    bool saw_3f = false, saw_40 = false, saw_41 = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_3f |= contains_value(COOP_TRANSIENT_TRIGGER, 0x3F, 1, 5);
+        saw_40 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x40, 2, 5);
+        saw_41 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x41, 2, 5);
+    }
+    CHECK(saw_3f && saw_40 && saw_41);
 
     reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
     coop_transient_capture(1); CHECK(!transient_input.enabled);
@@ -127,14 +146,22 @@ static void object_apply_checks() {
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x31, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
-        {{COOP_TRANSIENT_TRIGGER, 0x31, 2, 0}}};
+        {{COOP_TRANSIENT_TRIGGER, 0x31, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x31 && last_state == 2);
     coop_transient_apply(); CHECK(script_calls == 1); // Idempotent after activation.
     scripts[0x31].unk48[0] = 1; transient_result.records[0].state = 1;
     coop_transient_apply(); CHECK(script_calls == 1); // Ready never rewinds/triggers.
-    transient_result.records[0] = {COOP_TRANSIENT_TRIGGER, 0x32, 2, 0};
+    transient_result.records[0] = {COOP_TRANSIENT_TRIGGER, 0x32, 2, 2};
     coop_transient_apply(); CHECK(script_calls == 1); // Arbitrary trigger rejected.
+
+    reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x3F, 3);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x3F, 2, 5}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x3F && last_state == 5);
+    scripts[0x3F].unk48[0] = 3; transient_result.records[0].value = 4;
+    coop_transient_apply(); CHECK(script_calls == 1); // Wrong activation state rejected.
 }
 
 static void cutscene_checks() {

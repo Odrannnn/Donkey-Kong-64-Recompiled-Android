@@ -15,8 +15,8 @@ enum {
     COOP_TRANSIENT_TIMER,
     COOP_TRANSIENT_PLATFORM,
     COOP_TRANSIENT_CUTSCENE,
-    // A reviewed room action. State 2 means enter the object's exact vanilla
-    // activation state; state 1 is an inert ready/finished observation.
+    // A reviewed room action. State 2 means enter the exact vanilla activation
+    // state carried in value; state 1 is an inert ready/finished observation.
     COOP_TRANSIENT_TRIGGER,
     COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_TRIGGER
 };
