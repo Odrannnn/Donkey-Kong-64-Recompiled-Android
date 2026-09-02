@@ -2,8 +2,8 @@
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
 Version **0.49.0** adds typed same-area activation for the four Frantic Factory
-production switches, Diddy's three 3-1-2-4 room switches, Lanky's piano notes
-and Tiny's six dartboard targets.
+production switches, Diddy's three 3-1-2-4 room switches, Lanky's piano notes,
+Tiny's six dartboard targets, and Galleon's five instrument/two slam switches.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
 progress advances one locally valid note at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied

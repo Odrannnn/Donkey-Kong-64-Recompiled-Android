@@ -11,6 +11,12 @@ typedef struct {
 // come from coop_live_world_states below.
 static const CoopTransientObject coop_transient_extra_objects[] = {
     {30, 0, COOP_TRANSIENT_TIMER, 0}, {30, 1, COOP_TRANSIENT_TIMER, 0},
+    // Galleon's five instrument pads and Lanky/Tiny slam switches. State 2 is
+    // the shared vanilla post-input entry; each linked door remains local.
+    {30, 0x11, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x12, COOP_TRANSIENT_TRIGGER, 2},
+    {30, 0x13, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x14, COOP_TRANSIENT_TRIGGER, 2},
+    {30, 0x1B, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x1C, COOP_TRANSIENT_TRIGGER, 2},
+    {30, 0x1D, COOP_TRANSIENT_TRIGGER, 2},
     {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their

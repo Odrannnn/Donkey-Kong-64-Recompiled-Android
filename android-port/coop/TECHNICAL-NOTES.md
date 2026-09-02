@@ -1705,3 +1705,17 @@ the countdown to a stale value and freeze it between UDP updates.
 No other script field or timer is exposed. The cache resets on room epoch change,
 records remain constrained to the four allowlisted objects, and malformed timer
 values are rejected by the native protocol validator.
+
+## Galleon instrument and slam switches (0.49.0)
+
+Galleon map 30 objects `0x11`, `0x12`, `0x13`, `0x14` and `0x1B` are the five
+ship-opening instrument pads. Objects `0x1C` and `0x1D` are Tiny's and Lanky's
+slam switches. Every reviewed script waits in state 1 and enters state 2 after
+its exact local input check. Typed trigger records let the guest enter only that
+state-2 block while the host sequence is active.
+
+The receiving copy then runs the original instrument or slam presentation,
+linked-door state change, timer and completion path. No instrument energy,
+player input, door state, cutscene ID or permanent flag is supplied by the
+packet. Finished states do not rewind, arbitrary Galleon objects are rejected,
+and persistent completion still converges through the item/world channel.
