@@ -1658,6 +1658,18 @@ in the item channel. Both players must be in the same Factory room epoch with
 **Same-area events** enabled. Protocol 49, compatibility `0x00010131`, export
 `dk64_coop_tick_v49` and manifest 0.49.0 reject mixed semantic versions.
 
+## Factory Chunky cage switch (0.49.0)
+
+Factory object `0x24` is the slam switch that frees Chunky. It waits in state 1
+and enters state 2 after the stock character, slam and contact checks. A typed
+trigger can mirror only that entry while both players share the same Factory
+epoch. The receiving script then owns its 600-frame timer, cage notification and
+rescue presentation.
+
+The packet cannot name cage object `0x21`, reward object `0x78`, a cutscene or an
+ownership flag. State 0 is rejected, later states cannot be selected, and
+permanent Chunky ownership still converges through the item transaction.
+
 ## Factory 3-1-2-4 room switches (0.49.0)
 
 Diddy's timed R&D room uses Factory objects `0x3F`, `0x40` and `0x41`. Their

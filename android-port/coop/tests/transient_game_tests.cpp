@@ -192,11 +192,13 @@ static void capture_checks() {
 
     reset(); current_map = 26;
     load(0, 0x2E, 1); load(1, 0x2F, 2); load(2, 0x30, 3); load(3, 0x31, 20);
+    load(4, 0x24, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x2E, 1, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x2F, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x31, 1, 2));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x24, 2, 2));
 
     reset(); current_map = 26;
     load(0, 0x3F, 4); load(1, 0x40, 5); load(2, 0x41, 10);
@@ -298,6 +300,14 @@ static void object_apply_checks() {
     coop_transient_apply(); CHECK(script_calls == 1); // Ready never rewinds/triggers.
     transient_result.records[0] = {COOP_TRANSIENT_TRIGGER, 0x32, 2, 2};
     coop_transient_apply(); CHECK(script_calls == 1); // Arbitrary trigger rejected.
+
+    reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x24, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x24, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x24 && last_state == 2);
+    scripts[0x24].unk48[0] = 0; coop_transient_apply();
+    CHECK(script_calls == 1); // The peer cannot start an uninitialized cage switch.
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x3F, 3);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,

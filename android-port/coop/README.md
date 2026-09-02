@@ -10,6 +10,8 @@ letters advance through a bounded four-step sequence.
 Llama Temple's sixteen matching-game heads now mirror individual grape hits
 only after both local copies have armed that head; sounds, pair validation,
 resets and the reward remain in each copy's original scripts.
+Chunky's Factory cage switch also starts the stock rescue sequence on both peers;
+the cage, cutscene and ownership award remain locally validated.
 Japes' nine reviewed Diddy-cage, hive, painting-room, Diddy-cave and Rambi gun
 switches now run their local counters and gate sequences from state-2 activations.
 Aztec's three exterior llama switches share only their bounded projectile path;
