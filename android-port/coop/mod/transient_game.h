@@ -47,6 +47,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Llama Temple coconut switch and DK bongo pad. Their local state-2
     // sequences own the cooling/llama-spit flags and linked gate presentation.
     {20, 0x12, COOP_TRANSIENT_TRIGGER, 2}, {20, 0x16, COOP_TRANSIENT_TRIGGER, 2},
+    // DK's five-door-temple coconut panels. Each state-2 script owns its four
+    // local wall-panel updates and texture sequence.
+    {19, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {19, 0x05, COOP_TRANSIENT_TRIGGER, 2},
     // Llama Temple matching game heads. Every head is armed in state 11 and
     // enters state 12 after a local grape hit. Its own script supplies the
     // sound, five-frame debounce and matching-controller notification.

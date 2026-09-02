@@ -2170,3 +2170,13 @@ trigger mirrors only that activation entry.
 The local script retains the gate texture, cutscene, sound, delay and states 3
 through 5 before it returns to ready state 1. The packet cannot select those
 states, the linked gate, a projectile, a timer or a permanent flag.
+
+## DK five-door-temple coconut panels (0.49.0)
+
+DK's five-door temple map 19 objects `4` and `5` are coconut panels. Each waits
+in state 1 and enters state 2 after the stock coconut hit. Typed triggers mirror
+only those two activation edges.
+
+Each local state-2 script retains its sound, delays, animation, four linked
+wall-panel updates and texture writes through state 4. Packets cannot name a
+panel target, projectile, timer, texture operation or later state.
