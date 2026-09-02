@@ -1814,3 +1814,14 @@ states are explicitly normalized to ready and cannot be translated into a gun
 hit on the receiver. A valid fired record can move a receiving switch only from
 state 1 to state 2; later linked-object states, gun data, cutscenes and permanent
 flags remain local.
+
+## Aztec exterior guitar pad (0.49.0)
+
+Angry Aztec map 38 object `0x44` is Diddy's exterior guitar pad. Its exact
+instrument checks move state 1 to state 2, after which the original script owns
+the 200-frame timer and activates linked rotating-tower object `0x9C`. A typed
+trigger mirrors only that state-2 entry while the peers share the same map epoch.
+
+Instrument input, energy, timer values, linked-object state and permanent flags
+are not carried by the record. The guest's local script performs those actions,
+and a pad already in its state-2/state-3 sequence is never restarted or rewound.

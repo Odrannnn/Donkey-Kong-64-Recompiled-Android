@@ -10,7 +10,8 @@ letters advance through a bounded four-step sequence.
 Japes' nine reviewed Diddy-cage, hive, painting-room, Diddy-cave and Rambi gun
 switches now run their local counters and gate sequences from state-2 activations.
 Aztec's three exterior llama switches share only their bounded projectile path;
-their separate linked states remain local.
+their separate linked states remain local. Diddy's exterior guitar pad runs its
+own rotating-tower timer and linked-object sequence on both peers.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
 progress advances one locally valid note at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied
