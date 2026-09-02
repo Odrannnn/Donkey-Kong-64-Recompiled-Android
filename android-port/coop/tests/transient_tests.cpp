@@ -121,6 +121,32 @@ int main() {
     CHECK(guest.result().records[0].kind == COOP_TRANSIENT_MINIGAME_SUCCESS
         && guest.result().records[0].key == 3);
 
+    // Lobby pads are edge-triggered. A repeated fired snapshot is consumed
+    // once, and only an observed return to ready rearms the exact key.
+    TransientSync pad_guest;
+    State pad_local{173, 30, 0, active}, pad_peer{173, 40, 1, active};
+    CoopTransientInput pad_input{};
+    pad_input.enabled = 1; pad_input.file = 0; pad_input.map = 173;
+    pad_input.epoch = 30; pad_input.revision = 1; pad_input.count = 1;
+    pad_input.records[0] = {COOP_TRANSIENT_TRIGGER, 0, 1, 2};
+    TransientWire pad_remote{};
+    pad_remote.feature = 1; pad_remote.file = 0; pad_remote.map = 173;
+    pad_remote.epoch = 40; pad_remote.revision = 1; pad_remote.count = 1;
+    pad_remote.records[0] = {COOP_TRANSIENT_TRIGGER, 0, 2, 2};
+    pad_guest.update(false, pad_local, pad_input, pad_peer, pad_remote, true, true, 55);
+    CHECK(pad_guest.result().status == COOP_TRANSIENT_APPLYING && pad_guest.result().count == 1);
+    pad_guest.update(false, pad_local, pad_input, pad_peer, pad_remote, true, true, 55);
+    CHECK(pad_guest.result().status == COOP_TRANSIENT_SYNCED && !pad_guest.result().count);
+    pad_remote.revision++; pad_remote.records[0].state = 1;
+    pad_guest.update(false, pad_local, pad_input, pad_peer, pad_remote, true, true, 55);
+    CHECK(pad_guest.result().status == COOP_TRANSIENT_SYNCED && !pad_guest.result().count);
+    pad_remote.revision++; pad_remote.records[0].state = 2;
+    pad_guest.update(false, pad_local, pad_input, pad_peer, pad_remote, true, true, 55);
+    CHECK(pad_guest.result().status == COOP_TRANSIENT_APPLYING && pad_guest.result().count == 1);
+    pad_local.epoch++; pad_peer.epoch++; pad_input.epoch++; pad_remote.epoch++;
+    pad_guest.update(false, pad_local, pad_input, pad_peer, pad_remote, true, true, 55);
+    CHECK(pad_guest.result().status == COOP_TRANSIENT_APPLYING && pad_guest.result().count == 1);
+
     host_input = frame(7, 10, 4);
     guest_input = host_input; guest_input.epoch = 20;
     host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);

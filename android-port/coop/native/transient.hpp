@@ -28,5 +28,6 @@ private:
     TransientWire outgoing{};
     CoopTransientResult output{};
     std::array<uint32_t, 6> context{};
+    std::array<uint8_t, 24> remote_lobby_pad_state{};
 };
 }

@@ -163,6 +163,23 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Isles level-lobby feather switches. State 2 starts the local panel/door
     // presentation in the Aztec and Fungi lobbies respectively.
     {173, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {178, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    // Generic lobby instrument pads. Each exact state-1 input edge starts a
+    // self-contained state 2/3/4 animation and 60-frame timer before returning
+    // to state 1. No permanent flag or transition is written on this path.
+    {173, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {173, 0x01, COOP_TRANSIENT_TRIGGER, 2},
+    {173, 0x02, COOP_TRANSIENT_TRIGGER, 2}, {173, 0x03, COOP_TRANSIENT_TRIGGER, 2},
+    {174, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {174, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    {174, 0x06, COOP_TRANSIENT_TRIGGER, 2}, {174, 0x07, COOP_TRANSIENT_TRIGGER, 2},
+    {174, 0x08, COOP_TRANSIENT_TRIGGER, 2},
+    {175, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {175, 0x01, COOP_TRANSIENT_TRIGGER, 2},
+    {175, 0x02, COOP_TRANSIENT_TRIGGER, 2}, {175, 0x03, COOP_TRANSIENT_TRIGGER, 2},
+    {175, 0x04, COOP_TRANSIENT_TRIGGER, 2},
+    {193, 0x02, COOP_TRANSIENT_TRIGGER, 2}, {193, 0x03, COOP_TRANSIENT_TRIGGER, 2},
+    {193, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {193, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    {193, 0x06, COOP_TRANSIENT_TRIGGER, 2},
+    {194, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {194, 0x11, COOP_TRANSIENT_TRIGGER, 2},
+    {194, 0x12, COOP_TRANSIENT_TRIGGER, 2}, {194, 0x13, COOP_TRANSIENT_TRIGGER, 2},
+    {194, 0x14, COOP_TRANSIENT_TRIGGER, 2},
     // Caves small/large boulder pads. The small pad accepts state 2 from ready
     // state 1; the large pad must finish its local reveal at state 12 first.
     {72, 0x2E, COOP_TRANSIENT_TRIGGER, 2}, {72, 0x2F, COOP_TRANSIENT_TRIGGER, 13},
@@ -233,6 +250,8 @@ static unsigned coop_transient_applied_timer_epoch;
 #define COOP_TRANSIENT_CUTSCENE_HOLD_FRAMES 90
 static CoopTransientRecord coop_transient_last_cutscene;
 static unsigned coop_transient_cutscene_epoch, coop_transient_cutscene_hold;
+static unsigned coop_lobby_pad_applied_epoch, coop_lobby_pad_applied_map;
+static unsigned coop_lobby_pad_applied_object;
 
 // The generic bonus controller is shared by many unrelated minigames. Admit
 // only the four vanilla Kosh identities whose current map, source map and
@@ -448,8 +467,18 @@ static unsigned coop_transient_trigger_fired(unsigned map, unsigned object,
     return raw >= activation && raw < 20;
 }
 
+static unsigned coop_lobby_instrument_pad(unsigned map, unsigned object) {
+    return (map == 173 && object <= 0x03)
+        || (map == 174 && object >= 0x04 && object <= 0x08)
+        || (map == 175 && object <= 0x04)
+        || (map == 193 && object >= 0x02 && object <= 0x06)
+        || (map == 194 && object >= 0x10 && object <= 0x14);
+}
+
 static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         unsigned raw, unsigned activation) {
+    if (coop_lobby_instrument_pad(map, object))
+        return activation == 2 && raw == 1;
     // Matching heads must already be armed. Accepting state 10 would bypass
     // the vanilla initialization that enables contact and the sound actor.
     if (map == 20 && object >= 0x19 && object <= 0x28)
@@ -753,6 +782,12 @@ static void coop_transient_capture(unsigned present) {
 }
 
 static void coop_transient_apply(void) {
+    if (transient_result.status == COOP_TRANSIENT_SYNCED
+            && transient_result.map == (unsigned)current_map
+            && transient_result.epoch == epoch) {
+        coop_lobby_pad_applied_epoch = 0;
+        coop_lobby_pad_applied_map = coop_lobby_pad_applied_object = 0;
+    }
     if (!transient_enabled || transient_file_changed || role == ROLE_OFF
             || transient_result.status != COOP_TRANSIENT_APPLYING
             || transient_result.map != (unsigned)current_map || transient_result.epoch != epoch
@@ -795,9 +830,16 @@ static void coop_transient_apply(void) {
             // Never copy a later timer/presentation state or rewind a local
             // action. The only remote command is the reviewed vanilla entry.
             unsigned activation = coop_transient_object_activation(current_map, record.key);
+            unsigned lobby_pad = coop_lobby_instrument_pad(current_map, record.key);
+            if (lobby_pad && coop_lobby_pad_applied_epoch == epoch
+                    && coop_lobby_pad_applied_map == (unsigned)current_map
+                    && coop_lobby_pad_applied_object == record.key) continue;
             if (record.value == activation && record.state == 2
                     && coop_transient_trigger_ready(current_map, record.key,
                         script->unk48[0], activation)) {
+                if ((unsigned)current_map == 194 && record.key >= 0x10
+                        && record.key <= 0x14
+                        && !isFlagSet(0x19D, FLAG_TYPE_PERMANENT)) continue;
                 if ((unsigned)current_map == 90 && record.key >= 0x03 && record.key <= 0x05) {
                     Prop_ScriptData* controller = coop_transient_script(0x06);
                     if (!controller || controller->unk48[0] < 1 || controller->unk48[0] >= 4)
@@ -815,6 +857,11 @@ static void coop_transient_apply(void) {
                     coop_live_world_set_object(linked, 10);
                 }
                 coop_live_world_set_object(record.key, activation);
+                if (lobby_pad) {
+                    coop_lobby_pad_applied_epoch = epoch;
+                    coop_lobby_pad_applied_map = current_map;
+                    coop_lobby_pad_applied_object = record.key;
+                }
             }
             continue;
         }

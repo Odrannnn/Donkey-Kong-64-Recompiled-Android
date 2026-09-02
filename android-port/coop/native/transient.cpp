@@ -56,6 +56,14 @@ bool same_record(const CoopTransientRecord& a, const CoopTransientRecord& b) {
         return a.state >= b.state;
     return a.kind == b.kind && a.key == b.key && a.state == b.state && a.value == b.value;
 }
+unsigned lobby_pad_index(unsigned map, unsigned key) {
+    if (map == 173 && key <= 0x03) return key + 1;
+    if (map == 174 && key >= 0x04 && key <= 0x08) return 5 + key - 0x04;
+    if (map == 175 && key <= 0x04) return 10 + key;
+    if (map == 193 && key >= 0x02 && key <= 0x06) return 15 + key - 0x02;
+    if (map == 194 && key >= 0x10 && key <= 0x14) return 20 + key - 0x10;
+    return 0;
+}
 }
 
 std::array<uint32_t, COOP_TRANSIENT_WIRE_WORDS> transient_words(const TransientWire& wire) {
@@ -127,7 +135,10 @@ void TransientSync::update(bool host, const State& local, const CoopTransientInp
     }
     const std::array<uint32_t, 6> next{uint32_t(session >> 32), uint32_t(session),
         local.map, local.epoch, peer.epoch, input.file};
-    if (context != next) context = next;
+    if (context != next) {
+        context = next;
+        remote_lobby_pad_state.fill(0);
+    }
     output.map = local.map; output.epoch = local.epoch;
     output.status = COOP_TRANSIENT_SYNCED;
     for (unsigned i = 0; i < remote.count && output.count < COOP_TRANSIENT_RECORDS; ++i) {
@@ -140,7 +151,20 @@ void TransientSync::update(bool host, const State& local, const CoopTransientInp
             if (input.records[j].kind == wanted.kind && input.records[j].key == wanted.key) {
                 current = &input.records[j]; break;
             }
-        if (!current || !same_record(*current, wanted)) output.records[output.count++] = wanted;
+        bool deliver = !current || !same_record(*current, wanted);
+        unsigned pad = !host && wanted.kind == COOP_TRANSIENT_TRIGGER
+            ? lobby_pad_index(remote.map, wanted.key) : 0;
+        if (pad && wanted.value == 2u) {
+            uint8_t& observed = remote_lobby_pad_state[pad - 1];
+            if (wanted.state == 1u) {
+                observed = 1;
+                deliver = false;
+            } else if (wanted.state == 2u) {
+                deliver = observed != 2;
+                observed = 2;
+            }
+        }
+        if (deliver) output.records[output.count++] = wanted;
     }
     if (output.count) output.status = COOP_TRANSIENT_APPLYING;
 }

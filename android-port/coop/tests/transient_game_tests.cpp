@@ -33,7 +33,8 @@ struct CharacterSpawner {
 enum { MAP_JAPES_SHELL = 12, MAP_CAVES_ICE_CASTLE = 98,
     ACTOR_TOMATO_ICE = 164, ACTOR_TIMER_CONTROLLER = 177, ACTOR_CLAM = 286,
     ACTOR_MINIGAME_CONTROLLER = 256,
-    TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE = 0x30, FLAG_TYPE_TEMPORARY = 2 };
+    TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE = 0x30,
+    FLAG_TYPE_PERMANENT = 0, FLAG_TYPE_TEMPORARY = 2 };
 
 static unsigned checks, script_calls, last_object, last_state;
 #define CHECK(x) do { ++checks; if (!(x)) { std::fprintf(stderr, "TRANSIENT ADAPTER FAIL %d: %s\n", __LINE__, #x); std::exit(1); } } while (0)
@@ -63,7 +64,7 @@ struct CoopCountdownTestData {
 };
 static CoopCountdownTestData tomato_clock_data;
 static s8 D_global_asm_807FC8C0[16];
-static bool tomato_board_active;
+static bool tomato_board_active, caves_pad_available;
 struct ActorListEntry { Actor* actor{}; u32 metadata{}; };
 static ActorListEntry D_global_asm_807FB930[4];
 static u16 D_global_asm_807FBB34;
@@ -119,6 +120,7 @@ static void func_global_asm_8063DA78(s16 slot, s16 state, s16 state_index) {
     ++tile_activation_calls;
 }
 static u8 isFlagSet(s16 flag, u8 type) {
+    if (flag == 0x19D && type == FLAG_TYPE_PERMANENT) return caves_pad_available;
     CHECK(flag == TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE && type == FLAG_TYPE_TEMPORARY);
     return tomato_board_active;
 }
@@ -134,7 +136,8 @@ static void reset() {
     std::fill(std::begin(D_global_asm_807F6240), std::end(D_global_asm_807F6240), static_cast<s16>(-1));
     props = {}; scripts = {};
     enemy_spawners = {}; actors = {}; actor_data = {}; D_807FDC88 = {};
-    tomato_data = {}; tomato_clock_data = {}; tomato_board_active = false; D_global_asm_807FBB34 = 0;
+    tomato_data = {}; tomato_clock_data = {}; tomato_board_active = false;
+    caves_pad_available = true; D_global_asm_807FBB34 = 0;
     std::fill(std::begin(D_global_asm_807FB930), std::end(D_global_asm_807FB930), ActorListEntry{});
     std::fill(std::begin(D_global_asm_807FC8C0), std::end(D_global_asm_807FC8C0), static_cast<s8>(-1));
     role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
@@ -144,6 +147,8 @@ static void reset() {
     std::fill(std::begin(coop_transient_applied_timers), std::end(coop_transient_applied_timers), CoopTransientRecord{});
     coop_transient_last_cutscene = {};
     coop_transient_cutscene_epoch = coop_transient_cutscene_hold = 0;
+    coop_lobby_pad_applied_epoch = coop_lobby_pad_applied_map = 0;
+    coop_lobby_pad_applied_object = 0;
     transient_input = {}; transient_result = {};
     loading_zone_transition_speed = 0; is_cutscene_active = 0;
     D_global_asm_807476F8 = -1; D_global_asm_807F5CF0 = D_global_asm_807F5CF4 = 0;
@@ -1355,6 +1360,78 @@ static void cutscene_checks() {
     coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 6); // A packet cannot start one.
 }
 
+static void lobby_instrument_pad_checks() {
+    struct Pad { unsigned map, first, count; } groups[] = {
+        {173, 0x00, 4}, {174, 0x04, 5}, {175, 0x00, 5},
+        {193, 0x02, 5}, {194, 0x10, 5},
+    };
+    unsigned total = 0;
+    for (const auto& group : groups) {
+        reset(); current_map = group.map;
+        for (unsigned i = 0; i < group.count; ++i) {
+            unsigned object = group.first + i;
+            CHECK(coop_lobby_instrument_pad(group.map, object));
+            load(i, object, 1); ++total;
+        }
+        coop_transient_capture(1);
+        CHECK(transient_input.count == group.count);
+        for (unsigned i = 0; i < group.count; ++i)
+            CHECK(contains_value(COOP_TRANSIENT_TRIGGER, group.first + i, 1, 2));
+        for (unsigned i = 0; i < group.count; ++i)
+            scripts[group.first + i].unk48[0] = 2;
+        coop_transient_capture(1);
+        for (unsigned i = 0; i < group.count; ++i)
+            CHECK(contains_value(COOP_TRANSIENT_TRIGGER, group.first + i, 2, 2));
+    }
+    CHECK(total == 24);
+    CHECK(!coop_lobby_instrument_pad(173, 0x04)); // Complex lobby controller.
+    CHECK(!coop_lobby_instrument_pad(175, 0x0C)); // Permanent Factory lever.
+    CHECK(!coop_lobby_instrument_pad(178, 0x00)); // Fungi gun-order controller.
+
+    // Every reviewed key accepts only the exact raw state-1 activation edge.
+    for (const auto& group : groups) for (unsigned i = 0; i < group.count; ++i) {
+        reset(); role = ROLE_JOIN; current_map = group.map;
+        unsigned object = group.first + i; load(0, object, 1);
+        transient_result = {COOP_TRANSIENT_APPLYING, group.map, epoch, 1,
+            {{COOP_TRANSIENT_TRIGGER, object, 2, 2}}};
+        coop_transient_apply();
+        CHECK(script_calls == 1 && last_object == object && last_state == 2);
+        for (unsigned raw : {0u, 2u, 3u, 4u, 20u}) {
+            scripts[object].unk48[0] = static_cast<u8>(raw);
+            coop_transient_apply(); CHECK(script_calls == 1);
+        }
+        scripts[object].unk48[0] = 1;
+        coop_transient_apply(); CHECK(script_calls == 1); // Replayed fired pulse cannot restart.
+        transient_result.status = COOP_TRANSIENT_SYNCED;
+        transient_result.count = 0; coop_transient_apply();
+        transient_result.status = COOP_TRANSIENT_APPLYING;
+        transient_result.count = 1; coop_transient_apply();
+        CHECK(script_calls == 2); // A later native edge may start a new local loop.
+    }
+
+    // Caves pads exist only while the local pressure-switch flag makes them
+    // available. A network record cannot create the unavailable state.
+    reset(); role = ROLE_JOIN; current_map = 194; load(0, 0x10, 1);
+    caves_pad_available = false;
+    transient_result = {COOP_TRANSIENT_APPLYING, 194, epoch, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x10, 2, 2}}};
+    coop_transient_apply(); CHECK(!script_calls && scripts[0x10].unk48[0] == 1);
+    caves_pad_available = true; coop_transient_apply(); CHECK(script_calls == 1);
+
+    // Existing context and host-authority guards apply to the new rows too.
+    for (unsigned scenario = 0; scenario < 5; ++scenario) {
+        reset(); role = ROLE_JOIN; current_map = 173; load(0, 0, 1);
+        transient_result = {COOP_TRANSIENT_APPLYING, 173, epoch, 1,
+            {{COOP_TRANSIENT_TRIGGER, 0, 2, 2}}};
+        if (scenario == 0) role = ROLE_HOST;
+        if (scenario == 1) transient_result.epoch--;
+        if (scenario == 2) transient_result.map++;
+        if (scenario == 3) loading_zone_transition_speed = 1.0f;
+        if (scenario == 4) transient_result.records[0].value = 3;
+        coop_transient_apply(); CHECK(!script_calls && scripts[0].unk48[0] == 1);
+    }
+}
+
 static void kosh_checks() {
     for (unsigned key = 1; key <= 4; ++key) {
         reset(); load_kosh(key);
@@ -1443,6 +1520,6 @@ static void kosh_checks() {
 }
 
 int main() {
-    capture_checks(); object_apply_checks(); cutscene_checks(); kosh_checks();
+    capture_checks(); object_apply_checks(); cutscene_checks(); lobby_instrument_pad_checks(); kosh_checks();
     std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }

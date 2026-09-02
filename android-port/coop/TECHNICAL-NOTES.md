@@ -1,4 +1,4 @@
-> Current source: 0.63.0, protocol/native ABI v63. The protocol and persistent
+> Current source: 0.64.0, protocol/native ABI v64. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -2639,3 +2639,22 @@ wire. The normal item transaction remains the only path that owns and saves the
 Golden Banana. Packet and bridge sizes remain unchanged. Protocol 63,
 compatibility `0x0001023F`, v63 exports and manifest 0.63.0 reject older peers
 and companions.
+
+## Lobby instrument-pad timer loops (0.64.0)
+
+Twenty-four generic lobby pads use the same contained script path: armed raw
+state 1 enters state 2 after local instrument input, advances through states 3
+and 4 with a 60-frame timer, then returns to state 1. The typed adapter covers
+Aztec Lobby objects `0x00..0x03`, Galleon Lobby `0x04..0x08`, Factory Lobby
+`0x00..0x04`, Castle Lobby `0x02..0x06` and Caves Lobby `0x10..0x14`.
+
+The sender reduces states 2 through 4 to the existing fired observation. The
+receiver accepts only fired state 2 with activation value 2 while its exact
+local object is loaded and still at raw state 1. Caves additionally requires
+the local permanent availability condition `0x19D`. The packet cannot transmit
+timer progress, states 3 or 4, script fields, flags, cutscenes or transitions.
+Aztec object `0x04`, Factory object `0x0C`, the Fungi lobby gun-order controller
+and the Caves rotating-room controller remain excluded.
+
+Packet and bridge sizes remain unchanged. Protocol 64, compatibility
+`0x00010240`, v64 exports and manifest 0.64.0 reject older peers and companions.
