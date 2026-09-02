@@ -381,6 +381,19 @@ static void capture_checks() {
     }
     CHECK(saw_dartboard);
 
+    reset(); current_map = 84; load(0, 0x00, 1);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_SEQUENCE, 0x00, 0, 0));
+    scripts[0x00].unk48[0] = 6; transient_page = 0;
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_SEQUENCE, 0x00, 2, 0));
+    scripts[0x00].unk48[0] = 30; transient_page = 0;
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_SEQUENCE, 0x00, 4, 0));
+    scripts[0x00].unk48[0] = 50; transient_page = 0;
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_SEQUENCE, 0x00, 0, 0));
+
     reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
     coop_transient_capture(1); CHECK(!transient_input.enabled);
 
@@ -756,6 +769,24 @@ static void object_apply_checks() {
     CHECK(script_calls == 3 && last_state == 23); // Vanilla final-hit entry.
     scripts[0x7F].unk48[0] = 23; coop_transient_apply();
     CHECK(script_calls == 3); // Completion is idempotent.
+
+    reset(); role = ROLE_JOIN; current_map = 84; load(0, 0x00, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 84, 9, 1,
+        {{COOP_TRANSIENT_SEQUENCE, 0x00, 4, 0}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x00 && last_state == 2);
+    coop_transient_apply();
+    CHECK(script_calls == 1); // Wait for the local intermediate states.
+    scripts[0x00].unk48[0] = 4; coop_transient_apply();
+    CHECK(script_calls == 2 && last_state == 5);
+    scripts[0x00].unk48[0] = 6; coop_transient_apply();
+    CHECK(script_calls == 3 && last_state == 7);
+    scripts[0x00].unk48[0] = 8; coop_transient_apply();
+    CHECK(script_calls == 4 && last_state == 9);
+    scripts[0x00].unk48[0] = 9; coop_transient_apply();
+    CHECK(script_calls == 4); // Reward states are entered only by the local script.
+    scripts[0x00].unk48[0] = 50; coop_transient_apply();
+    CHECK(script_calls == 4); // A failure branch cannot be advanced remotely.
 }
 
 static void cutscene_checks() {

@@ -2126,3 +2126,15 @@ Each receiving switch updates its own vanilla pair counter, model, sound and
 timer. Permanent flags `0x99`, `0xA1` and `0x9B` retain their existing completed
 live-world refresh rows for the switches and linked controllers. The packets do
 not carry a counter, projectile, linked controller state or permanent flag.
+
+## Tiny Caves igloo target (0.49.0)
+
+Tiny's Caves igloo map 84 object `0` uses four distinct projectile-hit gates.
+Its raw transitions are `1` to `2`, `4` to `5`, `6` to `7`, and `8` to `9`;
+intermediate animation state `70` belongs to the first step. A typed sequence
+publishes only logical progress zero through four.
+
+The receive adapter can enter only the next hit state from its exact local wait
+state. It cannot skip a gate, select the reward path at states `30` through
+`35`, or enter the failure/restart path at states `50` through `53`. The target
+animation, timeout, sound, projectile checks and permanent reward remain local.

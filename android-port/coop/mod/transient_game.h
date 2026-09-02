@@ -113,6 +113,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Gorilla Gone controller by one reviewed step in the apply adapter.
     {90, 0x03, COOP_TRANSIENT_TRIGGER, 2}, {90, 0x04, COOP_TRANSIENT_TRIGGER, 2},
     {90, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    // Tiny's Caves igloo target has four locally gated hits. The synthetic
+    // sequence record carries only bounded progress; reward/failure stays local.
+    {84, 0x00, COOP_TRANSIENT_SEQUENCE, 0},
     // Castle Lanky/Tiny crypt grape and Simian Slam switches. Both enter their
     // local door/platform sequences through reviewed state 2.
     {108, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {108, 0x04, COOP_TRANSIENT_TRIGGER, 2},
@@ -214,6 +217,18 @@ static unsigned coop_dartboard_progress(unsigned raw) {
     return 0;
 }
 
+static const unsigned char coop_tiny_igloo_wait_states[4] = {1, 4, 6, 8};
+static const unsigned char coop_tiny_igloo_hit_states[4] = {2, 5, 7, 9};
+
+static unsigned coop_tiny_igloo_progress(unsigned raw) {
+    if (raw == 1) return 0;
+    if (raw == 2 || raw == 3 || raw == 4 || raw == 70) return 1;
+    if (raw == 5 || raw == 6) return 2;
+    if (raw == 7 || raw == 8) return 3;
+    if (raw == 9 || (raw >= 30 && raw <= 35)) return 4;
+    return 0; // Vanilla failure/restart states remain local.
+}
+
 static unsigned coop_tiny_temple_kong_progress(void) {
     Prop_ScriptData* letter_c = coop_transient_script(0x0C);
     Prop_ScriptData* letter_d = coop_transient_script(0x0D);
@@ -308,6 +323,8 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
             state = coop_dartboard_progress(state);
         else if ((unsigned)current_map == 16 && object == 0x0C)
             state = coop_tiny_temple_kong_progress();
+        else if ((unsigned)current_map == 84 && object == 0x00)
+            state = coop_tiny_igloo_progress(state);
         else return;
     }
     input->records[input->count++] = (CoopTransientRecord){kind, object, state, value};
@@ -412,6 +429,13 @@ static void coop_transient_apply(void) {
                     if (letter && letter->unk48[0] == 10)
                         coop_live_world_set_object(letters[progress], 11);
                 }
+                continue;
+            }
+            if ((unsigned)current_map == 84 && record.key == 0x00) {
+                unsigned progress = coop_tiny_igloo_progress(script->unk48[0]);
+                if (record.state <= 4 && record.state > progress && progress < 4
+                        && script->unk48[0] == coop_tiny_igloo_wait_states[progress])
+                    coop_live_world_set_object(record.key, coop_tiny_igloo_hit_states[progress]);
                 continue;
             }
             if ((unsigned)current_map != 26) continue;

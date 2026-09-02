@@ -40,6 +40,8 @@ Caves' small and large boulder pads mirror only their reviewed deposit entries;
 each local script still destroys its own dome and records permanent completion.
 Chunky's Caves cabin mirrors its three gun-target hits and advances the local
 Gorilla Gone controller once per newly received target.
+Tiny's Caves igloo target mirrors four bounded hits, one locally ready gate at
+a time; its miss/failure branches, presentation and reward remain local.
 Fungi's dark-attic guitar pad and Lanky attic slam switch mirror their reviewed
 activation entries while their room sequences remain local.
 The Winch Room up button mirrors its exact state-10-to-11 activation while the
@@ -61,7 +63,7 @@ activation entries; each peer retains its own door and platform sequence.
 Castle's tree grape and Chunky-punch switches mirror their distinct activation
 entries while each peer runs its own door animation and reset sequence.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
-progress advances one locally valid note at a time. Local timers, presentation,
+progress advances one locally valid note or target gate at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied
 and permanent GB ownership still uses the item channel. Galleon water and Fungi
 day/night timer records now align the actual countdown once per fresh network
