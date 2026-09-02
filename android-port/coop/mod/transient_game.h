@@ -126,6 +126,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Japes Mountain's paired slam switches. A real hit occupies states 2-5;
     // states 10/11/15/16 are cross-linked presentation states, not hits.
     {4, 0x0A, COOP_TRANSIENT_TRIGGER, 2}, {4, 0x0B, COOP_TRANSIENT_TRIGGER, 2},
+    // Japes Mountain GB slam switch enters its local 50-frame reward sequence
+    // at state 2; completed state 20 stays on the item channel.
+    {4, 0x06, COOP_TRANSIENT_TRIGGER, 2},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.
     {26, 0x2E, COOP_TRANSIENT_TRIGGER, 2}, {26, 0x2F, COOP_TRANSIENT_TRIGGER, 2},

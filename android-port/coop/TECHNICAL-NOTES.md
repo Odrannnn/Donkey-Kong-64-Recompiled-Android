@@ -1652,6 +1652,16 @@ states 10, 11, 15 and 16 remain ready observations. Receive requires both
 switches at state 1, places the opposite switch at state 10, then starts the hit
 switch at state 2. Timers, sounds, animations and later reset states stay local.
 
+## Japes Mountain GB slam switch (0.49.0)
+
+Japes Mountain map 4 object `6` is the separate GB slam switch. It waits in
+state 1 and enters state 2 after the stock slam and contact checks. A typed
+trigger mirrors only that activation edge.
+
+The local script retains its sound, 50-frame timer, cutscene, linked object `7`,
+reward spawn and permanent flag `23`. Completed states 20 through 22 are not
+remotely startable and continue to use permanent item synchronization.
+
 ## Factory Snatch Room grate (0.49.0)
 
 Factory map 26 object `0x15` is the Snatch Room punchable grate. It uniquely
