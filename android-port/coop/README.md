@@ -1,7 +1,11 @@
 # DK64 LAN co-op prototype
 
-Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
-Version **0.49.0** adds typed same-area activation for the four Frantic Factory
+Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
+Version **0.50.0** uses the new upstream map-load event to invalidate room
+epochs exactly, including same-map reloads, and verifies that the isolated
+campaign was selected before the new EEPROM-load boundary. It requires the
+actual 1.0.2 event table and rejects mixed protocol-50 peers. It retains the
+0.49.0 typed same-area activation for the four Frantic Factory
 production switches, Diddy's three 3-1-2-4 room switches, Lanky's piano notes,
 Tiny's six dartboard targets, Galleon's three cannon targets plus six gun/five instrument/two slam switches, and
 Llama Temple's coconut/bongo switches. Tiny Temple's opening switch, Diddy
@@ -150,11 +154,11 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.49.0 passes all
-eleven native suites in the pinned Linux Debug ASan/UBSan build. Its MIPS NRM and
-complete Android ARM64, Windows x64, binary-format, v49 export, package-contract
-and importer release pipeline remain pending. Gameplay validation remains
-pending.**
+**This is experimental, not complete campaign co-op. Version 0.50.0 adds a
+thirteenth native lifecycle suite. All 13 sanitizer suites and the complete
+MIPS, Android ARM64, Windows x64, binary-format, v50 export, package-contract,
+Android app and importer release pipeline pass. Gameplay and device validation
+remain pending.**
 Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
 Back up experimental saves before using the build.
@@ -166,7 +170,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.49
+While the native companion is loaded, `tools/query_trace.py` discovers v0.50
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -180,8 +184,9 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.49.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.50.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
+   Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
    Import the complete Android ZIP through **Manage Mods -> Import**.
    Windows: extract the Windows ZIP into the mods folder, keeping the NRM and

@@ -56,7 +56,7 @@ COOP_EXPORT void dk64_coop_local_ipv4(uint8_t*, recomp_context* ctx) {
     ctx->r2 = session.local_ipv4();
 }
 // A new export rejects older NRM/library pairs before reading the larger spans.
-COOP_EXPORT void dk64_coop_tick_v49(uint8_t* rdram, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_tick_v50(uint8_t* rdram, recomp_context* ctx) {
     uint32_t local_address = uint32_t(ctx->r4), remote_address = uint32_t(ctx->r5);
     uint32_t progress_address = uint32_t(ctx->r6), result_address = uint32_t(ctx->r7);
     constexpr size_t bytes = dkcoop::state_words * sizeof(uint32_t);

@@ -11,10 +11,11 @@
 #include "transient_types.h"
 #include "transition_policy.h"
 #include "trace_types.h"
+#include "lifecycle_policy.h"
 
 typedef struct { CoopGateInput gate; CoopCombatFrame combat; CoopItemInput items; CoopWorldInput world; CoopTransientInput transient; CoopTraceInput trace; } CoopExtraInput;
 typedef struct { CoopGateResult gate; CoopCombatResult combat; CoopItemResult items; CoopWorldResult world; CoopTransientResult transient; } CoopExtraResult;
-_Static_assert(sizeof(CoopExtraInput) == 2856 && sizeof(CoopExtraResult) == 3468, "v49 bridge ABI");
+_Static_assert(sizeof(CoopExtraInput) == 2856 && sizeof(CoopExtraResult) == 3468, "v50 bridge ABI");
 _Static_assert(sizeof(CoopCharacterProgress) == 0x5E && __builtin_offsetof(CoopCharacterProgress, golden_bananas) == 0x42
     && __builtin_offsetof(CoopCharacterProgress, coins) == 0x6
     && __builtin_offsetof(CoopCharacterProgress, coloured_bananas) == 0xA
@@ -126,7 +127,7 @@ _Static_assert(COOP_TROFF_FIRST == 2394 && COOP_TROFF_END == 5894 && COOP_JAPES_
 
 RECOMP_IMPORT(".", u32 dk64_coop_start(u32 role, const char* ip, u32 port, u32 room));
 RECOMP_IMPORT(".", u32 dk64_coop_local_ipv4(void));
-RECOMP_IMPORT(".", u32 dk64_coop_tick_v49(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
+RECOMP_IMPORT(".", u32 dk64_coop_tick_v50(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
 RECOMP_IMPORT(".", void dk64_coop_stop(void));
 
 extern Actor *gPlayerPointer, *gCurrentActorPointer, *gLastSpawnedActor;
@@ -182,6 +183,8 @@ enum { STATE_MAP, STATE_EPOCH, STATE_KONG, STATE_FLAGS, STATE_X, STATE_Y, STATE_
     STATE_ANIM, STATE_FRAME, STATE_TRANSITION_TICKET, STATE_TRANSITION_ROUTE, STATE_WORDS };
 enum { STATE_ACTIVE = 1, STATE_CUTSCENE = 2 };
 static u32 role, status, epoch = 1, boot_initialized;
+static u32 map_load_serial, eeprom_load_started;
+static CoopMapLifecycle map_lifecycle = {-1, 0};
 static u32 save_profile;
 static u32 shared_items;
 static u32 merge_guest_progress;
@@ -197,7 +200,6 @@ static CoopCombatFrame combat_input;
 static CoopCombatResult combat_result;
 static u32 local_ipv4;
 static u32 local_state[STATE_WORDS], remote_state[STATE_WORDS];
-static s32 previous_map = -1;
 static Actor* remote_actor;
 static Actor* retiring_actor;
 static u32 remote_generation, retiring_generation;
@@ -264,7 +266,7 @@ static void coop_select_save(void) {
     boot_initialized = 1;
     role = recomp_get_config_u32("role");
     if (role != ROLE_HOST && role != ROLE_JOIN) { role = ROLE_OFF; return; }
-    if (D_global_asm_807467E0 != 0) {
+    if (eeprom_load_started || D_global_asm_807467E0 != 0) {
         role = ROLE_OFF; status = NET_ERROR;
         recomp_printf("[dk64-coop] Save worker already started; co-op disabled without changing saves.\n");
         return;
@@ -295,6 +297,30 @@ static void remove_remote(void) {
     remote_actor = NULL;
     remote_pose.cooldown = 0;
     if (actor != NULL) { retiring_actor = actor; retiring_generation = remote_generation; deleteActor(actor); }
+}
+
+// Upstream 1.0.2 exposes exact map and EEPROM lifecycle boundaries. The map
+// callback records only a serial here; game-state cleanup runs on the next
+// ordinary co-op frame, after the freshly loaded actor registry is stable.
+RECOMP_CALLBACK("*", recomp_on_map_load) void coop_map_loaded(void) {
+    map_load_serial++;
+}
+
+RECOMP_CALLBACK("*", recomp_on_eeprom_load) void coop_eeprom_loaded(void) {
+    eeprom_load_started = 1;
+    if (role == ROLE_HOST || role == ROLE_JOIN)
+        recomp_printf("[dk64-coop] Isolated campaign selected before EEPROM load.\n");
+}
+
+static void coop_reset_loaded_map(void) {
+    epoch++;
+    remove_remote();
+    transient_page = 0;
+    transient_result = (CoopTransientResult){0};
+    // A normal transition already rebuilt the old map, so a queued refresh
+    // for it is no longer needed.
+    if (items.refresh_pending && items.refresh_map != (u32)current_map) items.refresh_pending = 0;
+    if (items.world_save_pending && (u32)current_map != 194) items.world_save_pending = 0;
 }
 
 // Original-function hooks require DK64's unfinished runtime ROM decompressor.
@@ -350,14 +376,8 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     if (!actor_is_alive(remote_actor, remote_generation)) remote_actor = NULL;
     if (!actor_is_alive(retiring_actor, retiring_generation)) retiring_actor = NULL;
     addActorToTextOverlayRenderArray(draw_coop_status, NULL, 5);
-    if (previous_map != (s32)current_map) {
-        previous_map = current_map; epoch++; remove_remote();
-        transient_page = 0; transient_result = (CoopTransientResult){0};
-        // A normal transition already rebuilt the old map, so a queued refresh
-        // for it is no longer needed.
-        if (items.refresh_pending && items.refresh_map != (u32)current_map) items.refresh_pending = 0;
-        if (items.world_save_pending && (u32)current_map != 194) items.world_save_pending = 0;
-    }
+    if (coop_map_lifecycle_changed(&map_lifecycle, current_map, map_load_serial))
+        coop_reset_loaded_map();
     local_state[STATE_MAP] = current_map;
     local_state[STATE_EPOCH] = epoch;
     local_state[STATE_FLAGS] = 0;
@@ -425,7 +445,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     trace.combat_status = combat_result.status;
     CoopExtraInput extra = {{0}, combat_input, items.input, world.input, transient_input, trace};
     CoopExtraResult extra_result = {0};
-    status = dk64_coop_tick_v49(local_state, remote_state, &extra, &extra_result);
+    status = dk64_coop_tick_v50(local_state, remote_state, &extra, &extra_result);
     coop_items_receive(&items, extra_result.items);
     coop_world_receive(&world, extra_result.world);
     transient_result = extra_result.transient;

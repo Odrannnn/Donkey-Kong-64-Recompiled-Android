@@ -1,6 +1,8 @@
-> Current source: 0.49.0, protocol/native ABI v49. All eleven pinned native suites
-> pass; the complete release build and gameplay validation remain pending. Version
-> 0.48.0 passed the full pinned sanitizer and release pipeline.
+> Current source: 0.50.0, protocol/native ABI v50. A thirteenth pinned lifecycle
+> suite covers event-driven and fallback map epochs. All 13 sanitizer suites and
+> the complete MIPS, Android ARM64, Windows x64, binary-format, v50 export,
+> package-contract, Android app and importer release pipeline pass. Gameplay and
+> device validation remain pending.
 
 # Prototype integration and limits
 
@@ -11,8 +13,9 @@ field. Its four functions are imported with `RECOMP_IMPORT(".", ...)`. Both
 platforms receive the same mod bytes. The platform library sits beside the mod;
 no embedded-library convention, manifest extension or loader patch is used.
 
-`recomp_on_init`, `dk64recomp_every_frame` and (since 0.2) `recomp_on_flag_change`,
-already exported by DK64's patches, are registered. There are **no original-function hooks**. Testing an
+`recomp_on_init`, `dk64recomp_every_frame`, `recomp_on_flag_change`,
+`recomp_on_map_load` and `recomp_on_eeprom_load` are registered. The two
+lifecycle events require upstream 1.0.2. There are **no original-function hooks**. Testing an
 original global-function hook exposed the pinned runtime's unfinished DK64 ROM
 decompressor; redirecting an already patched function also failed on Android.
 Those attempts were removed. The working build uses existing event callbacks.
@@ -27,6 +30,29 @@ EEPROM worker. Before switching saves, the mod checks the game's worker-started
 flag `D_global_asm_807467E0`. If it is already set, co-op is disabled and the save
 path is left alone. This is a conservative compatibility guard, not support for
 arbitrary initialization mods.
+
+The 1.0.2 EEPROM event provides a second exact guard after the save worker is
+started. Save selection still occurs in `recomp_on_init`, because changing the
+save namespace at the later event would already be too late. The mod records
+the event and refuses any future selection attempt after either the event or
+the original worker-start flag.
+
+## Upstream 1.0.2 lifecycle events (0.50.0)
+
+`recomp_on_map_load` increments a local serial without touching freshly rebuilt
+game objects inside the callback. On the next regular co-op frame, a new serial
+advances the room epoch, retires the remote avatar and clears transient page
+state. This catches a reload into the same numeric map, which the older
+`current_map` comparison could not distinguish. A changed map number remains a
+fail-safe edge and the two signals collapse into one reset when they arrive
+together.
+
+The wire compatibility changes to `0x00010232`, protocol 50 and export
+`dk64_coop_tick_v50`, so an older companion or peer fails before any state is
+read. The official 1.0.2 tag still contains an internal `version_string` of
+1.0.1; its follow-up upstream commit fixes that typo. The manifest therefore
+keeps 1.0.1 only as its numeric minimum while callback lookup enforces the
+actual 1.0.2 event set. The Android dev13 source patch reports 1.0.2 directly.
 
 `recomp_change_save_file` selects a role-specific name inside the runtime's
 mod-specific save namespace. Campaign 1 preserves the established names:
