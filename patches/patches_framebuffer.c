@@ -447,6 +447,9 @@ RECOMP_PATCH void func_global_asm_8070A934(enum map_e arg0, s32 arg1) {
 void func_global_asm_80682E38(void *arg0);
 extern s32 D_global_asm_8074E848[];
 
+// @recomp: Framebuffer CPU morpher
+RECOMP_PATCH void func_global_asm_8070B05C(u16 *arg0) {}
+
 typedef struct TagAAD {
     Actor *unk0;
     u16 unk4;
@@ -593,7 +596,7 @@ RECOMP_PATCH Gfx* func_global_asm_80706F90(Gfx* dl) {
     gDPSetRenderMode(dl++, G_RM_XLU_SURF, G_RM_XLU_SURF2);
     gDPSetCombineMode(dl++, G_CC_MODULATEIDECALA_PRIM, G_CC_MODULATEIDECALA_PRIM);
     gDPSetTexturePersp(dl++, G_TP_NONE);
-    gDPSetTextureFilter(dl++, G_TF_POINT);
+    gDPSetTextureFilter(dl++, G_TF_BILERP);
     //
     gEXPushScissor(dl++);
     gEXSetScissor(dl++, G_SC_NON_INTERLACE, G_EX_ORIGIN_NONE, G_EX_ORIGIN_NONE, 0, 0, width, height);
