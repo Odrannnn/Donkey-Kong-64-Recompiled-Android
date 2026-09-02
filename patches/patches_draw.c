@@ -1,7 +1,7 @@
 #include "common_structs.h"
 #include "ui.h"
 
-RECOMP_DECLARE_EVENT(recomp_on_asset_file_load_override(s32 tableIndex, s32 fileIndex, u8** outputFile));
+RECOMP_DECLARE_EVENT(recomp_on_asset_file_load_override(s32 tableIndex, s32 fileIndex, u8** outputFile, s32 *file_size));
 
 extern u8 cc_player_index;
 extern f32 func_global_asm_8065CFB8(s16 arg0, f32 arg1);
@@ -727,10 +727,14 @@ RECOMP_PATCH void *getPointerTableFile(enum pointertable_e pointerTableIndex, u3
     s32 var_a1;
     void *sp40;
     u8 *override_file = NULL;
+    s32 override_file_size = 0;
+    u8 *override_file_copy = NULL;
 
-    recomp_on_asset_file_load_override(pointerTableIndex, fileIndex, &override_file);
-    if (override_file) {
-        return override_file;
+    recomp_on_asset_file_load_override(pointerTableIndex, fileIndex, &override_file, &override_file_size);
+    if (override_file_size) {
+        override_file_copy = _malloc(override_file_size);
+        _memcpy(override_file_copy, override_file, override_file_size);
+        return override_file_copy;
     }
     func_global_asm_8066B5F4(pointerTableIndex);
     if (!arg3) {
