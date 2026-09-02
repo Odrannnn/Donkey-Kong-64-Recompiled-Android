@@ -65,6 +65,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Aztec exterior Diddy guitar pad; its local state-2 block owns the timer
     // and linked rotating-tower object.
     {38, 0x44, COOP_TRANSIENT_TRIGGER, 2},
+    // Aztec blueprint-door coconut switches. Override the completed live-world
+    // rows with their narrower state-2 projectile activation while unfinished.
+    {38, 0x9D, COOP_TRANSIENT_TRIGGER, 2}, {38, 0x9E, COOP_TRANSIENT_TRIGGER, 2},
     {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their

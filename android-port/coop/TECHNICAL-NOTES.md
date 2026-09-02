@@ -1882,6 +1882,17 @@ Instrument input, energy, timer values, linked-object state and permanent flags
 are not carried by the record. The guest's local script performs those actions,
 and a pad already in its state-2/state-3 sequence is never restarted or rewound.
 
+## Aztec blueprint-door switches (0.49.0)
+
+Aztec objects `0x9D` and `0x9E` are the two coconut switches for the blueprint
+door route. Both wait in state 1 and enter state 2 after their exact projectile
+check. Typed trigger rows supersede the broader completed-world script rows for
+these two objects, so an in-progress packet can request only the state-2 entry.
+
+The original scripts retain their 100-frame presentation and update linked door
+object `0x8D` plus permanent flag `0x30`. The linked door is not a trigger key,
+and its completed state still refreshes through the permanent world table.
+
 ## Galleon paired gun switches (0.49.0)
 
 Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired

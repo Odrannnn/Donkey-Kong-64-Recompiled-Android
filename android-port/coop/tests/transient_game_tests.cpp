@@ -113,18 +113,22 @@ static void capture_checks() {
     CHECK(saw_japes_28 && saw_japes_29 && saw_japes_2a && saw_japes_123);
 
     reset(); current_map = 38; load(0, 0x0D, 2); load(1, 0x0E, 6); load(2, 0x0F, 10);
-    load(3, 0x44, 3);
+    load(3, 0x44, 3); load(4, 0x9D, 1); load(5, 0x9E, 2);
     bool saw_aztec_d = false, saw_aztec_e = false, saw_aztec_f = false;
-    bool saw_aztec_guitar = false;
+    bool saw_aztec_guitar = false, saw_aztec_blueprint_d = false, saw_aztec_blueprint_e = false;
     for (unsigned page = 0; page < 4; ++page) {
         coop_transient_capture(1);
         saw_aztec_d |= contains_value(COOP_TRANSIENT_TRIGGER, 0x0D, 2, 2);
         saw_aztec_e |= contains_value(COOP_TRANSIENT_TRIGGER, 0x0E, 2, 2);
         saw_aztec_f |= contains_value(COOP_TRANSIENT_TRIGGER, 0x0F, 1, 2);
         saw_aztec_guitar |= contains_value(COOP_TRANSIENT_TRIGGER, 0x44, 2, 2);
+        saw_aztec_blueprint_d |= contains_value(COOP_TRANSIENT_TRIGGER, 0x9D, 1, 2);
+        saw_aztec_blueprint_e |= contains_value(COOP_TRANSIENT_TRIGGER, 0x9E, 2, 2);
     }
     CHECK(saw_aztec_d && saw_aztec_e && saw_aztec_f);
     CHECK(saw_aztec_guitar);
+    CHECK(saw_aztec_blueprint_d && saw_aztec_blueprint_e);
+    CHECK(!contains(COOP_TRANSIENT_SCRIPT, 0x9D, 1));
 
     reset(); current_map = 30; load(0, 0, 10, 123); load(1, 1, 6, 45);
     bool saw_timer_0 = false, saw_timer_1 = false;
@@ -308,6 +312,14 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x44, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x44 && last_state == 2);
+
+    reset(); role = ROLE_JOIN; current_map = 38; load(0, 0x9D, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 38, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x9D, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x9D && last_state == 2);
+    transient_result.records[0].key = 0x9F; coop_transient_apply();
+    CHECK(script_calls == 1); // The linked door cannot be named as a trigger.
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x31, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
