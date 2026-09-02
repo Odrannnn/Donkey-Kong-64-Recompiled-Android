@@ -645,8 +645,11 @@ static void coop_transient_apply(void) {
             unsigned local_id = D_global_asm_807476F8 >= 0 ? (unsigned)D_global_asm_807476F8 + 1 : 0;
             if (is_cutscene_active == 1 && record.key == local_id
                     && record.value == ((unsigned)D_global_asm_807F5CF4 & 0xFF)
-                    && record.state == (unsigned)D_global_asm_807F5CF0 + 1)
-                D_global_asm_807F5CF0 = record.state;
+                    && record.state > (unsigned)D_global_asm_807F5CF0)
+                // A 20 Hz sample can miss a short camera phase. Catch up one
+                // phase per rendered frame so vanilla observes every phase;
+                // never jump directly to the sampled state or rewind.
+                D_global_asm_807F5CF0++;
             continue;
         }
         unsigned kind = coop_transient_object_kind(current_map, record.key);

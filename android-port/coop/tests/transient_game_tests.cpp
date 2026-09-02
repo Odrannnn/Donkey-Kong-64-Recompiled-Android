@@ -1259,13 +1259,17 @@ static void cutscene_checks() {
         {{COOP_TRANSIENT_CUTSCENE, 13, 4, 0x41}}};
     coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4);
     transient_result.records[0].state = 6;
-    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4); // Never skip camera phases.
-    transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 14, 5, 0x41};
-    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4); // Wrong cutscene ID.
-    transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 13, 5, 0x40};
-    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4); // Wrong control flags.
-    is_cutscene_active = 0; transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 13, 5, 0x41};
-    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 4); // A packet cannot start one.
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 5); // Catch up one phase per frame.
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 6);
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 6); // Never advance past the host.
+    transient_result.records[0].state = 5;
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 6); // Never rewind camera phases.
+    transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 14, 7, 0x41};
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 6); // Wrong cutscene ID.
+    transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 13, 7, 0x40};
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 6); // Wrong control flags.
+    is_cutscene_active = 0; transient_result.records[0] = {COOP_TRANSIENT_CUTSCENE, 13, 7, 0x41};
+    coop_transient_apply(); CHECK(D_global_asm_807F5CF0 == 6); // A packet cannot start one.
 }
 
 int main() {

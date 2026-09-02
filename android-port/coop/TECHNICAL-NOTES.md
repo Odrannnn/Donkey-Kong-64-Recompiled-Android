@@ -1,4 +1,4 @@
-> Current source: 0.59.0, protocol/native ABI v59. The protocol and persistent
+> Current source: 0.60.0, protocol/native ABI v60. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -1795,6 +1795,24 @@ local board-active gate closes.
 
 Packet and bridge sizes remain unchanged. Protocol 59, compatibility
 `0x0001023B`, v59 exports and manifest 0.59.0 reject older peers and companions.
+
+## Missed cutscene phase recovery (0.60.0)
+
+The existing cutscene record still appears only when a local cutscene is
+already active and contains its bounded script ID, camera phase and low control
+flags. Apply still requires the Join to be running that same ID with those same
+flags. It cannot launch an inactive cutscene or select a script.
+
+Earlier versions accepted only a host phase exactly one greater than the local
+phase. A short camera phase could therefore pass entirely between 20 Hz samples,
+leaving the Join permanently behind. The Join now increments its camera phase
+by exactly one on each rendered frame while the matching host sample remains
+ahead. Vanilla observes every intermediate phase on the following update. Equal
+or older host phases do nothing, so the channel cannot jump directly to a later
+phase, advance beyond the host or rewind a locally advanced cutscene.
+
+Packet and bridge sizes remain unchanged. Protocol 60, compatibility
+`0x0001023C`, v60 exports and manifest 0.60.0 reject older peers and companions.
 
 ## Third reversible world state (0.45.0)
 
