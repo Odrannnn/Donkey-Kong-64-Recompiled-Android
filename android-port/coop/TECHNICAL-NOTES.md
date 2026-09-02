@@ -2204,3 +2204,13 @@ The receiver requires its copy of the same target to be exactly at state 12.
 It cannot start the game, select or expose a target, skip its delay, or hit a
 different object. State 13 retains the local sound, score/controller update and
 target reset, and already-hit or hidden targets cannot be replayed.
+
+## Galleon Enguarde door (0.49.0)
+
+Galleon map 30 object `0x21` is the Enguarde door. It waits in state 1 and
+enters state 2 after the stock Enguarde charge and contact checks. A typed
+trigger mirrors only that activation entry.
+
+The receiving script retains its five-frame delay, local cutscene, door action,
+sound and permanent flag `0x9F` through state 4. A packet cannot control
+Enguarde, select a linked object or later state, or replay a completed door.

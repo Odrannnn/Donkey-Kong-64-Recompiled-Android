@@ -328,6 +328,14 @@ static void capture_checks() {
     }
     CHECK(saw_target_2f && saw_target_30 && saw_target_31);
 
+    reset(); current_map = 30; load(0, 0x21, 1);
+    bool saw_enguarde_door = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_enguarde_door |= contains_value(COOP_TRANSIENT_TRIGGER, 0x21, 1, 2);
+    }
+    CHECK(saw_enguarde_door);
+
     reset(); current_map = 19; load(0, 0x04, 1); load(1, 0x05, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x04, 1, 2));
@@ -857,6 +865,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x2F && last_state == 13);
     scripts[0x2F].unk48[0] = 11; coop_transient_apply();
     CHECK(script_calls == 1); // An unexposed target cannot be hit remotely.
+
+    reset(); role = ROLE_JOIN; current_map = 30; load(0, 0x21, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 30, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x21, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x21 && last_state == 2);
+    scripts[0x21].unk48[0] = 4; coop_transient_apply();
+    CHECK(script_calls == 1); // Completion cannot replay the charge sequence.
 
     reset(); role = ROLE_JOIN; current_map = 16; load(0, 4, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,

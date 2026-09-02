@@ -48,6 +48,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // that target at state 12. State 13 retains local scoring/link updates.
     {30, 0x2F, COOP_TRANSIENT_TRIGGER, 13}, {30, 0x30, COOP_TRANSIENT_TRIGGER, 13},
     {30, 0x31, COOP_TRANSIENT_TRIGGER, 13},
+    // Enguarde door. Its reviewed state-2 entry starts the stock local door,
+    // cutscene and permanent-completion path after an Enguarde charge.
+    {30, 0x21, COOP_TRANSIENT_TRIGGER, 2},
     // Llama Temple coconut switch and DK bongo pad. Their local state-2
     // sequences own the cooling/llama-spit flags and linked gate presentation.
     {20, 0x12, COOP_TRANSIENT_TRIGGER, 2}, {20, 0x16, COOP_TRANSIENT_TRIGGER, 2},
