@@ -1,4 +1,4 @@
-> Current source: 0.64.0, protocol/native ABI v64. The protocol and persistent
+> Current source: 0.65.0, protocol/native ABI v65. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -2625,7 +2625,7 @@ exact actor-table entry is unmodified, then identifies an instance by its bonus
 map, parent map and target count. The four accepted tuples are `(10,24,18)`,
 `(115,47,22)`, `(116,151,25)` and `(117,170,28)`.
 
-A success record contains only the immutable tuple index. It is the only
+A success record contains only the immutable tuple index. It is a
 bidirectional transient kind; scripts, timers, platforms, cutscenes, AI and all
 other records remain host-authoritative. The receiver also requires the exact
 map and room epoch, a live initialized actor with matching generation, Kosh
@@ -2658,3 +2658,34 @@ and the Caves rotating-room controller remain excluded.
 
 Packet and bridge sizes remain unchanged. Protocol 64, compatibility
 `0x00010240`, v64 exports and manifest 0.64.0 reject older peers and companions.
+
+## Minecart Mayhem shared success (0.65.0)
+
+The three vanilla Minecart Mayhem maps use actor 87 and behavior
+`func_minecart_80024FD0`. The adapter installs a wrapper only when that exact
+actor-table entry is unmodified. An instance must match its bonus map, parent
+map, exit zero and required Kong: `(77,7,Chunky)`, `(129,59,DK)` or
+`(130,88,Diddy)`.
+
+The wrapper always runs the original controller first. A local win is
+published only when an active state 1 through 3 reaches terminal state 5 with
+the exact player success action `0x44`. A failure reaches the same terminal
+state with action `0x43`, clears any pending remote win and is never published.
+The exact failure-animation sentinel `0x292` is also a hard rejection.
+
+A receiver queues only a key 1 through 3, state 1, value zero record for its
+current map and room epoch. Both Host and Join may consume it. The wrapper then
+requires a live initialized actor with the same generation, private controller
+data, animation state, child actor, player private data, parent/exit/Kong
+identity and its own table entry still installed. Only active states 1 through
+3 may run the stock global cleanup and success helper, after which the wrapper
+sets terminal state 5. Intro states 4 and 10 must first advance locally to state
+3 and cannot consume the event in that same callback. States 0, 5 and 6,
+loading, file changes, epoch changes, missing pointers, local failure and actor
+replacement discard the pending event. Repeated packets are idempotent.
+
+No opponent state, timer, cart position, input, score, destination, flag or
+reward crosses the wire. The item transaction remains the only owner of the
+Golden Banana save. Packet and bridge sizes remain unchanged. Protocol 65,
+compatibility `0x00010241`, v65 exports and manifest 0.65.0 reject older peers
+and companions.

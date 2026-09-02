@@ -64,6 +64,11 @@ int main() {
     bad.records[5].key = 5; CHECK(!valid_transient(bad));
     bad.records[5].key = 1; bad.records[5].state = 2; CHECK(!valid_transient(bad));
     bad.records[5].state = 1; bad.records[5].value = 1; CHECK(!valid_transient(bad));
+    bad.records[5] = {COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}; CHECK(valid_transient(bad));
+    bad.records[5].key = 0; CHECK(!valid_transient(bad));
+    bad.records[5].key = 4; CHECK(!valid_transient(bad));
+    bad.records[5].key = 1; bad.records[5].state = 0; CHECK(!valid_transient(bad));
+    bad.records[5].state = 1; bad.records[5].value = 1; CHECK(!valid_transient(bad));
 
     State hs{7, 10, 0, active}, gs{7, 20, 1, active};
     auto guest_input = frame(7, 20, 8);
@@ -97,9 +102,8 @@ int main() {
         sequence_rewound |= guest.result().records[i].kind == COOP_TRANSIENT_SEQUENCE;
     CHECK(!sequence_rewound);
 
-    // Kosh completion is the sole bidirectional transient event. A guest can
-    // finish the host's matching instance, while its ordinary script record is
-    // still ignored by host authority.
+    // Reviewed minigame completions are bidirectional. A guest can finish the
+    // host's matching instance while its ordinary script remains host-filtered.
     guest_input = frame(7, 20, 12); guest_input.count = 2;
     guest_input.records[0] = {COOP_TRANSIENT_SCRIPT, 0x34, 1, 0};
     guest_input.records[1] = {COOP_TRANSIENT_MINIGAME_SUCCESS, 2, 1, 0};
@@ -119,6 +123,30 @@ int main() {
     guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
     CHECK(guest.result().status == COOP_TRANSIENT_APPLYING && guest.result().count == 1);
     CHECK(guest.result().records[0].kind == COOP_TRANSIENT_MINIGAME_SUCCESS
+        && guest.result().records[0].key == 3);
+
+    // Minecart Mayhem uses its own bounded keys but the same bidirectional
+    // authority exception, in both guest-to-host and host-to-guest directions.
+    guest_input = frame(7, 20, 13); guest_input.count = 2;
+    guest_input.records[0] = {COOP_TRANSIENT_SCRIPT, 0x34, 1, 0};
+    guest_input.records[1] = {COOP_TRANSIENT_MINECART_SUCCESS, 2, 1, 0};
+    for (unsigned i = 2; i < COOP_TRANSIENT_RECORDS; ++i) guest_input.records[i] = {};
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    host_input = frame(7, 10, 14);
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    CHECK(host.result().status == COOP_TRANSIENT_APPLYING && host.result().count == 1);
+    CHECK(host.result().records[0].kind == COOP_TRANSIENT_MINECART_SUCCESS
+        && host.result().records[0].key == 2);
+
+    host_input.count = 1;
+    host_input.records[0] = {COOP_TRANSIENT_MINECART_SUCCESS, 3, 1, 0};
+    for (unsigned i = 1; i < COOP_TRANSIENT_RECORDS; ++i) host_input.records[i] = {};
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    guest_input.count = 0;
+    for (auto& record : guest_input.records) record = {};
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    CHECK(guest.result().status == COOP_TRANSIENT_APPLYING && guest.result().count == 1);
+    CHECK(guest.result().records[0].kind == COOP_TRANSIENT_MINECART_SUCCESS
         && guest.result().records[0].key == 3);
 
     // Lobby pads are edge-triggered. A repeated fired snapshot is consumed
@@ -172,7 +200,7 @@ int main() {
     auto bytes = encode(packet); Packet roundtrip{};
     CHECK(bytes.size() == 1368 && decode(bytes.data(), bytes.size(), roundtrip));
     CHECK(roundtrip.transient.count == 5 && roundtrip.transient.records[4].kind == COOP_TRANSIENT_SEQUENCE);
-    bytes[transient_offset + 6 * 4 + 1] = 11; // Kind 11 is outside the bounded enum.
+    bytes[transient_offset + 6 * 4 + 1] = 12; // Corrupt the first kind beyond the bounded enum.
     CHECK(!decode(bytes.data(), bytes.size(), roundtrip));
 
     std::printf("PASS: %u same-area transient protocol checks (typed records, host authority, epochs, stale rejection, cutscene context)\n", checks);

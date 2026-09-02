@@ -15,6 +15,7 @@ enum { ROLE_OFF, ROLE_HOST, ROLE_JOIN };
 struct Prop_ScriptData { s16 unk44[2]{}; u8 unk48[2]{}; };
 struct Prop { Prop_ScriptData* unk7C{}; };
 struct CoopClamTestData { u8 pad[0x2C]{}; s32 timer{}; };
+struct AnimationState { u8 pad[0x64]{}; u16 unk64{}; };
 struct Actor {
     u32 object_properties_bitfield{};
     u32 unk54{}, unk58{};
@@ -23,6 +24,7 @@ struct Actor {
     void* additional_actor_data{};
     void* unk178{};
     Actor* unk11C{};
+    AnimationState* animation_state{};
 };
 struct EnemySpawner { Actor* tied_actor{}; };
 struct CharacterSpawner {
@@ -32,7 +34,7 @@ struct CharacterSpawner {
 };
 enum { MAP_JAPES_SHELL = 12, MAP_CAVES_ICE_CASTLE = 98,
     ACTOR_TOMATO_ICE = 164, ACTOR_TIMER_CONTROLLER = 177, ACTOR_CLAM = 286,
-    ACTOR_MINIGAME_CONTROLLER = 256,
+    ACTOR_MINECART_BONUS = 87, ACTOR_MINIGAME_CONTROLLER = 256,
     TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE = 0x30,
     FLAG_TYPE_PERMANENT = 0, FLAG_TYPE_TEMPORARY = 2 };
 
@@ -77,11 +79,24 @@ static CharacterSpawner character_spawners[2];
 static CharacterSpawner* D_global_asm_807FDC9C = character_spawners;
 static Actor* gCurrentActorPointer;
 static Actor* gPlayerPointer;
+static u8 current_character_index[1];
 static void (*D_global_asm_8074C0A0[300])(void);
 static Maps kosh_parent;
 static s32 kosh_exit;
 static bool kosh_parent_valid;
 static unsigned kosh_original_calls, kosh_success_calls, kosh_success_arg, kosh_success_text;
+static AnimationState minecart_animation;
+static std::array<u8, 32> minecart_actor_data, minecart_player_data;
+static unsigned minecart_original_calls, minecart_success_calls, minecart_cleanup_calls;
+static unsigned minecart_success_arg, minecart_success_text, minecart_original_mode;
+static char minecart_order[16];
+static unsigned minecart_order_count;
+
+static void minecart_log(char step) {
+    CHECK(minecart_order_count + 1 < sizeof(minecart_order));
+    minecart_order[minecart_order_count++] = step;
+    minecart_order[minecart_order_count] = 0;
+}
 
 static s32 func_global_asm_805FF800(Maps* map, s32* exit) {
     if (!kosh_parent_valid) return 0;
@@ -99,6 +114,41 @@ static void func_bonus_800264E0(u8 success, u8 text) {
         ++gCurrentActorPointer->control_state;
     }
     if (gPlayerPointer) gPlayerPointer->control_state = 0x44;
+}
+static void func_global_asm_80726EE0(u8 state) {
+    CHECK(state == 0); ++minecart_cleanup_calls; minecart_log('C');
+}
+static void func_minecart_80024000(u8 success, u8 text) {
+    ++minecart_success_calls; minecart_success_arg = success; minecart_success_text = text;
+    minecart_log('S');
+    if (gCurrentActorPointer) {
+        if (gCurrentActorPointer->unk11C) gCurrentActorPointer->unk11C->control_state = 0;
+        ++gCurrentActorPointer->control_state;
+    }
+    if (gPlayerPointer) gPlayerPointer->control_state = 0x44;
+}
+static void func_minecart_80024FD0(void) {
+    ++minecart_original_calls; minecart_log('O');
+    if (!gCurrentActorPointer) return;
+    if (minecart_original_mode == 1 && gCurrentActorPointer->control_state >= 1
+            && gCurrentActorPointer->control_state <= 3) {
+        func_global_asm_80726EE0(0);
+        func_minecart_80024000(1, 0xE);
+        gCurrentActorPointer->control_state = 5;
+    } else if (minecart_original_mode == 2) {
+        if (gPlayerPointer) gPlayerPointer->control_state = 0x43;
+        gCurrentActorPointer->control_state = 5;
+    } else if (minecart_original_mode == 3 && gCurrentActorPointer->control_state == 4) {
+        gCurrentActorPointer->control_state = 3;
+    } else if (minecart_original_mode == 4 && gCurrentActorPointer->control_state == 10) {
+        gCurrentActorPointer->control_state = 3;
+    } else if (minecart_original_mode == 5) {
+        D_global_asm_807FB930[0].actor = nullptr;
+    } else if (minecart_original_mode == 6) {
+        ++gCurrentActorPointer->unk54;
+    } else if (minecart_original_mode == 7) {
+        ++gCurrentActorPointer->unk11C->unk54;
+    }
 }
 static void recomp_printf(const char*, ...) {}
 
@@ -160,12 +210,22 @@ static void reset() {
     gCurrentActorPointer = gPlayerPointer = nullptr;
     std::fill(std::begin(D_global_asm_8074C0A0), std::end(D_global_asm_8074C0A0), nullptr);
     D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
+    D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
     kosh_parent = 0; kosh_exit = 0; kosh_parent_valid = false;
     kosh_original_calls = kosh_success_calls = kosh_success_arg = kosh_success_text = 0;
     coop_kosh_original = nullptr; coop_kosh_hook = 0;
     coop_kosh_pending_epoch = coop_kosh_pending_key = 0;
     coop_kosh_applied_epoch = coop_kosh_applied_key = 0;
     coop_kosh_success_epoch = coop_kosh_success_key = 0;
+    current_character_index[0] = 0;
+    minecart_animation = {}; minecart_actor_data = {}; minecart_player_data = {};
+    minecart_original_calls = minecart_success_calls = minecart_cleanup_calls = 0;
+    minecart_success_arg = minecart_success_text = minecart_original_mode = 0;
+    minecart_order_count = 0; minecart_order[0] = 0;
+    coop_minecart_original = nullptr; coop_minecart_hook = 0;
+    coop_minecart_pending_epoch = coop_minecart_pending_key = 0;
+    coop_minecart_applied_epoch = coop_minecart_applied_key = 0;
+    coop_minecart_success_epoch = coop_minecart_success_key = 0;
     coop_transient_init();
 }
 static void load(unsigned slot, unsigned object, unsigned state, unsigned timer = 0) {
@@ -215,6 +275,21 @@ static void load_kosh(unsigned key) {
     actors[0].unk178 = &data; actors[0].unk11C = &actors[1];
     gCurrentActorPointer = &actors[0]; gPlayerPointer = &actors[2];
     D_global_asm_807FB930[0].actor = &actors[0]; D_global_asm_807FBB34 = 1;
+}
+static void load_minecart(unsigned key) {
+    CHECK(key >= 1 && key <= 3);
+    const auto& row = coop_minecart_identities[key - 1];
+    current_map = row.map; kosh_parent = row.parent; kosh_exit = 0; kosh_parent_valid = true;
+    current_character_index[0] = row.kong;
+    actors[0].object_properties_bitfield = 0x10;
+    actors[0].unk54 = 91; actors[0].unk58 = ACTOR_MINECART_BONUS;
+    actors[0].additional_actor_data = minecart_actor_data.data();
+    actors[0].animation_state = &minecart_animation; actors[0].unk11C = &actors[1];
+    actors[1].control_state = 5;
+    actors[2].additional_actor_data = minecart_player_data.data();
+    gCurrentActorPointer = &actors[0]; gPlayerPointer = &actors[2];
+    D_global_asm_807FB930[0].actor = &actors[0];
+    D_global_asm_807FB930[1].actor = &actors[1]; D_global_asm_807FBB34 = 2;
 }
 static bool contains(unsigned kind, unsigned key, unsigned state) {
     for (unsigned i = 0; i < transient_input.count; ++i) {
@@ -1519,7 +1594,171 @@ static void kosh_checks() {
     CHECK(!coop_kosh_hook && D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] == func_bonus_80024158);
 }
 
+static void minecart_checks() {
+    // Every vanilla identity publishes a natural local win, and both peers can
+    // consume the event from each of the three genuinely active states.
+    for (unsigned key = 1; key <= 3; ++key) {
+        reset(); load_minecart(key); actors[0].control_state = 1;
+        minecart_original_mode = 1;
+        D_global_asm_8074C0A0[ACTOR_MINECART_BONUS]();
+        CHECK(minecart_original_calls == 1 && minecart_cleanup_calls == 1
+            && minecart_success_calls == 1 && actors[0].control_state == 5);
+        CHECK(actors[1].control_state == 0 && actors[2].control_state == 0x44);
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_MINECART_SUCCESS, key, 1, 0));
+
+        for (unsigned receiver_role : {ROLE_HOST, ROLE_JOIN}) for (unsigned state = 1; state <= 3; ++state) {
+            reset(); load_minecart(key); role = receiver_role; actors[0].control_state = state;
+            transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+                {{COOP_TRANSIENT_MINECART_SUCCESS, key, 1, 0}}};
+            coop_transient_apply();
+            CHECK(!minecart_success_calls && coop_minecart_pending_key == key);
+            D_global_asm_8074C0A0[ACTOR_MINECART_BONUS]();
+            CHECK(minecart_original_calls == 1 && minecart_cleanup_calls == 1
+                && minecart_success_calls == 1 && minecart_success_arg == 1
+                && minecart_success_text == 0xE);
+            CHECK(minecart_order_count == 3 && minecart_order[0] == 'O'
+                && minecart_order[1] == 'C' && minecart_order[2] == 'S');
+            CHECK(actors[0].control_state == 5 && actors[1].control_state == 0
+                && actors[2].control_state == 0x44 && !coop_minecart_pending_key);
+            coop_transient_apply();
+            D_global_asm_8074C0A0[ACTOR_MINECART_BONUS]();
+            CHECK(minecart_success_calls == 1); // Persistent result is idempotent.
+            coop_transient_capture(1);
+            CHECK(contains_value(COOP_TRANSIENT_MINECART_SUCCESS, key, 1, 0));
+        }
+    }
+
+    // The native result cannot queue a different identity or malformed event.
+    reset(); load_minecart(1); role = ROLE_JOIN;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}}};
+    for (unsigned scenario = 0; scenario < 6; ++scenario) {
+        coop_minecart_pending_key = 0;
+        auto saved = transient_result;
+        if (scenario == 0) transient_result.records[0].key = 2;
+        if (scenario == 1) transient_result.records[0].key = 4;
+        if (scenario == 2) transient_result.records[0].state = 2;
+        if (scenario == 3) transient_result.records[0].value = 1;
+        if (scenario == 4) transient_result.epoch--;
+        if (scenario == 5) transient_result.map++;
+        coop_transient_apply(); CHECK(!coop_minecart_pending_key);
+        transient_result = saved;
+    }
+    loading_zone_transition_speed = 1.0f;
+    coop_transient_apply(); CHECK(!coop_minecart_pending_key);
+
+    // Each controller identity/pointer invariant fails closed, clears the
+    // queued success, and still calls the stock controller exactly once.
+    for (unsigned scenario = 0; scenario < 18; ++scenario) {
+        reset(); load_minecart(1); role = ROLE_JOIN; actors[0].control_state = 1;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_minecart_pending_key == 1);
+        if (scenario == 0) ++current_map;
+        if (scenario == 1) kosh_parent = 8;
+        if (scenario == 2) kosh_exit = 1;
+        if (scenario == 3) current_character_index[0] = 3;
+        if (scenario == 4) actors[0].unk58 = ACTOR_MINIGAME_CONTROLLER;
+        if (scenario == 5) actors[0].object_properties_bitfield = 0;
+        if (scenario == 6) actors[0].additional_actor_data = nullptr;
+        if (scenario == 7) actors[0].animation_state = nullptr;
+        if (scenario == 8) actors[0].unk11C = nullptr;
+        if (scenario == 9) gPlayerPointer = nullptr;
+        if (scenario == 10) actors[2].additional_actor_data = nullptr;
+        if (scenario == 11) D_global_asm_807FBB34 = 0;
+        if (scenario == 12) D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
+        if (scenario == 13) minecart_original_mode = 5;
+        if (scenario == 14) minecart_original_mode = 6;
+        if (scenario == 15) kosh_parent_valid = false;
+        if (scenario == 16) D_global_asm_807FB930[1].actor = nullptr;
+        if (scenario == 17) minecart_original_mode = 7;
+        coop_minecart_behavior();
+        CHECK(minecart_original_calls == 1 && !minecart_success_calls
+            && !minecart_cleanup_calls && !coop_minecart_pending_key);
+    }
+
+    // Intro/transition states cannot consume the event in the same callback.
+    // Once stock code advances 4 or 10 to active state 3, the next frame may.
+    for (unsigned state : {4u, 10u}) {
+        reset(); load_minecart(1); role = ROLE_JOIN; actors[0].control_state = state;
+        minecart_original_mode = state == 4 ? 3 : 4;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); coop_minecart_behavior();
+        CHECK(actors[0].control_state == 3 && coop_minecart_pending_key == 1
+            && !minecart_success_calls);
+        minecart_original_mode = 0; coop_minecart_behavior();
+        CHECK(actors[0].control_state == 5 && minecart_success_calls == 1);
+    }
+    for (unsigned state : {0u, 5u, 6u}) {
+        reset(); load_minecart(1); role = ROLE_JOIN; actors[0].control_state = state;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); coop_minecart_behavior();
+        CHECK(!minecart_success_calls && !minecart_cleanup_calls && !coop_minecart_pending_key);
+    }
+
+    // A local failure wins the race against a queued remote success. The same
+    // applies to the exact failure-animation sentinel before stock transitions.
+    reset(); load_minecart(1); role = ROLE_JOIN; actors[0].control_state = 1;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); minecart_original_mode = 2; coop_minecart_behavior();
+    CHECK(actors[0].control_state == 5 && actors[2].control_state == 0x43
+        && !minecart_success_calls && !minecart_cleanup_calls && !coop_minecart_pending_key);
+    coop_transient_capture(1);
+    CHECK(!contains(COOP_TRANSIENT_MINECART_SUCCESS, 1, 1));
+
+    reset(); load_minecart(1); role = ROLE_JOIN; actors[0].control_state = 2;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); minecart_animation.unk64 = 0x292; coop_minecart_behavior();
+    CHECK(!minecart_success_calls && !minecart_cleanup_calls && !coop_minecart_pending_key);
+
+    // Natural success performs stock cleanup/helper once and is merely
+    // observed by the wrapper, even when a remote event was already queued.
+    reset(); load_minecart(1); role = ROLE_JOIN; actors[0].control_state = 2;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); minecart_original_mode = 1; coop_minecart_behavior();
+    CHECK(minecart_original_calls == 1 && minecart_cleanup_calls == 1
+        && minecart_success_calls == 1 && minecart_order_count == 3
+        && !coop_minecart_pending_key);
+
+    // Queued events are discarded on every stale lifecycle boundary.
+    for (unsigned scenario = 0; scenario < 4; ++scenario) {
+        reset(); load_minecart(1); role = ROLE_JOIN; actors[0].control_state = 1;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_MINECART_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_minecart_pending_key == 1);
+        if (scenario == 0) loading_zone_transition_speed = 1.0f;
+        if (scenario == 1) transient_file_changed = 1;
+        if (scenario == 2) gPlayerPointer = nullptr;
+        if (scenario == 3) ++epoch;
+        coop_minecart_behavior();
+        CHECK(!minecart_success_calls && !minecart_cleanup_calls && !coop_minecart_pending_key);
+    }
+
+    // Either hook conflict disables only that feature; the other minigame
+    // adapter remains available. A globally disabled transient feature hooks neither.
+    reset(); D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
+    D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = nullptr;
+    coop_kosh_hook = coop_minecart_hook = 0; coop_transient_init();
+    CHECK(coop_kosh_hook && !coop_minecart_hook);
+    reset(); D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = nullptr;
+    D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
+    coop_kosh_hook = coop_minecart_hook = 0; coop_transient_init();
+    CHECK(!coop_kosh_hook && coop_minecart_hook);
+    reset(); transient_enabled = 0; coop_kosh_hook = coop_minecart_hook = 0;
+    D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
+    D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
+    coop_transient_init();
+    CHECK(!coop_kosh_hook && !coop_minecart_hook);
+}
+
 int main() {
-    capture_checks(); object_apply_checks(); cutscene_checks(); lobby_instrument_pad_checks(); kosh_checks();
+    capture_checks(); object_apply_checks(); cutscene_checks(); lobby_instrument_pad_checks();
+    kosh_checks(); minecart_checks();
     std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }

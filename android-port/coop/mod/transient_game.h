@@ -273,10 +273,27 @@ static unsigned coop_kosh_hook, coop_kosh_pending_epoch, coop_kosh_pending_key;
 static unsigned coop_kosh_applied_epoch, coop_kosh_applied_key;
 static unsigned coop_kosh_success_epoch, coop_kosh_success_key;
 
+// Minecart Mayhem uses a different overlay controller. Its success and failure
+// both enter state 5, so only the exact player success action may be published.
+typedef struct {
+    unsigned char map, parent, kong;
+} CoopMinecartIdentity;
+static const CoopMinecartIdentity coop_minecart_identities[3] = {
+    {77, 7, 4}, {129, 59, 0}, {130, 88, 1},
+};
+static void coop_minecart_behavior(void);
+static void (*coop_minecart_original)(void);
+static unsigned coop_minecart_hook, coop_minecart_pending_epoch, coop_minecart_pending_key;
+static unsigned coop_minecart_applied_epoch, coop_minecart_applied_key;
+static unsigned coop_minecart_success_epoch, coop_minecart_success_key;
+
 extern CharacterSpawner* D_global_asm_807FDC9C;
 extern s32 func_global_asm_805FF800(Maps* map, s32* exit);
 extern void func_bonus_80024158(void);
 extern void func_bonus_800264E0(u8 success, u8 text);
+extern void func_minecart_80024FD0(void);
+extern void func_minecart_80024000(u8 success, u8 text);
+extern void func_global_asm_80726EE0(u8 state);
 
 static unsigned coop_kosh_actor_live(Actor* actor, unsigned generation) {
     if (!actor || D_global_asm_807FBB34 > 64) return 0;
@@ -333,16 +350,99 @@ static void coop_kosh_behavior(void) {
     }
 }
 
+static unsigned coop_minecart_identity(Actor* actor) {
+    if (!coop_minecart_hook || !actor || actor != gCurrentActorPointer
+            || actor->unk58 != ACTOR_MINECART_BONUS
+            || !(actor->object_properties_bitfield & 0x10)
+            || !actor->additional_actor_data || !actor->animation_state || !actor->unk11C
+            || !gPlayerPointer || !gPlayerPointer->additional_actor_data
+            || D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] != coop_minecart_behavior
+            || !coop_kosh_actor_live(actor, actor->unk54)) return 0;
+    Maps parent = current_map;
+    s32 exit = -1;
+    if (!func_global_asm_805FF800(&parent, &exit) || exit != 0) return 0;
+    for (unsigned i = 0; i < 3; ++i) {
+        const CoopMinecartIdentity* row = &coop_minecart_identities[i];
+        if (row->map == (unsigned)current_map && row->parent == (unsigned)parent
+                && row->kong == current_character_index[0]) return i + 1;
+    }
+    return 0;
+}
+
+static void coop_minecart_latch_success(unsigned key) {
+    coop_minecart_success_epoch = epoch;
+    coop_minecart_success_key = key;
+    coop_minecart_applied_epoch = epoch;
+    coop_minecart_applied_key = key;
+    coop_minecart_pending_key = 0;
+}
+
+static void coop_minecart_behavior(void) {
+    Actor* actor = gCurrentActorPointer;
+    unsigned generation = actor ? actor->unk54 : 0;
+    unsigned key = coop_minecart_identity(actor);
+    Actor* child = key ? actor->unk11C : 0;
+    unsigned child_generation = child ? child->unk54 : 0;
+    unsigned before = key ? actor->control_state : 0;
+    if (coop_minecart_pending_key && (coop_minecart_pending_epoch != epoch
+            || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer)) coop_minecart_pending_key = 0;
+    if (coop_minecart_original) coop_minecart_original();
+    if (!key || !coop_kosh_actor_live(actor, generation)
+            || coop_minecart_identity(actor) != key || actor->unk11C != child
+            || !coop_kosh_actor_live(child, child_generation)) {
+        coop_minecart_pending_key = 0;
+        return;
+    }
+    if (before >= 1 && before <= 3 && actor->control_state == 5) {
+        if (!transient_file_changed && loading_zone_transition_speed == 0.0f
+                && gPlayerPointer && gPlayerPointer->control_state == 0x44)
+            coop_minecart_latch_success(key);
+        else coop_minecart_pending_key = 0;
+        return;
+    }
+    if (actor->animation_state->unk64 == 0x292) {
+        coop_minecart_pending_key = 0;
+        return;
+    }
+    if (!(before >= 1 && before <= 3)) {
+        if ((before == 4 || before == 10) && actor->control_state == 3) return;
+        coop_minecart_pending_key = 0;
+        return;
+    }
+    if (actor->control_state >= 1 && actor->control_state <= 3
+            && coop_minecart_pending_epoch == epoch && coop_minecart_pending_key == key
+            && !(coop_minecart_applied_epoch == epoch && coop_minecart_applied_key == key)
+            && !transient_file_changed && loading_zone_transition_speed == 0.0f
+            && gPlayerPointer) {
+        coop_minecart_pending_key = 0;
+        func_global_asm_80726EE0(0);
+        func_minecart_80024000(1, 0xE);
+        actor->control_state = 5;
+        coop_minecart_latch_success(key);
+    } else if (actor->control_state == 5 || actor->control_state == 6) {
+        coop_minecart_pending_key = 0;
+    }
+}
+
 static void coop_transient_init(void) {
     if (!transient_enabled) return;
     coop_kosh_original = D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER];
     if (coop_kosh_original != func_bonus_80024158) {
         recomp_printf("[dk64-coop] Kosh controller modified by another mod; shared Kosh success disabled.\n");
         coop_kosh_original = 0;
-        return;
+    } else {
+        D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = coop_kosh_behavior;
+        coop_kosh_hook = 1;
     }
-    D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = coop_kosh_behavior;
-    coop_kosh_hook = 1;
+    coop_minecart_original = D_global_asm_8074C0A0[ACTOR_MINECART_BONUS];
+    if (coop_minecart_original != func_minecart_80024FD0) {
+        recomp_printf("[dk64-coop] Minecart controller modified by another mod; shared Minecart success disabled.\n");
+        coop_minecart_original = 0;
+    } else {
+        D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = coop_minecart_behavior;
+        coop_minecart_hook = 1;
+    }
 }
 
 static void coop_transient_add_kosh(CoopTransientInput* input) {
@@ -360,6 +460,25 @@ static void coop_transient_apply_kosh(CoopTransientRecord record) {
             || (coop_kosh_applied_epoch == epoch && coop_kosh_applied_key == record.key)) return;
     coop_kosh_pending_epoch = epoch;
     coop_kosh_pending_key = record.key;
+}
+
+static void coop_transient_add_minecart(CoopTransientInput* input) {
+    if (coop_minecart_success_epoch != epoch || !coop_minecart_success_key
+            || coop_minecart_success_key > 3 || input->count >= COOP_TRANSIENT_RECORDS
+            || coop_minecart_identities[coop_minecart_success_key - 1].map
+                != (unsigned)current_map) return;
+    input->records[input->count++] = (CoopTransientRecord){
+        COOP_TRANSIENT_MINECART_SUCCESS, coop_minecart_success_key, 1, 0};
+}
+
+static void coop_transient_apply_minecart(CoopTransientRecord record) {
+    if (!coop_minecart_hook || record.key < 1 || record.key > 3
+            || record.state != 1 || record.value
+            || coop_minecart_identities[record.key - 1].map != (unsigned)current_map
+            || (coop_minecart_applied_epoch == epoch
+                && coop_minecart_applied_key == record.key)) return;
+    coop_minecart_pending_epoch = epoch;
+    coop_minecart_pending_key = record.key;
 }
 
 static unsigned coop_transient_timer_sample_is_new(CoopTransientRecord record) {
@@ -756,6 +875,7 @@ static void coop_transient_capture(unsigned present) {
     coop_transient_add_tomato_board(transient_page, &ordinal, &transient_input);
     coop_transient_add_tomato_clock(transient_page, &ordinal, &transient_input);
     coop_transient_add_kosh(&transient_input);
+    coop_transient_add_minecart(&transient_input);
     // Retain the last same-epoch target briefly after the host finishes so a
     // lagging copy can consume missed phases. Apply still requires the Join to
     // be running the exact same cutscene and flags, so this cannot launch one.
@@ -796,6 +916,10 @@ static void coop_transient_apply(void) {
         CoopTransientRecord record = transient_result.records[i];
         if (record.kind == COOP_TRANSIENT_MINIGAME_SUCCESS) {
             coop_transient_apply_kosh(record);
+            continue;
+        }
+        if (record.kind == COOP_TRANSIENT_MINECART_SUCCESS) {
+            coop_transient_apply_minecart(record);
             continue;
         }
         if (role != ROLE_JOIN) continue;

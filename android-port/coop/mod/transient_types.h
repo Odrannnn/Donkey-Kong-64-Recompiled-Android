@@ -33,7 +33,10 @@ enum {
     // One of four exact vanilla Kremling Kosh controllers completed. This
     // monotonic event is bidirectional; each copy runs its own success helper.
     COOP_TRANSIENT_MINIGAME_SUCCESS,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_MINIGAME_SUCCESS
+    // One of three exact vanilla Minecart Mayhem controllers completed. This
+    // is separate from Kosh because Minecart has its own terminal state gate.
+    COOP_TRANSIENT_MINECART_SUCCESS,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_MINECART_SUCCESS
 };
 enum {
     COOP_TRANSIENT_OFF,
