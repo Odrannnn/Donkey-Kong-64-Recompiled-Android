@@ -1732,3 +1732,16 @@ permanent flag write.
 The lava gate itself is not driven directly by the packet; it observes the local
 flag through its original script. This prevents the network from choosing gate or
 cutscene states and keeps persistent ownership in the item/world transaction.
+
+## Tiny Temple opening, guitar and charge switches (0.49.0)
+
+Tiny Temple map 16 objects `0`, `4` and `0x14` are the opening switch, Diddy's
+guitar pad and the charge switch. Each waits in state 1 and enters its original
+state-2 sequence only after its local input condition. A typed trigger can make
+the guest enter exactly state 2 while both peers share the same map epoch.
+
+The local scripts retain every linked-door update, cooling step, cutscene and
+permanent-flag write. Packets cannot select those later states or name their
+linked objects. Objects `0xC` through `0xF`, the four ordered KONG-letter
+switches, remain excluded because their alternating state-1/state-10 behavior
+needs an ordered logical sequence rather than a generic fired trigger.
