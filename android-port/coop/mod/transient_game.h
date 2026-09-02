@@ -39,6 +39,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Synthetic logical progress for the K-O-N-G letter chain. Object C is
     // the record key; F, E, D and C remain the four locally gated steps.
     {16, 0x0C, COOP_TRANSIENT_SEQUENCE, 0},
+    // Aztec's three exterior llama switches. Only states 2-6 are the local
+    // projectile sequence; their distinct linked states 10-12 are not shared.
+    {38, 0x0D, COOP_TRANSIENT_TRIGGER, 2}, {38, 0x0E, COOP_TRANSIENT_TRIGGER, 2},
+    {38, 0x0F, COOP_TRANSIENT_TRIGGER, 2},
     {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
@@ -143,6 +147,13 @@ static unsigned coop_transient_object_kind(unsigned map, unsigned object) {
     return COOP_TRANSIENT_NONE;
 }
 
+static unsigned coop_transient_trigger_fired(unsigned map, unsigned object,
+        unsigned raw, unsigned activation) {
+    if (map == 38 && object >= 0x0D && object <= 0x0F)
+        return raw >= 2 && raw <= 6;
+    return raw >= activation && raw < 20;
+}
+
 static Prop_ScriptData* coop_transient_script(unsigned object) {
     for (unsigned slot = 0; slot < COOP_LIVE_WORLD_SCRIPT_SLOTS; ++slot) {
         if ((unsigned short)D_global_asm_807F6240[slot] != object) continue;
@@ -169,7 +180,7 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
     } else if (kind == COOP_TRANSIENT_TRIGGER) {
         value = coop_transient_object_activation(current_map, object);
         if (value < 2) return;
-        state = state >= value && state < 20 ? 2 : 1;
+        state = coop_transient_trigger_fired(current_map, object, state, value) ? 2 : 1;
     } else if (kind == COOP_TRANSIENT_SEQUENCE) {
         if ((unsigned)current_map == 26 && object == 0x14)
             state = coop_piano_progress(state);

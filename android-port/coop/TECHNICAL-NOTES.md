@@ -1801,3 +1801,16 @@ live-world table. The Rambi switch remains temporary and starts its own 500-fram
 local window; no timer or linked object state crosses the network. Supporting
 object `0x123` also verifies that the adapter and test boundary retain the full
 16-bit script-object key rather than truncating it to one byte.
+
+## Aztec exterior llama switches (0.49.0)
+
+Angry Aztec map 38 objects `0xD`, `0xE` and `0xF` are the coconut, grape and
+feather switches for the exterior llama puzzle. A local projectile hit enters
+state 2, and states 2–6 perform the reviewed target, timer and linked-door work.
+A map-specific predicate publishes fired progress only in that range.
+
+These scripts also use states 10–12 for a separate linked vanilla event. Those
+states are explicitly normalized to ready and cannot be translated into a gun
+hit on the receiver. A valid fired record can move a receiving switch only from
+state 1 to state 2; later linked-object states, gun data, cutscenes and permanent
+flags remain local.
