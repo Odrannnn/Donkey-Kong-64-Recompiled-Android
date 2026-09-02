@@ -17,6 +17,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {30, 0x13, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x14, COOP_TRANSIENT_TRIGGER, 2},
     {30, 0x1B, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x1C, COOP_TRANSIENT_TRIGGER, 2},
     {30, 0x1D, COOP_TRANSIENT_TRIGGER, 2},
+    // Llama Temple coconut switch and DK bongo pad. Their local state-2
+    // sequences own the cooling/llama-spit flags and linked gate presentation.
+    {20, 0x12, COOP_TRANSIENT_TRIGGER, 2}, {20, 0x16, COOP_TRANSIENT_TRIGGER, 2},
     {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their

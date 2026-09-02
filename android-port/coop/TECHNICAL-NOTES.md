@@ -1719,3 +1719,16 @@ linked-door state change, timer and completion path. No instrument energy,
 player input, door state, cutscene ID or permanent flag is supplied by the
 packet. Finished states do not rewind, arbitrary Galleon objects are rejected,
 and persistent completion still converges through the item/world channel.
+
+## Llama Temple coconut and bongo switches (0.49.0)
+
+Llama Temple map 20 objects `0x12` and `0x16` are the coconut gun switch and DK
+bongo pad. Both wait in state 1 and enter their exact state-2 block after vanilla
+input validation. A typed trigger mirrors that activation only while both peers
+share the same map epoch. The receiving script performs its own switch/pad
+presentation, temple cooling or llama-spit cutscene, linked-object update and
+permanent flag write.
+
+The lava gate itself is not driven directly by the packet; it observes the local
+flag through its original script. This prevents the network from choosing gate or
+cutscene states and keeps persistent ownership in the item/world transaction.

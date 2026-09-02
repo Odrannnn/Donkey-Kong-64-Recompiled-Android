@@ -106,6 +106,11 @@ static void capture_checks() {
     }
     CHECK(saw_bongo && saw_tiny_slam);
 
+    reset(); current_map = 20; load(0, 0x12, 1); load(1, 0x16, 4);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x12, 1, 2));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x16, 2, 2));
+
     reset(); current_map = 194; load(0, 6, 2);
     coop_transient_capture(1);
     CHECK(contains(COOP_TRANSIENT_PLATFORM, 6, 2));
@@ -227,6 +232,12 @@ static void object_apply_checks() {
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x13 && last_state == 2);
     coop_transient_apply(); CHECK(script_calls == 1); // Local pad sequence owns later states.
+
+    reset(); role = ROLE_JOIN; current_map = 20; load(0, 0x16, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 20, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x16, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x16 && last_state == 2);
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x7F, 17);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
