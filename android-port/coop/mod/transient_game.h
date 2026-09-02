@@ -28,6 +28,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {7, 0x38, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x39, COOP_TRANSIENT_TRIGGER, 2},
     {7, 0x3A, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x3B, COOP_TRANSIENT_TRIGGER, 2},
     {7, 0x115, COOP_TRANSIENT_TRIGGER, 2},
+    // Remaining Japes feather, grape and peanut switches. The first pair use
+    // state 11 as their exact timed-door activation; peanut uses state 2.
+    {7, 0x1F, COOP_TRANSIENT_TRIGGER, 11}, {7, 0x20, COOP_TRANSIENT_TRIGGER, 11},
+    {7, 0x58, COOP_TRANSIENT_TRIGGER, 2},
     // Paired cannon-game, shipwreck and lighthouse gun switches. Completed
     // presentation still uses the existing permanent live-world flag rows.
     {30, 0x06, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x07, COOP_TRANSIENT_TRIGGER, 2},
@@ -291,6 +295,8 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         return activation == 12 && raw == 11;
     if (map == 164 && object == 0x09)
         return activation == 5 && raw == 1;
+    if (map == 7 && (object == 0x1F || object == 0x20))
+        return activation == 11 && raw == 1;
     return raw > 0 && raw < activation;
 }
 

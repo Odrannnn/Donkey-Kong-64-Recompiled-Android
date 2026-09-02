@@ -2149,3 +2149,14 @@ Typed triggers mirror only that activation edge.
 The local state-2 blocks retain the switch animation, sound, timer, linked hut
 or wall update and permanent flags `0xD` through `0x10` or `0x2B`. Completed
 state 20 and every linked object remain local and cannot be replayed by a packet.
+
+## Remaining Japes timed-door switches (0.49.0)
+
+Japes map 7 objects `0x1F` and `0x20` are the feather and grape switches for
+two temporary doors. Both wait in state 1 and enter state 11 on the projectile
+hit. Object `0x58` is a peanut switch that enters state 2 from ready state 1.
+
+The receive adapter requires those exact local ready states. The feather and
+grape scripts retain their 200-frame door cycle and states 12 through 14. The
+peanut script retains its delayed linked-object sequence and permanent flag
+`0x2C`. Packets cannot select a timer, linked door, projectile or later state.

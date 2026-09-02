@@ -127,6 +127,17 @@ static void capture_checks() {
     }
     CHECK(saw_hut_38 && saw_hut_39 && saw_hut_3a && saw_hut_3b && saw_rambi_wall);
 
+    reset(); current_map = 7;
+    load(0, 0x1F, 1); load(1, 0x20, 11); load(2, 0x58, 2);
+    bool saw_feather = false, saw_grape = false, saw_peanut = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_feather |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1F, 1, 11);
+        saw_grape |= contains_value(COOP_TRANSIENT_TRIGGER, 0x20, 2, 11);
+        saw_peanut |= contains_value(COOP_TRANSIENT_TRIGGER, 0x58, 2, 2);
+    }
+    CHECK(saw_feather && saw_grape && saw_peanut);
+
     reset(); current_map = 38; load(0, 0x0D, 2); load(1, 0x0E, 6); load(2, 0x0F, 10);
     load(3, 0x44, 3); load(4, 0x9D, 1); load(5, 0x9E, 2);
     bool saw_aztec_d = false, saw_aztec_e = false, saw_aztec_f = false;
@@ -476,6 +487,20 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x115 && last_state == 2);
     scripts[0x115].unk48[0] = 0; coop_transient_apply();
     CHECK(script_calls == 1); // The packet cannot initialize the wall switch.
+
+    reset(); role = ROLE_JOIN; current_map = 7; load(0, 0x1F, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x1F, 2, 11}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x1F && last_state == 11);
+    scripts[0x1F].unk48[0] = 10; coop_transient_apply();
+    CHECK(script_calls == 1); // Intermediate states cannot satisfy exact readiness.
+
+    reset(); role = ROLE_JOIN; current_map = 7; load(0, 0x58, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x58, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x58 && last_state == 2);
 
     reset(); role = ROLE_JOIN; current_map = 38; load(0, 0x44, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 38, 9, 1,
