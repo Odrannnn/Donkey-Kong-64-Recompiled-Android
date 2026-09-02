@@ -131,6 +131,14 @@ static void capture_checks() {
     }
     CHECK(saw_piano); // Failure/restart states never masquerade as completion.
 
+    reset(); current_map = 26; load(0, 0x7F, 55);
+    bool saw_dartboard = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_dartboard |= contains_value(COOP_TRANSIENT_SEQUENCE, 0x7F, 3, 0);
+    }
+    CHECK(saw_dartboard);
+
     reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
     coop_transient_capture(1); CHECK(!transient_input.enabled);
 
@@ -189,6 +197,19 @@ static void object_apply_checks() {
     coop_transient_apply(); CHECK(script_calls == 2); // Host never rewinds an ahead peer.
     transient_result.records[0].state = 26;
     coop_transient_apply(); CHECK(script_calls == 2); // Out-of-range progress rejected.
+
+    reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x7F, 17);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_SEQUENCE, 0x7F, 4, 0}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x7F && last_state == 54);
+    scripts[0x7F].unk48[0] = 19; transient_result.records[0].state = 6;
+    coop_transient_apply();
+    CHECK(script_calls == 2 && last_state == 58); // Exactly the next hit, no skip.
+    scripts[0x7F].unk48[0] = 20; coop_transient_apply();
+    CHECK(script_calls == 3 && last_state == 23); // Vanilla final-hit entry.
+    scripts[0x7F].unk48[0] = 23; coop_transient_apply();
+    CHECK(script_calls == 3); // Completion is idempotent.
 }
 
 static void cutscene_checks() {

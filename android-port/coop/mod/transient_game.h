@@ -22,6 +22,7 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {26, 0x3F, COOP_TRANSIENT_TRIGGER, 5}, {26, 0x40, COOP_TRANSIENT_TRIGGER, 5},
     {26, 0x41, COOP_TRANSIENT_TRIGGER, 5},
     {26, 0x14, COOP_TRANSIENT_SEQUENCE, 0}, // Lanky's piano controller.
+    {26, 0x7F, COOP_TRANSIENT_SEQUENCE, 0}, // Tiny's dartboard controller.
 };
 
 // The piano controller has 25 correct-note gates. A received count never
@@ -42,6 +43,19 @@ static unsigned coop_piano_progress(unsigned raw) {
     for (unsigned i = 0; i < 25; ++i)
         if (raw >= coop_piano_hit_states[i]) progress = i + 1;
     return progress;
+}
+
+static const unsigned char coop_dartboard_wait_states[6] = {15, 16, 17, 18, 19, 20};
+static const unsigned char coop_dartboard_hit_states[6] = {50, 52, 54, 56, 58, 23};
+
+static unsigned coop_dartboard_progress(unsigned raw) {
+    if (raw == 23 || raw == 24) return 6;
+    if (raw == 20 || raw == 58 || raw == 59) return 5;
+    if (raw == 19 || raw == 56 || raw == 57) return 4;
+    if (raw == 18 || raw == 54 || raw == 55) return 3;
+    if (raw == 17 || raw == 52 || raw == 53) return 2;
+    if (raw == 16 || raw == 50 || raw == 51) return 1;
+    return 0;
 }
 
 static unsigned coop_transient_object_activation(unsigned map, unsigned object) {
@@ -89,8 +103,10 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
         if (value < 2) return;
         state = state >= value && state < 20 ? 2 : 1;
     } else if (kind == COOP_TRANSIENT_SEQUENCE) {
-        if ((unsigned)current_map != 26 || object != 0x14) return;
-        state = coop_piano_progress(state);
+        if ((unsigned)current_map != 26) return;
+        if (object == 0x14) state = coop_piano_progress(state);
+        else if (object == 0x7F) state = coop_dartboard_progress(state);
+        else return;
     }
     input->records[input->count++] = (CoopTransientRecord){kind, object, state, value};
 }
@@ -166,12 +182,20 @@ static void coop_transient_apply(void) {
             continue;
         }
         if (kind == COOP_TRANSIENT_SEQUENCE) {
-            if ((unsigned)current_map != 26 || record.key != 0x14 || record.value
-                    || record.state > 25) continue;
-            unsigned progress = coop_piano_progress(script->unk48[0]);
-            if (record.state > progress && progress < 25
-                    && script->unk48[0] == coop_piano_wait_states[progress])
-                coop_live_world_set_object(record.key, coop_piano_hit_states[progress]);
+            if ((unsigned)current_map != 26 || record.value) continue;
+            unsigned progress, count;
+            const unsigned char* waits;
+            const unsigned char* hits;
+            if (record.key == 0x14) {
+                progress = coop_piano_progress(script->unk48[0]); count = 25;
+                waits = coop_piano_wait_states; hits = coop_piano_hit_states;
+            } else if (record.key == 0x7F) {
+                progress = coop_dartboard_progress(script->unk48[0]); count = 6;
+                waits = coop_dartboard_wait_states; hits = coop_dartboard_hit_states;
+            } else continue;
+            if (record.state <= count && record.state > progress && progress < count
+                    && script->unk48[0] == waits[progress])
+                coop_live_world_set_object(record.key, hits[progress]);
             continue;
         }
         if (script->unk48[0] == record.state) continue;

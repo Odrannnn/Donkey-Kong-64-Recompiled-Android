@@ -1679,3 +1679,16 @@ The controller is never started remotely: both copies must already have reached
 its first note wait. Failure states 250–252 publish zero progress, an ahead guest
 is never rewound, and a guest cannot skip more than one locally gated note per
 script step. The packet cannot carry a raw script state or reward identity.
+
+## Factory dartboard sequence (0.49.0)
+
+Factory object `0x7F` controls Tiny's six-target dartboard. Its non-monotonic raw
+states are mapped to a logical hit count from 0 through 6. Six pinned wait/hit
+pairs (`15→50`, `16→52`, `17→54`, `18→56`, `19→58`, `20→23`) let the guest run
+only its next correct-hit block when the host is ahead. Miss handling, three-frame
+delays, target images, sounds and the final reward path remain local.
+
+The network cannot start the controller, choose a target actor or supply a raw
+state. Both copies must reach the first local wait state. An ahead guest is not
+rewound, completion is idempotent, and every catch-up step waits for the preceding
+local delay to reach the next pinned wait state.
