@@ -13,6 +13,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {30, 0, COOP_TRANSIENT_TIMER}, {30, 1, COOP_TRANSIENT_TIMER},
     {48, 4, COOP_TRANSIENT_TIMER}, {48, 5, COOP_TRANSIENT_TIMER},
     {194, 6, COOP_TRANSIENT_PLATFORM},
+    // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
+    // vanilla state-2 entry owns the timer/reward sequence locally.
+    {26, 0x2E, COOP_TRANSIENT_TRIGGER}, {26, 0x2F, COOP_TRANSIENT_TRIGGER},
+    {26, 0x30, COOP_TRANSIENT_TRIGGER}, {26, 0x31, COOP_TRANSIENT_TRIGGER},
 };
 
 static unsigned coop_transient_object_kind(unsigned map, unsigned object) {
@@ -46,6 +50,8 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
     if (!script) return;
     unsigned state = script->unk48[0];
     if (state > 0xFF) return;
+    if (kind == COOP_TRANSIENT_TRIGGER)
+        state = state >= 2 && state < 20 ? 2 : 1;
     input->records[input->count++] = (CoopTransientRecord){kind, object, state, 0};
 }
 
@@ -104,7 +110,15 @@ static void coop_transient_apply(void) {
         unsigned kind = coop_transient_object_kind(current_map, record.key);
         if (kind != record.kind || record.state > 0xFF) continue;
         Prop_ScriptData* script = coop_transient_script(record.key);
-        if (!script || script->unk48[0] == record.state) continue;
+        if (!script) continue;
+        if (kind == COOP_TRANSIENT_TRIGGER) {
+            // Never copy a later timer/presentation state or rewind a local
+            // action. The only remote command is the reviewed vanilla entry.
+            if (record.state == 2 && script->unk48[0] == 1)
+                coop_live_world_set_object(record.key, 2);
+            continue;
+        }
+        if (script->unk48[0] == record.state) continue;
         coop_live_world_set_object(record.key, record.state);
     }
 }

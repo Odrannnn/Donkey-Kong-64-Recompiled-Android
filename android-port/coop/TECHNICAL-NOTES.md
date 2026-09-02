@@ -1,7 +1,6 @@
-> Current source: 0.48.0, protocol/native ABI v48. All eleven native suites pass
-> in the pinned Linux GNU C++ 15.2.0 Debug ASan/UBSan build and the MIPS NRM
-> build. The full Android ARM64, Windows x64, format/export, package-contract and
-> importer verification pass also succeeds. Gameplay validation remains pending.
+> Current source: 0.49.0, protocol/native ABI v49. All eleven pinned native suites
+> pass; the complete release build and gameplay validation remain pending. Version
+> 0.48.0 passed the full pinned sanitizer and release pipeline.
 
 # Prototype integration and limits
 
@@ -1632,3 +1631,20 @@ stock `playCutscene(player, 3, 1)` call. The request is consumed once after the
 item transaction and only during regular play with no loading or reward queue.
 Every other remotely-startable cutscene remains prohibited; the generic
 same-area cutscene channel still only aligns two already-running matching scenes.
+
+## Factory production switch triggers (0.49.0)
+
+The four production-room slam switches in Factory map 26 are pinned to objects
+`0x2E`, `0x2F`, `0x30` and `0x31` (Chunky, Tiny, Lanky and Diddy). A typed
+same-area trigger record normalizes each loaded script to ready state 1 or fired
+state 2. When the host fires one and the guest still reports ready state 1, the
+guest invokes `func_global_asm_8063DA40` with that exact allowlisted object and
+vanilla activation state 2. The local script then owns its timer, cutscene,
+linked object changes and reward spawn.
+
+No later raw state, timer, object pointer or reward is accepted from the network.
+A ready host never rewinds a guest action, repeat packets are idempotent, and a
+missing or unlisted script is ignored. Persistent production GB ownership remains
+in the item channel. Both players must be in the same Factory room epoch with
+**Same-area events** enabled. Protocol 49, compatibility `0x00010131`, export
+`dk64_coop_tick_v49` and manifest 0.49.0 reject mixed semantic versions.

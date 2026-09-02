@@ -20,12 +20,17 @@ bool valid_record(const CoopTransientRecord& record) {
             return record.state <= 0xFFu;
         case COOP_TRANSIENT_CUTSCENE:
             return record.key <= 0xFFu && record.state <= 0xFFu && record.value <= 0xFFu;
-        case COOP_TRANSIENT_AI:
-            return record.state <= 0xFFFFu;
+        case COOP_TRANSIENT_TRIGGER:
+            return (record.state == 1u || record.state == 2u) && !record.value;
     }
     return false;
 }
 bool same_record(const CoopTransientRecord& a, const CoopTransientRecord& b) {
+    // A ready host never rewinds a local room action. Once the host has fired
+    // a trigger, the receiver only needs to report its own fired observation.
+    if (a.kind == COOP_TRANSIENT_TRIGGER && b.kind == COOP_TRANSIENT_TRIGGER
+            && a.key == b.key)
+        return b.state == 1u || a.state == 2u;
     return a.kind == b.kind && a.key == b.key && a.state == b.state && a.value == b.value;
 }
 }

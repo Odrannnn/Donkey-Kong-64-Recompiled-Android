@@ -158,7 +158,7 @@ struct TraceWorker {
     std::atomic<bool> stopping{false};
     std::atomic<uint64_t> queries{0}, rejected{0};
     std::mutex response_mutex;
-    std::string response = "{\"schema\":1,\"mod\":\"0.48.0\",\"status\":\"starting\"}";
+    std::string response = "{\"schema\":1,\"mod\":\"0.49.0\",\"status\":\"starting\"}";
     std::thread thread;
 
     ~TraceWorker() { stop(); }
@@ -333,7 +333,7 @@ struct Session::Impl {
         const auto combat_result = combat_sync.result();
         const uint32_t room_fingerprint = config.room * 2654435761u;
         std::ostringstream result;
-        result << "{\"schema\":1,\"mod\":\"0.48.0\",\"protocol\":" << protocol_version
+        result << "{\"schema\":1,\"mod\":\"0.49.0\",\"protocol\":" << protocol_version
             << ",\"role\":\"" << role_name(config.role) << "\",\"status\":\"" << status_name(status)
             << "\",\"room_fingerprint\":" << room_fingerprint
             << ",\"local_ip\":\"" << local_address << "\",\"coop_port\":" << bound_port

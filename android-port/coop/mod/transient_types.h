@@ -15,8 +15,10 @@ enum {
     COOP_TRANSIENT_TIMER,
     COOP_TRANSIENT_PLATFORM,
     COOP_TRANSIENT_CUTSCENE,
-    COOP_TRANSIENT_AI,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_AI
+    // A reviewed room action. State 2 means enter the object's exact vanilla
+    // activation state; state 1 is an inert ready/finished observation.
+    COOP_TRANSIENT_TRIGGER,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_TRIGGER
 };
 enum {
     COOP_TRANSIENT_OFF,

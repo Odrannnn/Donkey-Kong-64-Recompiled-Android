@@ -14,7 +14,7 @@
 
 typedef struct { CoopGateInput gate; CoopCombatFrame combat; CoopItemInput items; CoopWorldInput world; CoopTransientInput transient; CoopTraceInput trace; } CoopExtraInput;
 typedef struct { CoopGateResult gate; CoopCombatResult combat; CoopItemResult items; CoopWorldResult world; CoopTransientResult transient; } CoopExtraResult;
-_Static_assert(sizeof(CoopExtraInput) == 2856 && sizeof(CoopExtraResult) == 3468, "v48 bridge ABI");
+_Static_assert(sizeof(CoopExtraInput) == 2856 && sizeof(CoopExtraResult) == 3468, "v49 bridge ABI");
 _Static_assert(sizeof(CoopCharacterProgress) == 0x5E && __builtin_offsetof(CoopCharacterProgress, golden_bananas) == 0x42
     && __builtin_offsetof(CoopCharacterProgress, coins) == 0x6
     && __builtin_offsetof(CoopCharacterProgress, coloured_bananas) == 0xA
@@ -126,7 +126,7 @@ _Static_assert(COOP_TROFF_FIRST == 2394 && COOP_TROFF_END == 5894 && COOP_JAPES_
 
 RECOMP_IMPORT(".", u32 dk64_coop_start(u32 role, const char* ip, u32 port, u32 room));
 RECOMP_IMPORT(".", u32 dk64_coop_local_ipv4(void));
-RECOMP_IMPORT(".", u32 dk64_coop_tick_v48(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
+RECOMP_IMPORT(".", u32 dk64_coop_tick_v49(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
 RECOMP_IMPORT(".", void dk64_coop_stop(void));
 
 extern Actor *gPlayerPointer, *gCurrentActorPointer, *gLastSpawnedActor;
@@ -423,7 +423,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     trace.combat_status = combat_result.status;
     CoopExtraInput extra = {{0}, combat_input, items.input, world.input, transient_input, trace};
     CoopExtraResult extra_result = {0};
-    status = dk64_coop_tick_v48(local_state, remote_state, &extra, &extra_result);
+    status = dk64_coop_tick_v49(local_state, remote_state, &extra, &extra_result);
     coop_items_receive(&items, extra_result.items);
     coop_world_receive(&world, extra_result.world);
     transient_result = extra_result.transient;

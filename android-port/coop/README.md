@@ -1,7 +1,11 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
-Version **0.48.0** adds a read-only LAN trace endpoint and query tool for
+Version **0.49.0** adds typed same-area activation for the four Frantic Factory
+production switches. The peer enters each switch's vanilla state-2 sequence,
+so its local timer, presentation and reward script run normally; later raw
+script states are never copied and permanent GB ownership still uses the item
+channel. It retains the read-only LAN trace endpoint and query tool for
 diagnosing live host/peer sessions without exposing ROM or save bytes. It also
 retains the 0.46.0 additions: the last vanilla colored-banana collectible that was
 outside the generated pickup tables: Chunky's five-banana bunch behind the rear
@@ -58,10 +62,10 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.48.0 passes all
-eleven native suites in a pinned Linux Debug ASan/UBSan build plus the MIPS NRM
-build. The complete Android ARM64, Windows x64, binary-format, v48 export,
-package-contract and importer pass also succeeds. Gameplay validation remains
+**This is experimental, not complete campaign co-op. Version 0.49.0 passes all
+eleven native suites in the pinned Linux Debug ASan/UBSan build. Its MIPS NRM and
+complete Android ARM64, Windows x64, binary-format, v49 export, package-contract
+and importer release pipeline remain pending. Gameplay validation remains
 pending.**
 Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
@@ -74,7 +78,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.48
+While the native companion is loaded, `tools/query_trace.py` discovers v0.49
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -88,7 +92,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.48.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.49.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
    Import the complete Android ZIP through **Manage Mods -> Import**.
