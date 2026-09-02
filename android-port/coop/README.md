@@ -1,10 +1,12 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.54.0** synchronizes Giant Clam's four-phase open/close hazard cycle
-while both players are inside the Japes shell. It invokes only the two pinned
-vanilla phase edges, aligns the two stable 90-frame countdowns, and lets each
-copy finish its own opening and closing animation. Version 0.53.0 exchanges
+Version **0.55.0** adds guarded host boss-animation pose correction for all ten
+bounded boss rounds. The guest evaluates a pose only when both copies select
+the full pose mode and already run a matching local animation clip; callbacks
+are suppressed during that one visual evaluation. Version 0.54.0 synchronizes
+Giant Clam's four-phase open/close hazard cycle while both players are inside
+the Japes shell. Version 0.53.0 exchanges
 durable authority generations over LAN. A returning
 former host automatically yields to a newer promoted host, reopens as Join with
 its existing host save copy, and remembers that follower role across restarts.
@@ -14,7 +16,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 54 requires a matching peer and native
+address as a direct fallback. Protocol 55 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -166,8 +168,8 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.54.0 adds a
-bounded actor-driven environment-cycle contract and retains the persistent
+**This is experimental, not complete campaign co-op. Version 0.55.0 adds
+guarded boss-pose correction and retains the actor-driven environment-cycle and persistent
 recovery and authority-reconciliation suites. All 15 Linux
 ASan/UBSan suites and the complete maintained MIPS, Android ARM64, Windows x64,
 ABI/export, APK, package and Android-importer pipeline pass. Gameplay and device
@@ -183,7 +185,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.54
+While the native companion is loaded, `tools/query_trace.py` discovers v0.55
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -197,7 +199,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.54.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.55.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -681,7 +683,10 @@ phase at a time. Commands wait through the vanilla `0x4D` hit reaction and canno
 replace another local collision. The mod never writes the phase byte or script
 index directly. When both peers select enemy movement, the guest corrects Dillo's
 position and facing toward the host. AI decisions, attacks, missiles, barrel actors,
-animation, sounds, cutscenes and player damage remain local.
+animation selection, sounds, cutscenes and player damage remain local. With the
+full pose option on both peers, a matching already-local boss clip may receive
+one normalized host frame sample at a time; the packet cannot select a clip or
+run animation callbacks.
 If another mod owns the pinned Dillo handler, this boss channel disables itself.
 
 Dogadon uses the same four-word record in maps 83 and 197, but its vanilla
@@ -728,7 +733,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v54 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v55 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -740,7 +745,8 @@ mismatch is left alone rather than being overwritten later.
   enemy-link HUD message.
 - Optional bounded damage-phase synchronization for the five standard bosses and
   all five K. Rool rounds through pinned vanilla reaction paths. Tiny's hits are
-  committed by the foot actor in the shoe map. Other boss state remains local.
+  committed by the foot actor in the shoe map. Full pose mode also corrects a
+  matching local boss clip to the host's normalized frame. Other boss state remains local.
 - The first Japes gate is part of ordinary item/world sharing. The former
   standalone gate experiment is retired and its old save files are ignored.
 - Proxy cleanup across disconnects, map/Kong changes and actor destruction;

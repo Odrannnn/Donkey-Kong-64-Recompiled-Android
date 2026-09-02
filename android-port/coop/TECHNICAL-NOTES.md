@@ -1,4 +1,4 @@
-> Current source: 0.54.0, protocol/native ABI v54. The protocol and persistent
+> Current source: 0.55.0, protocol/native ABI v55. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -1683,6 +1683,30 @@ The game/native frame and result each gain a six-word typed motion record, growi
 the combined bridge spans to 2636 and 3324 bytes. The compact combat section and
 all subsequent offsets remain unchanged, so packets stay 1200 bytes. Protocol 44,
 compatibility `0x0001012C`, export `dk64_coop_tick_v44`, and manifest 0.44.0 reject
+older peers and native companions.
+
+## Guarded boss animation poses (0.55.0)
+
+Combat mode 3 extends the reciprocally bound boss-motion record with a normalized
+five-bit pose and a six-bit hash of the host's local animation clip. The guest
+accepts it only for the expected boss kind and map, its current actor generation
+and life token, a fresh READY session, and an already-running local clip whose
+bounded ID produces the same hash. Mode 2 continues to correct only position and
+facing. The host never accepts guest motion or pose data.
+
+One pose sample is evaluated at most once. The adapter temporarily clears the
+animation script, sound, callback and extra-effect fields around the stock frame
+evaluator, then restores all four. The record cannot select or load a clip, copy
+AI/control state, create an attack, advance a damage phase, or invoke an animation
+callback. A clip mismatch is left unconsumed so a later legitimate local clip can
+accept the current sample.
+
+The compact boss pseudo-enemy reuses its previously empty reciprocal-life word:
+bits 0 through 4 carry the pose and bits 5 through 10 the clip hash. Reserved high
+bits fail decoding. The UDP packet therefore remains 1368 bytes and all subsequent
+wire offsets remain unchanged. The typed game/native input and result records each
+gain two words, making the complete bridge spans 2868 and 3476 bytes. Protocol 55,
+compatibility `0x00010237`, the v55 recovery/tick exports and manifest 0.55.0 reject
 older peers and native companions.
 
 ## Third reversible world state (0.45.0)

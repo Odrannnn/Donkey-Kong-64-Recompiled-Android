@@ -404,25 +404,49 @@ int main() {
     // Army Dillo damage uses its overlay-private phase byte rather than Actor.health.
     // Remote progress enters the pinned vanilla TNT-impact branch one phase at a time.
     Actor dillo{}; CoopBossData dillo_data{};
+    AnimationStateUnk0_0 dillo_clip{}; dillo_clip.unk12 = 91;
+    AnimationStateUnk0 dillo_track{&dillo_clip, 45.0f, 0x333};
+    ActorAnimationState dillo_animation{}; dillo_animation.unk0 = &dillo_track;
+    dillo_animation.unk68 = 21; dillo_animation.unk6C = 22;
+    dillo_animation.unk70 = +[](Actor*) { return 23; }; dillo_animation.unk74 = 24;
     dillo.unk58 = ACTOR_BOSS_ARMY_DILLO; dillo.unk54 = 700;
-    dillo.object_properties_bitfield = 0x10; dillo.control_state = 0x27; dillo.unk178 = &dillo_data;
+    dillo.object_properties_bitfield = 0x10; dillo.control_state = 0x27;
+    dillo.animation_state = &dillo_animation; dillo.unk178 = &dillo_data;
     register_actor(&dillo);
     D_global_asm_8074C0A0[ACTOR_BOSS_ARMY_DILLO] = func_boss_800254D0;
-    combat_enabled = 2; dillo.x_position = 10; dillo.y_position = 20; dillo.z_position = 30; dillo.y_rotation = 256;
+    combat_enabled = 3; dillo.x_position = 10; dillo.y_position = 20; dillo.z_position = 30; dillo.y_rotation = 256;
     current_map = MAP_JAPES_ARMY_DILLO; coop_combat_capture();
     CHECK(boss_hooks && D_global_asm_8074C0A0[ACTOR_BOSS_ARMY_DILLO] == coop_boss_behavior);
     CHECK(combat_input.boss.kind == COOP_BOSS_ARMY_DILLO && combat_input.boss.life && !combat_input.boss.phase);
     CHECK(combat_input.boss_motion.kind == COOP_BOSS_ARMY_DILLO
         && combat_input.boss_motion.life == combat_input.boss.life
-        && combat_input.boss_motion.x == float_bits(10) && combat_input.boss_motion.yaw == 256);
+        && combat_input.boss_motion.x == float_bits(10) && combat_input.boss_motion.yaw == 256
+        && combat_input.boss_motion.pose == coop_enemy_pose_encode(45.0f, 91)
+        && combat_input.boss_motion.clip_hash == coop_enemy_clip_hash(0x333));
     combat_result = {}; combat_result.status = COOP_COMBAT_READY;
-    combat_result.movement = COOP_COMBAT_MOVEMENT;
+    combat_result.movement = COOP_COMBAT_MOVEMENT | COOP_COMBAT_POSE;
     combat_result.boss_motion = {COOP_BOSS_ARMY_DILLO, combat_input.boss.life,
-        float_bits(110), float_bits(70), float_bits(-20), 1024};
+        float_bits(110), float_bits(70), float_bits(-20), 1024,
+        coop_enemy_pose_encode(60.0f, 91), coop_enemy_clip_hash(0x333)};
+    const unsigned boss_pose_before = enemy_pose_evals;
     role = ROLE_JOIN; gCurrentActorPointer = &dillo; D_global_asm_807FBB70 = {};
     D_global_asm_8074C0A0[ACTOR_BOSS_ARMY_DILLO]();
     CHECK(dillo.x_position == 50 && dillo.y_position == 40 && dillo.z_position == 10
         && dillo.y_rotation == 1024);
+    CHECK(enemy_pose_evals == boss_pose_before + 1 && dillo_track.unk4 == 60.0f
+        && dillo_animation.unk68 == 21 && dillo_animation.unk6C == 22
+        && dillo_animation.unk70 && dillo_animation.unk74 == 24);
+    D_global_asm_8074C0A0[ACTOR_BOSS_ARMY_DILLO]();
+    CHECK(enemy_pose_evals == boss_pose_before + 1); // One network sample is consumed once.
+    combat_result.status = COOP_COMBAT_OFF;
+    D_global_asm_8074C0A0[ACTOR_BOSS_ARMY_DILLO]();
+    combat_result.status = COOP_COMBAT_READY;
+    D_global_asm_8074C0A0[ACTOR_BOSS_ARMY_DILLO]();
+    CHECK(enemy_pose_evals == boss_pose_before + 2); // A restored context may apply the current sample.
+    combat_result.boss_motion.clip_hash = (coop_enemy_clip_hash(0x333) + 1) & COOP_ENEMY_POSE_HASH_MASK;
+    combat_result.boss_motion.pose = coop_enemy_pose_encode(30.0f, 91);
+    D_global_asm_8074C0A0[ACTOR_BOSS_ARMY_DILLO]();
+    CHECK(enemy_pose_evals == boss_pose_before + 2); // A different local clip cannot be driven.
     role = ROLE_HOST; combat_enabled = 1;
     combat_result = {}; combat_result.status = COOP_COMBAT_READY;
     combat_result.boss = {COOP_BOSS_ARMY_DILLO, combat_input.boss.life, 900, 2};

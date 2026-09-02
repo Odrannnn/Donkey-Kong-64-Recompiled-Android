@@ -65,8 +65,10 @@ bool valid_combat(const CoopCombatFrame& f) {
             || b.life > COOP_ENEMY_LIFE_MASK || b.peer_life > COOP_ENEMY_LIFE_MASK || b.phase > 4) return false;
     const auto& m = f.boss_motion;
     if (!m.kind) {
-        if (m.life || m.x || m.y || m.z || m.yaw) return false;
+        if (m.life || m.x || m.y || m.z || m.yaw || m.pose || m.clip_hash) return false;
     } else if (f.enabled < 2 || m.kind != b.kind || m.life != b.life || m.yaw >= 4096
+            || m.pose > COOP_ENEMY_POSE_MASK || m.clip_hash > COOP_ENEMY_POSE_HASH_MASK
+            || (!m.pose && m.clip_hash) || (f.enabled < 3 && m.pose)
             || !bounded_float(m.x, -100000, 100000) || !bounded_float(m.y, -100000, 100000)
             || !bounded_float(m.z, -100000, 100000)) return false;
     return true;
@@ -78,7 +80,8 @@ std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat_words(const CoopCombatFrame&
     w[n++] = f.file; w[n++] = f.layout; w[n++] = f.hands;
     for (unsigned i = 0; i < COOP_ENEMIES; ++i) {
         CoopEnemy e = f.enemies[i];
-        if (!i && f.boss_motion.kind) e = {1, f.boss_motion.life, COOP_ENEMY_ALIVE, 0,
+        if (!i && f.boss_motion.kind) e = {1, f.boss_motion.life, COOP_ENEMY_ALIVE,
+            f.boss_motion.pose | (f.boss_motion.clip_hash << 5),
             boss_wire_kind_base + f.boss_motion.kind, f.boss_motion.x, f.boss_motion.y,
             f.boss_motion.z, f.boss_motion.yaw};
         uint32_t identity = e.key | (e.state << COOP_ENEMY_STATE_SHIFT) | (e.kind << COOP_ENEMY_KIND_SHIFT);
@@ -109,7 +112,10 @@ CoopCombatFrame combat_from_words(const std::array<uint32_t, COOP_COMBAT_WIRE_WO
         e.x = w[n++]; e.y = w[n++]; e.z = w[n++]; e.yaw = w[n++];
         if (!i && e.key == 1 && e.state == COOP_ENEMY_ALIVE
                 && e.kind > boss_wire_kind_base && e.kind <= boss_wire_kind_base + COOP_BOSS_KIND_COUNT) {
-            f.boss_motion = {e.kind - boss_wire_kind_base, e.life, e.x, e.y, e.z, e.yaw};
+            f.boss_motion = {e.kind - boss_wire_kind_base, e.life, e.x, e.y, e.z, e.yaw,
+                e.peer_life & COOP_ENEMY_POSE_MASK,
+                (e.peer_life >> 5) & COOP_ENEMY_POSE_HASH_MASK};
+            if (e.peer_life & ~0x7FFu) f.boss_motion.pose = COOP_ENEMY_POSE_MASK + 1;
             e = {};
         }
     }
@@ -182,6 +188,8 @@ void CombatSync::update(bool host, const State& local, const CoopCombatFrame& in
             ++output.paired;
             if (outgoing.enabled >= 2 && remote.enabled >= 2) {
                 output.movement |= COOP_COMBAT_MOVEMENT;
+                if (outgoing.enabled == 3 && remote.enabled == 3)
+                    output.movement |= COOP_COMBAT_POSE;
                 if (!host && remote.boss_motion.kind == expected_boss
                         && remote.boss_motion.life == remote.boss.life) {
                     output.boss_motion = remote.boss_motion;

@@ -80,7 +80,7 @@ typedef struct {
 } CoopKRoolFootData;
 typedef struct {
     Actor* actor;
-    u32 generation, life, phase, kind;
+    u32 generation, life, phase, kind, pose_stamp;
 } CoopBossSlot;
 static CoopEnemySlot combat_enemies[256];
 static CoopShotSlot combat_shots[COOP_SHOTS];
@@ -375,19 +375,44 @@ static void coop_boss_behavior(void) {
     const unsigned bit = kind ? 1u << index : 0;
     const CoopBoss command = combat_result.boss;
     const CoopBossMotion motion = combat_result.boss_motion;
-    if (role == ROLE_JOIN && combat_enabled >= 2 && (combat_result.movement & COOP_COMBAT_MOVEMENT)
+    const unsigned motion_context = role == ROLE_JOIN && combat_enabled >= 2
             && kind && motion.kind == kind && motion.life == combat_boss.life
             && combat_result.status == COOP_COMBAT_READY && combat_game_ready()
             && coop_boss_kind(current_map) == kind && combat_boss.actor == actor
             && combat_boss.generation == actor->unk54 && combat_actor_live(actor, actor->unk54)
-            && (actor->object_properties_bitfield & 0x10) && motion.yaw < 4096) {
-        float x = bits_float(motion.x), y = bits_float(motion.y), z = bits_float(motion.z);
-        if (x >= -100000.0f && x <= 100000.0f && y >= -100000.0f && y <= 100000.0f
+            && (actor->object_properties_bitfield & 0x10) && motion.yaw < 4096;
+    if (!motion_context || combat_enabled != 3 || !(combat_result.movement & COOP_COMBAT_POSE))
+        combat_boss.pose_stamp = 0;
+    if (motion_context) {
+        if (combat_result.movement & COOP_COMBAT_MOVEMENT) {
+            float x = bits_float(motion.x), y = bits_float(motion.y), z = bits_float(motion.z);
+            if (x >= -100000.0f && x <= 100000.0f && y >= -100000.0f && y <= 100000.0f
                 && z >= -100000.0f && z <= 100000.0f) {
-            float dx = x - actor->x_position, dy = y - actor->y_position, dz = z - actor->z_position;
-            float blend = dx * dx + dy * dy + dz * dz > 250000.0f ? 1.0f : 0.4f;
-            actor->x_position += dx * blend; actor->y_position += dy * blend; actor->z_position += dz * blend;
-            actor->y_rotation = actor->unkEE = motion.yaw;
+                float dx = x - actor->x_position, dy = y - actor->y_position, dz = z - actor->z_position;
+                float blend = dx * dx + dy * dy + dz * dz > 250000.0f ? 1.0f : 0.4f;
+                actor->x_position += dx * blend; actor->y_position += dy * blend; actor->z_position += dz * blend;
+                actor->y_rotation = actor->unkEE = motion.yaw;
+            }
+        }
+        if (combat_enabled == 3 && (combat_result.movement & COOP_COMBAT_POSE)
+                && motion.pose && motion.pose <= COOP_ENEMY_POSE_MASK
+                && motion.clip_hash <= COOP_ENEMY_POSE_HASH_MASK
+                && actor->animation_state && actor->animation_state->unk0) {
+            ActorAnimationState* animation = actor->animation_state;
+            AnimationStateUnk0* track = animation->unk0;
+            const unsigned stamp = (motion.clip_hash << 5) | motion.pose;
+            if (track->unk0 && track->unk10 >= 0 && track->unk10 < 2048 && track->unk0->unk12
+                    && combat_boss.pose_stamp != stamp
+                    && coop_enemy_clip_hash((unsigned)track->unk10) == motion.clip_hash) {
+                s32 script = animation->unk68, sound = animation->unk6C, extra = animation->unk74;
+                s32 (*callback)(Actor*) = animation->unk70;
+                animation->unk68 = animation->unk6C = animation->unk74 = 0; animation->unk70 = NULL;
+                func_global_asm_80614644(actor, track,
+                    coop_enemy_pose_frame(motion.pose, track->unk0->unk12));
+                animation->unk68 = script; animation->unk6C = sound;
+                animation->unk70 = callback; animation->unk74 = extra;
+                combat_boss.pose_stamp = stamp;
+            }
         }
     }
     if (kind && (boss_hooks & bit) && boss_behaviors[index] == combat_boss_types[index].original
@@ -562,7 +587,7 @@ static void coop_combat_capture(void) {
         if (actor && data && phase <= 4) {
             if (combat_boss.actor != actor || combat_boss.generation != actor->unk54
                     || combat_boss.kind != boss_kind) {
-                combat_boss = (CoopBossSlot){actor, actor->unk54, 0, phase, boss_kind};
+                combat_boss = (CoopBossSlot){actor, actor->unk54, 0, phase, boss_kind, 0};
                 combat_life_counter = (combat_life_counter + 1) & COOP_ENEMY_LIFE_MASK;
                 if (!combat_life_counter) combat_life_counter = 1;
                 combat_boss.life = combat_life_counter;
@@ -572,10 +597,19 @@ static void coop_combat_capture(void) {
         if (combat_boss.life && combat_boss.kind == boss_kind
                 && (phase <= 4 || combat_boss.phase == 4)) {
             combat_input.boss = (CoopBoss){boss_kind, combat_boss.life, 0, combat_boss.phase};
-            if (combat_enabled >= 2 && actor)
+            if (combat_enabled >= 2 && actor) {
                 combat_input.boss_motion = (CoopBossMotion){boss_kind, combat_boss.life,
                     float_bits(actor->x_position), float_bits(actor->y_position),
-                    float_bits(actor->z_position), (unsigned)actor->y_rotation & 0xFFF};
+                    float_bits(actor->z_position), (unsigned)actor->y_rotation & 0xFFF, 0, 0};
+                if (combat_enabled == 3 && actor->animation_state && actor->animation_state->unk0) {
+                    AnimationStateUnk0* track = actor->animation_state->unk0;
+                    if (track->unk0 && track->unk10 >= 0 && track->unk10 < 2048 && track->unk0->unk12) {
+                        combat_input.boss_motion.pose = coop_enemy_pose_encode(track->unk4, track->unk0->unk12);
+                        if (combat_input.boss_motion.pose)
+                            combat_input.boss_motion.clip_hash = coop_enemy_clip_hash((unsigned)track->unk10);
+                    }
+                }
+            }
         }
     }
     if (coop_combat_map(current_map) && combat_hooks && D_807FDC88.count > 0 && D_807FDC88.count <= 256 && D_807FDC88.first) {
