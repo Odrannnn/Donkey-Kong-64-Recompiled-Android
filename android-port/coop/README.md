@@ -7,6 +7,8 @@ Tiny's six dartboard targets, Galleon's five instrument/two slam switches, and
 Llama Temple's coconut/bongo switches. Tiny Temple's opening switch, Diddy
 guitar pad and charge switch use the same pinned activation path, and its KONG
 letters advance through a bounded four-step sequence.
+Japes' three coconut switches now run the local Diddy-cage counter and opening
+sequence from the host's reviewed state-2 activations.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
 progress advances one locally valid note at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied

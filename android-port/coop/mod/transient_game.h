@@ -12,6 +12,10 @@ static Prop_ScriptData* coop_transient_script(unsigned object);
 // timer-driven presentation, or linked platform. Permanent gate/door readers
 // come from coop_live_world_states below.
 static const CoopTransientObject coop_transient_extra_objects[] = {
+    // Japes Diddy-cage coconut switches. Their local state-2 blocks update the
+    // shared vanilla cage counter; the cage/reward scripts remain local.
+    {7, 0x30, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x31, COOP_TRANSIENT_TRIGGER, 2},
+    {7, 0x32, COOP_TRANSIENT_TRIGGER, 2},
     {30, 0, COOP_TRANSIENT_TIMER, 0}, {30, 1, COOP_TRANSIENT_TIMER, 0},
     // Galleon's five instrument pads and Lanky/Tiny slam switches. State 2 is
     // the shared vanilla post-input entry; each linked door remains local.

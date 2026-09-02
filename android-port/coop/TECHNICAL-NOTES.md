@@ -1760,3 +1760,16 @@ Tiny rescue controller. A guest whose first letter has not been enabled by the
 charge-switch sequence is left untouched, so a packet cannot start or complete
 the puzzle on its own. Permanent Tiny ownership still converges through the
 item channel.
+
+## Japes Diddy-cage coconut switches (0.49.0)
+
+Jungle Japes map 7 objects `0x30`, `0x31` and `0x32` are the three vanilla
+coconut switches around Diddy's cage. Each waits in state 1 and enters state 2
+only after the local projectile check. A typed trigger mirrors that exact entry
+while both players share the same Japes map epoch.
+
+The receiving switch executes its original counter, sound, model and temporary
+state operations. The cage objects `0x2D` through `0x2F` observe that local
+counter and run their own timed opening and reward path; the packet never names
+a cage state, counter value, projectile or Diddy ownership flag. Permanent Diddy
+ownership remains in the item channel.
