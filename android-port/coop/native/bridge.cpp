@@ -15,7 +15,7 @@ namespace {
 dkcoop::Session session;
 dkcoop::Status previous = dkcoop::Status::off;
 bool failed = false;
-struct ExtraInput { dkcoop::ProgressInput gate; CoopCombatFrame combat; CoopItemInput items; CoopWorldInput world; CoopTransientInput transient; };
+struct ExtraInput { dkcoop::ProgressInput gate; CoopCombatFrame combat; CoopItemInput items; CoopWorldInput world; CoopTransientInput transient; CoopTraceInput trace; };
 struct ExtraResult { dkcoop::ProgressResult gate; CoopCombatResult combat; CoopItemResult items; CoopWorldResult world; CoopTransientResult transient; };
 constexpr uint32_t rdram_base = 0x80000000u, rdram_size = 0x20000000u;
 bool valid_span(uint32_t address, size_t size, bool aligned = true) {
@@ -56,13 +56,13 @@ COOP_EXPORT void dk64_coop_local_ipv4(uint8_t*, recomp_context* ctx) {
     ctx->r2 = session.local_ipv4();
 }
 // A new export rejects older NRM/library pairs before reading the larger spans.
-COOP_EXPORT void dk64_coop_tick_v47(uint8_t* rdram, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_tick_v48(uint8_t* rdram, recomp_context* ctx) {
     uint32_t local_address = uint32_t(ctx->r4), remote_address = uint32_t(ctx->r5);
     uint32_t progress_address = uint32_t(ctx->r6), result_address = uint32_t(ctx->r7);
     constexpr size_t bytes = dkcoop::state_words * sizeof(uint32_t);
     static_assert(sizeof(dkcoop::ProgressInput) == dkcoop::progress_input_words * 4);
     static_assert(sizeof(dkcoop::ProgressResult) == dkcoop::progress_result_words * 4);
-    static_assert(sizeof(ExtraInput) == 2792 && sizeof(ExtraResult) == 3468);
+    static_assert(sizeof(ExtraInput) == 2856 && sizeof(ExtraResult) == 3468);
     if (!valid_span(local_address, bytes) || !valid_span(remote_address, bytes)
             || !valid_span(progress_address, sizeof(ExtraInput))
             || !valid_span(result_address, sizeof(ExtraResult))) {
@@ -77,7 +77,8 @@ COOP_EXPORT void dk64_coop_tick_v47(uint8_t* rdram, recomp_context* ctx) {
         // The former Japes-only gate experiment is retired. Its fixed-size
         // bridge result slots remain reserved and canonical zero in v46. Four
         // retired wire words now carry the expanded world-state prefix.
-        if (!failed) session.tick(dkcoop::state_from_words(local), now, {}, progress.combat, progress.items, progress.world, progress.transient);
+        if (!failed) session.tick(dkcoop::state_from_words(local), now, {}, progress.combat,
+            progress.items, progress.world, progress.transient, progress.trace);
         auto remote = dkcoop::state_to_words(session.remote(now));
         std::memcpy(rdram + (remote_address - rdram_base), remote.data(), bytes);
         ExtraResult result{{}, session.combat(now), session.items(now), session.world(now), session.transient(now)};

@@ -35,6 +35,12 @@ the ZIP, but both are produced and checksummed by the same release run. The entr
 point does not install, launch, commit, push, or publish anything, and it does not
 perform gameplay testing.
 
+The build passes the resolved workspace explicitly to every CMake target and to
+`build-mod.sh`. RecompModTool receives a generated build-local manifest whose
+paths are absolute; the checked-in manifest stays relocatable. This prevents an
+old adjacent checkout or caller working directory from silently supplying the
+wrong symbols, ELF, or toolchain.
+
 If an earlier run failed, its directory is retained for inspection and the
 default command refuses to overwrite it. After inspection, rerun with the
 following explicit option to remove only the derived

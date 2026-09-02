@@ -1,4 +1,4 @@
-> Current source: 0.46.0, protocol/native ABI v46. All eight native suites pass
+> Current source: 0.48.0, protocol/native ABI v48. All eleven native suites pass
 > in the pinned Linux GNU C++ 15.2.0 Debug ASan/UBSan build and the MIPS NRM
 > build. The full Android ARM64, Windows x64, format/export, package-contract and
 > importer verification pass also succeeds. Gameplay validation remains pending.
@@ -1582,3 +1582,25 @@ then requests the normal isolated save. It never changes a coin counter, starts
 Arcade, sets a temporary Arcade flag or grants either reward. A blocked write
 retries, a local payment wins the race, and invalid prerequisite snapshots fail
 closed. IDs 0 through 5895 remain unchanged.
+
+## Read-only LAN trace endpoint (0.48.0)
+
+Each native session binds the first available UDP port from `base + 1` through
+`base + 8` using a fresh socket for every candidate. A dedicated worker answers
+the fixed `DK64COOP_TRACE_V1` request from loopback and private IPv4 sources. It
+serializes a mutex-protected cache populated by `Session::tick`; it never reads
+RDRAM or calls the game adapter. The bounded JSON contains protocol and
+compatibility values, local/session fingerprints, role/status/address, packet
+age, rejected-packet count, current map/epoch/player flags, and item, world,
+same-area-event, and combat readiness. Local item wait reasons distinguish first
+snapshot, unsafe area, save-file change, invalid counters, reward queue, HUD,
+same-level pickup, progression context, and Troff feeding.
+
+`tools/query_trace.py` uses one socket per target/port. This avoids Windows UDP
+`WSAECONNRESET` from an unused port invalidating a reply received for another
+candidate. With no `--ip`, it recomputes local `/24` broadcast addresses on each
+watch iteration, so DHCP address changes do not require a stored diagnostic
+address. The trace endpoint is diagnostic only and does not alter gameplay,
+campaign saves, peer discovery, or the mod loader. Protocol 48, compatibility
+`0x00010130`, export `dk64_coop_tick_v48`, and manifest 0.48.0 reject mixed
+native companions and peers.

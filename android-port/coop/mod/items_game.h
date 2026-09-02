@@ -120,7 +120,23 @@ static inline void coop_items_save_world_lobby(CoopItems* g, unsigned stable) {
 }
 static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
     g->troff_pending = 0;
-    if (!g->input.ready || g->deferred || g->file_changed || g->counter_error || D_global_asm_807FD730) return;
+    g->wait_reason = COOP_TRACE_WAIT_NONE;
+    g->wait_id = 0xFFFFFFFFu;
+    if (!g->input.ready) {
+        coop_items_wait(g, COOP_TRACE_WAIT_SNAPSHOT, 0xFFFFFFFFu); return;
+    }
+    if (g->deferred) {
+        coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, 0xFFFFFFFFu); return;
+    }
+    if (g->file_changed) {
+        coop_items_wait(g, COOP_TRACE_WAIT_FILE, 0xFFFFFFFFu); return;
+    }
+    if (g->counter_error) {
+        coop_items_wait(g, COOP_TRACE_WAIT_COUNTER, 0xFFFFFFFFu); return;
+    }
+    if (D_global_asm_807FD730) {
+        coop_items_wait(g, COOP_TRACE_WAIT_REWARD_QUEUE, 0xFFFFFFFFu); return;
+    }
     unsigned here = getLevelIndex(current_map, 1);
     safe_to_save = safe_to_save && coop_items_safe_map();
     if (g->result.status == 2 || g->result.status == 3) {
@@ -128,7 +144,10 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
         for (unsigned id = 0; id < COOP_ITEMS; ++id) {
             if (!coop_item_has(g->result.apply, id) || coop_item_owned(id)) continue;
             if (id >= COOP_TROFF_FIRST && id < COOP_TROFF_END) {
-                if (!coop_troff_apply(g, id, safe_to_save, here)) g->troff_pending = 1;
+                if (!coop_troff_apply(g, id, safe_to_save, here)) {
+                    g->troff_pending = 1;
+                    coop_items_wait(g, COOP_TRACE_WAIT_TROFF, id);
+                }
                 if (g->counter_error) break;
                 continue;
             }
@@ -151,7 +170,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                     for (unsigned p = COOP_PROGRESSION_FIRST; p < COOP_PROGRESSION_END; ++p)
                         if (coop_progression_owned(p)) g->previous[p / 32] |= 1u << (p % 32);
                     g->save_pending = 1;
-                }
+                } else coop_items_wait(g, COOP_TRACE_WAIT_PROGRESSION_CONTEXT, id);
                 continue;
             }
             unsigned level = 0, kong = 0, before = 0, amount = 1;
@@ -174,14 +193,25 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
             if (boulder_bunch) { level = 0; kong = 4; amount = 5; }
             // This flag controls access to a later Arcade run. Let Factory and
             // the Arcade overlay unload before changing it; never copy its fee.
-            if (arcade_paid && (!safe_to_save || here == 2)) continue;
+            if (arcade_paid && (!safe_to_save || here == 2)) {
+                coop_items_wait(g, COOP_TRACE_WAIT_SAVE_UNSAFE, id); continue;
+            }
             if (gb || pickup || actor || boulder_bunch) {
                 // Outside the reward's level no stale prop/reward script remains
                 // loaded. Next entry sees the save bit and omits the old item.
                 // Snide's flag-guarded menu is safe outside HQ, as in v0.7.
-                if (!safe_to_save || !coop_items_main_world() || !D_global_asm_80754280 || here >= 8
-                        || ((pickup || id >= COOP_GB_FIRST) && level == here)) continue;
-                if (gb && id < COOP_MEDAL_FIRST && !isFlagSet(0x1D5 + id - COOP_SNIDE_FIRST, 0)) continue;
+                if (!safe_to_save || !coop_items_main_world() || here >= 8) {
+                    coop_items_wait(g, COOP_TRACE_WAIT_SAVE_UNSAFE, id); continue;
+                }
+                if (!D_global_asm_80754280) {
+                    coop_items_wait(g, COOP_TRACE_WAIT_HUD, id); continue;
+                }
+                if ((pickup || id >= COOP_GB_FIRST) && level == here) {
+                    coop_items_wait(g, COOP_TRACE_WAIT_SAME_LEVEL_ITEM, id); continue;
+                }
+                if (gb && id < COOP_MEDAL_FIRST && !isFlagSet(0x1D5 + id - COOP_SNIDE_FIRST, 0)) {
+                    coop_items_wait(g, COOP_TRACE_WAIT_PROGRESSION_CONTEXT, id); continue;
+                }
                 CoopCharacterProgress* p = &D_global_asm_807FC950[0].character_progress[kong];
                 if (rainbow) {
                     for (unsigned k = 0; k < 5; ++k) {

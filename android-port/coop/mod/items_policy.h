@@ -3,6 +3,7 @@
 #include "collectible_ids.h"
 #include "progression_ids.h"
 #include "troff_ids.h"
+#include "trace_types.h"
 // Stable item IDs, never arbitrary flags supplied by a peer. All ABI fields are words.
 enum { COOP_JAPES_BOULDER_BUNCH = COOP_TROFF_END, COOP_KROOL_DEFEATED = COOP_JAPES_BOULDER_BUNCH + 1,
     COOP_ARCADE_COINS_PAID = COOP_KROOL_DEFEATED + 1, COOP_ITEMS = COOP_ARCADE_COINS_PAID + 1,
@@ -29,7 +30,17 @@ typedef struct {
     // later safe capture proves the live save layout again.
     unsigned baseline, join, bound, deferred, live_snapshot, world_save_pending,
         previous[COOP_ITEM_WORDS];
+    // Local diagnostics only. These fields never cross the co-op wire and do
+    // not affect ownership or apply decisions.
+    unsigned wait_reason, wait_id;
 } CoopItems;
+
+static inline void coop_items_wait(CoopItems* g, unsigned reason, unsigned id) {
+    if (!g->wait_reason || id < g->wait_id) {
+        g->wait_reason = reason;
+        g->wait_id = id;
+    }
+}
 static inline int coop_item_flag(unsigned id) {
     static const unsigned keys[8] = {0x1A, 0x4A, 0x8A, 0xA8, 0xEC, 0x124, 0x13D, 0x17C};
     if (id < 40) return 0x1D5 + id; // Blueprints, not Snide's separate GB rewards.
