@@ -114,6 +114,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Factory Snatch Room grate. Unlike ordinary triggers, its reviewed punch
     // edge enters state 1 directly from ready state 0.
     {26, 0x15, COOP_TRANSIENT_TRIGGER, 1},
+    // Japes Mountain's paired slam switches. A real hit occupies states 2-5;
+    // states 10/11/15/16 are cross-linked presentation states, not hits.
+    {4, 0x0A, COOP_TRANSIENT_TRIGGER, 2}, {4, 0x0B, COOP_TRANSIENT_TRIGGER, 2},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.
     {26, 0x2E, COOP_TRANSIENT_TRIGGER, 2}, {26, 0x2F, COOP_TRANSIENT_TRIGGER, 2},
@@ -225,6 +228,8 @@ static unsigned coop_transient_object_kind(unsigned map, unsigned object) {
 
 static unsigned coop_transient_trigger_fired(unsigned map, unsigned object,
         unsigned raw, unsigned activation) {
+    if (map == 4 && (object == 0x0A || object == 0x0B))
+        return raw >= 2 && raw <= 5;
     if (map == 38 && object >= 0x0D && object <= 0x0F)
         return raw >= 2 && raw <= 6;
     return raw >= activation && raw < 20;
@@ -362,6 +367,14 @@ static void coop_transient_apply(void) {
                     // Vanilla function 28 adds one to controller state index 0
                     // before the target enters state 2.
                     controller->unk48[0] += 1;
+                }
+                if ((unsigned)current_map == 4 && (record.key == 0x0A || record.key == 0x0B)) {
+                    unsigned linked = record.key == 0x0A ? 0x0B : 0x0A;
+                    Prop_ScriptData* partner = coop_transient_script(linked);
+                    if (!partner || partner->unk48[0] != 1) continue;
+                    // The stock hit block puts the opposite switch into its
+                    // linked state before entering this switch's state 2.
+                    coop_live_world_set_object(linked, 10);
                 }
                 coop_live_world_set_object(record.key, activation);
             }

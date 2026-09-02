@@ -1641,6 +1641,17 @@ item transaction and only during regular play with no loading or reward queue.
 Every other remotely-startable cutscene remains prohibited; the generic
 same-area cutscene channel still only aligns two already-running matching scenes.
 
+## Japes Mountain paired slam switches (0.49.0)
+
+Japes Mountain map 4 objects `0xA` and `0xB` are paired slam switches. Each
+waits in state 1 and enters states 2 through 5 after its own hit. The same
+vanilla hit block places the opposite switch into linked state 10.
+
+Capture treats only states 2 through 5 as a fired trigger; linked presentation
+states 10, 11, 15 and 16 remain ready observations. Receive requires both
+switches at state 1, places the opposite switch at state 10, then starts the hit
+switch at state 2. Timers, sounds, animations and later reset states stay local.
+
 ## Factory Snatch Room grate (0.49.0)
 
 Factory map 26 object `0x15` is the Snatch Room punchable grate. It uniquely

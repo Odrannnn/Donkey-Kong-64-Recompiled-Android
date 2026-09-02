@@ -18,6 +18,8 @@ Factory's triangle, guitar and trombone pads mirror their reviewed activation
 edge while their timers and linked production-room objects run locally.
 The Snatch Room grate mirrors its exact state-zero punch entry while its camera,
 animation, sound and reset sequence run locally.
+Japes Mountain's paired slam switches mirror each hit together with the stock
+state-10 update of the opposite switch.
 Japes' nine reviewed Diddy-cage, hive, painting-room, Diddy-cave and Rambi gun
 switches now run their local counters and gate sequences from state-2 activations.
 Aztec's three exterior llama switches share only their bounded projectile path;
