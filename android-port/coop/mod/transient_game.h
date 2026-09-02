@@ -103,6 +103,11 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {38, 0x02, COOP_TRANSIENT_TRIGGER, 2}, {38, 0x03, COOP_TRANSIENT_TRIGGER, 2},
     {38, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {38, 0x05, COOP_TRANSIENT_TRIGGER, 2},
     {38, 0x9F, COOP_TRANSIENT_TRIGGER, 2}, {38, 0xA0, COOP_TRANSIENT_TRIGGER, 2},
+    // Five-door totem weapon switches are locally revealed by permanent flag
+    // 0x37. Only exact ready state 12 may enter the projectile-hit state 13.
+    {38, 0x10, COOP_TRANSIENT_TRIGGER, 13}, {38, 0x11, COOP_TRANSIENT_TRIGGER, 13},
+    {38, 0x12, COOP_TRANSIENT_TRIGGER, 13}, {38, 0x13, COOP_TRANSIENT_TRIGGER, 13},
+    {38, 0x14, COOP_TRANSIENT_TRIGGER, 13},
     // Isles trombone pad. Its local barrel dependency moves it to state 2;
     // only then may the reviewed instrument activation enter state 3.
     {34, 0x31, COOP_TRANSIENT_TRIGGER, 3},
@@ -331,6 +336,8 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
     if (map == 7 && (object == 0x1F || object == 0x20))
         return activation == 11 && raw == 1;
     if (map == 30 && object >= 0x2F && object <= 0x31)
+        return activation == 13 && raw == 12;
+    if (map == 38 && object >= 0x10 && object <= 0x14)
         return activation == 13 && raw == 12;
     return raw > 0 && raw < activation;
 }

@@ -173,6 +173,21 @@ static void capture_checks() {
     CHECK(saw_aztec_2 && saw_aztec_3 && saw_aztec_4);
     CHECK(saw_aztec_5 && saw_aztec_9f && saw_aztec_a0);
 
+    reset(); current_map = 38;
+    load(0, 0x10, 12); load(1, 0x11, 13); load(2, 0x12, 11);
+    load(3, 0x13, 12); load(4, 0x14, 17);
+    bool saw_totem_10 = false, saw_totem_11 = false, saw_totem_12 = false;
+    bool saw_totem_13 = false, saw_totem_14 = false;
+    for (unsigned page = 0; page < 12; ++page) {
+        coop_transient_capture(1);
+        saw_totem_10 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x10, 1, 13);
+        saw_totem_11 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x11, 2, 13);
+        saw_totem_12 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x12, 1, 13);
+        saw_totem_13 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x13, 1, 13);
+        saw_totem_14 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x14, 2, 13);
+    }
+    CHECK(saw_totem_10 && saw_totem_11 && saw_totem_12 && saw_totem_13 && saw_totem_14);
+
     reset(); current_map = 30; load(0, 0, 10, 123); load(1, 1, 6, 45);
     bool saw_timer_0 = false, saw_timer_1 = false;
     for (unsigned page = 0; page < 8; ++page) {
@@ -613,6 +628,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x9F && last_state == 2);
     scripts[0x9F].unk48[0] = 20; coop_transient_apply();
     CHECK(script_calls == 1); // Completed presentation cannot restart.
+
+    reset(); role = ROLE_JOIN; current_map = 38; load(0, 0x12, 12);
+    transient_result = {COOP_TRANSIENT_APPLYING, 38, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x12, 2, 13}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x12 && last_state == 13);
+    scripts[0x12].unk48[0] = 11; coop_transient_apply();
+    CHECK(script_calls == 1); // An unrevealed switch is not remotely armed.
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x31, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,

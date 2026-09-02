@@ -2248,3 +2248,15 @@ matching projectile hit.
 Typed triggers mirror only those activation entries. Each local script retains
 its sound, timer, animation, linked door and permanent flag. Completed state 20
 and every linked object remain local and cannot be selected or replayed.
+
+## Aztec five-door totem switches (0.49.0)
+
+Aztec map 38 objects `0x10` through `0x14` are the five Kong weapon switches on
+the five-door totem. The permanent totem activation flag `0x37` initializes each
+available switch through states 10 and 11 into ready state 12. Its matching
+projectile hit then enters state 13.
+
+Typed triggers publish only that state-13 hit and the receiver requires exact
+local state 12. The packet cannot set flag `0x37`, reveal or arm a switch, or
+select a Kong/projectile. Each local script retains its sound, cutscene, linked
+door, 300-frame cycle, animation and return to ready state 12.

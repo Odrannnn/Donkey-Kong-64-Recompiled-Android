@@ -41,6 +41,8 @@ their separate linked states remain local. Diddy's exterior guitar pad runs its
 own rotating-tower timer and linked-object sequence on both peers.
 Aztec's four exterior gate switches and all four blueprint-door switches mirror
 only their exact projectile-hit entry; their doors and flags remain locally scripted.
+Its five totem weapon switches mirror hits only after both copies have reached
+the vanilla revealed state; totem activation and availability remain local.
 Fungi's paired feather and pineapple tunnel switches and its yellow-tunnel grape
 switch now use the same bounded projectile-entry path.
 The Aztec and Fungi lobby feather switches also mirror only their stock
