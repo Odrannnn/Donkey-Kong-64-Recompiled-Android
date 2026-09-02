@@ -26,7 +26,7 @@ static void protocol_tests() {
         {34, 3, 4, active, 1.0f, -2.5f, 0.0f, 4095, 5, 3.5f, 11, 0x000007A9u}};
     auto bytes = encode(p); Packet decoded;
     CHECK(bytes.size() == packet_size);
-    const std::array<uint8_t, 40> header{0x44,0x4b,0x43,0x50,0,50,0,3,0,1,2,0x32,0x12,0x34,0x56,0x78,
+    const std::array<uint8_t, 40> header{0x44,0x4b,0x43,0x50,0,51,0,3,0,1,2,0x33,0x12,0x34,0x56,0x78,
         1,2,3,4,5,6,7,8,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0,1,0xe2,0x40,0,0,0,0};
     for (size_t i = 0; i < header.size(); ++i) CHECK(bytes[i] == header[i]);
     CHECK(bytes[56] == 0x3f && bytes[57] == 0x80 && bytes[60] == 0xc0 && bytes[61] == 0x20);
@@ -117,6 +117,7 @@ static void session_tests() {
     CHECK(!conflict.start({Role::join, "255.255.255.255", host.bound_port(), 123456}, now));
     CHECK(!conflict.start({Role::host, "", 0, 0}, now));
     CHECK(conflict.start({Role::off, "", 0, 0}, now)); CHECK(conflict.status() == Status::off);
+
 }
 
 // Exercise the real socket boundary with a peer that can send adversarial packets.
@@ -128,7 +129,7 @@ struct RawPeer {
     int socket = -1;
 #endif
     sockaddr_in target{};
-    explicit RawPeer(uint16_t port) {
+    explicit RawPeer(uint16_t port, const char* local_ip = "127.0.0.1", uint16_t local_port = 0) {
 #ifdef _WIN32
         WSADATA data{}; CHECK(WSAStartup(MAKEWORD(2, 2), &data) == 0);
 #endif
@@ -140,9 +141,11 @@ struct RawPeer {
         CHECK(socket >= 0);
         CHECK(fcntl(socket, F_SETFL, O_NONBLOCK) == 0);
 #endif
-        sockaddr_in address{}; address.sin_family = AF_INET; address.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        sockaddr_in address{}; address.sin_family = AF_INET;
+        CHECK(inet_pton(AF_INET, local_ip, &address.sin_addr) == 1);
+        address.sin_port = htons(local_port);
         CHECK(bind(socket, reinterpret_cast<sockaddr*>(&address), sizeof(address)) == 0);
-        target = address; target.sin_port = htons(port);
+        target = address; target.sin_addr.s_addr = htonl(INADDR_LOOPBACK); target.sin_port = htons(port);
     }
     ~RawPeer() {
 #ifdef _WIN32
@@ -161,7 +164,52 @@ struct RawPeer {
         int count = int(recvfrom(socket, reinterpret_cast<char*>(bytes.data()), int(bytes.size()), 0, nullptr, nullptr));
         return count > 0 && decode(bytes.data(), size_t(count), packet);
     }
+    uint16_t port() const {
+        sockaddr_in address{};
+#ifdef _WIN32
+        int length = sizeof(address);
+#else
+        socklen_t length = sizeof(address);
+#endif
+        CHECK(getsockname(socket, reinterpret_cast<sockaddr*>(&address), &length) == 0);
+        return ntohs(address.sin_port);
+    }
+    void target_port(uint16_t port) { target.sin_port = htons(port); }
 };
+
+static void changed_host_address_tests() {
+    uint64_t now = 20000;
+    RawPeer old_address(0, "127.0.0.1");
+    RawPeer new_address(0, "127.0.0.2", old_address.port());
+    Session guest;
+    CHECK(guest.start({Role::join, "127.0.0.1", old_address.port(), 654321}, now));
+    old_address.target_port(guest.bound_port());
+    new_address.target_port(guest.bound_port());
+    State local{34, 1, 1, active, 1, 2, 3, 4};
+    Packet hello{};
+    bool got_hello = false;
+    for (unsigned i = 0; i < 200 && !got_hello; ++i) {
+        now += 10; guest.tick(local, now);
+        got_hello = old_address.receive(hello);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    CHECK(got_hello && hello.kind == Kind::hello && hello.room == 654321 && hello.session == 0);
+    Packet welcome{Kind::welcome, 1, 0x123456789ABCDEFu, hello.nonce, 654321, {}};
+    new_address.send(welcome);
+    for (unsigned i = 0; i < 100 && guest.status() != Status::connected; ++i) {
+        now += 10; guest.tick(local, now);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    CHECK(guest.status() == Status::connected);
+    Packet state{};
+    for (unsigned i = 0; i < 100 && state.kind != Kind::state; ++i) {
+        now += 10; guest.tick(local, now);
+        new_address.receive(state);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    CHECK(state.kind == Kind::state && state.session == welcome.session
+        && state.nonce == welcome.nonce);
+}
 
 static void adversarial_session_tests() {
     uint64_t now = 10000;
@@ -203,6 +251,6 @@ static void adversarial_session_tests() {
     CHECK(host.status() == Status::listening);
 }
 int main() {
-    protocol_tests(); session_tests(); adversarial_session_tests();
+    protocol_tests(); session_tests(); changed_host_address_tests(); adversarial_session_tests();
     std::printf("PASS: %u assertions, 50000 malformed-packet probes, live UDP lifecycle tests\n", checks);
 }

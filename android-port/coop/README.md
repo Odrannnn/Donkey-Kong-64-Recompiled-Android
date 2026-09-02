@@ -1,10 +1,14 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.50.0** uses the new upstream map-load event to invalidate room
-epochs exactly, including same-map reloads, and verifies that the isolated
-campaign was selected before the new EEPROM-load boundary. It requires the
-actual 1.0.2 event table and rejects mixed protocol-50 peers. It retains the
+Version **0.51.0** adds room-code LAN discovery and conservative manual host
+recovery. A guest can promote its last fully acknowledged, save-safe checkpoint
+without switching the loaded save; explicit save-copy selection preserves that
+authority across later restarts. A new session generation invalidates all old
+packets and transient state. It also follows a host whose DHCP address changes,
+while retaining the numeric address as a direct fallback. Protocol 51 requires
+a matching peer and native companion. It retains 0.50.0's upstream map-load and
+EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
 production switches, Diddy's three 3-1-2-4 room switches, Lanky's piano notes,
 Tiny's six dartboard targets, Galleon's three cannon targets plus six gun/five instrument/two slam switches, and
@@ -154,11 +158,10 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.50.0 adds a
-thirteenth native lifecycle suite. All 13 sanitizer suites and the complete
-MIPS, Android ARM64, Windows x64, binary-format, v50 export, package-contract,
-Android app and importer release pipeline pass. Gameplay and device validation
-remain pending.**
+**This is experimental, not complete campaign co-op. Version 0.51.0 passes all
+14 Linux ASan/UBSan native suites and the complete maintained release pipeline:
+MIPS NRM, Android ARM64, Windows x64, ABI/export, APK, package and Android
+importer checks. Gameplay and device validation remain pending.**
 Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
 Back up experimental saves before using the build.
@@ -170,7 +173,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.50
+While the native companion is loaded, `tools/query_trace.py` discovers v0.51
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -184,7 +187,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.50.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.51.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -194,7 +197,8 @@ worker never accesses game memory itself.
 3. Set **LAN session** to Host on one device and Join on the other. Start the
    host and read its numeric LAN IPv4 address from the host HUD, then enter it on
    the joining device. Android dev12 opens the software keyboard when a native
-   text field is tapped. Match the port
+   text field is tapped. The address is a fast path: room-code discovery can
+   reconnect after either device receives a different DHCP address. Match the port
    (default 6464) and six-digit room code (default 123456). Leave **Transition
    behavior** at its default **Independent exploration**, or choose **Follow
    host** on the joining device for coordinated travel.
@@ -228,6 +232,43 @@ imports only validated permanent shared IDs through normal game grant/save paths
 when both show **LAN ITEMS: SYNCED**, return the option to **Stop safely**. This
 produces the union and cannot import excluded temporary state. Back up both role
 files together before resolving a conflict.
+
+## Host recovery and address changes
+
+Protocol 51 sends each disconnected Join hello to both the last known host and
+the active interfaces' LAN broadcast addresses. A matching host replies directly,
+and the guest adopts that source as its new destination. A guest address change
+is handled by the same fresh hello after the host's three-second timeout. Networks
+with Wi-Fi client isolation or blocked UDP broadcast still require entering the
+new host address manually.
+
+The guest continuously evaluates a recovery checkpoint even when the recovery
+setting is Off. It becomes eligible only after 120 consecutive regular frames
+with both persistent channels synchronized, no requests or applies pending, no
+reward/save/reload work queued, and the guest in a reviewed save-safe map. Any
+new guest pickup or reversible-world action before disconnection invalidates the
+checkpoint until both saves converge again.
+
+To recover after the host is confirmed offline:
+
+1. On the guest, open the mod configuration and set **Manual host recovery** to
+   **Promote now**. Promotion waits for safe gameplay and fails closed without a
+   checkpoint. It restarts the UDP socket as Host, creates a new session generation,
+   clears old acknowledgements/transient events and keeps the loaded guest save.
+2. Before restarting that promoted device, set **LAN session** to **Host** and
+   **Recovery save copy** to **Guest checkpoint copy**. Keep the same campaign.
+3. On the former host, set **LAN session** to **Join** and **Recovery save copy**
+   to **Host checkpoint copy**, then connect to the promoted device. If its old
+   host copy contains additional progress, enable **Merge guest progress into
+   host** on the promoted host for that one reconciliation and return it to
+   **Stop safely** after both clients reach SYNCED.
+
+Do not promote during a temporary Wi-Fi interruption. If the old host remains
+active, both devices can become independent authorities; the protocol cannot
+choose safely between them. A failed local host-port bind returns the device to
+Join and requires changing the recovery option away from **Promote now** before
+retrying. Promotion is in-memory until the role/save-copy settings above are
+selected for the next restart. No raw save bytes are copied.
 
 Expanded sharing may reveal differences between previously independent
 collectibles or upgrades in old test saves. Use the matching campaign, a fresh

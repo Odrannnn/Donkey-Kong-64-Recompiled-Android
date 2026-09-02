@@ -12,10 +12,11 @@
 #include "transition_policy.h"
 #include "trace_types.h"
 #include "lifecycle_policy.h"
+#include "recovery_policy.h"
 
 typedef struct { CoopGateInput gate; CoopCombatFrame combat; CoopItemInput items; CoopWorldInput world; CoopTransientInput transient; CoopTraceInput trace; } CoopExtraInput;
 typedef struct { CoopGateResult gate; CoopCombatResult combat; CoopItemResult items; CoopWorldResult world; CoopTransientResult transient; } CoopExtraResult;
-_Static_assert(sizeof(CoopExtraInput) == 2856 && sizeof(CoopExtraResult) == 3468, "v50 bridge ABI");
+_Static_assert(sizeof(CoopExtraInput) == 2856 && sizeof(CoopExtraResult) == 3468, "v51 bridge ABI");
 _Static_assert(sizeof(CoopCharacterProgress) == 0x5E && __builtin_offsetof(CoopCharacterProgress, golden_bananas) == 0x42
     && __builtin_offsetof(CoopCharacterProgress, coins) == 0x6
     && __builtin_offsetof(CoopCharacterProgress, coloured_bananas) == 0xA
@@ -127,7 +128,7 @@ _Static_assert(COOP_TROFF_FIRST == 2394 && COOP_TROFF_END == 5894 && COOP_JAPES_
 
 RECOMP_IMPORT(".", u32 dk64_coop_start(u32 role, const char* ip, u32 port, u32 room));
 RECOMP_IMPORT(".", u32 dk64_coop_local_ipv4(void));
-RECOMP_IMPORT(".", u32 dk64_coop_tick_v50(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
+RECOMP_IMPORT(".", u32 dk64_coop_tick_v51(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
 RECOMP_IMPORT(".", void dk64_coop_stop(void));
 
 extern Actor *gPlayerPointer, *gCurrentActorPointer, *gLastSpawnedActor;
@@ -185,9 +186,12 @@ enum { STATE_ACTIVE = 1, STATE_CUTSCENE = 2 };
 static u32 role, status, epoch = 1, boot_initialized;
 static u32 map_load_serial, eeprom_load_started;
 static CoopMapLifecycle map_lifecycle = {-1, 0};
-static u32 save_profile;
+static u32 save_profile, save_copy, using_host_save;
 static u32 shared_items;
 static u32 merge_guest_progress;
+static u32 recovery_state, promoted_host;
+static CoopHostRecovery host_recovery;
+static u32 recovery_world_change[COOP_WORLD_TOGGLES];
 static u32 automatic_world_refresh;
 static u32 follow_host_transitions;
 static u32 transient_enabled, transient_revision = 1, transient_page;
@@ -275,14 +279,19 @@ static void coop_select_save(void) {
     merge_guest_progress = role == ROLE_HOST && recomp_get_config_u32("save_conflict") == 1;
     save_profile = recomp_get_config_u32("save_profile");
     if (save_profile >= 8) save_profile = 0;
+    save_copy = recomp_get_config_u32("recovery_save_copy");
+    if (save_copy > 2) save_copy = 0;
+    using_host_save = coop_recovery_use_host_copy(role, save_copy);
     automatic_world_refresh = shared_items && recomp_get_config_u32("automatic_world_refresh") == 1;
     follow_host_transitions = recomp_get_config_u32("follow_host_transitions") == 1;
     combat_enabled = recomp_get_config_u32("combat");
     if (combat_enabled > 3) combat_enabled = 0;
     transient_enabled = recomp_get_config_u32("same_area_events") == 1;
-    if (shared_items) recomp_change_save_file(role == ROLE_HOST ? item_host_saves[save_profile] : item_guest_saves[save_profile]);
-    else recomp_change_save_file(role == ROLE_HOST ? presence_host_saves[save_profile] : presence_guest_saves[save_profile]);
-    recomp_printf("[dk64-coop] Using isolated co-op campaign %d save.\n", save_profile + 1);
+    if (shared_items) recomp_change_save_file(using_host_save ? item_host_saves[save_profile] : item_guest_saves[save_profile]);
+    else recomp_change_save_file(using_host_save ? presence_host_saves[save_profile] : presence_guest_saves[save_profile]);
+    promoted_host = role == ROLE_HOST && !using_host_save;
+    recomp_printf("[dk64-coop] Using isolated co-op campaign %d %s copy.\n",
+        save_profile + 1, using_host_save ? "host" : "guest");
 }
 
 // Existing upstream event: no original-function hooks or loader changes.
@@ -321,6 +330,80 @@ static void coop_reset_loaded_map(void) {
     // for it is no longer needed.
     if (items.refresh_pending && items.refresh_map != (u32)current_map) items.refresh_pending = 0;
     if (items.world_save_pending && (u32)current_map != 194) items.world_save_pending = 0;
+}
+
+static u32 coop_item_words_any(const unsigned* words) {
+    for (unsigned i = 0; i < COOP_ITEM_WORDS; ++i) if (words[i]) return 1;
+    return 0;
+}
+
+static u32 coop_recovery_local_safe(u32 playing) {
+    if (!playing || loading_zone_transition_speed != 0.0f || D_global_asm_807FD730) return 0;
+    if (!shared_items) return 1;
+    return coop_items_safe_map() && items.input.ready && items.baseline && items.live_snapshot
+        && !items.deferred && !items.file_changed && !items.counter_error
+        && !items.save_pending && !items.world_save_pending && !items.refresh_pending
+        && !coop_item_words_any(items.input.request);
+}
+
+static u32 coop_recovery_checkpoint_safe(u32 playing) {
+    if (!coop_recovery_local_safe(playing) || status != NET_CONNECTED) return 0;
+    if (!shared_items) return 1;
+    return items.result.status == 3 && !coop_item_words_any(items.result.apply)
+        && world.result.status == 3 && !world.result.pending && !world.result.apply;
+}
+
+static void coop_recovery_observe_local_intent(void) {
+    if (role != ROLE_JOIN) return;
+    u32 changed = coop_item_words_any(items.input.request);
+    for (u32 i = 0; i < COOP_WORLD_TOGGLES; ++i) {
+        changed |= recovery_world_change[i] != world.input.change[i];
+        recovery_world_change[i] = world.input.change[i];
+    }
+    if (changed) {
+        host_recovery.checkpoint = 0;
+        host_recovery.stable_frames = 0;
+    }
+}
+
+static u32 coop_start_network(u32 network_role) {
+    char* ip = recomp_get_config_string("host_ip");
+    u32 result = dk64_coop_start(network_role, ip,
+        recomp_get_config_u32("port"), recomp_get_config_u32("room"));
+    recomp_free_config_string(ip);
+    return result;
+}
+
+static u32 coop_promote_guest(void) {
+    dk64_coop_stop();
+    u32 promoted_status = coop_start_network(ROLE_HOST);
+    if (promoted_status != NET_LISTENING) {
+        // A failed bind must not strand the player in a half-host session.
+        status = coop_start_network(ROLE_JOIN);
+        coop_host_recovery_complete(&host_recovery, 0);
+        return 0;
+    }
+    role = ROLE_HOST;
+    status = promoted_status;
+    promoted_host = 1;
+    merge_guest_progress = recomp_get_config_u32("save_conflict") == 1;
+    local_ipv4 = dk64_coop_local_ipv4();
+    items.join = 0;
+    items.bound = 0;
+    items.input.session_hi = items.input.session_lo = items.input.scope = 0;
+    for (u32 i = 0; i < COOP_ITEM_WORDS; ++i) items.input.request[i] = 0;
+    items.result = (CoopItemResult){0};
+    world.input.session_hi = world.input.session_lo = world.input.scope = 0;
+    world.result = (CoopWorldResult){0};
+    transient_input = (CoopTransientInput){0};
+    transient_result = (CoopTransientResult){0};
+    transition_capture = (CoopTransitionCapture){0};
+    transition_follow = (CoopTransitionFollow){0};
+    remove_remote();
+    epoch++;
+    coop_host_recovery_complete(&host_recovery, 1);
+    recomp_printf("[dk64-coop] Guest checkpoint promoted to LAN host; the loaded save copy is unchanged.\n");
+    return 1;
 }
 
 // Original-function hooks require DK64's unfinished runtime ROM decompressor.
@@ -363,9 +446,7 @@ RECOMP_CALLBACK("*", recomp_on_init) void coop_initialize(void) {
     D_global_asm_8074C0A0[ACTOR_PUSHABLE_BOX] = remote_behavior;
     avatar_available = 1;
     coop_combat_init();
-    char* ip = recomp_get_config_string("host_ip");
-    status = dk64_coop_start(role, ip, recomp_get_config_u32("port"), recomp_get_config_u32("room"));
-    recomp_free_config_string(ip);
+    status = coop_start_network(role);
     local_ipv4 = role == ROLE_HOST ? dk64_coop_local_ipv4() : 0;
     recomp_printf("[dk64-coop] Prototype initialized. Experimental combat %s; same-area events %s; remote visual actors never collide.\n",
         combat_enabled ? "ON" : "OFF", transient_enabled ? "ON" : "OFF");
@@ -415,6 +496,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     // Rising-bit capture recovers local awards when regular play resumes.
     coop_items_capture(&items, shared_items ? (merge_guest_progress ? 2 : 1) : 0, playing, current_file);
     coop_world_capture(&world, &items);
+    coop_recovery_observe_local_intent();
     coop_transient_capture(present);
     // Keep the retired v1-v40 gate words canonical zero so the established
     // combat/item/world bridge offsets remain unchanged.
@@ -429,7 +511,9 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
         | (D_global_asm_80754280 ? COOP_TRACE_HUD_READY : 0)
         | (items.refresh_pending ? COOP_TRACE_REFRESH_PENDING : 0)
         | (items.save_pending ? COOP_TRACE_SAVE_PENDING : 0)
-        | (items.world_save_pending ? COOP_TRACE_WORLD_SAVE_PENDING : 0);
+        | (items.world_save_pending ? COOP_TRACE_WORLD_SAVE_PENDING : 0)
+        | (host_recovery.checkpoint ? COOP_TRACE_RECOVERY_CHECKPOINT : 0)
+        | (promoted_host ? COOP_TRACE_PROMOTED_HOST : 0);
     trace.level = getLevelIndex(current_map, 1);
     trace.item_deferred = items.deferred;
     trace.item_baseline = items.baseline;
@@ -443,9 +527,10 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     trace.world_pending = world.result.pending;
     trace.transient_status = transient_result.status;
     trace.combat_status = combat_result.status;
+    trace.recovery_state = recovery_state;
     CoopExtraInput extra = {{0}, combat_input, items.input, world.input, transient_input, trace};
     CoopExtraResult extra_result = {0};
-    status = dk64_coop_tick_v50(local_state, remote_state, &extra, &extra_result);
+    status = dk64_coop_tick_v51(local_state, remote_state, &extra, &extra_result);
     coop_items_receive(&items, extra_result.items);
     coop_world_receive(&world, extra_result.world);
     transient_result = extra_result.transient;
@@ -486,6 +571,16 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
                 recomp_printf("[dk64-coop] Reloading the current map to apply shared world state.\n");
             }
         }
+    }
+    u32 recovery_command = recomp_get_config_u32("host_recovery");
+    if (recovery_command > COOP_RECOVERY_PROMOTE) recovery_command = COOP_RECOVERY_OFF;
+    recovery_state = coop_host_recovery_update(&host_recovery, role == ROLE_JOIN,
+        status == NET_CONNECTED, coop_recovery_checkpoint_safe(playing),
+        coop_recovery_local_safe(playing), recovery_command);
+    if (recovery_state == COOP_RECOVERY_START) {
+        if (coop_promote_guest()) recovery_state = COOP_RECOVERY_ACTIVE;
+        else recovery_state = COOP_RECOVERY_FAILED;
+        return;
     }
     combat_result = extra_result.combat;
     if (!world_refresh_started && coop_transition_should_follow(&transition_follow,
@@ -569,6 +664,15 @@ static Gfx* draw_coop_status(Gfx* dl, Actor* unused) {
         else if (combat_result.status == COOP_COMBAT_SHOTS) text = "LAN COMBAT: SHOTS ONLY IN THIS MAP";
         else text = "LAN COMBAT: WAITING FOR PEER";
     }
+    if (recovery_state == COOP_RECOVERY_BUILDING) text = "LAN RECOVERY: BUILDING CHECKPOINT";
+    else if (recovery_state == COOP_RECOVERY_READY)
+        text = status == NET_CONNECTED ? "LAN RECOVERY: CHECKPOINT READY"
+            : "LAN RECOVERY: HOST LOST - SELECT PROMOTE";
+    else if (recovery_state == COOP_RECOVERY_NO_CHECKPOINT) text = "LAN RECOVERY: NO SAFE CHECKPOINT";
+    else if (recovery_state == COOP_RECOVERY_WAIT_SAFE) text = "LAN RECOVERY: MOVE TO A SAFE MAP";
+    else if (recovery_state == COOP_RECOVERY_FAILED) text = "LAN RECOVERY: START FAILED - RESET OPTION";
+    else if (recovery_state == COOP_RECOVERY_ACTIVE && status == NET_LISTENING)
+        text = "LAN RECOVERY HOST: WAITING FOR PEER";
     gSPDisplayList(dl++, D_1000118);
     gDPSetCombineMode(dl++, G_CC_MODULATEIA_PRIM, G_CC_MODULATEIA_PRIM);
     gSPMatrix(dl++, &D_2000180, G_MTX_NOPUSH | G_MTX_LOAD | G_MTX_MODELVIEW);

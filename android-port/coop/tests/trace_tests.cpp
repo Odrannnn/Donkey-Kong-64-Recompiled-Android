@@ -90,9 +90,11 @@ int main() {
 
     dkcoop::State player{34, 7, 2, dkcoop::active, 1, 2, 3, 4, 5, 6};
     CoopTraceInput trace{}; trace.version = COOP_TRACE_VERSION;
-    trace.flags = COOP_TRACE_PLAYING | COOP_TRACE_ITEM_SAFE_MAP | COOP_TRACE_HUD_READY;
+    trace.flags = COOP_TRACE_PLAYING | COOP_TRACE_ITEM_SAFE_MAP | COOP_TRACE_HUD_READY
+        | COOP_TRACE_RECOVERY_CHECKPOINT | COOP_TRACE_PROMOTED_HOST;
     trace.level = 7; trace.item_baseline = trace.item_bound = trace.item_live_snapshot = 1;
     trace.item_wait_reason = COOP_TRACE_WAIT_SAME_LEVEL_ITEM; trace.item_wait_id = 160;
+    trace.recovery_state = 7;
 
     const char malformed[] = "DK64COOP_TRACE_V0";
     CHECK(sendto(query, malformed, int(sizeof(malformed) - 1), 0,
@@ -114,18 +116,21 @@ int main() {
         else std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     CHECK(response.starts_with("{\"schema\":1,"));
-    CHECK(response.find("\"mod\":\"0.50.0\"") != std::string::npos);
+    CHECK(response.find("\"mod\":\"0.51.0\"") != std::string::npos);
     CHECK(response.find("\"role\":\"host\"") != std::string::npos);
+    CHECK(response.find("\"lan_discovery\":false") != std::string::npos);
     CHECK(response.find("\"room_fingerprint\":"
         + std::to_string(uint32_t(123456u * 2654435761u)) + ",\"local_ip\":\"") != std::string::npos);
     CHECK(response.find("\"map\":34") != std::string::npos);
     CHECK(response.find("\"wait_reason\":\"same_level_item\"") != std::string::npos);
     CHECK(response.find("\"wait_item_id\":160") != std::string::npos);
+    CHECK(response.find("\"recovery\":{\"checkpoint\":true,\"promoted_host\":true,\"state\":7}")
+        != std::string::npos);
     CHECK(session.statistics().trace_queries == 1 && session.statistics().trace_rejected == 1);
     close_test_socket(query);
     close_test_socket(blocker3);
     close_test_socket(blocker2);
     second.stop();
     session.stop();
-    std::puts("PASS: private-LAN trace endpoint rejects malformed requests and returns bounded v50 JSON");
+    std::puts("PASS: private-LAN trace endpoint rejects malformed requests and returns bounded v51 JSON");
 }

@@ -152,13 +152,70 @@ uint32_t preferred_local_ipv4() {
     return selected;
 }
 
+std::vector<sockaddr_in> discovery_broadcasts(uint16_t port) {
+    std::vector<sockaddr_in> result;
+    auto add = [&](uint32_t host_address) {
+        if (!host_address) return;
+        sockaddr_in candidate{}; candidate.sin_family = AF_INET;
+        candidate.sin_port = htons(port); candidate.sin_addr.s_addr = htonl(host_address);
+        for (const auto& existing : result)
+            if (same_peer(existing, candidate)) return;
+        result.push_back(candidate);
+    };
+    add(0xFFFFFFFFu);
+#ifdef _WIN32
+    ULONG bytes = 0;
+    constexpr ULONG flags = GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_MULTICAST
+        | GAA_FLAG_SKIP_DNS_SERVER;
+    if (GetAdaptersAddresses(AF_INET, flags, nullptr, nullptr, &bytes) == ERROR_BUFFER_OVERFLOW && bytes) {
+        std::vector<unsigned char> storage(bytes);
+        auto* adapters = reinterpret_cast<IP_ADAPTER_ADDRESSES*>(storage.data());
+        if (GetAdaptersAddresses(AF_INET, flags, nullptr, adapters, &bytes) == NO_ERROR) {
+            for (auto* adapter = adapters; adapter; adapter = adapter->Next) {
+                if (adapter->OperStatus != IfOperStatusUp
+                        || (adapter->IfType != IF_TYPE_IEEE80211
+                            && adapter->IfType != IF_TYPE_ETHERNET_CSMACD)) continue;
+                for (auto* entry = adapter->FirstUnicastAddress; entry; entry = entry->Next) {
+                    if (!entry->Address.lpSockaddr || entry->Address.lpSockaddr->sa_family != AF_INET
+                            || entry->OnLinkPrefixLength > 32) continue;
+                    const auto* address = reinterpret_cast<const sockaddr_in*>(entry->Address.lpSockaddr);
+                    const uint32_t host = ntohl(address->sin_addr.s_addr);
+                    const unsigned prefix = entry->OnLinkPrefixLength;
+                    const uint32_t mask = prefix ? 0xFFFFFFFFu << (32 - prefix) : 0;
+                    add(host | ~mask);
+                }
+            }
+        }
+    }
+#else
+    ifaddrs* interfaces = nullptr;
+    if (getifaddrs(&interfaces) == 0) {
+        for (ifaddrs* entry = interfaces; entry; entry = entry->ifa_next) {
+            if (!entry->ifa_addr || entry->ifa_addr->sa_family != AF_INET
+                    || !(entry->ifa_flags & IFF_UP)) continue;
+            const std::string name = entry->ifa_name ? entry->ifa_name : "";
+            const bool lan_adapter = name.starts_with("wlan") || name.starts_with("wifi")
+                || name.starts_with("eth") || name.starts_with("en") || name.starts_with("ap");
+            if (!lan_adapter) continue;
+            if ((entry->ifa_flags & IFF_BROADCAST) && entry->ifa_broadaddr
+                    && entry->ifa_broadaddr->sa_family == AF_INET) {
+                const auto* broadcast = reinterpret_cast<const sockaddr_in*>(entry->ifa_broadaddr);
+                add(ntohl(broadcast->sin_addr.s_addr));
+            }
+        }
+        freeifaddrs(interfaces);
+    }
+#endif
+    return result;
+}
+
 struct TraceWorker {
     Socket socket = invalid_socket;
     uint16_t port = 0;
     std::atomic<bool> stopping{false};
     std::atomic<uint64_t> queries{0}, rejected{0};
     std::mutex response_mutex;
-    std::string response = "{\"schema\":1,\"mod\":\"0.50.0\",\"status\":\"starting\"}";
+    std::string response = "{\"schema\":1,\"mod\":\"0.51.0\",\"status\":\"starting\"}";
     std::thread thread;
 
     ~TraceWorker() { stop(); }
@@ -251,10 +308,12 @@ struct Session::Impl {
     Status status = Status::off;
     std::string error;
     sockaddr_in peer{}, destination{};
+    std::vector<sockaddr_in> discovery_targets;
     uint16_t bound_port = 0;
     uint32_t local_ipv4 = 0;
     bool has_peer = false, received_sequence = false;
-    uint64_t session = 0, nonce = 0, last_receive = 0, last_state = 0, last_send = 0, last_hello = 0;
+    uint64_t session = 0, nonce = 0, last_receive = 0, last_state = 0, last_send = 0,
+        last_hello = 0, last_address_refresh = 0;
     uint32_t send_sequence = 0, receive_sequence = 0, item_page_turn = 0, combat_page_turn = 0;
     State local_player{}, remote{};
     AnimationTimeline animation;
@@ -333,11 +392,16 @@ struct Session::Impl {
         const auto combat_result = combat_sync.result();
         const uint32_t room_fingerprint = config.room * 2654435761u;
         std::ostringstream result;
-        result << "{\"schema\":1,\"mod\":\"0.50.0\",\"protocol\":" << protocol_version
+        char destination_address[INET_ADDRSTRLEN] = "";
+        if (config.role == Role::join)
+            inet_ntop(AF_INET, &destination.sin_addr, destination_address, sizeof(destination_address));
+        result << "{\"schema\":1,\"mod\":\"0.51.0\",\"protocol\":" << protocol_version
             << ",\"role\":\"" << role_name(config.role) << "\",\"status\":\"" << status_name(status)
             << "\",\"room_fingerprint\":" << room_fingerprint
             << ",\"local_ip\":\"" << local_address << "\",\"coop_port\":" << bound_port
-            << ",\"trace_port\":" << (trace_worker ? trace_worker->port : 0) << ",\"peer_ip\":\"" << peer_address
+            << ",\"trace_port\":" << (trace_worker ? trace_worker->port : 0)
+            << ",\"lan_discovery\":" << (!discovery_targets.empty() ? "true" : "false")
+            << ",\"destination_ip\":\"" << destination_address << "\",\"peer_ip\":\"" << peer_address
             << "\",\"peer_port\":" << (has_peer ? ntohs(peer.sin_port) : 0)
             << ",\"session\":\"" << std::hex << session << std::dec
             << "\",\"last_receive_ms\":" << (last_receive && now >= last_receive ? now - last_receive : 0)
@@ -363,7 +427,12 @@ struct Session::Impl {
             << ",\"transient\":{\"status\":" << transient_result.status
             << ",\"game_status\":" << local_trace.transient_status << "}"
             << ",\"combat\":{\"status\":" << combat_result.status
-            << ",\"game_status\":" << local_trace.combat_status << "}}";
+            << ",\"game_status\":" << local_trace.combat_status << "}"
+            << ",\"recovery\":{\"checkpoint\":"
+            << ((local_trace.flags & COOP_TRACE_RECOVERY_CHECKPOINT) ? "true" : "false")
+            << ",\"promoted_host\":"
+            << ((local_trace.flags & COOP_TRACE_PROMOTED_HOST) ? "true" : "false")
+            << ",\"state\":" << local_trace.recovery_state << "}}";
         return result.str();
     }
     void clear_peer(uint64_t now) {
@@ -418,7 +487,21 @@ bool Session::start(const Config& config, uint64_t now) {
     if (config.role == Role::join && (config.port == 0 || inet_pton(AF_INET, config.host_ip.c_str(), &s.destination.sin_addr) != 1
             || s.destination.sin_addr.s_addr == INADDR_ANY || s.destination.sin_addr.s_addr == INADDR_BROADCAST))
         return fail("Join requires the host's numeric IPv4 address and port");
+    if (config.role == Role::join) {
+        bool discovery_enabled = false;
+#ifdef _WIN32
+        BOOL enabled = TRUE;
+        discovery_enabled = setsockopt(s.socket, SOL_SOCKET, SO_BROADCAST,
+            reinterpret_cast<const char*>(&enabled), sizeof(enabled)) == 0;
+#else
+        int enabled = 1;
+        discovery_enabled = setsockopt(s.socket, SOL_SOCKET, SO_BROADCAST,
+            &enabled, sizeof(enabled)) == 0;
+#endif
+        if (discovery_enabled) s.discovery_targets = discovery_broadcasts(config.port);
+    }
     s.nonce = random_id(); s.last_receive = s.last_state = now;
+    s.last_address_refresh = now;
     s.last_hello = now >= retry_ms ? now - retry_ms : 0;
     s.status = config.role == Role::host ? Status::listening : Status::connecting;
     if (config.port < 65535) {
@@ -456,6 +539,10 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
         && world.file == s.local_items.file && (!world.ready || s.local_items.ready) ? world : CoopWorldInput{};
     s.local_transient = valid_transient_input(transient) ? transient : CoopTransientInput{};
     s.local_trace = trace.version == COOP_TRACE_VERSION ? trace : CoopTraceInput{};
+    if (now - s.last_address_refresh >= 1000) {
+        s.local_ipv4 = preferred_local_ipv4();
+        s.last_address_refresh = now;
+    }
     if (outgoing.map != japes_map) s.local_progress.ready = 0;
     if (s.has_peer && now - s.last_receive > timeout_ms) s.clear_peer(now);
     if (now - s.last_state > stale_ms) s.remote_progress = {};
@@ -486,14 +573,15 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
             // A new join cannot evict an established/pending peer.
             continue;
         }
+        const bool host_source = ntohs(from.sin_port) == s.config.port;
         if (s.config.role == Role::join && !s.has_peer && packet.kind == Kind::busy
-                && same_peer(from, s.destination) && packet.nonce == s.nonce) {
+                && host_source && packet.nonce == s.nonce) {
             s.status = Status::busy; continue; // Continue retrying; the host may become available.
         }
-        if (s.config.role == Role::join && packet.kind == Kind::welcome && same_peer(from, s.destination)
+        if (s.config.role == Role::join && packet.kind == Kind::welcome && host_source
                 && packet.nonce == s.nonce && (!s.has_peer || packet.session == s.session)) {
             if (!s.has_peer) {
-                s.session = packet.session; s.peer = from; s.has_peer = true;
+                s.session = packet.session; s.peer = from; s.destination = from; s.has_peer = true;
                 s.status = Status::connected; s.last_receive = now; s.received_sequence = false;
             }
             s.send(Kind::state, from, outgoing); s.last_send = now;
@@ -537,6 +625,8 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
         now - s.last_state <= stale_ms, s.session);
     if (s.config.role == Role::join && !s.has_peer && now - s.last_hello >= retry_ms) {
         s.send(Kind::hello, s.destination); s.last_hello = now;
+        for (const auto& target : s.discovery_targets)
+            if (!same_peer(s.destination, target)) s.send(Kind::hello, target);
     }
     if (s.status == Status::connected && now - s.last_send >= heartbeat_ms) {
         s.send(Kind::state, s.peer, outgoing); s.last_send = now;

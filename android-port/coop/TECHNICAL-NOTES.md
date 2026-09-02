@@ -1,8 +1,8 @@
-> Current source: 0.50.0, protocol/native ABI v50. A thirteenth pinned lifecycle
-> suite covers event-driven and fallback map epochs. All 13 sanitizer suites and
-> the complete MIPS, Android ARM64, Windows x64, binary-format, v50 export,
-> package-contract, Android app and importer release pipeline pass. Gameplay and
-> device validation remain pending.
+> Current source: 0.51.0, protocol/native ABI v51. A fourteenth pinned recovery
+> suite covers conservative checkpoint eligibility and manual promotion. All
+> 14 Linux ASan/UBSan suites and the complete maintained MIPS, Android ARM64,
+> Windows x64, ABI/export, APK, package and Android-importer pipeline pass.
+> Gameplay and device validation remain pending.
 
 # Prototype integration and limits
 
@@ -77,6 +77,42 @@ host advertises the resulting union, the guest converges normally. Raw flags,
 save bytes and excluded temporary state never enter this path. Users should turn
 the option back off after `LAN ITEMS: SYNCED` so another unintended guest cannot
 be imported into the campaign.
+
+## LAN rediscovery and manual host recovery (0.51.0)
+
+Join retains its configured numeric address as a fast path but also sends the
+same nonce-bearing HELLO to the limited broadcast and every active interface's
+directed broadcast address. No new unauthenticated payload type was introduced.
+A WELCOME is accepted only from the configured UDP port with the current room,
+nonce, protocol and compatibility value, after which its source becomes the
+active unicast destination. A later timeout rotates the nonce before discovery
+resumes. This lets either endpoint move after DHCP renewal without binding a save
+or campaign to an address. It remains trusted-LAN discovery, not authentication.
+
+`CoopHostRecovery` arms only after 120 consecutive regular frames where the
+guest is connected in a save-safe map, both item and reversible-world results
+are status 3, no apply/request/revision is pending, the live inventory is valid,
+and no reward, save or map-refresh work remains. Item requests and local world
+change counters invalidate the checkpoint before transport processing, including
+the frame where a graceful BYE could otherwise clear those requests. A timeout
+preserves only that last fully acknowledged checkpoint.
+
+The live **Promote now** command requires the checkpoint and the same local
+safety gates. It stops the old Join session, binds a fresh Host socket, generates
+new session/nonce state and clears item/world bindings, transient pages, route
+tickets and the remote actor. It does not change the save namespace after EEPROM
+load. If the host port cannot be bound, the bridge immediately starts Join again
+and requires the user to reset the command before retrying.
+
+Network role and local save copy are intentionally separate at startup. The
+default maps Host to `*_host_*` and Join to `*_guest_*`; the recovery option can
+select either existing copy without copying bytes. A promoted guest therefore
+restarts as Host with its guest checkpoint copy, while the former host can return
+as Join with its host checkpoint copy. Ordinary SAVE AHEAD and explicit merge
+rules reconcile any persistent difference. Protocol compatibility
+`0x00010233`, version 51 and export `dk64_coop_tick_v51` reject older peers and
+companions. Partitioned hosts are not automatically elected: users must confirm
+the old host is offline to avoid two independent authorities.
 
 ## Remote actor ownership
 
