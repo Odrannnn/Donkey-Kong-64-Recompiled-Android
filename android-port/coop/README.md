@@ -36,6 +36,8 @@ jitter tolerance, the v0.41 campaign-save and automatic host-address changes. It
 keeps eight explicit co-op campaign saves and LAN-address reporting. Campaign 1
 preserves the existing co-op saves; campaigns
 2–8 are separate. IP, port, room-code and Wi-Fi changes never select a save.
+While Host or Join is selected, the adventure menu shows only that campaign's
+single physical game file and Delete; Role Off keeps the original three files.
 Independent exploration remains the default. Players may use
 different maps while collectible and progression synchronization continues;
 the remote model and combat pause until they share a map again. A join-side
@@ -125,9 +127,9 @@ worker never accesses game memory itself.
    manually leaving a level for permanent world updates, enable **Auto-refresh
    shared world -> Live update with reload fallback** on each device where you want it.
    This setting may differ between peers. All experiments default to Off.
-5. Restart after changing settings. Use the same save slot throughout each
-   process; changing slots locks item, world, combat and same-area event sharing
-   until the game is restarted. Connect in adventure gameplay and wait for **LAN ITEMS: SYNCED**
+5. Restart after changing settings. With Host or Join selected, the adventure
+   menu shows only the campaign's first physical file plus Delete; campaign 1–8
+   is the co-op save selector. Connect in adventure gameplay and wait for **LAN ITEMS: SYNCED**
    before collecting on the guest. Players may then use different maps. The
    remote model and combat resume automatically whenever both share a map.
 

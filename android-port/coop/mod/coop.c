@@ -216,6 +216,7 @@ static f32 bits_float(u32 value) { union { f32 f; u32 u; } bits; bits.u = value;
 #include "items_game.h"
 #include "world_game.h"
 #include "transient_game.h"
+#include "single_slot_menu.h"
 static CoopWorld world;
 _Static_assert(PERMFLAG_PROGRESS_IS_GALLEON_WATER_RAISED == 0xA0
     && PERMFLAG_PROGRESS_IS_NIGHTTIME == 0xCE && MAP_CAVES_LOBBY == 194

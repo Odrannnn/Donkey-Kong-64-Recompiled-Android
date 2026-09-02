@@ -276,9 +276,17 @@ still apply. There is no blanket flag OR or save-buffer transfer.
 
 The initialization callback selects existing `items_host_v6`/`items_guest_v6`
 files before the EEPROM worker starts. Normal saves and older experiment files
-are untouched. Changing adventure slots disables item, world, combat and
-same-area event sharing until restart. Expanding
-the supported IDs can expose old guest-ahead saves; no automatic merge/reset occurs.
+are untouched. When Host or Join is configured, six menu-function replacements
+render and navigate only physical file 1 plus Delete; the delete submenu can
+target only file 1. Role Off retains the original three-file menus. The existing
+runtime file locks remain as a defensive check if another mod or engine path
+changes the adventure file unexpectedly. Expanding the supported IDs can expose
+old guest-ahead saves; no automatic merge/reset occurs.
+
+`menu_slot_policy.h` keeps the normal four-entry file-menu mapping (files 1/2,
+Delete, file 3) and three-entry delete mapping separate from the co-op two-entry
+and one-entry layouts. Co-op always maps its one visible file to physical index
+0; campaign, role and save namespace provide the actual isolation.
 
 The existing pre-write flag callback observes local unique items. Frame capture
 also observes rising bits after establishing a baseline, covering ordinary
