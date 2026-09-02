@@ -17,7 +17,7 @@ enum { ACTOR_PUSHABLE_BOX = 21, ACTOR_BEAVER_BLUE = 178, ACTOR_BEAVER_GOLD = 212
     ACTOR_KASPLAT_TINY = 244, ACTOR_KASPLAT_CHUNKY = 245, ACTOR_SHURI = 267, ACTOR_GIMPFISH = 268,
     ACTOR_KLAPTRAP_GREEN = 205, ACTOR_KLAPTRAP_PURPLE = 208, ACTOR_KLAPTRAP_RED = 209, ACTOR_KROSSBONES = 262,
     ACTOR_KABOOM = 175, ACTOR_BOOK = 181, ACTOR_KLOBBER = 182, ACTOR_TOY_MONSTER = 228, ACTOR_PUFFTUP_0 = 290, ACTOR_KRITTER_IN_A_SHEET = 289, ACTOR_MR_DICE_0 = 269, ACTOR_SIR_DOMINO = 270, ACTOR_MR_DICE_1 = 271, ACTOR_SPIDERLING = 276, ACTOR_FIREBALL_WITH_GLASSES = 273, ACTOR_RULER = 230,
-    ACTOR_BOSS_KUTOUT_TAG = 165, ACTOR_BOSS_ARMY_DILLO = 185,
+    ACTOR_BOSS_KUTOUT_TAG = 165, ACTOR_BOSS_ARMY_DILLO = 185, ACTOR_BOSS_SPIDER = 251,
     ACTOR_BOSS_MAD_JACK = 204, ACTOR_BOSS_PUFFTOSS = 216, ACTOR_BOSS_DOGADON = 236,
     ACTOR_BOSS_KROOL_FOOT = 227, ACTOR_BOSS_KROOL_DK = 281,
     ACTOR_BOSS_KROOL_DIDDY = 292, ACTOR_BOSS_KROOL_LANKY = 293,
@@ -98,6 +98,7 @@ static std::array<LedgeInfo, 64> ledges;
 static std::array<Actor*, 64> queued;
 static unsigned allocations, queued_count;
 static unsigned boss_flags;
+u8 D_global_asm_807FBD70;
 static void register_actor(Actor* a) { CHECK(D_global_asm_807FBB34 < 64); D_global_asm_807FB930[D_global_asm_807FBB34++].actor = a; }
 static void fake_beaver() {
     if (D_global_asm_807FBB70.unk200 == 9 && gCurrentActorPointer->control_state != 0x37) {
@@ -210,6 +211,15 @@ void func_boss_80030EC4() {
             && gCurrentActorPointer->control_state_progress == 8 && data->phase < 3) {
         ++data->phase; gCurrentActorPointer->control_state_progress = 6; ++boss_impacts;
     } else if (data && gCurrentActorPointer->control_state == 0x37) {
+        ++boss_impacts;
+    }
+}
+void func_boss_8002C964() {
+    if (D_global_asm_807FBD70 == 4 && gCurrentActorPointer->health == 1
+            && gCurrentActorPointer->control_state == 0x27
+            && gCurrentActorPointer->control_state_progress == 2) {
+        gCurrentActorPointer->control_state = 0x28;
+        gCurrentActorPointer->control_state_progress = 0;
         ++boss_impacts;
     }
 }
@@ -672,6 +682,29 @@ int main() {
     CHECK(krool_chunky_data.phase == 3 && krool_chunky.control_state == 0x37
         && boss_impacts == chunky_start + 4 && boss_flags == 1);
     coop_combat_capture(); CHECK(combat_input.boss.phase == 4);
+
+    // The Fungi Spider has one final vulnerable collision after its locally
+    // simulated Spiderling waves. The pinned handler owns the full death path.
+    Actor spider{}; CoopBossData spider_data{};
+    spider.unk58 = ACTOR_BOSS_SPIDER; spider.unk54 = 890; spider.health = 6;
+    spider.object_properties_bitfield = 0x10; spider.control_state = 0x27;
+    spider.control_state_progress = 1; spider.unk178 = &spider_data;
+    register_actor(&spider); D_global_asm_8074C0A0[ACTOR_BOSS_SPIDER] = func_boss_8002C964;
+    current_map = MAP_FUNGI_SPIDER; D_global_asm_807FBD70 = 0; coop_combat_capture();
+    CHECK(boss_hooks == 1024 && combat_input.boss.kind == COOP_BOSS_FUNGI_SPIDER
+        && !combat_input.boss.phase && !combat_input.boss_motion.kind);
+    combat_result = {}; combat_result.status = COOP_COMBAT_READY;
+    combat_result.boss = {COOP_BOSS_FUNGI_SPIDER, combat_input.boss.life, 910, 1};
+    gCurrentActorPointer = &spider; const unsigned spider_start = boss_impacts;
+    D_global_asm_8074C0A0[ACTOR_BOSS_SPIDER]();
+    CHECK(spider.control_state == 0x27 && boss_impacts == spider_start); // Wait until vulnerable.
+    spider.control_state_progress = 2; D_global_asm_807FBD70 = 7;
+    D_global_asm_8074C0A0[ACTOR_BOSS_SPIDER]();
+    CHECK(spider.control_state == 0x27 && boss_impacts == spider_start); // Preserve a local collision.
+    D_global_asm_807FBD70 = 0; D_global_asm_8074C0A0[ACTOR_BOSS_SPIDER]();
+    CHECK(spider.health == 1 && spider.control_state == 0x28 && boss_impacts == spider_start + 1);
+    D_global_asm_807FBD70 = 0; coop_combat_capture();
+    CHECK(combat_input.boss.phase == 1 && !combat_input.boss_motion.kind);
     current_map = MAP_JAPES; combat_result = {}; combat_result.status = COOP_COMBAT_READY;
 
     // The added enemy retains its own handler, including the knockback guard.

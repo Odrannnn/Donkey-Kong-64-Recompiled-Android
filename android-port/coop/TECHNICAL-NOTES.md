@@ -1,4 +1,4 @@
-> Current source: 0.55.0, protocol/native ABI v55. The protocol and persistent
+> Current source: 0.56.0, protocol/native ABI v56. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -1708,6 +1708,30 @@ wire offsets remain unchanged. The typed game/native input and result records ea
 gain two words, making the complete bridge spans 2868 and 3476 bytes. Protocol 55,
 compatibility `0x00010237`, the v55 recovery/tick exports and manifest 0.55.0 reject
 older peers and native companions.
+
+## Fungi Spider final-hit synchronization (0.56.0)
+
+Map 60 now binds actor 251 to the pinned `func_boss_8002C964` handler as an
+eleventh boss kind. The actor-health table in the decompressed US ROM gives this
+controller initial health 6. Its preceding Spiderling waves remain independently local,
+with their individual defeats synchronized through the existing ordinary-enemy
+records. Only the Spider's final vulnerable hit crosses the boss phase channel.
+
+Phase zero accepts only the initialized Spider states `0x1E` and `0x27` with
+health exactly 6. States `0x28`, `0x23`, `0x37` and `0x40` with health 1 are
+terminal readback phase one. A remote step waits for state `0x27`, progress 2
+and an empty local collision class, then reproduces the stock collision layer's
+bounded final result of health 1 and collision class 4. The original handler owns
+the death animation, effects, permanent reward, cutscene and room exit. Any other
+health, state, handler, actor generation, map, life token or active collision
+fails closed, and only host-confirmed readback becomes authoritative.
+
+Map 60 simultaneously needs the compact ordinary-enemy page for Spiderlings.
+Boss movement and pose records are therefore forbidden for this boss so the
+pseudo-record cannot overwrite page slot zero. AI, targeting, webs, wave timing,
+position and animation remain local. No ABI or packet field grows, but protocol
+56, compatibility `0x00010238`, the v56 exports and manifest 0.56.0 reject older
+peers and companions.
 
 ## Third reversible world state (0.45.0)
 

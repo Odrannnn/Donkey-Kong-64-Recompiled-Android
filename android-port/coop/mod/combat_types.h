@@ -28,9 +28,11 @@ enum {
     COOP_BOSS_K_ROOL_LANKY,
     COOP_BOSS_K_ROOL_TINY,
     COOP_BOSS_K_ROOL_CHUNKY,
-    COOP_BOSS_KIND_COUNT = COOP_BOSS_K_ROOL_CHUNKY
+    COOP_BOSS_FUNGI_SPIDER,
+    COOP_BOSS_KIND_COUNT = COOP_BOSS_FUNGI_SPIDER
 };
 enum {
+    COOP_MAP_FUNGI_SPIDER = 60,
     COOP_MAP_JAPES_DILLO = 8,
     COOP_MAP_FUNGI_DOGADON = 83,
     COOP_MAP_CAVES_DILLO = 196,
@@ -138,6 +140,7 @@ static inline unsigned coop_boss_kind(unsigned map) {
     // actor in the shoe map. Her arena reads those flags on return.
     if (map == COOP_MAP_K_ROOL_SHOE) return COOP_BOSS_K_ROOL_TINY;
     if (map == COOP_MAP_K_ROOL_CHUNKY) return COOP_BOSS_K_ROOL_CHUNKY;
+    if (map == COOP_MAP_FUNGI_SPIDER) return COOP_BOSS_FUNGI_SPIDER;
     return COOP_BOSS_NONE;
 }
 static inline unsigned coop_boss_map(unsigned map) { return coop_boss_kind(map) != COOP_BOSS_NONE; }

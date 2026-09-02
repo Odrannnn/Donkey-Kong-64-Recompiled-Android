@@ -110,6 +110,9 @@ static void protocol_checks() {
     x.boss_motion.pose = 31; x.boss_motion.clip_hash = 64; bad(x);
     x.boss_motion.pose = 0; x.boss_motion.clip_hash = 1; bad(x);
     x.enabled = 2; x.boss_motion.pose = 1; x.boss_motion.clip_hash = 0; bad(x);
+    x = boss_frame(702, 0, COOP_BOSS_FUNGI_SPIDER); x.enabled = 2;
+    x.boss_motion = {COOP_BOSS_FUNGI_SPIDER, 702, bits(1), bits(2), bits(3), 0}; bad(x);
+    x = boss_frame(702, 2, COOP_BOSS_FUNGI_SPIDER); bad(x);
     p.combat = f; p.kind = Kind::welcome; b = encode(p); CHECK(!decode(b.data(), b.size(), out));
     p.kind = Kind::state; b = encode(p); b[5] = 4; CHECK(!decode(b.data(), b.size(), out));
 }
@@ -184,7 +187,8 @@ static void boss_checks() {
         && coop_boss_kind(205) == COOP_BOSS_K_ROOL_LANKY
         && !coop_boss_kind(206) // Tiny's damage is committed by the shoe actor.
         && coop_boss_kind(207) == COOP_BOSS_K_ROOL_CHUNKY
-        && coop_boss_kind(214) == COOP_BOSS_K_ROOL_TINY);
+        && coop_boss_kind(214) == COOP_BOSS_K_ROOL_TINY
+        && coop_boss_kind(60) == COOP_BOSS_FUNGI_SPIDER);
     CombatSync host, guest;
     State hs{8, 1, 0, active}, gs{8, 2, 1, active};
     auto hi = boss_frame(700, 0), gi = boss_frame(800, 0);
@@ -247,6 +251,18 @@ static void boss_checks() {
     CHECK(host.result().status == COOP_COMBAT_READY && guest.result().status == COOP_COMBAT_READY);
     hi = boss_frame(1200, 0); gi = boss_frame(1201, 0); tick(4);
     CHECK(host.result().status == COOP_COMBAT_SHOTS && !host.result().paired && !host.result().boss.kind);
+    hs.map = gs.map = 60;
+    hi = boss_frame(1300, 0, COOP_BOSS_FUNGI_SPIDER);
+    gi = boss_frame(1301, 0, COOP_BOSS_FUNGI_SPIDER);
+    hi.layout = gi.layout = 0x1234; tick(8);
+    CHECK(host.result().status == COOP_COMBAT_READY && guest.result().status == COOP_COMBAT_READY
+        && host.result().paired == 1 && guest.result().paired == 1
+        && !host.wire().boss_motion.kind && !guest.wire().boss_motion.kind);
+    gi.boss.phase = 1; tick(3);
+    CHECK(host.result().boss.kind == COOP_BOSS_FUNGI_SPIDER && host.result().boss.phase == 1
+        && !guest.result().boss.kind);
+    hi.boss.phase = 1; tick(3);
+    CHECK(!host.result().boss.kind && !guest.result().boss.kind);
 }
 static void context_checks() {
     for (unsigned scenario = 0; scenario < 9; ++scenario) {

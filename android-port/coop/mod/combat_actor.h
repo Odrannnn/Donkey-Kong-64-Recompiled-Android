@@ -41,6 +41,8 @@ extern void func_boss_8002DE04(void);
 extern void func_boss_8002EA7C(void);
 extern void func_boss_8002FF74(void);
 extern void func_boss_80030EC4(void);
+extern void func_boss_8002C964(void);
+extern u8 D_global_asm_807FBD70;
 #ifndef DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
 #define DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
 typedef struct { s16 count, padding; EnemySpawner* first; } CoopEnemySpawnerTable;
@@ -145,6 +147,7 @@ combat_boss_types[COOP_BOSS_KIND_COUNT] = {
     {ACTOR_BOSS_KROOL_LANKY, func_boss_8002EA7C},
     {ACTOR_BOSS_KROOL_FOOT, func_boss_8002FF74},
     {ACTOR_BOSS_KROOL_CHUNKY, func_boss_80030EC4},
+    {ACTOR_BOSS_SPIDER, func_boss_8002C964},
 };
 
 static unsigned combat_explosive_kind(unsigned kind) {
@@ -298,6 +301,12 @@ static unsigned combat_boss_phase(unsigned kind, Actor* actor, CoopBossData* dat
         if (data->phase > 3) return 5;
         return data->phase == 3 && actor->control_state == 0x37 ? 4 : data->phase;
     }
+    if (kind == COOP_BOSS_FUNGI_SPIDER) {
+        if (actor->health == 6
+                && (actor->control_state == 0x1E || actor->control_state == 0x27)) return 0;
+        if (actor->health == 1 && (actor->control_state == 0x28 || actor->control_state == 0x23
+                || actor->control_state == 0x37 || actor->control_state == 0x40)) return 1;
+    }
     return 5;
 }
 static unsigned combat_boss_step_ready(unsigned kind, Actor* actor, CoopBossData* data) {
@@ -329,6 +338,9 @@ static unsigned combat_boss_step_ready(unsigned kind, Actor* actor, CoopBossData
     if (kind == COOP_BOSS_K_ROOL_CHUNKY)
         return actor->control_state == 0x29 && actor->control_state_progress == 6
             && data->phase < 4;
+    if (kind == COOP_BOSS_FUNGI_SPIDER)
+        return actor->health == 6 && actor->control_state == 0x27
+            && actor->control_state_progress == 2 && D_global_asm_807FBD70 == 0;
     return 0;
 }
 static void combat_boss_apply_step(unsigned kind, Actor* actor, CoopBossData* data) {
@@ -364,6 +376,12 @@ static void combat_boss_apply_step(unsigned kind, Actor* actor, CoopBossData* da
             actor->control_state = 0x37; actor->control_state_progress = 0;
             setFlag(0x1B0, 1, 0); // PERMFLAG_PROGRESS_K_ROOL_DEFEATED
         }
+    } else if (kind == COOP_BOSS_FUNGI_SPIDER) {
+        // The Spider has one final vulnerable collision after its locally run
+        // Spiderling waves. Its pinned handler owns the death sequence, reward,
+        // cutscene and exit once it observes this stock collision class.
+        actor->health = 1;
+        D_global_asm_807FBD70 = 4;
     }
 }
 static void coop_boss_behavior(void) {
@@ -418,7 +436,8 @@ static void coop_boss_behavior(void) {
     if (kind && (boss_hooks & bit) && boss_behaviors[index] == combat_boss_types[index].original
             && D_global_asm_8074C0A0[combat_boss_types[index].type] == coop_boss_behavior
             && data && command.kind == kind && command.life == combat_boss.life && command.peer_life
-            && command.phase > phase && command.phase <= 4
+            && command.phase > phase
+            && command.phase <= (kind == COOP_BOSS_FUNGI_SPIDER ? 1 : 4)
             && combat_result.status == COOP_COMBAT_READY && combat_game_ready()
             && coop_boss_kind(current_map) == kind && combat_boss.actor == actor
             && combat_boss.kind == kind && combat_boss.generation == actor->unk54
@@ -597,7 +616,9 @@ static void coop_combat_capture(void) {
         if (combat_boss.life && combat_boss.kind == boss_kind
                 && (phase <= 4 || combat_boss.phase == 4)) {
             combat_input.boss = (CoopBoss){boss_kind, combat_boss.life, 0, combat_boss.phase};
-            if (combat_enabled >= 2 && actor) {
+            // Map 60 also carries ordinary Spiderling records. Do not replace
+            // its first compact enemy slot with the boss-motion pseudo-record.
+            if (combat_enabled >= 2 && actor && boss_kind != COOP_BOSS_FUNGI_SPIDER) {
                 combat_input.boss_motion = (CoopBossMotion){boss_kind, combat_boss.life,
                     float_bits(actor->x_position), float_bits(actor->y_position),
                     float_bits(actor->z_position), (unsigned)actor->y_rotation & 0xFFF, 0, 0};

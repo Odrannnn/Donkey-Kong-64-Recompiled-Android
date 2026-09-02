@@ -1,7 +1,10 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.55.0** adds guarded host boss-animation pose correction for all ten
+Version **0.56.0** synchronizes the Fungi Spider's single final vulnerable hit
+after both copies have run their local Spiderling waves. The receiver enters the
+pinned collision path; vanilla still owns the death, reward, cutscene and exit.
+Version 0.55.0 adds guarded host boss-animation pose correction for all ten
 bounded boss rounds. The guest evaluates a pose only when both copies select
 the full pose mode and already run a matching local animation clip; callbacks
 are suppressed during that one visual evaluation. Version 0.54.0 synchronizes
@@ -16,7 +19,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 55 requires a matching peer and native
+address as a direct fallback. Protocol 56 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -168,8 +171,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.55.0 adds
-guarded boss-pose correction and retains the actor-driven environment-cycle and persistent
+**This is experimental, not complete campaign co-op. Version 0.56.0 adds the
+bounded Fungi Spider final-hit adapter and retains guarded boss-pose correction,
+the actor-driven environment-cycle, and persistent
 recovery and authority-reconciliation suites. All 15 Linux
 ASan/UBSan suites and the complete maintained MIPS, Android ARM64, Windows x64,
 ABI/export, APK, package and Android-importer pipeline pass. Gameplay and device
@@ -185,7 +189,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.55
+While the native companion is loaded, `tools/query_trace.py` discovers v0.56
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -199,7 +203,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.55.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.56.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -702,6 +706,16 @@ fire attacks, Hunky Chunky/TNT barrel actors, arena sinking, animation, sounds,
 cutscenes and player damage remain local. A conflicting Dogadon handler disables
 this channel without replacing it.
 
+The Fungi Spider uses the same authority and life-token binding in map 60 for
+its one final vulnerable hit. Spiderling waves, web attacks and targeting remain
+local; their already-supported individual defeats continue through the ordinary
+enemy records. A receiver waits for Spider state `0x27`, progress 2, its pinned
+initial health 6, and an empty local collision result before reproducing the
+stock final-hit result of health 1 plus collision class 4 for the
+pinned Spider handler. That handler owns the death sequence, Golden Banana,
+cutscene and exit. Boss movement and pose are deliberately disabled in this room
+so the boss pseudo-record cannot replace a Spiderling slot.
+
 ## Reviewed host-follow transitions (0.39; gameplay untested)
 
 As of 0.40.1, this is disabled by default. **Transition behavior -> Independent
@@ -733,7 +747,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v55 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v56 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -743,8 +757,9 @@ mismatch is left alone rather than being overwritten later.
   reviewed combat maps, plus optional host position/facing and guarded normalized
   pose corrections. Enable the same combat option on both peers and wait for the
   enemy-link HUD message.
-- Optional bounded damage-phase synchronization for the five standard bosses and
-  all five K. Rool rounds through pinned vanilla reaction paths. Tiny's hits are
+- Optional bounded damage-phase synchronization for six standard encounters and
+  all five K. Rool rounds through pinned vanilla reaction paths. The Fungi Spider
+  adds a single final-hit step; Tiny's hits are
   committed by the foot actor in the shoe map. Full pose mode also corrects a
   matching local boss clip to the host's normalized frame. Other boss state remains local.
 - The first Japes gate is part of ordinary item/world sharing. The former

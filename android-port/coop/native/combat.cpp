@@ -62,11 +62,13 @@ bool valid_combat(const CoopCombatFrame& f) {
     if (!b.kind) {
         if (b.life || b.peer_life || b.phase) return false;
     } else if (!f.enabled || b.kind > COOP_BOSS_KIND_COUNT || !b.life
-            || b.life > COOP_ENEMY_LIFE_MASK || b.peer_life > COOP_ENEMY_LIFE_MASK || b.phase > 4) return false;
+            || b.life > COOP_ENEMY_LIFE_MASK || b.peer_life > COOP_ENEMY_LIFE_MASK || b.phase > 4
+            || (b.kind == COOP_BOSS_FUNGI_SPIDER && b.phase > 1)) return false;
     const auto& m = f.boss_motion;
     if (!m.kind) {
         if (m.life || m.x || m.y || m.z || m.yaw || m.pose || m.clip_hash) return false;
-    } else if (f.enabled < 2 || m.kind != b.kind || m.life != b.life || m.yaw >= 4096
+    } else if (f.enabled < 2 || m.kind != b.kind || m.kind == COOP_BOSS_FUNGI_SPIDER
+            || m.life != b.life || m.yaw >= 4096
             || m.pose > COOP_ENEMY_POSE_MASK || m.clip_hash > COOP_ENEMY_POSE_HASH_MASK
             || (!m.pose && m.clip_hash) || (f.enabled < 3 && m.pose)
             || !bounded_float(m.x, -100000, 100000) || !bounded_float(m.y, -100000, 100000)
