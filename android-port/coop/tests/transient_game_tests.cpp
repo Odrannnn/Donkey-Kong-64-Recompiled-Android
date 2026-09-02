@@ -247,6 +247,11 @@ static void capture_checks() {
     reset(); current_map = 62; load(0, 0x00, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x00, 2, 2));
+
+    reset(); current_map = 62; load(0, 0x01, 10); load(1, 0x03, 11);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x01, 1, 11));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x03, 2, 11));
     reset(); current_map = 17;
     load(0, 0x2C, 2); load(1, 0x2D, 11); load(2, 0x2E, 12);
     load(3, 0x2F, 13); load(4, 0x30, 11);
@@ -794,6 +799,8 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x06, 2, 11}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x06 && last_state == 11);
+    scripts[0x06].unk48[0] = 9; coop_transient_apply();
+    CHECK(script_calls == 1); // Only exact armed state 10 may activate.
     scripts[0x06].unk48[0] = 0; coop_transient_apply();
     CHECK(script_calls == 1); // The permanent pre-activation path stays local.
     reset(); role = ROLE_JOIN; current_map = 62; load(0, 0x00, 1);
@@ -803,6 +810,13 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x00 && last_state == 2);
     scripts[0x00].unk48[0] = 3; coop_transient_apply();
     CHECK(script_calls == 1); // Completed pad path cannot be replayed.
+    reset(); role = ROLE_JOIN; current_map = 62; load(0, 0x03, 10);
+    transient_result = {COOP_TRANSIENT_APPLYING, 62, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x03, 2, 11}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x03 && last_state == 11);
+    scripts[0x03].unk48[0] = 9; coop_transient_apply();
+    CHECK(script_calls == 1); // Question boxes require exact armed state 10.
     reset(); role = ROLE_JOIN; current_map = 17; load(0, 0x2C, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 17, 9, 1,
         {{COOP_TRANSIENT_TRIGGER, 0x2C, 2, 2}}};
@@ -825,6 +839,8 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x03, 2, 11}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x03 && last_state == 11);
+    scripts[0x03].unk48[0] = 9; coop_transient_apply();
+    CHECK(script_calls == 1); // Only exact winch-ready state 10 may activate.
     scripts[0x03].unk48[0] = 20; coop_transient_apply();
     CHECK(script_calls == 1); // Saved completion cannot restart the winch.
 

@@ -140,6 +140,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Fungi rear-mill triangle pad enters its local crusher activation and
     // reward path at state 2 after the stock instrument check.
     {62, 0x00, COOP_TRANSIENT_TRIGGER, 2},
+    // Rear-mill question-mark boxes are locally armed at exact state 10 and
+    // enter their break/reward paths at state 11.
+    {62, 0x01, COOP_TRANSIENT_TRIGGER, 11}, {62, 0x03, COOP_TRANSIENT_TRIGGER, 11},
     // Hideout Helm instrument pads. Bongo uses its state-2 entry; the other
     // four are armed at state 11 and enter their local door sequence at 12.
     {17, 0x2C, COOP_TRANSIENT_TRIGGER, 2}, {17, 0x2D, COOP_TRANSIENT_TRIGGER, 12},
@@ -341,6 +344,9 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         return activation == 13 && raw == 12;
     if (map == 38 && object >= 0x10 && object <= 0x14)
         return activation == 13 && raw == 12;
+    if ((map == 57 && object == 0x03) || (map == 61 && object == 0x06)
+            || (map == 62 && (object == 0x01 || object == 0x03)))
+        return activation == 11 && raw == 10;
     return raw > 0 && raw < activation;
 }
 

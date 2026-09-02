@@ -2270,3 +2270,16 @@ typed trigger mirrors only that activation entry.
 The local script retains the break sound, animation, state-3 completion checks
 and return through states 4 and 5 to ready state 1. No player move, actor,
 animation phase, timer or later state is carried by the packet.
+
+## Fungi rear-mill question boxes (0.49.0)
+
+Fungi Mill Back map 62 objects `1` and `3` are the two question-mark boxes.
+Their permanent-completion initialization enters state 10 only while the box is
+available. A stock punch enters state 11 and starts its 100-frame local
+break/reward sequence. Typed triggers mirror only that edge.
+
+The receive adapter requires exact raw state 10. The same exact readiness rule
+now applies to Winch Room object `3` and Mill Front object `6`, whose earlier
+state-11 typed triggers also use vanilla ready state 10. Packets cannot arm an
+unavailable box, replay completion, select a reward, or enter intermediate
+states 1 through 9.
