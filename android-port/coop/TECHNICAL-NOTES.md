@@ -1967,6 +1967,17 @@ Each local script retains its own switch animation, sound, shared door update
 and reset timing. Packets cannot name the door, a projectile or later states,
 and an already-running switch is never rewound.
 
+## Castle basement slam switches (0.49.0)
+
+Castle Basement map 163 objects `4`, `5` and `6` are the DK, Diddy and Lanky
+Simian Slam switches. Each initializes into ready state 1 and enters state 2
+only after the stock move, Kong and contact checks. Typed triggers mirror that
+single activation edge.
+
+Each receiving script retains its local sound, door/platform target and states
+4 through 7. Packets cannot select a Kong, target object or later state, and a
+local sequence that already left state 1 is never rewound.
+
 ## Castle tree door switches (0.49.0)
 
 Castle tree map 164 object `1` is the grape switch and enters state 2 from

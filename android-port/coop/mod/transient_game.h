@@ -90,6 +90,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // all local sound, linked-door and reset behavior.
     {112, 0x0D, COOP_TRANSIENT_TRIGGER, 2}, {112, 0x0E, COOP_TRANSIENT_TRIGGER, 2},
     {112, 0x0F, COOP_TRANSIENT_TRIGGER, 2},
+    // Castle basement DK, Diddy and Lanky slam switches. Their reviewed
+    // state-2 entries preserve each local door/platform sequence.
+    {163, 0x04, COOP_TRANSIENT_TRIGGER, 2}, {163, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    {163, 0x06, COOP_TRANSIENT_TRIGGER, 2},
     // Castle tree grape and Chunky-punch switches. The second has a distinct
     // state-5 activation edge; each local script owns its door and reset.
     {164, 0x01, COOP_TRANSIENT_TRIGGER, 2}, {164, 0x09, COOP_TRANSIENT_TRIGGER, 5},

@@ -182,6 +182,13 @@ static void capture_checks() {
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x0E, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x0F, 2, 2));
 
+    reset(); current_map = 163;
+    load(0, 0x04, 1); load(1, 0x05, 2); load(2, 0x06, 7);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x04, 1, 2));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x05, 2, 2));
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x06, 2, 2));
+
     reset(); current_map = 164; load(0, 0x01, 2); load(1, 0x09, 5);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x01, 2, 2));
@@ -480,6 +487,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x0E && last_state == 2);
     scripts[0x0E].unk48[0] = 5; coop_transient_apply();
     CHECK(script_calls == 1); // Local reset/door states are never overwritten.
+
+    reset(); role = ROLE_JOIN; current_map = 163; load(0, 0x05, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 163, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x05, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x05 && last_state == 2);
+    scripts[0x05].unk48[0] = 4; coop_transient_apply();
+    CHECK(script_calls == 1); // A running door sequence is never rewound.
 
     reset(); role = ROLE_JOIN; current_map = 164; load(0, 0x09, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 164, 9, 1,
