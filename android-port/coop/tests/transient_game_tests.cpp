@@ -173,6 +173,14 @@ static void capture_checks() {
     }
     CHECK(saw_matching_ready && saw_matching_hit && saw_matching_last);
 
+    reset(); current_map = 20; load(0, 0x69, 2);
+    bool saw_quicksand_switch = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_quicksand_switch |= contains_value(COOP_TRANSIENT_TRIGGER, 0x69, 2, 2);
+    }
+    CHECK(saw_quicksand_switch);
+
     reset(); current_map = 16; load(0, 0, 1); load(1, 4, 2); load(2, 0x14, 3);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0, 1, 2));
@@ -389,6 +397,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1); // The network cannot arm an uninitialized head.
     scripts[0x23].unk48[0] = 11; transient_result.records[0].value = 11;
     coop_transient_apply(); CHECK(script_calls == 1); // Pinned activation is mandatory.
+
+    reset(); role = ROLE_JOIN; current_map = 20; load(0, 0x69, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 20, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x69, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x69 && last_state == 2);
+    scripts[0x69].unk48[0] = 20; coop_transient_apply();
+    CHECK(script_calls == 1); // Completed tunnel switches never rewind.
 
     reset(); role = ROLE_JOIN; current_map = 16; load(0, 4, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,

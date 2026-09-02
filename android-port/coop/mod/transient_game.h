@@ -49,6 +49,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {20, 0x23, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x24, COOP_TRANSIENT_TRIGGER, 12},
     {20, 0x25, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x26, COOP_TRANSIENT_TRIGGER, 12},
     {20, 0x27, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x28, COOP_TRANSIENT_TRIGGER, 12},
+    // Llama Temple quicksand-tunnel slam switch. State 2 begins the reviewed
+    // local delay and tunnel-door update; permanent flag 0x3E stays local.
+    {20, 0x69, COOP_TRANSIENT_TRIGGER, 2},
     // Tiny Temple opening switch, Diddy guitar pad and charge switch.
     {16, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {16, 0x04, COOP_TRANSIENT_TRIGGER, 2},
     {16, 0x14, COOP_TRANSIENT_TRIGGER, 2},

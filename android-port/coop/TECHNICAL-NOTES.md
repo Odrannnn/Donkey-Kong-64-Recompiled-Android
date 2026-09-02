@@ -1778,6 +1778,17 @@ idempotent, and the controller, wrong-pair reset, temporary active flag and
 Golden Banana reward remain local vanilla behavior. Permanent GB ownership
 continues through the item channel.
 
+## Llama Temple quicksand switch (0.49.0)
+
+Llama Temple object `0x69` is the slam switch for the quicksand tunnel. Its
+stock script waits in state 1 and enters state 2 only after the local slam,
+character and contact checks. A typed trigger mirrors that entry. The receiving
+script retains the local 25-frame and 50-frame delays before updating Aztec door
+object `0xA1` and permanent flag `0x3E` through the original operations.
+
+The packet contains no player input, timer, linked object, map transition or
+flag. Completed state 20 is never rewound and a missing switch fails closed.
+
 ## Tiny Temple opening, guitar and charge switches (0.49.0)
 
 Tiny Temple map 16 objects `0`, `4` and `0x14` are the opening switch, Diddy's
