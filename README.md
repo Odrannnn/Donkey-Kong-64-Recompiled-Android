@@ -7,7 +7,7 @@
 >
 > This disclosure applies to the Android-port changes, not the original upstream code or artwork, whose authorship and notices are retained. Please report Android-port issues [in this fork](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/issues), not to upstream. Full gameplay and all-device compatibility are not established.
 
-This fork adds the Android ARM64 port in **[android-port/](android-port/README.md)**. It is based on upstream **1.0.1** and is independent of the upstream maintainers. The Android changes were developed with AI assistance; validation limits and known issues are recorded in [the port notes](android-port/PORT-NOTES.md).
+This fork adds the Android ARM64 port in **[android-port/](android-port/README.md)**. Its current source is based on upstream **1.0.2** and is independent of the upstream maintainers. The Android changes were developed with AI assistance; validation limits and known issues are recorded in [the port notes](android-port/PORT-NOTES.md).
 
 - Earlier builds tested on a Lenovo TB520FU (Snapdragon 8 Gen 3 / Adreno 750, Android 16) and Poco F8 Ultra (Adreno 840).
 - **GMEM is now the default for imported Turnip drivers**, following the user-reported Poco V35 water workaround. Explicit sysmem/diagnostic choices are preserved; Advanced Turnip diagnostics includes **Driver defaults (automatic)** to opt out. System-driver launches receive no Turnip flags.

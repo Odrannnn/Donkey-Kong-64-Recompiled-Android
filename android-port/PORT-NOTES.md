@@ -4,7 +4,7 @@
 
 All source revisions, including nested dependencies, are pinned in `upstream.lock.json`. Original notices and licenses remain in their source checkouts.
 
-- DK64 Recompiled: Rainchus and contributors; upstream 1.0.1, commit `c6730d2f244d7b2d9d8c47c94c2eecfa1bfb1a43`.
+- DK64 Recompiled: Rainchus and contributors; upstream 1.0.2, commit `9177e21a3f633e834779573783b399750f20e7fe`.
 - N64ModernRuntime, N64Recomp, RecompFrontend, RT64 and their dependencies: their respective authors; see upstream licenses.
 - Android integration reference: [AurelioB/BanjoRecomp-Android](https://github.com/AurelioB/BanjoRecomp-Android). Selected SDL Vulkan, private paths, generated shader dependencies and VI pause changes were adapted without replacing DK64's full runtime/frontend/renderer versions.
 - Plume Android/loader hooks adapted from AurelioB/plume `2073b0440749f0f6333f13281fb75e6a44da7206`; Plume copyright renderbag and contributors, MIT license.
@@ -118,3 +118,26 @@ An official Khronos Android validation layer was downloaded into ignored `.local
 - Android native-menu `TextInput` focus now calls `SDL_StartTextInput`; focus loss calls `SDL_StopTextInput`. SDL's hidden Android edit control supplies IME text events while RmlUi remains the visible field. This enables software-keyboard entry for mod configuration strings such as a LAN guest IPv4 address.
 - The app runtime and co-op mod remain separate. Co-op v0.41 adds automatic host LAN-address display, eight explicit campaign-save selections and an explicit host-controlled union recovery for validated guest-save-ahead progress. Changing IP address, port, room code or Wi-Fi does not select another campaign save.
 - The debug and release APKs compile and pass the existing APK structure/16 KiB checks. Co-op v0.41 passes all eight pinned Linux sanitizer suites plus MIPS, Android, Windows, export, format and package checks. ADB confirmed the v0.41 mod is loaded on the tablet; software-keyboard device confirmation was obstructed by another foreground streaming app and remains pending.
+
+## Android dev13 — upstream 1.0.2 integration — 2026-09-02
+
+- Version `1.0.2-android-dev13`, version code 12. The pinned game source moves
+  from upstream commit `c6730d2f244d7b2d9d8c47c94c2eecfa1bfb1a43` to
+  `9177e21a3f633e834779573783b399750f20e7fe`; N64ModernRuntime moves from
+  `45bd0180f85c89c19ae45d30190be54c9d577904` to
+  `8fe786b52177d087821cf3affb85296f663b508d`. All nested dependency revisions
+  remain pinned.
+- Retains the Android Vulkan-driver importer, GMEM default, lifecycle-aware
+  audio queue, touch D-pad, software keyboard and mod manager. Upstream 1.0.2
+  adds camera/control, draw-distance, interpolation, lightning, UI and
+  audio-engine fixes plus CLI boot support.
+- The upstream map-load and EEPROM-load mod events provide exact lifecycle
+  boundaries for co-op room epochs and isolated-save initialization. The asset
+  override event is useful for content mods but does not replace the co-op
+  network bridge. The mod keeps a per-frame fallback so one package can remain
+  fail-safe on 1.0.1 while using the new events on 1.0.2.
+- Source-patch reapplication against both new pinned commits, game/RSP/MIPS
+  regeneration, Android ARM64 compilation, Debug APK packaging and the APK
+  structure/ARM64/16 KiB-alignment checks pass. The APK contains no ROM,
+  imported driver or validation layer. Device gameplay and suspend/resume
+  validation remain pending.

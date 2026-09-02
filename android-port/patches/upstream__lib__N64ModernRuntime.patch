@@ -20,7 +20,7 @@ index 46aea61..351853d 100644
  // Graphics
  uint32_t get_target_framerate(uint32_t original);
 diff --git a/ultramodern/src/events.cpp b/ultramodern/src/events.cpp
-index 2f1cfb5..8e20d48 100644
+index 17d7a47..8e7209c 100644
 --- a/ultramodern/src/events.cpp
 +++ b/ultramodern/src/events.cpp
 @@ -19,6 +19,23 @@
@@ -47,7 +47,7 @@ index 2f1cfb5..8e20d48 100644
  
  void ultramodern::events::set_callbacks(const ultramodern::events::callbacks_t& callbacks) {
      events_callbacks = callbacks;
-@@ -189,6 +206,11 @@ void vi_thread_func() {
+@@ -194,6 +211,11 @@ void vi_thread_func() {
      int remaining_retraces = 1;
  
      while (!exited) {

@@ -4,13 +4,13 @@
     {
       "path": "upstream",
       "url": "https://github.com/Rainchus/Donkey-Kong-64-Recompiled.git",
-      "commit": "c6730d2f244d7b2d9d8c47c94c2eecfa1bfb1a43",
+      "commit": "9177e21a3f633e834779573783b399750f20e7fe",
       "patch": "patches/upstream.patch"
     },
     {
       "path": "upstream/lib/N64ModernRuntime",
       "url": "https://github.com/Killklli/N64ModernRuntime",
-      "commit": "45bd0180f85c89c19ae45d30190be54c9d577904",
+      "commit": "8fe786b52177d087821cf3affb85296f663b508d",
       "patch": "patches/upstream__lib__N64ModernRuntime.patch"
     },
     {

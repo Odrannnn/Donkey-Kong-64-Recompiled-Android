@@ -7,13 +7,18 @@
 >
 > This disclosure applies to the Android-port changes, not the original upstream code or artwork, whose authorship and notices are retained. Please report Android-port issues [in this fork](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android/issues), not to upstream. Full gameplay and all-device compatibility are not established.
 
-Local Android port of [Rainchus/Donkey-Kong-64-Recompiled 1.0.1](https://github.com/Rainchus/Donkey-Kong-64-Recompiled/releases/tag/1.0.1), targeting ARM64 tablets. **Development build: the intro and early gameplay render with Turnip; full gameplay is still being tested.** No ROM or Turnip driver is bundled.
+Local Android port of [Rainchus/Donkey-Kong-64-Recompiled 1.0.2](https://github.com/Rainchus/Donkey-Kong-64-Recompiled/releases/tag/1.0.2), targeting ARM64 tablets. **Development build: the intro and early gameplay render with Turnip; full gameplay is still being tested.** No ROM or Turnip driver is bundled.
 
 Published source fork: [Odrannnn/Donkey-Kong-64-Recompiled-Android](https://github.com/Odrannnn/Donkey-Kong-64-Recompiled-Android), default branch `codex/android-port`. The public fork keeps upstream history and contains this Android project under `android-port/`. Initial source publication: `8e952a56021f83ec56a0f642f3f3655ff04a413b`. The separate local publication checkout is `.local/github-publish`; the current workspace and tablet installation were not moved or replaced.
 
 ## Current status
 
 The native game and Android APK compile. ROM import, private asset storage and the touch overlay have run on a Lenovo TB520FU (Snapdragon 8 Gen 3 / Adreno 750, Android 16).
+
+The current dev13 source integrates upstream 1.0.2, including its gameplay,
+camera, interpolation and audio-engine fixes and its new mod lifecycle events.
+The latest published APK remains dev12 until dev13 receives build and device
+validation.
 
 The first system-driver test crashed during renderer startup. The stock driver rejected `fbReadAnyChanges`, `fbReadAnyFull`, `fbWriteColor`, `fbWriteDepth` and `fbWriteDepthMS` compute pipelines with `VK_ERROR_UNKNOWN`; binding a failed pipeline then crashed inside `vulkan.adreno.so`. Those shader binaries pass offline SPIR-V validation. The underlying rejection is not resolved.
 

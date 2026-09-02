@@ -51,7 +51,7 @@ public final class MainActivity extends Activity {
         title.setTextSize(28);
         column.addView(title);
         TextView note = new TextView(this);
-        note.setText("Based on DK64 Recompiled 1.0.1. Experimental: graphics, suspend/resume and saves need validation.\n\nImport your own original US ROM. No ROM is included. A Bluetooth/USB controller or the touch controls can be used.");
+        note.setText("Based on DK64 Recompiled 1.0.2. Experimental: graphics, suspend/resume and saves need validation.\n\nImport your own original US ROM. No ROM is included. A Bluetooth/USB controller or the touch controls can be used.");
         note.setTextSize(16);
         column.addView(note);
         pick = new Button(this);
