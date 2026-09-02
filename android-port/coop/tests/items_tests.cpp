@@ -598,6 +598,12 @@ static void world_refresh_checks() {
     reset_engine(); current_map = 26; D_global_asm_807F6240[6] = 0x2D;
     CHECK(coop_live_world_refresh(0x081) && live_calls == 1 && live_state == 20);
 
+    // Training's switch and exit door must advance as one reviewed live unit.
+    reset_engine(); current_map = 176;
+    D_global_asm_807F6240[5] = 0x39; D_global_asm_807F6240[8] = 0x49;
+    CHECK(coop_live_world_refresh(0x181) && live_calls == 2 && live_slot == 8
+        && live_state == 20);
+
     // Reversible world state remains blocked by default, then starts the exact
     // loaded vanilla up/down switch sequence instead of rebuilding the map.
     reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = 1;

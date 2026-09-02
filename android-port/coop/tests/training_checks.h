@@ -22,10 +22,10 @@ static void training_checks() {
         coop_items_capture(&g, 1, 1, 0); coop_items_apply(&g, 1);
         CHECK(g.input.ready && !any(g.input.request) && saves == 1 && writes == 2);
     }
-    // Reviewed ordinary maps may publish a complete first snapshot. Only the
-    // narrower main-world/treehouse set may apply a training grant or save.
-    // Grounds (176) may publish a verified first snapshot so a new co-op
-    // session does not wait there, but remains outside the apply/save set.
+    // Reviewed ordinary maps may publish a complete first snapshot. The
+    // narrower main-world/treehouse set may apply every progression grant.
+    // Grounds (176) additionally admits only its reviewed training/exit IDs;
+    // this loop uses camera to prove unrelated writes remain deferred there.
     // Barrels, Fairy Island (189), Cranky (5), shops and boss overlays remain
     // outside both sets.
     for (unsigned map = 0; map < 216; ++map) {
@@ -40,6 +40,40 @@ static void training_checks() {
         g.result.status = 2; g.result.apply[2198/32] = bit(2198); coop_items_apply(&g, 1);
         CHECK(bool(flags[0x179]) == apply_allowed && writes == unsigned(apply_allowed));
     }
+    // A stable loaded Training Grounds frame accepts its seven training flags
+    // and exit switch, drives both exact flag-positive exit scripts, saves once,
+    // and requests the completion scene only when the peer is in the same map.
+    reset_engine(); CoopItems live{}; current_game = &live; live.join = 1;
+    current_map = 176; mock_level = 7; live.peer_same_map = 1;
+    D_global_asm_807F6240[4] = 0x39; D_global_asm_807F6240[9] = 0x49;
+    coop_items_capture(&live, 1, 1, 0); CHECK(live.input.ready && live.deferred);
+    live.result.status = 2;
+    for (unsigned id = COOP_TRAINING_SPAWNED; id <= COOP_FIRST_SLAM; ++id)
+        live.result.apply[id / 32] |= bit(id);
+    live.result.apply[COOP_WORLD_TRAINING_EXIT / 32] |= bit(COOP_WORLD_TRAINING_EXIT);
+    coop_items_apply(&live, 1);
+    CHECK(writes == 8 && saves == 1 && flags[0x181] && flags[0x187] && flags[0x180]);
+    CHECK(live_calls == 2 && live_state == 20 && !live.refresh_pending
+        && live.training_scene_pending);
+    for (unsigned k = 0; k < 5; ++k)
+        CHECK(D_global_asm_807FC950[0].character_progress[k].progression[1] == 1);
+
+    reset_engine(); live = {}; current_game = &live; current_map = 176; mock_level = 7;
+    coop_items_capture(&live, 1, 1, 0); live.result.status = 2;
+    for (unsigned id = COOP_TRAINING_SPAWNED; id <= COOP_TRAINING_COMPLETE; ++id)
+        live.result.apply[id / 32] |= bit(id);
+    coop_items_apply(&live, 1);
+    CHECK(writes == 6 && saves == 1 && flags[0x187] && !live.training_scene_pending);
+
+    // A local pending reward retains ownership of the transaction. Network
+    // flags and the exit scripts wait until the local queue is empty.
+    reset_engine(); live = {}; current_game = &live; current_map = 176; mock_level = 7;
+    coop_items_capture(&live, 1, 1, 0); live.result.status = 2;
+    live.result.apply[COOP_TRAINING_SPAWNED / 32] = bit(COOP_TRAINING_SPAWNED);
+    D_global_asm_807FD730 = &hud_object; coop_items_apply(&live, 1);
+    CHECK(!writes && !saves && live.wait_reason == COOP_TRACE_WAIT_REWARD_QUEUE);
+    D_global_asm_807FD730 = nullptr; coop_items_apply(&live, 1);
+    CHECK(writes == 1 && saves == 1 && flags[0x17F]);
     // Fresh guest receives all training and the real host's first gift, then a
     // pending higher slam. Never replay the gift or downgrade on duplicate packets.
     reset_engine(); CoopItems g{}; current_game = &g; g.join = 1; current_map = 171;

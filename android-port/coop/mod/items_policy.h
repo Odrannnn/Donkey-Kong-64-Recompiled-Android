@@ -8,6 +8,7 @@
 enum { COOP_JAPES_BOULDER_BUNCH = COOP_TROFF_END, COOP_KROOL_DEFEATED = COOP_JAPES_BOULDER_BUNCH + 1,
     COOP_ARCADE_COINS_PAID = COOP_KROOL_DEFEATED + 1, COOP_ITEMS = COOP_ARCADE_COINS_PAID + 1,
     COOP_FACTORY_ARCADE_LEVER = (unsigned)COOP_WORLD_FIRST + (unsigned)COOP_WORLD_FACTORY_FIRST + 5,
+    COOP_WORLD_TRAINING_EXIT = (unsigned)COOP_WORLD_FIRST + 81,
     COOP_ITEM_WORDS = 192, COOP_ITEM_PAGE_WORDS = 24, COOP_ITEM_PAGES = 8,
     COOP_ITEM_WIRE_WORDS = 5 + 2 * COOP_ITEM_PAGE_WORDS,
     COOP_SNIDE_FIRST = 80, COOP_SNIDE_COUNT = 40, COOP_MEDAL_FIRST = 120,
@@ -33,6 +34,9 @@ typedef struct {
     // Local diagnostics only. These fields never cross the co-op wire and do
     // not affect ownership or apply decisions.
     unsigned wait_reason, wait_id;
+    // Local frame context and one-shot presentation request. Neither crosses
+    // the native ABI or network.
+    unsigned peer_same_map, training_scene_pending;
 } CoopItems;
 
 static inline void coop_items_wait(CoopItems* g, unsigned reason, unsigned id) {

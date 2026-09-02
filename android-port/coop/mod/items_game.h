@@ -22,6 +22,10 @@ static inline unsigned coop_items_snapshot_map(void) {
     return coop_items_safe_map() || current_map == 176 || coop_combat_map(current_map)
         || current_map == 174 || current_map == 178 || current_map == 194;
 }
+static inline unsigned coop_training_ground_apply_id(unsigned id) {
+    return (id >= COOP_TRAINING_SPAWNED && id <= COOP_FIRST_SLAM)
+        || id == COOP_WORLD_TRAINING_EXIT;
+}
 #include "troff_game.h"
 static inline unsigned coop_item_owned(unsigned id) {
     if (id == COOP_JAPES_BOULDER_BUNCH) return isFlagSet(0x01D, 0) != 0;
@@ -120,12 +124,15 @@ static inline void coop_items_save_world_lobby(CoopItems* g, unsigned stable) {
 }
 static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
     g->troff_pending = 0;
+    g->training_scene_pending = 0;
     g->wait_reason = COOP_TRACE_WAIT_NONE;
     g->wait_id = 0xFFFFFFFFu;
     if (!g->input.ready) {
         coop_items_wait(g, COOP_TRACE_WAIT_SNAPSHOT, 0xFFFFFFFFu); return;
     }
-    if (g->deferred) {
+    unsigned stable = safe_to_save;
+    unsigned training_ground = stable && current_map == 176;
+    if (g->deferred && !training_ground) {
         coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, 0xFFFFFFFFu); return;
     }
     if (g->file_changed) {
@@ -138,7 +145,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
         coop_items_wait(g, COOP_TRACE_WAIT_REWARD_QUEUE, 0xFFFFFFFFu); return;
     }
     unsigned here = getLevelIndex(current_map, 1);
-    safe_to_save = safe_to_save && coop_items_safe_map();
+    safe_to_save = stable && coop_items_safe_map();
     if (g->result.status == 2 || g->result.status == 3) {
         g->applying = 1;
         for (unsigned id = 0; id < COOP_ITEMS; ++id) {
@@ -153,18 +160,26 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
             }
             if (id >= COOP_PROGRESSION_FIRST && id < COOP_PROGRESSION_END) {
                 if (!coop_progression_valid()) { g->counter_error = 1; break; }
+                unsigned progression_safe = safe_to_save
+                    || (training_ground && coop_training_ground_apply_id(id));
+                if (!progression_safe) {
+                    coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, id); continue;
+                }
                 unsigned refresh = id >= COOP_WORLD_FIRST
                     && here == coop_world_unlocks[id - COOP_WORLD_FIRST].level;
-                if (coop_progression_apply(id, safe_to_save, here, g->refresh_enabled)) {
+                if (training_ground && id == COOP_WORLD_TRAINING_EXIT) refresh = 1;
+                if (coop_progression_apply(id, progression_safe, here, g->refresh_enabled)) {
                     // Simple loaded doors and gates enter the same completed
                     // vanilla state selected by their flag-positive initializer.
                     // Everything else retains the full map-rebuild fallback.
                     unsigned live = refresh && coop_live_world_refresh(
                         coop_world_unlocks[id - COOP_WORLD_FIRST].flag);
-                    if (refresh && !live) {
+                    if (refresh && !live && !training_ground) {
                         g->refresh_pending = 1;
                         g->refresh_map = current_map;
                     }
+                    if (training_ground && id == COOP_TRAINING_COMPLETE
+                            && g->peer_same_map) g->training_scene_pending = 1;
                     // A tier also owns every lower tier; record all newly owned
                     // progression so the guest never echoes an implied grant.
                     for (unsigned p = COOP_PROGRESSION_FIRST; p < COOP_PROGRESSION_END; ++p)
@@ -258,7 +273,8 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
         // barrel, so its local exit script may never derive the completion bit.
         // Derive only this flag, from readback, in a safe bound session. Never
         // derive Cranky's gift or run the training-completion cutscene remotely.
-        if (!g->counter_error && safe_to_save && D_global_asm_80754280 && coop_training_prerequisites()
+        if (!g->counter_error && (safe_to_save || training_ground) && D_global_asm_80754280
+                && coop_training_prerequisites()
                 && !coop_item_has(g->result.apply, COOP_TRAINING_COMPLETE)
                 && !coop_item_owned(COOP_TRAINING_COMPLETE)) {
             setFlag(coop_item_flag(COOP_TRAINING_COMPLETE), 1, 0);
@@ -266,15 +282,17 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 coop_items_note(g, COOP_TRAINING_COMPLETE);
                 g->previous[COOP_TRAINING_COMPLETE / 32] |= 1u << (COOP_TRAINING_COMPLETE % 32);
                 g->save_pending = 1;
+                if (training_ground && g->peer_same_map) g->training_scene_pending = 1;
             }
         }
         g->applying = 0;
     }
     if (g->counter_error) { g->input.ready = 0; return; }
-    if (safe_to_save && g->hud_pending && D_global_asm_80754280) {
+    unsigned save_safe = safe_to_save || training_ground;
+    if (save_safe && g->hud_pending && D_global_asm_80754280) {
         func_global_asm_806F8278(0); g->hud_pending = 0;
     }
-    if (safe_to_save && g->save_pending) {
+    if (save_safe && g->save_pending) {
         func_global_asm_8060DEC8(); g->save_pending = 0;
     }
 }

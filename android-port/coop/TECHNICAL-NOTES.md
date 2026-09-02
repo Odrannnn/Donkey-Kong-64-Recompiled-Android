@@ -1605,8 +1605,30 @@ campaign saves, peer discovery, or the mod loader. Protocol 48, compatibility
 `0x00010130`, export `dk64_coop_tick_v48`, and manifest 0.48.0 reject mixed
 native companions and peers.
 
-Training Grounds map 176 is a publish-only snapshot map in 0.48.0. Its ordinary
-save inventory layout passes the same dependency and counter checks as the main
-worlds, allowing a fresh session to initialize before either player exits the
-starting area. `deferred` remains set there, so this change alone cannot write a
-remote flag, save, run an instance script, or grant a reward in the loaded map.
+Training Grounds map 176 can publish the first complete snapshot in 0.48.0. Its
+ordinary save inventory layout passes the same dependency and counter checks as
+the main worlds, allowing a fresh session to initialize before either player
+exits the starting area. The general `deferred` gate remains set, but a second
+per-ID gate admits only training IDs 2191..2197 and exit-switch ID 2375 while the
+frame is active, the HUD exists, and no collectible-credit queue is pending.
+
+The four barrel actors run `func_global_asm_80681BD8`, which checks spawned flag
+`0x17F` and ability flags `0x182..0x185` every update and selects its own vanilla
+visibility/control state. Course rewards therefore cross through the persistent
+item transaction after the originating barrel's local queue drains; no remote
+barrel actor, resource refill, timer, or reward-queue pointer is copied.
+
+The Training Grounds exit is permanent flag `0x181`, distinct from all-courses
+flag `0x187`. Pinned US setup map 176 writes it from object `0x39`; flag-positive
+initializers select state 20 for switch `0x39` and door `0x49`. Both rows are in
+the live-world table and must resolve together. A verified grant runs those exact
+loaded script states and saves once, without a room reload. Missing scripts keep
+the permanent result for the next vanilla initialization and never invoke an
+arbitrary object.
+
+When the all-courses bit is newly received or derived in map 176 and the peer's
+validated state is also map 176, the adapter raises a one-frame request for the
+stock `playCutscene(player, 3, 1)` call. The request is consumed once after the
+item transaction and only during regular play with no loading or reward queue.
+Every other remotely-startable cutscene remains prohibited; the generic
+same-area cutscene channel still only aligns two already-running matching scenes.

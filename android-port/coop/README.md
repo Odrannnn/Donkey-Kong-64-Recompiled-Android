@@ -67,10 +67,10 @@ Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
 Back up experimental saves before using the build.
 
-Training Grounds (map 176) may now establish the first verified item snapshot,
-so two new files starting there can reach LAN ITEMS/WORLD readiness. This change
-does not yet admit incoming writes there; the live Training Grounds event path is
-reviewed separately below.
+Training Grounds (map 176) may establish the first verified item snapshot, so
+two new files starting there can reach LAN ITEMS/WORLD readiness. Its live apply
+path is restricted to the reviewed training flags and exit switch described
+below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
@@ -190,11 +190,18 @@ second credit when network confirmation arrives.
 - Each Kong's three special-move tiers, gun and instrument ownership are shared.
   Slam tiers 2/3, ammo belts and global gun/instrument upgrades apply to all five
   Kongs as the stock shops do. Grants never downgrade a tier or replace other bits.
-- **Training now synchronizes:** barrel availability, diving, vines, orange
-  throwing, barrel throwing, completion and Cranky's first slam gift. Complete
-  courses on either player, then return to **DK's treehouse** to exchange progress.
-  Gifts never arrive in the training grounds/barrels or inside Cranky's shop.
-  Return to the grounds to reload the barrels after receiving unlocks.
+- **Training now synchronizes live:** barrel availability, diving, vines, orange
+  throwing, barrel throwing, completion and Cranky's first slam gift. A stable
+  Training Grounds frame may receive only these reviewed training IDs; its stock
+  barrel actors notice the flags on their next update. The permanent exit-switch
+  flag advances both the loaded switch and door through their vanilla state-20
+  paths. No leave/re-enter cycle is required. A pending local reward remains
+  local and delays remote application until its queue drains.
+- When both players are in Training Grounds, a newly received or derived
+  all-training-complete flag requests cutscene 3 once. It cannot start from a
+  different map, during loading, during another cutscene, or while a reward is
+  pending. Cranky's own first-slam conversation remains local; receiving the
+  resulting saved gift raises each Kong to at least slam 1 without replaying it.
 - Completing all four shared courses derives their completion flag. Someone
   must still obtain Cranky's first slam gift; the mod does not invent that gift.
   Receiving it raises all five Kongs to at least slam 1. Higher upgrades apply

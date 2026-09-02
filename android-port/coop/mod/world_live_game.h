@@ -11,7 +11,7 @@ typedef struct {
     unsigned char state;
 } CoopLiveWorldState;
 
-enum { COOP_LIVE_WORLD_STATE_COUNT = 41, COOP_LIVE_WORLD_SCRIPT_SLOTS = 600 };
+enum { COOP_LIVE_WORLD_STATE_COUNT = 43, COOP_LIVE_WORLD_SCRIPT_SLOTS = 600 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20}, { 7, 0x000, 0x01B, 20},
     { 7, 0x007, 0x034, 20}, { 7, 0x007, 0x035, 20}, { 7, 0x007, 0x033, 20},
@@ -30,6 +30,9 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     {48, 0x0CF, 0x017, 20}, {48, 0x0CF, 0x018, 20}, {48, 0x0CF, 0x019, 20},
     {48, 0x0D0, 0x01C, 20}, {48, 0x0D0, 0x01A, 20}, {48, 0x0D0, 0x01B, 20},
     {48, 0x0D2, 0x01D, 20}, {48, 0x0D2, 0x01E, 20},
+    // Training exit switch and door. State 20 is each flag-positive vanilla
+    // initializer and runs their normal completed presentation/removal path.
+    {176, 0x181, 0x039, 20}, {176, 0x181, 0x049, 20},
 };
 
 static inline unsigned coop_live_world_set_object(unsigned object, unsigned state) {

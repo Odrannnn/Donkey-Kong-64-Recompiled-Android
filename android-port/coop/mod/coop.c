@@ -84,6 +84,7 @@ _Static_assert(PERMFLAG_PROGRESS_JAPES_FIRST_GATE_OPENED == 0
     && PERMFLAG_ITEM_PEARL_1 == 0xBA && PERMFLAG_ITEM_PEARL_5 == 0xBE
     && PERMFLAG_PROGRESS_RAREWARE_ROOM_OPEN == 0x189 && COOP_CAMERA_SHOCKWAVE == 2198
     && PERMFLAG_PROGRESS_HELM_SHUTDOWN == 0x302 && PERMFLAG_PROGRESS_CROWN_DOOR_OPENED == 0x304
+    && COOP_WORLD_TRAINING_EXIT == 2375
     && COOP_WORLD_UNLOCK_COUNT <= 128 && COOP_WORLD_REQUIREMENT_COUNT == 11,
     "Expanded vanilla flags and bounded prerequisite rows");
 
@@ -152,6 +153,7 @@ extern s16 D_global_asm_807F6240[];
 extern Prop* D_global_asm_807F6000;
 extern s16 func_global_asm_80659470(s32 object);
 extern void func_global_asm_8063DA40(s16 script_slot, s16 state);
+extern s32 playCutscene(Actor* actor, s16 cutscene, u8 mode);
 extern u8 getLevelIndex(Maps map, u8 include_lobbies);
 extern s8 is_cutscene_active;
 extern s16 D_global_asm_807476F8;
@@ -428,8 +430,19 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     coop_transient_apply();
     coop_world_apply(&world, &items, playing);
     coop_items_save_world_lobby(&items, playing && loading_zone_transition_speed == 0.0f);
+    items.peer_same_map = status == NET_CONNECTED
+        && remote_state[STATE_MAP] == (u32)current_map
+        && (remote_state[STATE_FLAGS] & (STATE_ACTIVE | STATE_CUTSCENE));
     // Shops, bonus games and transitions may have partially completed awards.
-    coop_items_apply(&items, playing && coop_items_safe_map());
+    coop_items_apply(&items, playing);
+    if (items.training_scene_pending) {
+        // This is the one reviewed remotely-startable presentation. Ownership
+        // and same-area context were verified before the request was raised.
+        if (playing && current_map == MAP_TRAINING_GROUNDS && items.peer_same_map
+                && !D_global_asm_807FD730 && gPlayerPointer)
+            playCutscene(gPlayerPointer, 3, 1);
+        items.training_scene_pending = 0;
+    }
     u8 world_refresh_started = 0;
     if (items.refresh_pending) {
         if (items.refresh_map != (u32)current_map) {
