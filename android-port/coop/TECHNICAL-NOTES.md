@@ -1946,6 +1946,17 @@ receiving pad runs its original dome notification, presentation and permanent
 flag `0x10E` update. Dome objects `0x27` and `0x2B` remain locally controlled,
 and the large pad cannot be activated before local state 12.
 
+## Castle Lanky/Tiny crypt switches (0.49.0)
+
+Castle crypt map 108 object `0` is Lanky's grape switch and object `4` is Tiny's
+Simian Slam switch. Both wait in state 1 and enter state 2 after their respective
+local input checks. Typed triggers mirror only those activation entries.
+
+The grape script retains its sound, 25/110-frame delays, linked door `1` and
+platform state. The slam script retains its 300-frame sequence and linked
+objects `6`, `7`, `9`, `0xA`, `0xB` and `0xC`. None of those linked objects,
+timers or player inputs can be selected by a packet.
+
 ## Galleon paired gun switches (0.49.0)
 
 Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired

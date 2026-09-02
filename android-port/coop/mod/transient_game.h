@@ -83,6 +83,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Caves small/large boulder pads. The small pad accepts state 2 from ready
     // state 1; the large pad must finish its local reveal at state 12 first.
     {72, 0x2E, COOP_TRANSIENT_TRIGGER, 2}, {72, 0x2F, COOP_TRANSIENT_TRIGGER, 13},
+    // Castle Lanky/Tiny crypt grape and Simian Slam switches. Both enter their
+    // local door/platform sequences through reviewed state 2.
+    {108, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {108, 0x04, COOP_TRANSIENT_TRIGGER, 2},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.

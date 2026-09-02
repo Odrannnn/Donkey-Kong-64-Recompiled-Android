@@ -31,6 +31,8 @@ The Isles trombone pad can mirror its rocket-barrel reveal only after the
 receiving pad has independently reached its barrel-ready state.
 Caves' small and large boulder pads mirror only their reviewed deposit entries;
 each local script still destroys its own dome and records permanent completion.
+Castle's Lanky/Tiny crypt grape and Simian Slam switches now mirror their exact
+activation entries while local scripts retain the door and platform sequences.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
 progress advances one locally valid note at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied
