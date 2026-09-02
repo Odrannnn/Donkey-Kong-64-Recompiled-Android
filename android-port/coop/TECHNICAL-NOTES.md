@@ -1604,3 +1604,9 @@ address. The trace endpoint is diagnostic only and does not alter gameplay,
 campaign saves, peer discovery, or the mod loader. Protocol 48, compatibility
 `0x00010130`, export `dk64_coop_tick_v48`, and manifest 0.48.0 reject mixed
 native companions and peers.
+
+Training Grounds map 176 is a publish-only snapshot map in 0.48.0. Its ordinary
+save inventory layout passes the same dependency and counter checks as the main
+worlds, allowing a fresh session to initialize before either player exits the
+starting area. `deferred` remains set there, so this change alone cannot write a
+remote flag, save, run an instance script, or grant a reward in the loaded map.

@@ -24,13 +24,15 @@ static void training_checks() {
     }
     // Reviewed ordinary maps may publish a complete first snapshot. Only the
     // narrower main-world/treehouse set may apply a training grant or save.
-    // Grounds (176), barrels, Fairy Island (189), Cranky (5), shops and boss
-    // overlays remain outside both sets.
+    // Grounds (176) may publish a verified first snapshot so a new co-op
+    // session does not wait there, but remains outside the apply/save set.
+    // Barrels, Fairy Island (189), Cranky (5), shops and boss overlays remain
+    // outside both sets.
     for (unsigned map = 0; map < 216; ++map) {
         reset_engine(); CoopItems g{}; current_game = &g; current_map = map;
         bool apply_allowed = map == 7 || map == 26 || map == 30 || map == 34 || map == 38
             || map == 48 || map == 72 || map == 87 || map == 171;
-        bool snapshot_allowed = apply_allowed || coop_combat_map(map)
+        bool snapshot_allowed = apply_allowed || map == 176 || coop_combat_map(map)
             || map == 174 || map == 178 || map == 194;
         coop_items_capture(&g, 1, 1, 0);
         CHECK(bool(g.input.ready) == snapshot_allowed && bool(g.deferred) == (snapshot_allowed && !apply_allowed)

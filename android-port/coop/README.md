@@ -67,6 +67,11 @@ Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
 Back up experimental saves before using the build.
 
+Training Grounds (map 176) may now establish the first verified item snapshot,
+so two new files starting there can reach LAN ITEMS/WORLD readiness. This change
+does not yet admit incoming writes there; the live Training Grounds event path is
+reviewed separately below.
+
 ## Read-only LAN trace
 
 While the native companion is loaded, `tools/query_trace.py` discovers v0.48
