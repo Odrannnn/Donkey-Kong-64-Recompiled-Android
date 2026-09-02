@@ -105,6 +105,22 @@ Gfx *pop_model_matrix_group(Gfx *dl) {
     return dl;
 }
 
+Gfx *simple_set_model_matrix(Gfx *dl, u8 *pushed, s32 id, s32 sub_id) {
+    cur_drawn_model_transform_id = id;
+    cur_model_transform_id_offset = sub_id;
+    gSPMatrix(dl++, &identity_fixed_mtx, G_MTX_PUSH | G_MTX_MUL | G_MTX_MODELVIEW);
+    dl = set_model_matrix_group(dl, NULL, FALSE, pushed);
+    return dl;
+}
+
+Gfx *simple_pop_model_matrix(Gfx *dl, u8 pushed) {
+    gSPPopMatrix(dl++, G_MTX_MODELVIEW);
+    if (pushed) {
+        dl = pop_model_matrix_group(dl);
+    }
+    return dl;
+}
+
 typedef struct actor_lockdown_struct {
     Actor * actor;
     u16 value;
@@ -236,6 +252,7 @@ typedef struct Struct80636FFC {
 } Struct80636FFC;
 
 extern f32 recomp_filter_draw(f32 value, f32 ratio);
+extern f32 propDrawFilter(s32 prop_type);
 
 // @recomp: Model 2 Matrix stuff
 RECOMP_PATCH Gfx* func_global_asm_80636FFC(Struct80636FFC* arg0, Gfx* dl, s32 arg2, s32 arg3, s32 arg4, u8 arg5, s16 arg6) {
@@ -268,16 +285,16 @@ RECOMP_PATCH Gfx* func_global_asm_80636FFC(Struct80636FFC* arg0, Gfx* dl, s32 ar
         dY = character_change_array[cc_player_index].unk220 - arg0->unk4;
         dZ = character_change_array[cc_player_index].unk224 - arg0->unk8;
         sp88 = _sqrtf(dX + SQ(dY) + SQ(dZ));
-        var_f2 = func_global_asm_8065D0FC(recomp_filter_draw(arg0->unkC0, 1.0f));
+        var_f2 = func_global_asm_8065D0FC(recomp_filter_draw(arg0->unkC0, propDrawFilter(arg0->unkB4)));
         if (arg0->unkC5 & 1) {
-            var_f2 = recomp_filter_draw(arg0->unkC0, 1.0f);
+            var_f2 = recomp_filter_draw(arg0->unkC0, propDrawFilter(arg0->unkB4));
         }
         if (var_f2 < sp88) {
             return dl;
         }
     }
     if (arg0->unkC3 != 0) {
-        func_global_asm_8065EB10(arg0->unkC3, arg0->unkB6, arg0->unk0, arg0->unk4, arg0->unk8, recomp_filter_draw(arg0->unkC0, 1.0f), sp88 / var_f2, (s32) arg6);
+        func_global_asm_8065EB10(arg0->unkC3, arg0->unkB6, arg0->unk0, arg0->unk4, arg0->unk8, recomp_filter_draw(arg0->unkC0, propDrawFilter(arg0->unkB4)), sp88 / var_f2, (s32) arg6);
     }
     if ((arg0->unkB4 == 0) || (arg0->unkB4 == 0x241)) {
         return dl;
@@ -346,7 +363,7 @@ RECOMP_PATCH Gfx* func_global_asm_80636FFC(Struct80636FFC* arg0, Gfx* dl, s32 ar
             func_global_asm_8063E6B4(temp_a0_4);
             sp92 = D_global_asm_807F6000[temp_v0_3].unk7C->unk64;
         } else {
-            func_global_asm_8065CE4C(arg0->unk0, arg0->unk4, arg0->unk8, recomp_filter_draw(arg0->unkC0, 1.0f), (s16) (s32) arg0->unkB4, &sp92);
+            func_global_asm_8065CE4C(arg0->unk0, arg0->unk4, arg0->unk8, recomp_filter_draw(arg0->unkC0, propDrawFilter(arg0->unkB4)), (s16) (s32) arg0->unkB4, &sp92);
             if (arg0->unkB6 != -1) {
                 if ((D_global_asm_807F6000[temp_v0_3].unk7C != NULL) && (D_global_asm_80750AB4 == 1)) {
                     D_global_asm_807F6000[temp_v0_3].unk7C->unk62 = sp92;

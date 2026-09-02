@@ -63,6 +63,7 @@ typedef enum interpolationIDs {
     MTXTAG_TAG3,
     MTXTAG_SKYBOXBLEND,
     MTXTAG_CAMERAPROJECTION,
+    MTXTAG_HELMTIMER,
     MTXTAG_MAINMENU_BARREL = 0xF00,
     MTXTAG_ACTORS = 0x1000, // 0x100 allocated per actor
     MTXTAG_PROP = 0x101000,
@@ -72,6 +73,8 @@ typedef enum interpolationIDs {
     MTXTAG_FLUIDS = 0x400000,
     MTXTAG_SOLAR_FLARE = 0x400100,
     MTXTAG_RAP_LYRICS = 0x400200,
+    MTXTAG_PAUSE_MAIN_OPTIONS = 0x403000,
+    MTXTAG_PAUSE_MAIN_AREYOUSURE = 0x403010,
 } interpolationIDs;
 
 typedef struct AnimationStateUnk0_0 {
@@ -1093,7 +1096,9 @@ typedef struct {
     f32 unkB8;
     u8 padBC[0xC0 - 0xBC];
     s32 unkC0;
-    u8 padC4[0xCC - 0xC4];
+    u8 padC4[0xC8 - 0xC4];
+    s16 unkC8;
+    s16 unkCA;
     tuple_f unkCC;
     tuple_f unkD8;
     u8 padE4[0xEE - 0xE4];
@@ -1110,7 +1115,8 @@ typedef struct {
     u8 padF8[0xFA - 0xF8];
     u8 unkFA;
     u8 unkFB;
-    u8 padFC[0xFF - 0xFC];
+    u8 unkFC;
+    u8 padFD[0xFF - 0xFD];
     u8 unkFF;
 } CameraPaad;
 

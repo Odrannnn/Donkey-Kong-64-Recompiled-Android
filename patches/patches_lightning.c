@@ -54,7 +54,6 @@ extern u8 D_global_asm_807FC621;
 extern u8 D_global_asm_807FC622;
 extern u16 newly_pressed_input[];
 
-
 typedef struct LZControllerAAD {
     u8 unk0;
     u8 pad1[0x4 - 0x01];
@@ -72,6 +71,76 @@ typedef struct LZControllerAAD {
     u8 unk20;
     u8 unk21;
 } LZControllerAAD;
+
+extern f32 *D_global_asm_8076A0C0;
+extern f32 *D_global_asm_8076A0C4;
+extern f32 *D_global_asm_8076A0C8;
+extern f32 *D_global_asm_8076A0B4;
+extern f32 *D_global_asm_8076A0B8;
+extern f32 *D_global_asm_8076A0BC;
+extern s32 D_global_asm_807F6C28;
+f32 getLightningValue(f32 *original, f32 value, s16 chunk) {
+    f32 original_v;
+    f32 delta;
+    f32 intensity;
+
+    intensity = recomp_get_lightning_intensity();
+    original_v = original[chunk];
+    delta = value - original_v;
+    delta *= intensity;
+    return original_v + delta;
+}
+
+void lightningSetter(f32 arg0, f32 arg1, f32 arg2, s16 arg3) {
+    // Copy of func_global_asm_80659DB0
+    u8 phi_v1;
+    u8 iChunk;
+
+    if (D_global_asm_807F6C28 <= 0) {
+        phi_v1 = 1;
+    } else {
+        phi_v1 = D_global_asm_807F6C28;
+    }
+    if (arg3 != -1) {
+        D_global_asm_8076A0C0[arg3] = getLightningValue(D_global_asm_8076A0C0, MIN(arg0, 1.0f), arg3);
+        D_global_asm_8076A0C4[arg3] = getLightningValue(D_global_asm_8076A0C4, MIN(arg1, 1.0f), arg3);
+        D_global_asm_8076A0C8[arg3] = getLightningValue(D_global_asm_8076A0C8, MIN(arg2, 1.0f), arg3);
+    } else {
+        for (iChunk = 0; iChunk < phi_v1; iChunk++) {
+            D_global_asm_8076A0C0[iChunk] = getLightningValue(D_global_asm_8076A0C0, MIN(arg0, 1.0f), iChunk);
+            D_global_asm_8076A0C4[iChunk] = getLightningValue(D_global_asm_8076A0C4, MIN(arg1, 1.0f), iChunk);
+            D_global_asm_8076A0C8[iChunk] = getLightningValue(D_global_asm_8076A0C8, MIN(arg2, 1.0f), iChunk);
+        }
+    }
+}
+
+void lightningSetter0(f32 arg0, f32 arg1, f32 arg2, f32 arg3, s16 arg4) {
+    // Copy of func_global_asm_80659F7C
+    s32 i;
+    u8 var_v1;
+    f32 a0, a1, a2;
+
+    var_v1 = MAX(1, D_global_asm_807F6C28);
+    if (arg4 != -1) {
+        if (arg4 < var_v1) {
+            a0 = getLightningValue(D_global_asm_8076A0C0, MIN(arg0, 1.0f), arg4);
+            a1 = getLightningValue(D_global_asm_8076A0C4, MIN(arg1, 1.0f), arg4);
+            a2 = getLightningValue(D_global_asm_8076A0C8, MIN(arg2, 1.0f), arg4);
+            D_global_asm_8076A0B4[arg4] = ((D_global_asm_8076A0C0[arg4] - a0) * arg3) + a0;
+            D_global_asm_8076A0B8[arg4] = ((D_global_asm_8076A0C4[arg4] - a1) * arg3) + a1;
+            D_global_asm_8076A0BC[arg4] = ((D_global_asm_8076A0C8[arg4] - a2) * arg3) + a2;
+        }
+    } else {
+        for (i = 0; i < var_v1; i++) {
+            a0 = getLightningValue(D_global_asm_8076A0C0, MIN(arg0, 1.0f), i);
+            a1 = getLightningValue(D_global_asm_8076A0C4, MIN(arg1, 1.0f), i);
+            a2 = getLightningValue(D_global_asm_8076A0C8, MIN(arg2, 1.0f), i);
+            D_global_asm_8076A0B4[i] = ((D_global_asm_8076A0C0[i] - a0) * arg3) + a0;
+            D_global_asm_8076A0B8[i] = ((D_global_asm_8076A0C4[i] - a1) * arg3) + a1;
+            D_global_asm_8076A0BC[i] = ((D_global_asm_8076A0C8[i] - a2) * arg3) + a2;
+        }
+    }
+}
 
 RECOMP_PATCH void func_global_asm_8068AD7C(void) {
     Struct807FBB70_unk278 *temp_s0;
@@ -257,9 +326,9 @@ RECOMP_PATCH void func_global_asm_8068AD7C(void) {
     if (TaaD->unk1E) {
         TaaD->unk1E--;
         temp = (f32) TaaD->unk1E / (f32) TaaD->unk1C;
-        func_global_asm_80659F7C(TaaD->unkC, TaaD->unk10, TaaD->unk14, temp, TaaD->unk1A);
+        lightningSetter0(TaaD->unkC, TaaD->unk10, TaaD->unk14, temp, TaaD->unk1A);
         if (TaaD->unk1E == 0) {
-            func_global_asm_80659DB0(TaaD->unkC, TaaD->unk10, TaaD->unk14, TaaD->unk1A);
+            lightningSetter(TaaD->unkC, TaaD->unk10, TaaD->unk14, TaaD->unk1A);
         }
     }
     switch (TaaD->unk0) {
@@ -295,17 +364,17 @@ RECOMP_PATCH void func_global_asm_8068AD7C(void) {
                 intensity = recomp_get_lightning_intensity();
                 if (intensity > 0) {
                     func_global_asm_80659670(intensity, intensity, intensity, TaaD->unk1A);
-                }
-                if ((D_global_asm_80750190 == 0) && (TaaD->unk21 == 0)) {
-                    var_s0 = 70;
-                    if (current_map == MAP_CASTLE) {
-                        var_s0 = 45;
-                    }
-                    func_global_asm_80608DA8(0x9C, var_s0, 0x7F, 0x1E, (RANDNUM() >> 0xF) % 3);
-                    if (current_map == MAP_GALLEON_PUFFTOSS) {
-                        TaaD->unk21 = 80;
-                    } else {
-                        TaaD->unk21 = 50;
+                    if ((D_global_asm_80750190 == 0) && (TaaD->unk21 == 0)) {
+                        var_s0 = 70;
+                        if (current_map == MAP_CASTLE) {
+                            var_s0 = 45;
+                        }
+                        func_global_asm_80608DA8(0x9C, var_s0, 0x7F, 0x1E, (RANDNUM() >> 0xF) % 3);
+                        if (current_map == MAP_GALLEON_PUFFTOSS) {
+                            TaaD->unk21 = 80;
+                        } else {
+                            TaaD->unk21 = 50;
+                        }
                     }
                 }
                 TaaD->unk1E = MAX(TaaD->unk1E, 4);
