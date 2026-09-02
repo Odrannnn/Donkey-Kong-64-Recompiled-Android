@@ -71,6 +71,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Chunky's cage switch. State 2 starts its stock 600-frame cage/rescue
     // sequence; the cage, cutscene and ownership flag stay locally scripted.
     {26, 0x24, COOP_TRANSIENT_TRIGGER, 2},
+    // Factory triangle, guitar and trombone pads. Their state-2 blocks own the
+    // 80-frame presentation and linked production-room object locally.
+    {26, 0x37, COOP_TRANSIENT_TRIGGER, 2}, {26, 0x38, COOP_TRANSIENT_TRIGGER, 2},
+    {26, 0x3B, COOP_TRANSIENT_TRIGGER, 2},
     // Diddy's 3-1-2-4 switch room. Each local script owns its long cutscene,
     // switch hiding, enemy spawn and final reward after state 5 is entered.
     {26, 0x3F, COOP_TRANSIENT_TRIGGER, 5}, {26, 0x40, COOP_TRANSIENT_TRIGGER, 5},

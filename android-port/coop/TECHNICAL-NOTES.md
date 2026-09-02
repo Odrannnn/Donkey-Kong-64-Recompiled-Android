@@ -1670,6 +1670,18 @@ The packet cannot name cage object `0x21`, reward object `0x78`, a cutscene or a
 ownership flag. State 0 is rejected, later states cannot be selected, and
 permanent Chunky ownership still converges through the item transaction.
 
+## Factory instrument pads (0.49.0)
+
+Factory objects `0x37`, `0x38` and `0x3B` are the triangle, guitar and trombone
+pads. Their stock scripts wait in state 1 and enter state 2 after validating the
+instrument, Kong and contact. A typed trigger mirrors only that entry. Each
+receiving script retains its own 80-frame timer, presentation and update of
+linked object `0x36`, `0x39` or `0x3A`.
+
+The packet carries no instrument input, energy, timer or linked-object state.
+States 3 and later cannot be restarted or rewound, and an absent pad fails
+closed. Both players must be in the same Factory epoch.
+
 ## Factory 3-1-2-4 room switches (0.49.0)
 
 Diddy's timed R&D room uses Factory objects `0x3F`, `0x40` and `0x41`. Their

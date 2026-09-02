@@ -201,6 +201,17 @@ static void capture_checks() {
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x24, 2, 2));
 
     reset(); current_map = 26;
+    load(0, 0x37, 1); load(1, 0x38, 2); load(2, 0x3B, 3);
+    bool saw_factory_triangle = false, saw_factory_guitar = false, saw_factory_trombone = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_factory_triangle |= contains_value(COOP_TRANSIENT_TRIGGER, 0x37, 1, 2);
+        saw_factory_guitar |= contains_value(COOP_TRANSIENT_TRIGGER, 0x38, 2, 2);
+        saw_factory_trombone |= contains_value(COOP_TRANSIENT_TRIGGER, 0x3B, 2, 2);
+    }
+    CHECK(saw_factory_triangle && saw_factory_guitar && saw_factory_trombone);
+
+    reset(); current_map = 26;
     load(0, 0x3F, 4); load(1, 0x40, 5); load(2, 0x41, 10);
     bool saw_3f = false, saw_40 = false, saw_41 = false;
     for (unsigned page = 0; page < 8; ++page) {
@@ -308,6 +319,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x24 && last_state == 2);
     scripts[0x24].unk48[0] = 0; coop_transient_apply();
     CHECK(script_calls == 1); // The peer cannot start an uninitialized cage switch.
+
+    reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x38, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x38, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x38 && last_state == 2);
+    scripts[0x38].unk48[0] = 3; coop_transient_apply();
+    CHECK(script_calls == 1); // The local pad owns completion and reset timing.
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x3F, 3);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
