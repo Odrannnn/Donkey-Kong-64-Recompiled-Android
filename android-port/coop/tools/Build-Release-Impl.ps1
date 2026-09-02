@@ -115,7 +115,7 @@ $toolVersions.recomp_mod_tool_sha256 = (Select-String -LiteralPath $preflight -P
 $hostBuild = Join-Path $releaseRoot 'host-tests'
 $wslHostBuild = To-WslPath $hostBuild
 $hostLog = Join-Path $logsRoot '01-host-tests.log'
-$hostCommand = "set -euo pipefail; cmake -S $(Quote-Bash $wslCoop) -B $(Quote-Bash $wslHostBuild) -G Ninja -DCMAKE_CXX_COMPILER=/usr/bin/c++ -DBUILD_TESTING=ON -DCOOP_SANITIZE=ON -DCMAKE_BUILD_TYPE=Debug; cmake --build $(Quote-Bash $wslHostBuild) --parallel 4; ctest --test-dir $(Quote-Bash $wslHostBuild) --output-on-failure"
+$hostCommand = "set -euo pipefail; cmake -S $(Quote-Bash $wslCoop) -B $(Quote-Bash $wslHostBuild) -G Ninja -DCMAKE_CXX_COMPILER=/usr/bin/c++ -DPORT_ROOT=$(Quote-Bash $wslWorkspace) -DBUILD_TESTING=ON -DCOOP_SANITIZE=ON -DCMAKE_BUILD_TYPE=Debug; cmake --build $(Quote-Bash $wslHostBuild) --parallel 4; ctest --test-dir $(Quote-Bash $wslHostBuild) --output-on-failure"
 Invoke-Logged 'Linux ASan/UBSan native tests' $wsl @('-d', 'Ubuntu', '--cd', $wslCoop, '--', 'bash', '-lc', $hostCommand) $hostLog
 $expectedHostTests = (Select-String -LiteralPath (Join-Path $coopRoot 'CMakeLists.txt') -Pattern '^\s*add_test\(').Count
 $hostSummary = [regex]::Match((Get-Content -LiteralPath $hostLog -Raw), '100% tests passed, 0 tests failed out of (\d+)')
@@ -124,7 +124,7 @@ if ($expectedHostTests -lt 1 -or !$hostSummary.Success -or [int]$hostSummary.Gro
 }
 
 $mipsLog = Join-Path $logsRoot '02-mips-nrm.log'
-Invoke-Logged 'MIPS NRM build' $wsl @('-d', 'Ubuntu', '--cd', $wslCoop, '--', 'bash', '-lc', 'set -euo pipefail; ./tools/build-mod.sh') $mipsLog
+Invoke-Logged 'MIPS NRM build' $wsl @('-d', 'Ubuntu', '--cd', $wslCoop, '--', 'bash', '-lc', "set -euo pipefail; DK64_PORT_ROOT=$(Quote-Bash $wslWorkspace) ./tools/build-mod.sh") $mipsLog
 $mipsRoot = Join-Path $releaseRoot 'mips'
 New-Item -ItemType Directory -Path $mipsRoot | Out-Null
 Copy-Item -LiteralPath (Join-Path $coopRoot 'build/mod/coop.o') -Destination $mipsRoot
@@ -137,7 +137,7 @@ $releaseNrm = Require-File (Join-Path $mipsRoot 'dk64_lan_coop.nrm') 'Isolated M
 $androidBuild = Join-Path $releaseRoot 'android'
 $androidConfigureLog = Join-Path $logsRoot '03-android-arm64-configure.log'
 $androidBuildLog = Join-Path $logsRoot '04-android-arm64-build.log'
-Invoke-Logged 'Android ARM64 configure' $androidCmake @('-S', $coopRoot, '-B', $androidBuild, '-G', 'Ninja', "-DCMAKE_MAKE_PROGRAM=$androidNinja", "-DCMAKE_TOOLCHAIN_FILE=$androidToolchain", '-DANDROID_ABI=arm64-v8a', '-DANDROID_PLATFORM=android-29', '-DANDROID_STL=c++_static', '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON', '-DCMAKE_BUILD_TYPE=Release') $androidConfigureLog
+Invoke-Logged 'Android ARM64 configure' $androidCmake @('-S', $coopRoot, '-B', $androidBuild, '-G', 'Ninja', "-DCMAKE_MAKE_PROGRAM=$androidNinja", "-DCMAKE_TOOLCHAIN_FILE=$androidToolchain", "-DPORT_ROOT=$workspace", '-DANDROID_ABI=arm64-v8a', '-DANDROID_PLATFORM=android-29', '-DANDROID_STL=c++_static', '-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON', '-DCMAKE_BUILD_TYPE=Release') $androidConfigureLog
 $androidCache = Require-File (Join-Path $androidBuild 'CMakeCache.txt') 'Fresh Android ARM64 API 29 cache'
 $cacheText = Get-Content -LiteralPath $androidCache -Raw
 foreach ($expected in @('ANDROID_ABI.*=arm64-v8a', 'ANDROID_PLATFORM.*=android-29', '27\.3\.13750724', 'CMAKE_MAKE_PROGRAM.*ninja')) {
@@ -149,7 +149,7 @@ $androidLibrary = Require-File (Join-Path $androidBuild 'dk64_coop_bridge.so') '
 $windowsBuild = Join-Path $releaseRoot 'windows'
 $wslWindowsBuild = To-WslPath $windowsBuild
 $windowsLog = Join-Path $logsRoot '05-windows-x64.log'
-$windowsCommand = "set -euo pipefail; cmake -S $(Quote-Bash $wslCoop) -B $(Quote-Bash $wslWindowsBuild) -G Ninja -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_CXX_COMPILER=$(Quote-Bash "$wslMingw/bin/x86_64-w64-mingw32-clang++") -DCMAKE_RC_COMPILER=$(Quote-Bash "$wslMingw/bin/x86_64-w64-mingw32-windres") -DCMAKE_BUILD_TYPE=Release; cmake --build $(Quote-Bash $wslWindowsBuild) --parallel 4"
+$windowsCommand = "set -euo pipefail; cmake -S $(Quote-Bash $wslCoop) -B $(Quote-Bash $wslWindowsBuild) -G Ninja -DPORT_ROOT=$(Quote-Bash $wslWorkspace) -DCMAKE_SYSTEM_NAME=Windows -DCMAKE_CXX_COMPILER=$(Quote-Bash "$wslMingw/bin/x86_64-w64-mingw32-clang++") -DCMAKE_RC_COMPILER=$(Quote-Bash "$wslMingw/bin/x86_64-w64-mingw32-windres") -DCMAKE_BUILD_TYPE=Release; cmake --build $(Quote-Bash $wslWindowsBuild) --parallel 4"
 Invoke-Logged 'Windows x64 cross build' $wsl @('-d', 'Ubuntu', '--cd', $wslCoop, '--', 'bash', '-lc', $windowsCommand) $windowsLog
 $windowsLibrary = Require-File (Join-Path $windowsBuild 'dk64_coop_bridge.dll') 'Windows x64 bridge'
 

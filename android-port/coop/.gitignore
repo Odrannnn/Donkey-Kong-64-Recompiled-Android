@@ -1,0 +1,10 @@
+/build/
+/dist/
+/.local/
+*.nrm
+*.dll
+*.so
+*.exe
+*.o
+*.elf
+__pycache__/
