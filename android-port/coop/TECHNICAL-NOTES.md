@@ -1,8 +1,8 @@
-> Current source: 0.51.0, protocol/native ABI v51. A fourteenth pinned recovery
-> suite covers conservative checkpoint eligibility and manual promotion. All
-> 14 Linux ASan/UBSan suites and the complete maintained MIPS, Android ARM64,
-> Windows x64, ABI/export, APK, package and Android-importer pipeline pass.
-> Gameplay and device validation remain pending.
+> Current source: 0.52.0, protocol/native ABI v52. A fifteenth pinned suite
+> covers the checksummed persistent recovery journal. All 15 Linux ASan/UBSan
+> suites and the complete maintained MIPS, Android ARM64, Windows x64,
+> ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
+> device validation remain pending.
 
 # Prototype integration and limits
 
@@ -113,6 +113,43 @@ rules reconcile any persistent difference. Protocol compatibility
 `0x00010233`, version 51 and export `dk64_coop_tick_v51` reject older peers and
 companions. Partitioned hosts are not automatically elected: users must confirm
 the old host is offline to avoid two independent authorities.
+
+## Persistent recovery journal (0.52.0)
+
+The runtime supplies the absolute path of the already selected isolated save
+after `recomp_change_save_file`. The native companion accepts only an absolute,
+lexically normalized path whose filename exactly matches the configured
+campaign, host/guest copy and items/prototype save family. Existing save and
+journal paths must be ordinary files rather than symlinks. This binds recovery
+metadata to the same loader-owned namespace without changing the loader or
+inventing a second save-data format.
+
+At the start of a new 120-frame guest convergence window, the mod requests an
+ordinary DK64 save through the game's normal save path. Once the checkpoint is
+fully acknowledged and the gameplay adapter still reports a persist-safe frame,
+the companion hashes that save and atomically replaces a fixed 68-byte
+`.coop-recovery` sidecar. The record contains its format, campaign/copy binding,
+room, synchronized-state fingerprint, authority generation, random node
+identity, save size/hash and CRC32. It contains no ROM data, raw save bytes,
+network address or room secret. Corruption, a foreign binding, an unexpected
+path type or an unreadable save fails closed. If the selected save later differs
+from the recorded digest, the stale checkpoint is cleared while an already
+promoted authority remains recorded and must establish a new safe checkpoint.
+
+Manual promotion commits the promoted flag and increments its authority
+generation only after the replacement Host socket binds. A journal write failure
+stops that socket and restores Join, so an in-memory promotion cannot silently
+outlive its durable state. After a complete restart, a configured Join using the
+Automatic recovery-copy setting becomes the effective Host when that guest
+copy's journal carries promoted authority. Selecting either explicit save copy
+suppresses this role override. Protocol compatibility `0x00010234`, version 52
+and export `dk64_coop_tick_v52` reject older peers and companions.
+
+The generation and node identity deliberately remain local in 0.52. They prepare
+the authority record for later peer reconciliation but do not elect between two
+live hosts or automatically demote a former host after a partition. Recovery
+therefore still requires confirming the former host is offline and manually
+returning it as Join.
 
 ## Remote actor ownership
 

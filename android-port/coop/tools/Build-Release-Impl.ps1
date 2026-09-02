@@ -195,7 +195,12 @@ try {
     $nrmReader = [IO.StreamReader]::new($nrmEntry.Open())
     try { $nrmManifest = $nrmReader.ReadToEnd() | ConvertFrom-Json } finally { $nrmReader.Dispose() }
 } finally { $nrmArchive.Dispose() }
-if ($nrmManifest.version -ne $version -or (@($nrmManifest.native_libraries.dk64_coop_bridge) -join ',') -ne "dk64_coop_start,dk64_coop_local_ipv4,$expectedTick,dk64_coop_stop") { throw 'Built NRM manifest version/native function contract check failed' }
+$expectedNativeFunctions = @('dk64_coop_start', 'dk64_coop_local_ipv4')
+if ($protocolVersion -ge 52) {
+    $expectedNativeFunctions += @("dk64_coop_recovery_configure_v$protocolVersion", "dk64_coop_recovery_status_v$protocolVersion", "dk64_coop_recovery_promote_v$protocolVersion")
+}
+$expectedNativeFunctions += @($expectedTick, 'dk64_coop_stop')
+if ($nrmManifest.version -ne $version -or (@($nrmManifest.native_libraries.dk64_coop_bridge) -join ',') -ne ($expectedNativeFunctions -join ',')) { throw 'Built NRM manifest version/native function contract check failed' }
 Add-Content -LiteralPath $checkLog -Value "PASS protocol $protocolVersion/export, Android ELF aarch64/16KiB/export, Windows PE x64/export, built NRM mod.json version/native functions"
 $commands.Add([pscustomobject]@{ name = 'Artifact contract checks'; command = 'PowerShell binary and manifest checks'; log = [IO.Path]::GetFileName($checkLog); exit_code = 0 })
 

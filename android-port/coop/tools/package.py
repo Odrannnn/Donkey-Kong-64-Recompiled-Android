@@ -30,7 +30,14 @@ with zipfile.ZipFile(nrm) as archive:
         protocol = int(version.split(".")[1])
     except ValueError as error:
         raise ValueError(f"NRM version does not encode a protocol minor version: {version!r}") from error
-    expected_functions = ["dk64_coop_start", "dk64_coop_local_ipv4", f"dk64_coop_tick_v{protocol}", "dk64_coop_stop"]
+    expected_functions = ["dk64_coop_start", "dk64_coop_local_ipv4"]
+    if protocol >= 52:
+        expected_functions += [
+            f"dk64_coop_recovery_configure_v{protocol}",
+            f"dk64_coop_recovery_status_v{protocol}",
+            f"dk64_coop_recovery_promote_v{protocol}",
+        ]
+    expected_functions += [f"dk64_coop_tick_v{protocol}", "dk64_coop_stop"]
     if manifest.get("native_libraries") != {"dk64_coop_bridge": expected_functions}:
         raise ValueError("NRM native_libraries must contain exactly the derived start/address/tick/stop exports")
     if any(name.endswith((".dll", ".so")) for name in archive.namelist()):

@@ -17,6 +17,7 @@ enum {
     COOP_RECOVERY_START = 5,
     COOP_RECOVERY_FAILED = 6,
     COOP_RECOVERY_ACTIVE = 7,
+    COOP_RECOVERY_STORAGE_FAILED = 8,
 };
 
 typedef struct {

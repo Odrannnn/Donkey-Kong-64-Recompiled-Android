@@ -1,13 +1,13 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.51.0** adds room-code LAN discovery and conservative manual host
-recovery. A guest can promote its last fully acknowledged, save-safe checkpoint
-without switching the loaded save; explicit save-copy selection preserves that
-authority across later restarts. A new session generation invalidates all old
-packets and transient state. It also follows a host whose DHCP address changes,
-while retaining the numeric address as a direct fallback. Protocol 51 requires
-a matching peer and native companion. It retains 0.50.0's upstream map-load and
+Version **0.52.0** persists a fully acknowledged guest checkpoint and promoted
+authority in a checksummed sidecar beside the isolated campaign save. A normal
+Join/Automatic configuration restores that promoted guest as Host after a full
+process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
+room-code discovery still follows DHCP address changes while retaining the numeric
+address as a direct fallback. Protocol 52 requires a matching peer and native
+companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
 production switches, Diddy's three 3-1-2-4 room switches, Lanky's piano notes,
@@ -113,7 +113,7 @@ Item pages remain synchronized while players occupy different
 areas by publishing each device's last verified safe inventory snapshot through
 shops, bosses, minigames, and other unsafe overlays. Incoming writes remain queued
 until that device reaches a safe gameplay frame. It retains v0.41.1's Android/Wi-Fi
-jitter tolerance, the v0.41 campaign-save and automatic host-address changes. It
+jitter tolerance, campaign-save isolation and v0.51 automatic host-address changes. It
 keeps eight explicit co-op campaign saves and LAN-address reporting. Campaign 1
 preserves the existing co-op saves; campaigns
 2–8 are separate. IP, port, room-code and Wi-Fi changes never select a save.
@@ -158,10 +158,11 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.51.0 passes all
-14 Linux ASan/UBSan native suites and the complete maintained release pipeline:
-MIPS NRM, Android ARM64, Windows x64, ABI/export, APK, package and Android
-importer checks. Gameplay and device validation remain pending.**
+**This is experimental, not complete campaign co-op. Version 0.52.0 adds a
+fifteenth native suite for persistent recovery storage. All 15 Linux
+ASan/UBSan suites and the complete maintained MIPS, Android ARM64, Windows x64,
+ABI/export, APK, package and Android-importer pipeline pass. Gameplay and device
+validation remain pending.**
 Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
 Back up experimental saves before using the build.
@@ -173,7 +174,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.51
+While the native companion is loaded, `tools/query_trace.py` discovers v0.52
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -187,7 +188,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.51.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.52.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -235,7 +236,8 @@ files together before resolving a conflict.
 
 ## Host recovery and address changes
 
-Protocol 51 sends each disconnected Join hello to both the last known host and
+Protocol 52 retains the v0.51 behavior that sends each disconnected Join hello
+to both the last known host and
 the active interfaces' LAN broadcast addresses. A matching host replies directly,
 and the guest adopts that source as its new destination. A guest address change
 is handled by the same fresh hello after the host's three-second timeout. Networks
@@ -243,11 +245,16 @@ with Wi-Fi client isolation or blocked UDP broadcast still require entering the
 new host address manually.
 
 The guest continuously evaluates a recovery checkpoint even when the recovery
-setting is Off. It becomes eligible only after 120 consecutive regular frames
+setting is Off. It requests a normal DK64 save when convergence begins and becomes
+eligible only after 120 consecutive regular frames
 with both persistent channels synchronized, no requests or applies pending, no
 reward/save/reload work queued, and the guest in a reviewed save-safe map. Any
 new guest pickup or reversible-world action before disconnection invalidates the
-checkpoint until both saves converge again.
+checkpoint until both saves converge again. The native companion then records the
+selected save's size and checksum, campaign/copy binding, synchronized-state
+fingerprint, random local node identity and authority generation in an atomically
+replaced `.coop-recovery` sidecar. Corrupt, foreign, symlinked or mismatched records
+grant no checkpoint or authority.
 
 To recover after the host is confirmed offline:
 
@@ -255,8 +262,10 @@ To recover after the host is confirmed offline:
    **Promote now**. Promotion waits for safe gameplay and fails closed without a
    checkpoint. It restarts the UDP socket as Host, creates a new session generation,
    clears old acknowledgements/transient events and keeps the loaded guest save.
-2. Before restarting that promoted device, set **LAN session** to **Host** and
-   **Recovery save copy** to **Guest checkpoint copy**. Keep the same campaign.
+2. The promotion is journaled before it becomes active. If the game process later
+   restarts while **LAN session** is still **Join** and **Recovery save copy** is
+   **Automatic**, that device restores its guest campaign as the effective Host.
+   Selecting an explicit save copy disables this automatic role override.
 3. On the former host, set **LAN session** to **Join** and **Recovery save copy**
    to **Host checkpoint copy**, then connect to the promoted device. If its old
    host copy contains additional progress, enable **Merge guest progress into
@@ -267,8 +276,8 @@ Do not promote during a temporary Wi-Fi interruption. If the old host remains
 active, both devices can become independent authorities; the protocol cannot
 choose safely between them. A failed local host-port bind returns the device to
 Join and requires changing the recovery option away from **Promote now** before
-retrying. Promotion is in-memory until the role/save-copy settings above are
-selected for the next restart. No raw save bytes are copied.
+retrying. The sidecar stores only recovery metadata and a save digest; no raw save
+bytes are copied into it.
 
 Expanded sharing may reveal differences between previously independent
 collectibles or upgrades in old test saves. Use the matching campaign, a fresh
@@ -700,7 +709,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v46 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v52 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -723,7 +732,7 @@ correction suppresses animation callbacks while evaluating the already-local cli
 it does not synchronize attacks, sounds, effects or damage. Enemy health
 from the guest is speculative until host acceptance; there is no rollback. Other enemies, boss behavior outside the bounded phase adapters, enemy drops, shared
 player damage/ammo, secondary animation layers, sounds/effects, other puzzles/doors,
-transitions outside the 169-route reviewed ordinary-route allowlist, host migration
+transitions outside the 169-route reviewed ordinary-route allowlist
 and world progression outside the allowlist are **not synchronized**. The remote
 shot visuals cannot themselves hit enemies or switches.
 Full Tag Anywhere compatibility is not established.

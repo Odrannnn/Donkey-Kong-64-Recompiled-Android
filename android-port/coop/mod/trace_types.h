@@ -2,7 +2,7 @@
 #define COOP_TRACE_TYPES_H
 
 enum {
-    COOP_TRACE_VERSION = 51,
+    COOP_TRACE_VERSION = 52,
     COOP_TRACE_PLAYING = 1u << 0,
     COOP_TRACE_CUTSCENE = 1u << 1,
     COOP_TRACE_LOADING = 1u << 2,
@@ -15,6 +15,7 @@ enum {
     COOP_TRACE_WORLD_SAVE_PENDING = 1u << 9,
     COOP_TRACE_RECOVERY_CHECKPOINT = 1u << 10,
     COOP_TRACE_PROMOTED_HOST = 1u << 11,
+    COOP_TRACE_RECOVERY_PERSIST_SAFE = 1u << 12,
 };
 
 enum {
@@ -37,7 +38,7 @@ typedef struct {
     unsigned item_deferred, item_baseline, item_bound, item_live_snapshot;
     unsigned item_wait_reason, item_wait_id, item_refresh_map, item_result_status;
     unsigned world_result_status, world_pending, transient_status, combat_status;
-    unsigned recovery_state;
+    unsigned recovery_state, recovery_fingerprint;
 } CoopTraceInput;
 
 #endif
