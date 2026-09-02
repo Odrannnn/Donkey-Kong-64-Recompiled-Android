@@ -23,6 +23,11 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Each state-2 block owns its linked gate/counter and presentation locally.
     {7, 0x28, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x29, COOP_TRANSIENT_TRIGGER, 2},
     {7, 0x2A, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x123, COOP_TRANSIENT_TRIGGER, 2},
+    // Paired cannon-game, shipwreck and lighthouse gun switches. Completed
+    // presentation still uses the existing permanent live-world flag rows.
+    {30, 0x06, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x07, COOP_TRANSIENT_TRIGGER, 2},
+    {30, 0x08, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x09, COOP_TRANSIENT_TRIGGER, 2},
+    {30, 0x0A, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x0B, COOP_TRANSIENT_TRIGGER, 2},
     {30, 0, COOP_TRANSIENT_TIMER, 0}, {30, 1, COOP_TRANSIENT_TIMER, 0},
     // Galleon's five instrument pads and Lanky/Tiny slam switches. State 2 is
     // the shared vanilla post-input entry; each linked door remains local.

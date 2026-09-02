@@ -127,19 +127,34 @@ static void capture_checks() {
     CHECK(saw_aztec_guitar);
 
     reset(); current_map = 30; load(0, 0, 10, 123); load(1, 1, 6, 45);
-    coop_transient_capture(1);
-    coop_transient_capture(1); // Galleon's reviewed script rows occupy page zero.
-    CHECK(contains_value(COOP_TRANSIENT_TIMER, 0, 10, 123));
-    CHECK(contains_value(COOP_TRANSIENT_TIMER, 1, 6, 45));
+    bool saw_timer_0 = false, saw_timer_1 = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_timer_0 |= contains_value(COOP_TRANSIENT_TIMER, 0, 10, 123);
+        saw_timer_1 |= contains_value(COOP_TRANSIENT_TIMER, 1, 6, 45);
+    }
+    CHECK(saw_timer_0 && saw_timer_1);
 
     reset(); current_map = 30; load(0, 0x11, 1); load(1, 0x1C, 3);
+    load(2, 6, 1); load(3, 7, 2); load(4, 8, 3); load(5, 9, 1);
+    load(6, 0xA, 2); load(7, 0xB, 1);
     bool saw_bongo = false, saw_tiny_slam = false;
+    bool saw_galleon_6 = false, saw_galleon_7 = false, saw_galleon_8 = false;
+    bool saw_galleon_9 = false, saw_galleon_a = false, saw_galleon_b = false;
     for (unsigned page = 0; page < 8; ++page) {
         coop_transient_capture(1);
         saw_bongo |= contains_value(COOP_TRANSIENT_TRIGGER, 0x11, 1, 2);
         saw_tiny_slam |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1C, 2, 2);
+        saw_galleon_6 |= contains_value(COOP_TRANSIENT_TRIGGER, 6, 1, 2);
+        saw_galleon_7 |= contains_value(COOP_TRANSIENT_TRIGGER, 7, 2, 2);
+        saw_galleon_8 |= contains_value(COOP_TRANSIENT_TRIGGER, 8, 2, 2);
+        saw_galleon_9 |= contains_value(COOP_TRANSIENT_TRIGGER, 9, 1, 2);
+        saw_galleon_a |= contains_value(COOP_TRANSIENT_TRIGGER, 0xA, 2, 2);
+        saw_galleon_b |= contains_value(COOP_TRANSIENT_TRIGGER, 0xB, 1, 2);
     }
     CHECK(saw_bongo && saw_tiny_slam);
+    CHECK(saw_galleon_6 && saw_galleon_7 && saw_galleon_8);
+    CHECK(saw_galleon_9 && saw_galleon_a && saw_galleon_b);
 
     reset(); current_map = 20; load(0, 0x12, 1); load(1, 0x16, 4);
     coop_transient_capture(1);
@@ -310,6 +325,12 @@ static void object_apply_checks() {
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x13 && last_state == 2);
     coop_transient_apply(); CHECK(script_calls == 1); // Local pad sequence owns later states.
+
+    reset(); role = ROLE_JOIN; current_map = 30; load(0, 8, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 30, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 8, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 8 && last_state == 2);
 
     reset(); role = ROLE_JOIN; current_map = 20; load(0, 0x16, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 20, 9, 1,

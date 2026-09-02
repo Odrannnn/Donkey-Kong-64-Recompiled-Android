@@ -1825,3 +1825,15 @@ trigger mirrors only that state-2 entry while the peers share the same map epoch
 Instrument input, energy, timer values, linked-object state and permanent flags
 are not carried by the record. The guest's local script performs those actions,
 and a pad already in its state-2/state-3 sequence is never restarted or rewound.
+
+## Galleon paired gun switches (0.49.0)
+
+Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired
+cannon-game, shipwreck and lighthouse gun switches. Every script moves from
+state 1 to state 2 after its pinned projectile check. Typed triggers replace
+their former generic same-area records and invoke only that activation entry.
+
+Each receiving switch updates its own vanilla pair counter, model, sound and
+timer. Permanent flags `0x99`, `0xA1` and `0x9B` retain their existing completed
+live-world refresh rows for the switches and linked controllers. The packets do
+not carry a counter, projectile, linked controller state or permanent flag.
