@@ -38,6 +38,7 @@ Gorilla Gone controller once per newly received target.
 Fungi's dark-attic guitar pad and Lanky attic slam switch mirror their reviewed
 activation entries while their room sequences remain local.
 Thornvine Barn's two slam boxes also mirror only their reviewed state-2 entry.
+The Fungi Mill-front slam box mirrors its distinct state-10-to-11 activation.
 Castle's Lanky/Tiny crypt grape and Simian Slam switches now mirror their exact
 activation entries while local scripts retain the door and platform sequences.
 The three DK/Diddy/Chunky crypt gun switches also mirror their reviewed hit

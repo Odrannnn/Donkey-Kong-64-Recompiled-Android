@@ -1977,6 +1977,16 @@ Each box keeps its own 60-frame timer, camera, sound, hide/show operations and
 permanent completion path. Later and completed states cannot be selected by a
 packet, and a local sequence already in progress is never restarted.
 
+## Fungi Mill-front slam box (0.49.0)
+
+Fungi Mill Front map 61 object `6` waits in state 10 when its permanent reward
+has not been completed. The stock slam and contact checks enter state 11. A
+typed trigger mirrors only that exact edge.
+
+The receiving state-11 script retains the 60-frame timer, camera, sound, box
+animation, linked object `2` and permanent flag `218`. State 0 initialization,
+completed state and every linked action remain local.
+
 ## Chunky Caves cabin targets (0.49.0)
 
 Chunky's Caves cabin map 90 objects `3`, `4` and `5` are the three gun targets.

@@ -83,6 +83,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Thornvine Barn's two DK slam boxes enter their local 60-frame sequences
     // at state 2 after the reviewed move and contact checks.
     {59, 0x01, COOP_TRANSIENT_TRIGGER, 2}, {59, 0x24, COOP_TRANSIENT_TRIGGER, 2},
+    // Fungi Mill-front slam box uniquely waits at state 10 and starts its
+    // local timed box/camera sequence at state 11.
+    {61, 0x06, COOP_TRANSIENT_TRIGGER, 11},
     // Isles level-lobby feather switches. State 2 starts the local panel/door
     // presentation in the Aztec and Fungi lobbies respectively.
     {173, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {178, 0x05, COOP_TRANSIENT_TRIGGER, 2},

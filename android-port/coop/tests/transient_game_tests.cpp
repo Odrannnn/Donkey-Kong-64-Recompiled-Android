@@ -164,6 +164,9 @@ static void capture_checks() {
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x01, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x24, 1, 2));
+    reset(); current_map = 61; load(0, 0x06, 11);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x06, 2, 11));
 
     reset(); current_map = 173; load(0, 0x10, 2);
     coop_transient_capture(1);
@@ -525,6 +528,13 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x24 && last_state == 2);
     scripts[0x24].unk48[0] = 3; coop_transient_apply();
     CHECK(script_calls == 1); // Completed local box cannot be restarted.
+    reset(); role = ROLE_JOIN; current_map = 61; load(0, 0x06, 10);
+    transient_result = {COOP_TRANSIENT_APPLYING, 61, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x06, 2, 11}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x06 && last_state == 11);
+    scripts[0x06].unk48[0] = 0; coop_transient_apply();
+    CHECK(script_calls == 1); // The permanent pre-activation path stays local.
     reset(); role = ROLE_JOIN; current_map = 58; load(0, 0x00, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 58, 9, 1,
         {{COOP_TRANSIENT_TRIGGER, 0x00, 2, 2}}};
