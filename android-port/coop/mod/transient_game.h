@@ -90,6 +90,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // all local sound, linked-door and reset behavior.
     {112, 0x0D, COOP_TRANSIENT_TRIGGER, 2}, {112, 0x0E, COOP_TRANSIENT_TRIGGER, 2},
     {112, 0x0F, COOP_TRANSIENT_TRIGGER, 2},
+    // Castle tree grape and Chunky-punch switches. The second has a distinct
+    // state-5 activation edge; each local script owns its door and reset.
+    {164, 0x01, COOP_TRANSIENT_TRIGGER, 2}, {164, 0x09, COOP_TRANSIENT_TRIGGER, 5},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.
@@ -217,6 +220,8 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         return activation == 3 && raw == 2;
     if (map == 72 && object == 0x2F)
         return activation == 13 && raw == 12;
+    if (map == 164 && object == 0x09)
+        return activation == 5 && raw == 1;
     return raw > 0 && raw < activation;
 }
 

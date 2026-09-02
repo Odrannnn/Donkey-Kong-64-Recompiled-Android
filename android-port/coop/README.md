@@ -35,6 +35,8 @@ Castle's Lanky/Tiny crypt grape and Simian Slam switches now mirror their exact
 activation entries while local scripts retain the door and platform sequences.
 The three DK/Diddy/Chunky crypt gun switches also mirror their reviewed hit
 entries while their shared door, sounds and reset timing remain local.
+Castle's tree grape and Chunky-punch switches mirror their distinct activation
+entries while each peer runs its own door animation and reset sequence.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
 progress advances one locally valid note at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied

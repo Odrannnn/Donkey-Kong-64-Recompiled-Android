@@ -1967,6 +1967,16 @@ Each local script retains its own switch animation, sound, shared door update
 and reset timing. Packets cannot name the door, a projectile or later states,
 and an already-running switch is never rewound.
 
+## Castle tree door switches (0.49.0)
+
+Castle tree map 164 object `1` is the grape switch and enters state 2 from
+ready state 1. Object `9` is the Chunky-punch switch and enters state 5 only
+from ready state 1. Typed triggers mirror those exact activation edges.
+
+The receiving scripts retain their local door changes, animation, sound and
+reset timing. Object `9` cannot be remotely advanced from intermediate states,
+and neither packet can identify a linked door, player move or projectile.
+
 ## Galleon paired gun switches (0.49.0)
 
 Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired
