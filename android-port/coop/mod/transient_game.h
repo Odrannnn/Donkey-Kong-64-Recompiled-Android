@@ -23,6 +23,11 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Each state-2 block owns its linked gate/counter and presentation locally.
     {7, 0x28, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x29, COOP_TRANSIENT_TRIGGER, 2},
     {7, 0x2A, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x123, COOP_TRANSIENT_TRIGGER, 2},
+    // Japes' four Kong hut switches and the Rambi rock-wall switch. Their
+    // state-2 blocks own the permanent flag and linked hut/wall presentation.
+    {7, 0x38, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x39, COOP_TRANSIENT_TRIGGER, 2},
+    {7, 0x3A, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x3B, COOP_TRANSIENT_TRIGGER, 2},
+    {7, 0x115, COOP_TRANSIENT_TRIGGER, 2},
     // Paired cannon-game, shipwreck and lighthouse gun switches. Completed
     // presentation still uses the existing permanent live-world flag rows.
     {30, 0x06, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x07, COOP_TRANSIENT_TRIGGER, 2},

@@ -2138,3 +2138,14 @@ The receive adapter can enter only the next hit state from its exact local wait
 state. It cannot skip a gate, select the reward path at states `30` through
 `35`, or enter the failure/restart path at states `50` through `53`. The target
 animation, timeout, sound, projectile checks and permanent reward remain local.
+
+## Japes Kong-hut and Rambi-wall switches (0.49.0)
+
+Japes map 7 objects `0x38`, `0x39`, `0x3A` and `0x3B` are the Diddy, Tiny,
+Lanky and DK hut switches. Object `0x115` is the Rambi rock-wall switch. Each
+waits in state 1 and enters state 2 after its stock weapon or Rambi action.
+Typed triggers mirror only that activation edge.
+
+The local state-2 blocks retain the switch animation, sound, timer, linked hut
+or wall update and permanent flags `0xD` through `0x10` or `0x2B`. Completed
+state 20 and every linked object remain local and cannot be replayed by a packet.

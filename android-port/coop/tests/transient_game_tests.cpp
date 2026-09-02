@@ -112,6 +112,21 @@ static void capture_checks() {
     CHECK(saw_japes_34 && saw_japes_35);
     CHECK(saw_japes_28 && saw_japes_29 && saw_japes_2a && saw_japes_123);
 
+    reset(); current_map = 7;
+    load(0, 0x38, 1); load(1, 0x39, 2); load(2, 0x3A, 1);
+    load(3, 0x3B, 20); load(4, 0x115, 2);
+    bool saw_hut_38 = false, saw_hut_39 = false, saw_hut_3a = false;
+    bool saw_hut_3b = false, saw_rambi_wall = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_hut_38 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x38, 1, 2);
+        saw_hut_39 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x39, 2, 2);
+        saw_hut_3a |= contains_value(COOP_TRANSIENT_TRIGGER, 0x3A, 1, 2);
+        saw_hut_3b |= contains_value(COOP_TRANSIENT_TRIGGER, 0x3B, 1, 2);
+        saw_rambi_wall |= contains_value(COOP_TRANSIENT_TRIGGER, 0x115, 2, 2);
+    }
+    CHECK(saw_hut_38 && saw_hut_39 && saw_hut_3a && saw_hut_3b && saw_rambi_wall);
+
     reset(); current_map = 38; load(0, 0x0D, 2); load(1, 0x0E, 6); load(2, 0x0F, 10);
     load(3, 0x44, 3); load(4, 0x9D, 1); load(5, 0x9E, 2);
     bool saw_aztec_d = false, saw_aztec_e = false, saw_aztec_f = false;
@@ -444,6 +459,23 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x0E, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x0E && last_state == 2);
+
+    reset(); role = ROLE_JOIN; current_map = 7; load(0, 0x3A, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x3A, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x3A && last_state == 2);
+    coop_transient_apply(); CHECK(script_calls == 1);
+    scripts[0x3A].unk48[0] = 20; coop_transient_apply();
+    CHECK(script_calls == 1); // A completed hut switch never restarts.
+
+    reset(); role = ROLE_JOIN; current_map = 7; load(0, 0x115, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x115, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x115 && last_state == 2);
+    scripts[0x115].unk48[0] = 0; coop_transient_apply();
+    CHECK(script_calls == 1); // The packet cannot initialize the wall switch.
 
     reset(); role = ROLE_JOIN; current_map = 38; load(0, 0x44, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 38, 9, 1,
