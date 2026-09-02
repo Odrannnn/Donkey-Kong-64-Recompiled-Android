@@ -27,12 +27,12 @@ static s8 is_cutscene_active;
 static s16 D_global_asm_807476F8 = -1;
 static u16 D_global_asm_807F5CF0, D_global_asm_807F5CF4;
 static s16 D_global_asm_807F6240[600];
-static std::array<Prop, 256> props;
-static std::array<Prop_ScriptData, 256> scripts;
+static std::array<Prop, 512> props;
+static std::array<Prop_ScriptData, 512> scripts;
 static Prop* D_global_asm_807F6000 = props.data();
 
 static s16 func_global_asm_80659470(s32 object) {
-    return object >= 0 && object < 256 ? static_cast<s16>(object) : -1;
+    return object >= 0 && object < static_cast<s32>(scripts.size()) ? static_cast<s16>(object) : -1;
 }
 static void func_global_asm_8063DA40(s16 slot, s16 state) {
     CHECK(slot >= 0 && slot < 600);
@@ -92,8 +92,10 @@ static void capture_checks() {
     CHECK(!contains(COOP_TRANSIENT_SCRIPT, 0x34, 4));
     load(3, 0x30, 1); load(4, 0x31, 2); load(5, 0x32, 3);
     load(6, 0x34, 1); load(7, 0x35, 2);
+    load(8, 0x28, 1); load(9, 0x29, 2); load(10, 0x2A, 3); load(11, 0x123, 2);
     bool saw_japes_30 = false, saw_japes_31 = false, saw_japes_32 = false;
     bool saw_japes_34 = false, saw_japes_35 = false;
+    bool saw_japes_28 = false, saw_japes_29 = false, saw_japes_2a = false, saw_japes_123 = false;
     for (unsigned page = 0; page < 8; ++page) {
         coop_transient_capture(1);
         saw_japes_30 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 1, 2);
@@ -101,9 +103,14 @@ static void capture_checks() {
         saw_japes_32 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x32, 2, 2);
         saw_japes_34 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x34, 1, 2);
         saw_japes_35 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x35, 2, 2);
+        saw_japes_28 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x28, 1, 2);
+        saw_japes_29 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x29, 2, 2);
+        saw_japes_2a |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2A, 2, 2);
+        saw_japes_123 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x123, 2, 2);
     }
     CHECK(saw_japes_30 && saw_japes_31 && saw_japes_32);
     CHECK(saw_japes_34 && saw_japes_35);
+    CHECK(saw_japes_28 && saw_japes_29 && saw_japes_2a && saw_japes_123);
 
     reset(); current_map = 30; load(0, 0, 10, 123); load(1, 1, 6, 45);
     coop_transient_capture(1);
@@ -221,6 +228,12 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x35, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x35 && last_state == 2);
+
+    reset(); role = ROLE_JOIN; load(0, 0x123, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x123, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x123 && last_state == 2);
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x31, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,

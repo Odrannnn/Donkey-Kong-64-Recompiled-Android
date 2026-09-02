@@ -1787,3 +1787,17 @@ refresh of both switches and the gate. During the live sequence, the receiving
 switch runs its own sound, model, counter and timer operations. Packets cannot
 select gate state, counter value, projectile data or the permanent completion
 flag.
+
+## Remaining Japes gun switches (0.49.0)
+
+Four further Jungle Japes scripts have the same pinned activation boundary:
+painting-room switch `0x28`, paired Diddy-cave switches `0x29`/`0x2A`, and Rambi
+switch `0x123`. Each enters state 2 only after its vanilla projectile check.
+The typed trigger then lets the receiving script perform its own linked-object,
+counter, sound, model and timer operations.
+
+The painting switch's completed-state path still uses the existing flag-`0x1E`
+live-world table. The Rambi switch remains temporary and starts its own 500-frame
+local window; no timer or linked object state crosses the network. Supporting
+object `0x123` also verifies that the adapter and test boundary retain the full
+16-bit script-object key rather than truncating it to one byte.

@@ -19,6 +19,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Japes hive-area feather switches. The local state-2 blocks own the
     // counter and gate sequence; completed-state refresh still uses flag 7.
     {7, 0x34, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x35, COOP_TRANSIENT_TRIGGER, 2},
+    // Remaining Japes gun switches: painting room, paired Diddy cave, Rambi.
+    // Each state-2 block owns its linked gate/counter and presentation locally.
+    {7, 0x28, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x29, COOP_TRANSIENT_TRIGGER, 2},
+    {7, 0x2A, COOP_TRANSIENT_TRIGGER, 2}, {7, 0x123, COOP_TRANSIENT_TRIGGER, 2},
     {30, 0, COOP_TRANSIENT_TIMER, 0}, {30, 1, COOP_TRANSIENT_TIMER, 0},
     // Galleon's five instrument pads and Lanky/Tiny slam switches. State 2 is
     // the shared vanilla post-input entry; each linked door remains local.
