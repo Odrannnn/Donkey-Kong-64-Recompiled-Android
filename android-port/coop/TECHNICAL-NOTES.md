@@ -1,4 +1,4 @@
-> Current source: 0.61.0, protocol/native ABI v61. The protocol and persistent
+> Current source: 0.62.0, protocol/native ABI v62. The protocol and persistent
 > recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
@@ -2599,3 +2599,20 @@ now applies to Winch Room object `3` and Mill Front object `6`, whose earlier
 state-11 typed triggers also use vanilla ready state 10. Packets cannot arm an
 unavailable box, replay completion, select a reward, or enter intermediate
 states 1 through 9.
+
+## Reviewed same-level Golden Banana delivery (0.62.0)
+
+Numeric item grants still require a stable main-world or Isles save context, a
+loaded HUD, an empty reward queue and valid item counters. Version 0.62.0
+relaxes only the owning-level exclusion for 29 exact `(main map, reward flag)`
+pairs. Their reward actors and scripts live in an unloaded race, minecart,
+bonus-barrel interior or lobby, so applying the permanent flag and incrementing
+the saved Golden Banana counter cannot collide with the source controller.
+
+The table is an allowlist, not a map-class rule. Same-map reward spawners,
+Galleon's Seal Race, Fungi and Caves Baboon Blast, rabbit and owl races,
+ordinary pickups, balloons, rainbow coins and the Japes boulder retain the
+existing whole-level delay. Flag write, counter increment, HUD update and save
+remain one retryable operation; a failed flag write does not advance the
+counter. Protocol and packet sizes are unchanged. Protocol 62, compatibility
+`0x0001023E`, v62 exports and manifest 0.62.0 reject older peers and companions.

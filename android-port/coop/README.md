@@ -1,7 +1,11 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.61.0** retains the host's last verified cutscene target for 90
+Version **0.62.0** applies 29 audited Golden Banana rewards immediately while
+the receiver remains in the owning main level. These rewards originate in an
+unloaded race, minecart, bonus-barrel interior, or lobby, so the exact reward
+controller cannot still be active. All other same-level rewards retain the
+existing delay. Version 0.61.0 retains the host's last verified cutscene target for 90
 rendered frames inside the same room epoch, so a lagging Join can finish its
 bounded catch-up even after the host cutscene closes. Active cutscene records
 also take priority when a transient page is full. Version 0.60.0 makes matching
@@ -34,7 +38,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 61 requires a matching peer and native
+address as a direct fallback. Protocol 62 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -187,8 +191,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.61.0 adds a
-same-epoch retained cutscene target and keeps missed-phase recovery, the bounded Ice Tomato board/clock
+**This is experimental, not complete campaign co-op. Version 0.62.0 adds the
+reviewed same-level reward allowlist and keeps the retained cutscene target,
+missed-phase recovery, the bounded Ice Tomato board/clock
 adapter, Spider movement, pose and final-hit adapters,
 the actor-driven environment-cycle, and persistent
 recovery and authority-reconciliation suites. All 15 Linux
@@ -206,7 +211,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.61
+While the native companion is loaded, `tools/query_trace.py` discovers v0.62
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -220,7 +225,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.61.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.62.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -777,7 +782,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v61 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v62 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

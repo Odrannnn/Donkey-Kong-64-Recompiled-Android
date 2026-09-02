@@ -221,7 +221,11 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 if (!D_global_asm_80754280) {
                     coop_items_wait(g, COOP_TRACE_WAIT_HUD, id); continue;
                 }
-                if ((pickup || id >= COOP_GB_FIRST) && level == here) {
+                if ((pickup || actor || boulder_bunch) && level == here) {
+                    coop_items_wait(g, COOP_TRACE_WAIT_SAME_LEVEL_ITEM, id); continue;
+                }
+                if (id >= COOP_GB_FIRST && id < COOP_PICKUP_FIRST && level == here
+                        && !coop_gb_same_level_safe(id, current_map)) {
                     coop_items_wait(g, COOP_TRACE_WAIT_SAME_LEVEL_ITEM, id); continue;
                 }
                 if (gb && id < COOP_MEDAL_FIRST && !isFlagSet(0x1D5 + id - COOP_SNIDE_FIRST, 0)) {

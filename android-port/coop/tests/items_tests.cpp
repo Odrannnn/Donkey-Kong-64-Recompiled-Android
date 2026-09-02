@@ -207,6 +207,10 @@ static void reset_engine() {
     writes = saves = hud_updates = block_write = mutate_counter = live_calls = live_slot = live_state = 0;
     D_global_asm_80754280 = &hud_object;
 }
+static unsigned main_map_for_level(unsigned level) {
+    static const unsigned maps[8] = {7, 38, 26, 30, 48, 72, 87, 34};
+    CHECK(level < 8); return maps[level];
+}
 static void snide_and_medal_checks() {
     for (unsigned i = 0; i < 40; ++i) {
         reset_engine(); CoopItems g{}; current_game = &g;
@@ -286,9 +290,12 @@ static void remaining_collectible_checks() {
     for (unsigned id = COOP_GB_FIRST; id < COOP_PICKUP_FIRST; ++id) {
         reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
         unsigned l, k; CHECK(coop_item_gb(id, &l, &k)); ++bucket[l][k];
-        mock_level = l; coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
+        current_map = main_map_for_level(l); mock_level = l;
+        coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
         g.result.status = 2; g.result.apply[id / 32] = bit(id);
-        coop_items_apply(&g, 1); CHECK(!writes && !saves); // Loaded old GB remains local.
+        if (!coop_gb_same_level_safe(id, current_map)) {
+            coop_items_apply(&g, 1); CHECK(!writes && !saves); // Loaded old GB remains local.
+        }
         mock_level = (l + 1) % 8;
         D_global_asm_807FD730 = &hud_object; coop_items_apply(&g, 1); CHECK(!writes);
         D_global_asm_807FD730 = nullptr;
@@ -399,6 +406,67 @@ static void actor_collectible_checks() {
     g.result.status = 2; g.result.apply[id / 32] = bit(id); coop_items_apply(&g, 1);
     CHECK(g.counter_error && !writes && !saves && !flags[a.flag]);
     CHECK(std::memcmp(expected, D_global_asm_807FC950, sizeof(expected)) == 0);
+}
+static void same_level_gb_delivery_checks() {
+    // These exact rewards originate in an unloaded lobby/interior while the
+    // receiver is on the owning main map. No source reward controller remains
+    // loaded, so their flag and counter may be committed atomically in place.
+    for (unsigned row = 0; row < COOP_SAME_LEVEL_GB_COUNT; ++row) {
+        int found = coop_item_id(coop_same_level_gbs[row].flag);
+        CHECK(found >= (int)COOP_GB_FIRST && found < (int)COOP_PICKUP_FIRST);
+        unsigned id = (unsigned)found, level = 0, kong = 0;
+        CHECK(coop_item_gb(id, &level, &kong));
+        CHECK(main_map_for_level(level) == coop_same_level_gbs[row].map);
+        CHECK(coop_gb_same_level_safe(id, current_map = coop_same_level_gbs[row].map));
+
+        reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+        current_map = coop_same_level_gbs[row].map; mock_level = level;
+        coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
+        g.result.status = 2; g.result.apply[id / 32] = bit(id);
+        MockPlayerProgress expected[4]; std::memcpy(expected, D_global_asm_807FC950, sizeof(expected));
+        expected[0].character_progress[kong].golden_bananas[level] = 1;
+        coop_items_apply(&g, 1);
+        CHECK(writes == 1 && saves == 1 && hud_updates == 1 && flags[coop_item_flag(id)]);
+        CHECK(std::memcmp(expected, D_global_asm_807FC950, sizeof(expected)) == 0);
+        coop_items_apply(&g, 1); CHECK(writes == 1 && saves == 1 && hud_updates == 1);
+    }
+
+    // Every non-reviewed same-level GB remains deferred. This includes
+    // same-map spawners and reward props such as Seal Race and Baboon Blast.
+    for (unsigned id = COOP_GB_FIRST; id < COOP_PICKUP_FIRST; ++id) {
+        unsigned level = 0, kong = 0; CHECK(coop_item_gb(id, &level, &kong));
+        unsigned map = main_map_for_level(level);
+        if (coop_gb_same_level_safe(id, map)) continue;
+        reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+        current_map = map; mock_level = level; coop_items_capture(&g, 1, 1, 0);
+        g.result.status = 2; g.result.apply[id / 32] = bit(id);
+        coop_items_apply(&g, 1);
+        CHECK(!writes && !saves && !hud_updates && !flags[coop_item_flag(id)]);
+        CHECK(g.wait_reason == COOP_TRACE_WAIT_SAME_LEVEL_ITEM && g.wait_id == id);
+    }
+
+    // The new allowlist never overrides existing save, HUD, reward-queue, or
+    // exact-map guards, and a failed flag write retries without counter drift.
+    unsigned id = (unsigned)coop_item_id(0x018), level = 0, kong = 0;
+    CHECK(coop_item_gb(id, &level, &kong));
+    for (unsigned scenario = 0; scenario < 4; ++scenario) {
+        reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+        current_map = scenario == 3 ? 38 : 7; mock_level = level;
+        coop_items_capture(&g, 1, 1, 0); g.result.status = 2;
+        g.result.apply[id / 32] = bit(id);
+        if (scenario == 1) D_global_asm_80754280 = nullptr;
+        if (scenario == 2) D_global_asm_807FD730 = &hud_object;
+        coop_items_apply(&g, scenario != 0);
+        CHECK(!writes && !saves && !hud_updates && !flags[0x018]);
+    }
+    reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+    current_map = 7; mock_level = 0; coop_items_capture(&g, 1, 1, 0);
+    g.result.status = 2; g.result.apply[id / 32] = bit(id); block_write = 1;
+    coop_items_apply(&g, 1); CHECK(writes == 1 && !saves && !flags[0x018]);
+    CHECK(D_global_asm_807FC950[0].character_progress[kong].golden_bananas[level] == 0);
+    block_write = 0; coop_items_apply(&g, 1);
+    CHECK(writes == 2 && saves == 1 && flags[0x018]);
+    CHECK(D_global_asm_807FC950[0].character_progress[kong].golden_bananas[level] == 1);
 }
 static void japes_boulder_bunch_checks() {
     reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
@@ -870,6 +938,6 @@ static void live_checks() {
 #include "progression_checks.h"
 #include "training_checks.h"
 int main() {
-    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); actor_collectible_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); arcade_payment_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
+    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); same_level_gb_delivery_checks(); actor_collectible_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); arcade_payment_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
     std::printf("PASS: %u item, all GBs/1700 pickups adapter, inventory preservation, authority, deduplication, lossy UDP and reconnect checks\n", checks);
 }
