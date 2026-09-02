@@ -192,6 +192,9 @@ static void capture_checks() {
     reset(); current_map = 34; load(0, 0x31, 3);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x31, 2, 3));
+    reset(); current_map = 34; load(0, 0x33, 2);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x33, 1, 3));
 
     reset(); current_map = 72; load(0, 0x2E, 2); load(1, 0x2F, 13);
     coop_transient_capture(1);
@@ -518,6 +521,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x31 && last_state == 3);
     scripts[0x31].unk48[0] = 1; coop_transient_apply();
     CHECK(script_calls == 1); // Barrel dependency must have armed state 2 locally.
+
+    reset(); role = ROLE_JOIN; current_map = 34; load(0, 0x33, 2);
+    transient_result = {COOP_TRANSIENT_APPLYING, 34, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x33, 2, 3}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x33 && last_state == 3);
+    scripts[0x33].unk48[0] = 1; coop_transient_apply();
+    CHECK(script_calls == 1); // Local barrel initialization is mandatory.
 
     reset(); role = ROLE_JOIN; current_map = 72; load(0, 0x2F, 12);
     transient_result = {COOP_TRANSIENT_APPLYING, 72, 9, 1,

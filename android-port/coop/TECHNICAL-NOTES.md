@@ -1966,6 +1966,17 @@ The original script owns the presentation, linked actor state and permanent
 flag `0x1AA`. A guest still in state 1 is left untouched, and packets cannot
 name the barrel actor or force the later completion state.
 
+## Isles Fairy Island sax pad (0.49.0)
+
+Isles object `0x33` is Tiny's sax pad for the Fairy Island door. Its script
+waits in state 2 only after its local pad/barrel actor is ready, then enters
+state 3 after the stock instrument check. The same-area adapter mirrors only
+that exact state-2-to-3 edge.
+
+The local script retains the door choice, cutscene, reward path and permanent
+flags `425` and `427`. A receiver in state 0, 1 or any completed state is left
+untouched, and packets cannot select a door, flag or later state.
+
 ## Caves boulder pads (0.49.0)
 
 Caves object `0x2E` is the small-boulder pad and enters state 2 from ready state

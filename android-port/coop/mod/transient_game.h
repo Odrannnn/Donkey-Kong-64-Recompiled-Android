@@ -71,6 +71,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Isles trombone pad. Its local barrel dependency moves it to state 2;
     // only then may the reviewed instrument activation enter state 3.
     {34, 0x31, COOP_TRANSIENT_TRIGGER, 3},
+    // Isles sax pad uses the same local-barrel prerequisite and state-3
+    // instrument edge before its Fairy Island door/reward sequence.
+    {34, 0x33, COOP_TRANSIENT_TRIGGER, 3},
     {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
     // Fungi green-tunnel feather/pineapple pairs and yellow-tunnel grape
     // switch. Each state-2 block owns its linked gate and completion locally.
@@ -255,7 +258,7 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         return activation == 12 && raw == 11;
     if (map == 26 && object == 0x15)
         return activation == 1 && raw == 0;
-    if (map == 34 && object == 0x31)
+    if (map == 34 && (object == 0x31 || object == 0x33))
         return activation == 3 && raw == 2;
     if (map == 72 && object == 0x2F)
         return activation == 13 && raw == 12;
