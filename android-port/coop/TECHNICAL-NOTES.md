@@ -1928,6 +1928,18 @@ The original script owns the presentation, linked actor state and permanent
 flag `0x1AA`. A guest still in state 1 is left untouched, and packets cannot
 name the barrel actor or force the later completion state.
 
+## Caves boulder pads (0.49.0)
+
+Caves object `0x2E` is the small-boulder pad and enters state 2 from ready state
+1 after the stock carried-object check. Object `0x2F` is the large-boulder pad;
+it becomes eligible only in state 12 after its local reveal and enters state 13
+after the carried-object check. Typed triggers mirror those two exact edges.
+
+No carried actor, player state or object pointer crosses the network. Each
+receiving pad runs its original dome notification, presentation and permanent
+flag `0x10E` update. Dome objects `0x27` and `0x2B` remain locally controlled,
+and the large pad cannot be activated before local state 12.
+
 ## Galleon paired gun switches (0.49.0)
 
 Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired
