@@ -154,6 +154,13 @@ static void capture_checks() {
     }
     CHECK(saw_fungi_18 && saw_fungi_19 && saw_fungi_1a && saw_fungi_1b && saw_fungi_1e);
 
+    reset(); current_map = 173; load(0, 0x10, 2);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x10, 2, 2));
+    reset(); current_map = 178; load(0, 0x05, 1);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x05, 1, 2));
+
     reset(); current_map = 30; load(0, 0x11, 1); load(1, 0x1C, 3);
     load(2, 6, 1); load(3, 7, 2); load(4, 8, 3); load(5, 9, 1);
     load(6, 0xA, 2); load(7, 0xB, 1);
@@ -402,6 +409,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x1A && last_state == 2);
     scripts[0x1A].unk48[0] = 20; coop_transient_apply();
     CHECK(script_calls == 1); // Permanent completion cannot be rewound.
+
+    reset(); role = ROLE_JOIN; current_map = 173; load(0, 0x10, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 173, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x10, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x10 && last_state == 2);
+    transient_result.map = 178; coop_transient_apply();
+    CHECK(script_calls == 1); // A lobby record cannot cross into another map.
 
     reset(); role = ROLE_JOIN; current_map = 30; load(0, 0x13, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 30, 9, 1,

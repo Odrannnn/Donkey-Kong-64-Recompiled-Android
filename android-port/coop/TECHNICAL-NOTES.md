@@ -1905,6 +1905,18 @@ gate updates. Permanent flags `0xCF`, `0xD0` and `0xD2` still converge through
 the world transaction and their completed gate rows. Packets cannot name the
 linked gate objects, counters, projectiles or permanent flags.
 
+## Isles lobby feather switches (0.49.0)
+
+Aztec lobby object `0x10` and Fungi lobby object `0x05` are the two vanilla
+feather switches. Each waits in state 1 and enters state 2 after its exact local
+projectile check. A typed trigger mirrors only that entry while both players
+share the same lobby epoch.
+
+The Aztec script retains its linked stone-panel update; the Fungi script retains
+its 200-frame timer and linked door update. Permanent lobby flags continue
+through the world transaction. Records are map-bound and cannot cross between
+the two lobbies or select their linked objects.
+
 ## Galleon paired gun switches (0.49.0)
 
 Gloomy Galleon map 30 objects `6`/`7`, `8`/`9` and `0xA`/`0xB` are the paired

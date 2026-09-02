@@ -74,6 +74,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {48, 0x18, COOP_TRANSIENT_TRIGGER, 2}, {48, 0x19, COOP_TRANSIENT_TRIGGER, 2},
     {48, 0x1A, COOP_TRANSIENT_TRIGGER, 2}, {48, 0x1B, COOP_TRANSIENT_TRIGGER, 2},
     {48, 0x1E, COOP_TRANSIENT_TRIGGER, 2},
+    // Isles level-lobby feather switches. State 2 starts the local panel/door
+    // presentation in the Aztec and Fungi lobbies respectively.
+    {173, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {178, 0x05, COOP_TRANSIENT_TRIGGER, 2},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
     // vanilla state-2 entry owns the timer/reward sequence locally.
