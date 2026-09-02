@@ -1967,6 +1967,16 @@ Typed triggers mirror that activation edge. The local scripts retain their
 timers, sounds, room objects, enemies and permanent completion flags. Completed
 state 20 is never treated as a remotely startable action.
 
+## Thornvine Barn slam boxes (0.49.0)
+
+Thornvine Barn map 59 objects `1` and `0x24` are the two DK slam boxes. Both
+wait in state 1 and enter state 2 only after the stock slam, Kong and contact
+checks. Typed triggers mirror only that activation entry.
+
+Each box keeps its own 60-frame timer, camera, sound, hide/show operations and
+permanent completion path. Later and completed states cannot be selected by a
+packet, and a local sequence already in progress is never restarted.
+
 ## Chunky Caves cabin targets (0.49.0)
 
 Chunky's Caves cabin map 90 objects `3`, `4` and `5` are the three gun targets.

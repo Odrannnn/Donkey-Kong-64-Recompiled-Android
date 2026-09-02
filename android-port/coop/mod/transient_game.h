@@ -80,6 +80,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Fungi dark-attic guitar pad and Lanky attic slam switch. State 2 starts
     // each local room sequence after its exact vanilla move check.
     {56, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {58, 0x00, COOP_TRANSIENT_TRIGGER, 2},
+    // Thornvine Barn's two DK slam boxes enter their local 60-frame sequences
+    // at state 2 after the reviewed move and contact checks.
+    {59, 0x01, COOP_TRANSIENT_TRIGGER, 2}, {59, 0x24, COOP_TRANSIENT_TRIGGER, 2},
     // Isles level-lobby feather switches. State 2 starts the local panel/door
     // presentation in the Aztec and Fungi lobbies respectively.
     {173, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {178, 0x05, COOP_TRANSIENT_TRIGGER, 2},
