@@ -1968,6 +1968,16 @@ receiving pad runs its original dome notification, presentation and permanent
 flag `0x10E` update. Dome objects `0x27` and `0x2B` remain locally controlled,
 and the large pad cannot be activated before local state 12.
 
+## Fungi main-map slam switches (0.49.0)
+
+Fungi map 48 object `0xF` is Diddy's night slam switch and object `0xEB` is
+Lanky's mushroom slam switch. Both enter state 2 from ready state 1 after their
+stock move, Kong and contact checks. Typed triggers mirror only that entry.
+
+The night switch retains its 300-frame timer and linked object `0xA`; the
+mushroom switch retains its cutscene, enemy check and linked objects `0x38` and
+`0x3A`. Permanent flags and the independent day/night lane remain authoritative.
+
 ## Fungi attic activators (0.49.0)
 
 Fungi Rafters map 56 object `0` is the dark-attic guitar pad, and Mill Attic

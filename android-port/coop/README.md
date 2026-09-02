@@ -39,6 +39,8 @@ Chunky's Caves cabin mirrors its three gun-target hits and advances the local
 Gorilla Gone controller once per newly received target.
 Fungi's dark-attic guitar pad and Lanky attic slam switch mirror their reviewed
 activation entries while their room sequences remain local.
+Fungi's Diddy night slam and Lanky mushroom slam switches also mirror their
+state-2 activations without copying day/night or permanent reward state.
 Thornvine Barn's two slam boxes also mirror only their reviewed state-2 entry.
 The Fungi Mill-front slam box mirrors its distinct state-10-to-11 activation.
 Castle's Lanky/Tiny crypt grape and Simian Slam switches now mirror their exact

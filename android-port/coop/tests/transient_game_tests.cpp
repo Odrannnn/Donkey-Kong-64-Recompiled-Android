@@ -153,6 +153,14 @@ static void capture_checks() {
         saw_fungi_1e |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1E, 2, 2);
     }
     CHECK(saw_fungi_18 && saw_fungi_19 && saw_fungi_1a && saw_fungi_1b && saw_fungi_1e);
+    reset(); current_map = 48; load(0, 0x0F, 2); load(1, 0xEB, 1);
+    bool saw_fungi_night = false, saw_fungi_mushroom = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_fungi_night |= contains_value(COOP_TRANSIENT_TRIGGER, 0x0F, 2, 2);
+        saw_fungi_mushroom |= contains_value(COOP_TRANSIENT_TRIGGER, 0xEB, 1, 2);
+    }
+    CHECK(saw_fungi_night && saw_fungi_mushroom);
 
     reset(); current_map = 56; load(0, 0x00, 2);
     coop_transient_capture(1);
@@ -478,6 +486,13 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x1A && last_state == 2);
     scripts[0x1A].unk48[0] = 20; coop_transient_apply();
     CHECK(script_calls == 1); // Permanent completion cannot be rewound.
+    reset(); role = ROLE_JOIN; current_map = 48; load(0, 0xEB, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 48, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0xEB, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0xEB && last_state == 2);
+    scripts[0xEB].unk48[0] = 20; coop_transient_apply();
+    CHECK(script_calls == 1); // Saved completion cannot restart the sequence.
 
     reset(); role = ROLE_JOIN; current_map = 173; load(0, 0x10, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 173, 9, 1,
