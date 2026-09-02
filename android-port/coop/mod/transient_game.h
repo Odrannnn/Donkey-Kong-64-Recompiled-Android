@@ -44,6 +44,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {30, 0x13, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x14, COOP_TRANSIENT_TRIGGER, 2},
     {30, 0x1B, COOP_TRANSIENT_TRIGGER, 2}, {30, 0x1C, COOP_TRANSIENT_TRIGGER, 2},
     {30, 0x1D, COOP_TRANSIENT_TRIGGER, 2},
+    // Cannon-game targets may be hit only after each local game has exposed
+    // that target at state 12. State 13 retains local scoring/link updates.
+    {30, 0x2F, COOP_TRANSIENT_TRIGGER, 13}, {30, 0x30, COOP_TRANSIENT_TRIGGER, 13},
+    {30, 0x31, COOP_TRANSIENT_TRIGGER, 13},
     // Llama Temple coconut switch and DK bongo pad. Their local state-2
     // sequences own the cooling/llama-spit flags and linked gate presentation.
     {20, 0x12, COOP_TRANSIENT_TRIGGER, 2}, {20, 0x16, COOP_TRANSIENT_TRIGGER, 2},
@@ -309,6 +313,8 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         return activation == 5 && raw == 1;
     if (map == 7 && (object == 0x1F || object == 0x20))
         return activation == 11 && raw == 1;
+    if (map == 30 && object >= 0x2F && object <= 0x31)
+        return activation == 13 && raw == 12;
     return raw > 0 && raw < activation;
 }
 

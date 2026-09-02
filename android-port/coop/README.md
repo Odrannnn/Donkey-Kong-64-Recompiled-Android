@@ -3,12 +3,14 @@
 Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
 Version **0.49.0** adds typed same-area activation for the four Frantic Factory
 production switches, Diddy's three 3-1-2-4 room switches, Lanky's piano notes,
-Tiny's six dartboard targets, Galleon's six gun/five instrument/two slam switches, and
+Tiny's six dartboard targets, Galleon's three cannon targets plus six gun/five instrument/two slam switches, and
 Llama Temple's coconut/bongo switches. Tiny Temple's opening switch, Diddy
 guitar pad and charge switch use the same pinned activation path, and its KONG
 letters advance through a bounded four-step sequence.
 All five-door temples mirror their reviewed weapon-panel hits while each copy
 owns its wall textures, animation and completion sequence.
+Galleon's cannon game mirrors a target hit only when that same target is already
+exposed in both copies; target selection, timing and game startup remain local.
 Llama Temple's sixteen matching-game heads now mirror individual grape hits
 only after both local copies have armed that head; sounds, pair validation,
 resets and the reward remain in each copy's original scripts.

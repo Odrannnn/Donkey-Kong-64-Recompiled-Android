@@ -2192,3 +2192,15 @@ These nine typed triggers complete all eleven activation entries across the five
 temples. Each local script retains its delays, sounds, linked wall-panel updates
 and texture writes. No packet can select a projectile, linked panel, timer,
 texture operation or later state.
+
+## Galleon cannon-game targets (0.49.0)
+
+Galleon map 30 objects `0x2F`, `0x30` and `0x31` are the three cannon-game
+targets. Their controller exposes a target through states 10 through 12. Only a
+real coconut hit at state 12 enters state 13 and notifies the local linked
+object. Typed triggers publish that state-13 hit as logical fired progress.
+
+The receiver requires its copy of the same target to be exactly at state 12.
+It cannot start the game, select or expose a target, skip its delay, or hit a
+different object. State 13 retains the local sound, score/controller update and
+target reset, and already-hit or hidden targets cannot be replayed.

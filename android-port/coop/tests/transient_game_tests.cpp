@@ -317,6 +317,17 @@ static void capture_checks() {
     CHECK(saw_galleon_6 && saw_galleon_7 && saw_galleon_8);
     CHECK(saw_galleon_9 && saw_galleon_a && saw_galleon_b);
 
+    reset(); current_map = 30;
+    load(0, 0x2F, 12); load(1, 0x30, 13); load(2, 0x31, 11);
+    bool saw_target_2f = false, saw_target_30 = false, saw_target_31 = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_target_2f |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2F, 1, 13);
+        saw_target_30 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 2, 13);
+        saw_target_31 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x31, 1, 13);
+    }
+    CHECK(saw_target_2f && saw_target_30 && saw_target_31);
+
     reset(); current_map = 19; load(0, 0x04, 1); load(1, 0x05, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x04, 1, 2));
@@ -838,6 +849,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x07 && last_state == 2);
     transient_result.records[0].key = 0x06; coop_transient_apply();
     CHECK(script_calls == 1); // A linked wall panel is not an allowed trigger.
+
+    reset(); role = ROLE_JOIN; current_map = 30; load(0, 0x2F, 12);
+    transient_result = {COOP_TRANSIENT_APPLYING, 30, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x2F, 2, 13}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x2F && last_state == 13);
+    scripts[0x2F].unk48[0] = 11; coop_transient_apply();
+    CHECK(script_calls == 1); // An unexposed target cannot be hit remotely.
 
     reset(); role = ROLE_JOIN; current_map = 16; load(0, 4, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,
