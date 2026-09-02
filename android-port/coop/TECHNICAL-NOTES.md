@@ -1664,3 +1664,18 @@ switch hiding, enemy spawn and final reward path. States 20 and above are treate
 as finished or reset observations and never rewind the peer. Missing scripts,
 wrong activation values and repeated packets fail closed. Both players must be
 in the same Factory room epoch.
+
+## Factory piano sequence (0.49.0)
+
+Factory object `0x14` is the 112-block piano controller. Twenty-five pinned
+wait-state/correct-hit-state pairs describe its vanilla sequence. The wire sends
+only a logical completed-note count from 0 through 25. If the host is ahead and
+the guest controller is sitting at the exact wait state for its next note, the
+adapter invokes only that next correct-hit state. The original script then owns
+the note sound, timer, presentation, cutscene and eventual reward before another
+network step is eligible.
+
+The controller is never started remotely: both copies must already have reached
+its first note wait. Failure states 250–252 publish zero progress, an ahead guest
+is never rewound, and a guest cannot skip more than one locally gated note per
+script step. The packet cannot carry a raw script state or reward identity.

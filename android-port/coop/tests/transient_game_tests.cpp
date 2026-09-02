@@ -117,6 +117,20 @@ static void capture_checks() {
     }
     CHECK(saw_3f && saw_40 && saw_41);
 
+    reset(); current_map = 26; load(0, 0x14, 31);
+    bool saw_piano = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_piano |= contains_value(COOP_TRANSIENT_SEQUENCE, 0x14, 9, 0);
+    }
+    CHECK(saw_piano);
+    scripts[0x14].unk48[0] = 250; transient_page = 0; saw_piano = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_piano |= contains_value(COOP_TRANSIENT_SEQUENCE, 0x14, 0, 0);
+    }
+    CHECK(saw_piano); // Failure/restart states never masquerade as completion.
+
     reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
     coop_transient_capture(1); CHECK(!transient_input.enabled);
 
@@ -162,6 +176,19 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x3F && last_state == 5);
     scripts[0x3F].unk48[0] = 3; transient_result.records[0].value = 4;
     coop_transient_apply(); CHECK(script_calls == 1); // Wrong activation state rejected.
+
+    reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x14, 30);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_SEQUENCE, 0x14, 10, 0}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x14 && last_state == 31);
+    coop_transient_apply(); CHECK(script_calls == 1); // Wait for local timer/state gate.
+    scripts[0x14].unk48[0] = 32; coop_transient_apply();
+    CHECK(script_calls == 2 && last_state == 33); // Catch up one more local note.
+    scripts[0x14].unk48[0] = 34; transient_result.records[0].state = 9;
+    coop_transient_apply(); CHECK(script_calls == 2); // Host never rewinds an ahead peer.
+    transient_result.records[0].state = 26;
+    coop_transient_apply(); CHECK(script_calls == 2); // Out-of-range progress rejected.
 }
 
 static void cutscene_checks() {

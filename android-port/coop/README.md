@@ -2,10 +2,11 @@
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.1 and the vanilla US ROM.
 Version **0.49.0** adds typed same-area activation for the four Frantic Factory
-production switches and Diddy's three 3-1-2-4 room switches. The peer enters each
-allowlisted switch's exact vanilla activation state, so its local timer,
-presentation, enemy and reward script run normally; later raw script states are
-never copied and permanent GB ownership still uses the item channel. It retains
+production switches, Diddy's three 3-1-2-4 room switches and Lanky's piano notes.
+The peer enters each allowlisted switch's exact vanilla activation state; piano
+progress advances one locally valid note at a time. Local timers, presentation,
+enemies and reward scripts run normally. Raw controller states are never copied
+and permanent GB ownership still uses the item channel. It retains
 the read-only LAN trace endpoint and query tool for
 diagnosing live host/peer sessions without exposing ROM or save bytes. It also
 retains the 0.46.0 additions: the last vanilla colored-banana collectible that was

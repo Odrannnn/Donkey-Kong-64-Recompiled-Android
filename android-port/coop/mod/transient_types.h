@@ -18,7 +18,10 @@ enum {
     // A reviewed room action. State 2 means enter the exact vanilla activation
     // state carried in value; state 1 is an inert ready/finished observation.
     COOP_TRANSIENT_TRIGGER,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_TRIGGER
+    // A reviewed ordered controller. State is bounded logical progress; the
+    // game adapter may execute only its next pinned local step.
+    COOP_TRANSIENT_SEQUENCE,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_SEQUENCE
 };
 enum {
     COOP_TRANSIENT_OFF,

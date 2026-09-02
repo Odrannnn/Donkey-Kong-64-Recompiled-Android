@@ -23,6 +23,8 @@ bool valid_record(const CoopTransientRecord& record) {
         case COOP_TRANSIENT_TRIGGER:
             return (record.state == 1u || record.state == 2u)
                 && record.value >= 2u && record.value <= 0xFFu;
+        case COOP_TRANSIENT_SEQUENCE:
+            return record.state <= 25u && !record.value;
     }
     return false;
 }
@@ -32,6 +34,9 @@ bool same_record(const CoopTransientRecord& a, const CoopTransientRecord& b) {
     if (a.kind == COOP_TRANSIENT_TRIGGER && b.kind == COOP_TRANSIENT_TRIGGER
             && a.key == b.key && a.value == b.value)
         return b.state == 1u || a.state == 2u;
+    if (a.kind == COOP_TRANSIENT_SEQUENCE && b.kind == COOP_TRANSIENT_SEQUENCE
+            && a.key == b.key)
+        return a.state >= b.state;
     return a.kind == b.kind && a.key == b.key && a.state == b.state && a.value == b.value;
 }
 }

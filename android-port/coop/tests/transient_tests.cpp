@@ -9,11 +9,12 @@ static unsigned checks;
 static CoopTransientInput frame(unsigned map, unsigned epoch, unsigned revision) {
     CoopTransientInput input{};
     input.enabled = 1; input.file = 0; input.map = map; input.epoch = epoch;
-    input.revision = revision; input.count = 4;
+    input.revision = revision; input.count = 5;
     input.records[0] = {COOP_TRANSIENT_SCRIPT, 0x34, 20, 0};
     input.records[1] = {COOP_TRANSIENT_TIMER, 0x25, 3, 240};
     input.records[2] = {COOP_TRANSIENT_PLATFORM, 0x27, 4, 0x12345678};
     input.records[3] = {COOP_TRANSIENT_TRIGGER, 0x31, 2, 2};
+    input.records[4] = {COOP_TRANSIENT_SEQUENCE, 0x14, 8, 0};
     return input;
 }
 
@@ -25,13 +26,15 @@ int main() {
     for (unsigned i = 0; i < COOP_TRANSIENT_RECORDS; ++i) wire.records[i] = host_input.records[i];
     auto decoded = transient_from_words(transient_words(wire));
     CHECK(valid_transient(decoded) && decoded.records[2].value == 0x12345678);
-    auto bad = decoded; bad.records[4].kind = COOP_TRANSIENT_SCRIPT; CHECK(!valid_transient(bad));
+    auto bad = decoded; bad.records[5].kind = COOP_TRANSIENT_SCRIPT; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[3].key = 0x10000; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[1].key = bad.records[0].key; bad.records[1].kind = bad.records[0].kind;
     CHECK(!valid_transient(bad));
     bad = decoded; bad.records[0].state = 0x100; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[3].state = 3; CHECK(!valid_transient(bad));
     bad = decoded; bad.records[3].state = 2; bad.records[3].value = 1; CHECK(!valid_transient(bad));
+    bad = decoded; bad.records[4].state = 26; CHECK(!valid_transient(bad));
+    bad = decoded; bad.records[4].state = 8; bad.records[4].value = 1; CHECK(!valid_transient(bad));
 
     State hs{7, 10, 0, active}, gs{7, 20, 1, active};
     auto guest_input = frame(7, 20, 8);
@@ -44,7 +47,7 @@ int main() {
     CHECK(host.result().status == COOP_TRANSIENT_SYNCED && !host.result().count);
     guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
     auto result = guest.result();
-    CHECK(result.status == COOP_TRANSIENT_APPLYING && result.count == 4);
+    CHECK(result.status == COOP_TRANSIENT_APPLYING && result.count == 5);
     CHECK(result.map == 7 && result.epoch == 20 && result.records[0].key == 0x34);
     // A ready host never asks a guest to rewind an already-fired trigger.
     host_input.records[3].state = 1; guest_input.records[1] = host_input.records[3];
@@ -55,6 +58,15 @@ int main() {
     for (unsigned i = 0; i < guest.result().count; ++i)
         rewound |= guest.result().records[i].kind == COOP_TRANSIENT_TRIGGER;
     CHECK(!rewound);
+    // A guest that has already completed more piano notes is never rewound.
+    host_input.records[4].state = 8; guest_input = host_input; guest_input.epoch = 20;
+    guest_input.records[4].state = 9;
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    bool sequence_rewound = false;
+    for (unsigned i = 0; i < guest.result().count; ++i)
+        sequence_rewound |= guest.result().records[i].kind == COOP_TRANSIENT_SEQUENCE;
+    CHECK(!sequence_rewound);
     guest_input = host_input; guest_input.epoch = 20;
     guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
     CHECK(guest.result().status == COOP_TRANSIENT_SYNCED && !guest.result().count);
@@ -76,8 +88,8 @@ int main() {
     packet.nonce = 3; packet.room = 123456; packet.player = hs; packet.transient = wire;
     auto bytes = encode(packet); Packet roundtrip{};
     CHECK(bytes.size() == 1352 && decode(bytes.data(), bytes.size(), roundtrip));
-    CHECK(roundtrip.transient.count == 4 && roundtrip.transient.records[3].kind == COOP_TRANSIENT_TRIGGER);
-    bytes[transient_offset + 6 * 4 + 1] = 6; // Kind 6 is outside the bounded enum.
+    CHECK(roundtrip.transient.count == 5 && roundtrip.transient.records[4].kind == COOP_TRANSIENT_SEQUENCE);
+    bytes[transient_offset + 6 * 4 + 1] = 7; // Kind 7 is outside the bounded enum.
     CHECK(!decode(bytes.data(), bytes.size(), roundtrip));
 
     std::printf("PASS: %u same-area transient protocol checks (typed records, host authority, epochs, stale rejection, cutscene context)\n", checks);

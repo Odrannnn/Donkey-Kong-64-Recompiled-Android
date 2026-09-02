@@ -21,7 +21,28 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // switch hiding, enemy spawn and final reward after state 5 is entered.
     {26, 0x3F, COOP_TRANSIENT_TRIGGER, 5}, {26, 0x40, COOP_TRANSIENT_TRIGGER, 5},
     {26, 0x41, COOP_TRANSIENT_TRIGGER, 5},
+    {26, 0x14, COOP_TRANSIENT_SEQUENCE, 0}, // Lanky's piano controller.
 };
+
+// The piano controller has 25 correct-note gates. A received count never
+// selects a raw state: the adapter can only enter the next correct-hit state
+// from its matching local wait state, preserving every intermediate block.
+static const unsigned char coop_piano_wait_states[25] = {
+    12, 14, 16, 19, 21, 23, 25, 28, 30, 32, 34, 36, 39,
+    41, 43, 45, 47, 49, 52, 54, 56, 58, 60, 62, 64,
+};
+static const unsigned char coop_piano_hit_states[25] = {
+    13, 15, 17, 20, 22, 24, 26, 29, 31, 33, 35, 37, 40,
+    42, 44, 46, 48, 50, 53, 55, 57, 59, 61, 63, 65,
+};
+
+static unsigned coop_piano_progress(unsigned raw) {
+    if (raw >= 250) return 0; // Vanilla failure/restart path is local.
+    unsigned progress = 0;
+    for (unsigned i = 0; i < 25; ++i)
+        if (raw >= coop_piano_hit_states[i]) progress = i + 1;
+    return progress;
+}
 
 static unsigned coop_transient_object_activation(unsigned map, unsigned object) {
     for (unsigned i = 0; i < sizeof(coop_transient_extra_objects) / sizeof(coop_transient_extra_objects[0]); ++i) {
@@ -67,6 +88,9 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
         value = coop_transient_object_activation(current_map, object);
         if (value < 2) return;
         state = state >= value && state < 20 ? 2 : 1;
+    } else if (kind == COOP_TRANSIENT_SEQUENCE) {
+        if ((unsigned)current_map != 26 || object != 0x14) return;
+        state = coop_piano_progress(state);
     }
     input->records[input->count++] = (CoopTransientRecord){kind, object, state, value};
 }
@@ -139,6 +163,15 @@ static void coop_transient_apply(void) {
             if (record.value == activation && record.state == 2
                     && script->unk48[0] > 0 && script->unk48[0] < activation)
                 coop_live_world_set_object(record.key, activation);
+            continue;
+        }
+        if (kind == COOP_TRANSIENT_SEQUENCE) {
+            if ((unsigned)current_map != 26 || record.key != 0x14 || record.value
+                    || record.state > 25) continue;
+            unsigned progress = coop_piano_progress(script->unk48[0]);
+            if (record.state > progress && progress < 25
+                    && script->unk48[0] == coop_piano_wait_states[progress])
+                coop_live_world_set_object(record.key, coop_piano_hit_states[progress]);
             continue;
         }
         if (script->unk48[0] == record.state) continue;
