@@ -1989,6 +1989,16 @@ receiving pad runs its original dome notification, presentation and permanent
 flag `0x10E` update. Dome objects `0x27` and `0x2B` remain locally controlled,
 and the large pad cannot be activated before local state 12.
 
+## Caves breakable ice walls (0.49.0)
+
+Caves map 72 objects `0x1D`, `0x1E` and `0x1F` are the three breakable ice
+walls. Each waits in state 1 and enters state 2 after stock punch/contact
+checks. Typed triggers mirror only those activation entries.
+
+The local state-2 scripts retain debris, sound, collision, paired visual-object
+changes and permanent flags `0x109` through `0x10B`. Packets cannot select a
+player move, paired object, timer, later state or replay a destroyed wall.
+
 ## Fungi main-map slam switches (0.49.0)
 
 Fungi map 48 object `0xF` is Diddy's night slam switch and object `0xEB` is

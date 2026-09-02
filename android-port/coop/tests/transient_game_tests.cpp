@@ -286,6 +286,17 @@ static void capture_checks() {
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x2E, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x2F, 2, 13));
 
+    reset(); current_map = 72;
+    load(0, 0x1D, 1); load(1, 0x1E, 2); load(2, 0x1F, 3);
+    bool saw_ice_1d = false, saw_ice_1e = false, saw_ice_1f = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_ice_1d |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1D, 1, 2);
+        saw_ice_1e |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1E, 2, 2);
+        saw_ice_1f |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1F, 2, 2);
+    }
+    CHECK(saw_ice_1d && saw_ice_1e && saw_ice_1f);
+
     reset(); current_map = 90;
     load(0, 0x03, 1); load(1, 0x04, 2); load(2, 0x05, 20); load(3, 0x06, 2);
     coop_transient_capture(1);
@@ -768,6 +779,14 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x2E, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x2E && last_state == 2);
+
+    reset(); role = ROLE_JOIN; current_map = 72; load(0, 0x1E, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 72, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x1E, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x1E && last_state == 2);
+    scripts[0x1E].unk48[0] = 3; coop_transient_apply();
+    CHECK(script_calls == 1); // A destroyed wall cannot replay its break entry.
 
     reset(); role = ROLE_JOIN; current_map = 90;
     load(0, 0x03, 1); load(1, 0x04, 1); load(2, 0x05, 1); load(3, 0x06, 1);

@@ -154,6 +154,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Caves small/large boulder pads. The small pad accepts state 2 from ready
     // state 1; the large pad must finish its local reveal at state 12 first.
     {72, 0x2E, COOP_TRANSIENT_TRIGGER, 2}, {72, 0x2F, COOP_TRANSIENT_TRIGGER, 13},
+    // Three Caves main-map breakable ice walls. Their state-2 entries retain
+    // local debris, collision, visual-pair and permanent-completion work.
+    {72, 0x1D, COOP_TRANSIENT_TRIGGER, 2}, {72, 0x1E, COOP_TRANSIENT_TRIGGER, 2},
+    {72, 0x1F, COOP_TRANSIENT_TRIGGER, 2},
     // Chunky's Caves cabin gun targets. Each hit also advances the local
     // Gorilla Gone controller by one reviewed step in the apply adapter.
     {90, 0x03, COOP_TRANSIENT_TRIGGER, 2}, {90, 0x04, COOP_TRANSIENT_TRIGGER, 2},

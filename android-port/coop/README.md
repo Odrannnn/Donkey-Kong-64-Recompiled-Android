@@ -53,6 +53,8 @@ The Fairy Island sax pad uses the same local ready-state requirement before its
 instrument activation is mirrored.
 Caves' small and large boulder pads mirror only their reviewed deposit entries;
 each local script still destroys its own dome and records permanent completion.
+The three main-map breakable ice walls mirror their exact punch entry while
+each local script owns debris, collision, paired visuals and saved removal.
 Chunky's Caves cabin mirrors its three gun-target hits and advances the local
 Gorilla Gone controller once per newly received target.
 Tiny's Caves igloo target mirrors four bounded hits, one locally ready gate at
