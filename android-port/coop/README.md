@@ -12,6 +12,8 @@ only after both local copies have armed that head; sounds, pair validation,
 resets and the reward remain in each copy's original scripts.
 Its quicksand-tunnel slam switch also mirrors the reviewed activation edge and
 lets each local script perform the delayed door update.
+The temple's grape switch likewise mirrors its single hit and lets each copy
+run the timed gate, texture and reset sequence locally.
 Chunky's Factory cage switch also starts the stock rescue sequence on both peers;
 the cage, cutscene and ownership award remain locally validated.
 Factory's triangle, guitar and trombone pads mirror their reviewed activation

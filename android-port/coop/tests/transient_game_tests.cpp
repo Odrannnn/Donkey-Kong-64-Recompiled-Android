@@ -332,6 +332,21 @@ static void capture_checks() {
     }
     CHECK(saw_quicksand_switch);
 
+    reset(); current_map = 20; load(0, 0x6B, 1);
+    bool saw_grape_ready = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_grape_ready |= contains_value(COOP_TRANSIENT_TRIGGER, 0x6B, 1, 2);
+    }
+    CHECK(saw_grape_ready);
+    scripts[0x6B].unk48[0] = 2; transient_page = 0;
+    bool saw_grape_hit = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_grape_hit |= contains_value(COOP_TRANSIENT_TRIGGER, 0x6B, 2, 2);
+    }
+    CHECK(saw_grape_hit);
+
     reset(); current_map = 16; load(0, 0, 1); load(1, 4, 2); load(2, 0x14, 3);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0, 1, 2));
@@ -784,6 +799,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x69 && last_state == 2);
     scripts[0x69].unk48[0] = 20; coop_transient_apply();
     CHECK(script_calls == 1); // Completed tunnel switches never rewind.
+
+    reset(); role = ROLE_JOIN; current_map = 20; load(0, 0x6B, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 20, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x6B, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x6B && last_state == 2);
+    scripts[0x6B].unk48[0] = 3; coop_transient_apply();
+    CHECK(script_calls == 1); // The local timed cycle cannot be restarted.
 
     reset(); role = ROLE_JOIN; current_map = 16; load(0, 4, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,

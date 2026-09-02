@@ -2160,3 +2160,13 @@ The receive adapter requires those exact local ready states. The feather and
 grape scripts retain their 200-frame door cycle and states 12 through 14. The
 peanut script retains its delayed linked-object sequence and permanent flag
 `0x2C`. Packets cannot select a timer, linked door, projectile or later state.
+
+## Llama Temple grape switch (0.49.0)
+
+Llama Temple map 20 object `0x6B` is the grape switch for its temporary gate.
+It waits in state 1 and enters state 2 after the stock grape hit. A typed
+trigger mirrors only that activation entry.
+
+The local script retains the gate texture, cutscene, sound, delay and states 3
+through 5 before it returns to ready state 1. The packet cannot select those
+states, the linked gate, a projectile, a timer or a permanent flag.
