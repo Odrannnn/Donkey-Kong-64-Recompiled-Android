@@ -117,6 +117,13 @@ static void capture_checks() {
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 4, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x14, 2, 2));
 
+    reset(); current_map = 16;
+    load(0, 0x0C, 1); load(1, 0x0D, 1); load(2, 0x0E, 10); load(3, 0x0F, 22);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_SEQUENCE, 0x0C, 1, 0));
+    scripts[0x0C].unk48[0] = 20; coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_SEQUENCE, 0x0C, 4, 0));
+
     reset(); current_map = 194; load(0, 6, 2);
     coop_transient_capture(1);
     CHECK(contains(COOP_TRANSIENT_PLATFORM, 6, 2));
@@ -250,6 +257,29 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 4, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 4 && last_state == 2);
+
+    reset(); role = ROLE_JOIN; current_map = 16;
+    load(0, 0x0C, 1); load(1, 0x0D, 1); load(2, 0x0E, 1); load(3, 0x0F, 10);
+    transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,
+        {{COOP_TRANSIENT_SEQUENCE, 0x0C, 3, 0}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x0F && last_state == 11);
+    coop_transient_apply(); CHECK(script_calls == 1); // Local chain must advance first.
+    scripts[0x0F].unk48[0] = 22; scripts[0x0E].unk48[0] = 10;
+    coop_transient_apply();
+    CHECK(script_calls == 2 && last_object == 0x0E && last_state == 11);
+    scripts[0x0E].unk48[0] = 1; scripts[0x0D].unk48[0] = 10;
+    transient_result.records[0].state = 4; coop_transient_apply();
+    CHECK(script_calls == 3 && last_object == 0x0D && last_state == 11);
+    scripts[0x0D].unk48[0] = 1; scripts[0x0C].unk48[0] = 10;
+    coop_transient_apply();
+    CHECK(script_calls == 4 && last_object == 0x0C && last_state == 11);
+
+    reset(); role = ROLE_JOIN; current_map = 16;
+    load(0, 0x0C, 1); load(1, 0x0D, 1); load(2, 0x0E, 1); load(3, 0x0F, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,
+        {{COOP_TRANSIENT_SEQUENCE, 0x0C, 1, 0}}};
+    coop_transient_apply(); CHECK(!script_calls); // Cannot start the puzzle remotely.
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x7F, 17);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,

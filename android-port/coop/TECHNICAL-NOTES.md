@@ -1742,6 +1742,21 @@ the guest enter exactly state 2 while both peers share the same map epoch.
 
 The local scripts retain every linked-door update, cooling step, cutscene and
 permanent-flag write. Packets cannot select those later states or name their
-linked objects. Objects `0xC` through `0xF`, the four ordered KONG-letter
-switches, remain excluded because their alternating state-1/state-10 behavior
-needs an ordered logical sequence rather than a generic fired trigger.
+linked objects. Objects `0xC` through `0xF`, the four KONG-letter switches, use
+the ordered logical sequence below instead of a generic fired trigger.
+
+## Tiny Temple KONG-letter sequence (0.49.0)
+
+Tiny Temple's four letter scripts activate in object order `0xF`, `0xE`, `0xD`,
+`0xC`. The adapter derives a logical progress value from 0 through 4 by finding
+the one letter that the vanilla chain has placed in state 10. Completion is
+observed only while object `0xC` runs its reviewed states 11 or 20–22. Raw
+letter states never cross the native ABI.
+
+When the host is ahead, the guest may move only its next active letter from
+state 10 to state 11. The original script then advances the following letter,
+runs wrong-hit resets, presentation and timers, and ultimately starts the local
+Tiny rescue controller. A guest whose first letter has not been enabled by the
+charge-switch sequence is left untouched, so a packet cannot start or complete
+the puzzle on its own. Permanent Tiny ownership still converges through the
+item channel.

@@ -6,6 +6,8 @@ typedef struct {
     unsigned char kind, activation;
 } CoopTransientObject;
 
+static Prop_ScriptData* coop_transient_script(unsigned object);
+
 // Pinned loaded scripts whose state drives a reviewed reversible switch,
 // timer-driven presentation, or linked platform. Permanent gate/door readers
 // come from coop_live_world_states below.
@@ -23,6 +25,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Tiny Temple opening switch, Diddy guitar pad and charge switch.
     {16, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {16, 0x04, COOP_TRANSIENT_TRIGGER, 2},
     {16, 0x14, COOP_TRANSIENT_TRIGGER, 2},
+    // Synthetic logical progress for the K-O-N-G letter chain. Object C is
+    // the record key; F, E, D and C remain the four locally gated steps.
+    {16, 0x0C, COOP_TRANSIENT_SEQUENCE, 0},
     {48, 4, COOP_TRANSIENT_TIMER, 0}, {48, 5, COOP_TRANSIENT_TIMER, 0},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory production switches: Chunky, Tiny, Lanky and Diddy. Their
@@ -95,6 +100,19 @@ static unsigned coop_dartboard_progress(unsigned raw) {
     return 0;
 }
 
+static unsigned coop_tiny_temple_kong_progress(void) {
+    Prop_ScriptData* letter_c = coop_transient_script(0x0C);
+    Prop_ScriptData* letter_d = coop_transient_script(0x0D);
+    Prop_ScriptData* letter_e = coop_transient_script(0x0E);
+    if (!letter_c || !letter_d || !letter_e) return 0;
+    unsigned state_c = letter_c->unk48[0];
+    if (state_c == 11 || (state_c >= 20 && state_c <= 22)) return 4;
+    if (state_c == 10) return 3;
+    if (letter_d->unk48[0] == 10) return 2;
+    if (letter_e->unk48[0] == 10) return 1;
+    return 0;
+}
+
 static unsigned coop_transient_object_activation(unsigned map, unsigned object) {
     for (unsigned i = 0; i < sizeof(coop_transient_extra_objects) / sizeof(coop_transient_extra_objects[0]); ++i) {
         const CoopTransientObject* entry = &coop_transient_extra_objects[i];
@@ -142,9 +160,12 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
         if (value < 2) return;
         state = state >= value && state < 20 ? 2 : 1;
     } else if (kind == COOP_TRANSIENT_SEQUENCE) {
-        if ((unsigned)current_map != 26) return;
-        if (object == 0x14) state = coop_piano_progress(state);
-        else if (object == 0x7F) state = coop_dartboard_progress(state);
+        if ((unsigned)current_map == 26 && object == 0x14)
+            state = coop_piano_progress(state);
+        else if ((unsigned)current_map == 26 && object == 0x7F)
+            state = coop_dartboard_progress(state);
+        else if ((unsigned)current_map == 16 && object == 0x0C)
+            state = coop_tiny_temple_kong_progress();
         else return;
     }
     input->records[input->count++] = (CoopTransientRecord){kind, object, state, value};
@@ -221,7 +242,18 @@ static void coop_transient_apply(void) {
             continue;
         }
         if (kind == COOP_TRANSIENT_SEQUENCE) {
-            if ((unsigned)current_map != 26 || record.value) continue;
+            if (record.value) continue;
+            if ((unsigned)current_map == 16 && record.key == 0x0C) {
+                static const unsigned char letters[4] = {0x0F, 0x0E, 0x0D, 0x0C};
+                unsigned progress = coop_tiny_temple_kong_progress();
+                if (record.state <= 4 && record.state > progress && progress < 4) {
+                    Prop_ScriptData* letter = coop_transient_script(letters[progress]);
+                    if (letter && letter->unk48[0] == 10)
+                        coop_live_world_set_object(letters[progress], 11);
+                }
+                continue;
+            }
+            if ((unsigned)current_map != 26) continue;
             unsigned progress, count;
             const unsigned char* waits;
             const unsigned char* hits;
