@@ -43,6 +43,8 @@ Fungi's Diddy night slam and Lanky mushroom slam switches also mirror their
 state-2 activations without copying day/night or permanent reward state.
 Thornvine Barn's two slam boxes also mirror only their reviewed state-2 entry.
 The Fungi Mill-front slam box mirrors its distinct state-10-to-11 activation.
+The rear-mill triangle pad mirrors its state-2 instrument activation while the
+crusher start and reward sequence execute locally.
 Castle's Lanky/Tiny crypt grape and Simian Slam switches now mirror their exact
 activation entries while local scripts retain the door and platform sequences.
 The three DK/Diddy/Chunky crypt gun switches also mirror their reviewed hit

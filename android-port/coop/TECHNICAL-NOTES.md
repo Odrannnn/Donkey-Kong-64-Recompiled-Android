@@ -2008,6 +2008,16 @@ The receiving state-11 script retains the 60-frame timer, camera, sound, box
 animation, linked object `2` and permanent flag `218`. State 0 initialization,
 completed state and every linked action remain local.
 
+## Fungi rear-mill triangle pad (0.49.0)
+
+Fungi Mill Back map 62 object `0` is the triangle pad. It initializes to ready
+state 1 and enters state 2 after the stock instrument, Kong and contact checks.
+A typed trigger mirrors only that activation edge.
+
+The receiving state-2 script retains its 80-frame timer, crusher start,
+cutscene, reward spawn and permanent flag. State 3 and completed room state
+cannot be remotely selected or replayed.
+
 ## Chunky Caves cabin targets (0.49.0)
 
 Chunky's Caves cabin map 90 objects `3`, `4` and `5` are the three gun targets.

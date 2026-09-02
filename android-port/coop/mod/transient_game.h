@@ -89,6 +89,9 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Fungi Mill-front slam box uniquely waits at state 10 and starts its
     // local timed box/camera sequence at state 11.
     {61, 0x06, COOP_TRANSIENT_TRIGGER, 11},
+    // Fungi rear-mill triangle pad enters its local crusher activation and
+    // reward path at state 2 after the stock instrument check.
+    {62, 0x00, COOP_TRANSIENT_TRIGGER, 2},
     // Isles level-lobby feather switches. State 2 starts the local panel/door
     // presentation in the Aztec and Fungi lobbies respectively.
     {173, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {178, 0x05, COOP_TRANSIENT_TRIGGER, 2},
