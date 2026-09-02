@@ -220,6 +220,14 @@ static void capture_checks() {
     }
     CHECK(saw_fungi_night && saw_fungi_mushroom);
 
+    reset(); current_map = 48; load(0, 0x07, 1);
+    bool saw_fungi_door = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_fungi_door |= contains_value(COOP_TRANSIENT_TRIGGER, 0x07, 1, 2);
+    }
+    CHECK(saw_fungi_door);
+
     reset(); current_map = 56; load(0, 0x00, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x00, 2, 2));
@@ -703,6 +711,14 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x1A && last_state == 2);
     scripts[0x1A].unk48[0] = 20; coop_transient_apply();
     CHECK(script_calls == 1); // Permanent completion cannot be rewound.
+
+    reset(); role = ROLE_JOIN; current_map = 48; load(0, 0x07, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 48, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x07, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x07 && last_state == 2);
+    scripts[0x07].unk48[0] = 4; coop_transient_apply();
+    CHECK(script_calls == 1); // The local break animation cannot restart.
     reset(); role = ROLE_JOIN; current_map = 48; load(0, 0xEB, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 48, 9, 1,
         {{COOP_TRANSIENT_TRIGGER, 0xEB, 2, 2}}};

@@ -63,6 +63,8 @@ The Winch Room up button mirrors its exact state-10-to-11 activation while the
 400-frame winch and reward path stay local.
 Fungi's Diddy night slam and Lanky mushroom slam switches also mirror their
 state-2 activations without copying day/night or permanent reward state.
+The main-map breakable door mirrors its exact punch entry while its breaking
+animation and reset cycle run locally.
 Thornvine Barn's two slam boxes also mirror only their reviewed state-2 entry.
 The Fungi Mill-front slam box mirrors its distinct state-10-to-11 activation.
 The rear-mill triangle pad mirrors its state-2 instrument activation while the

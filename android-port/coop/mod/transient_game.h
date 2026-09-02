@@ -123,6 +123,8 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Fungi Diddy night slam and Lanky mushroom slam switches. State 2 starts
     // their local timer, object and permanent-completion sequences.
     {48, 0x0F, COOP_TRANSIENT_TRIGGER, 2}, {48, 0xEB, COOP_TRANSIENT_TRIGGER, 2},
+    // Fungi main-map breakable door enters its local break/reset path at state 2.
+    {48, 0x07, COOP_TRANSIENT_TRIGGER, 2},
     // Fungi dark-attic guitar pad and Lanky attic slam switch. State 2 starts
     // each local room sequence after its exact vanilla move check.
     {56, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {58, 0x00, COOP_TRANSIENT_TRIGGER, 2},

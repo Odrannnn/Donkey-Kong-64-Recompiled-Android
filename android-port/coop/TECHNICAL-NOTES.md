@@ -2260,3 +2260,13 @@ Typed triggers publish only that state-13 hit and the receiver requires exact
 local state 12. The packet cannot set flag `0x37`, reveal or arm a switch, or
 select a Kong/projectile. Each local script retains its sound, cutscene, linked
 door, 300-frame cycle, animation and return to ready state 12.
+
+## Fungi main-map breakable door (0.49.0)
+
+Fungi map 48 object `7` is the repeatable breakable door. It waits in state 1
+and enters state 2 after the stock punch/contact and nearby-actor checks. A
+typed trigger mirrors only that activation entry.
+
+The local script retains the break sound, animation, state-3 completion checks
+and return through states 4 and 5 to ready state 1. No player move, actor,
+animation phase, timer or later state is carried by the packet.
