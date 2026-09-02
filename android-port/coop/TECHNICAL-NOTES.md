@@ -276,7 +276,8 @@ still apply. There is no blanket flag OR or save-buffer transfer.
 
 The initialization callback selects existing `items_host_v6`/`items_guest_v6`
 files before the EEPROM worker starts. Normal saves and older experiment files
-are untouched. Changing adventure slots disables sharing until restart. Expanding
+are untouched. Changing adventure slots disables item, world, combat and
+same-area event sharing until restart. Expanding
 the supported IDs can expose old guest-ahead saves; no automatic merge/reset occurs.
 
 The existing pre-write flag callback observes local unique items. Frame capture

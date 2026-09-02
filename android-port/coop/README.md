@@ -113,7 +113,8 @@ worker never accesses game memory itself.
    shared world -> Live update with reload fallback** on each device where you want it.
    This setting may differ between peers. All experiments default to Off.
 5. Restart after changing settings. Use the same save slot throughout each
-   process. Connect in adventure gameplay and wait for **LAN ITEMS: SYNCED**
+   process; changing slots locks item, world, combat and same-area event sharing
+   until the game is restarted. Connect in adventure gameplay and wait for **LAN ITEMS: SYNCED**
    before collecting on the guest. Players may then use different maps. The
    remote model and combat resume automatically whenever both share a map.
 

@@ -188,6 +188,7 @@ static u32 merge_guest_progress;
 static u32 automatic_world_refresh;
 static u32 follow_host_transitions;
 static u32 transient_enabled, transient_revision = 1, transient_page;
+static u32 transient_file, transient_file_changed;
 static CoopTransientInput transient_input;
 static CoopTransientResult transient_result;
 static CoopItems items;
@@ -577,7 +578,8 @@ static Gfx* draw_coop_status(Gfx* dl, Actor* unused) {
     }
     if (transient_enabled) {
         char* event_text = "LAN EVENTS: DIFFERENT AREA";
-        if (status != NET_CONNECTED) event_text = "LAN EVENTS: WAITING FOR PEER";
+        if (transient_file_changed) event_text = "LAN EVENTS: RESTART AFTER FILE CHANGE";
+        else if (status != NET_CONNECTED) event_text = "LAN EVENTS: WAITING FOR PEER";
         else if (remote_state[STATE_MAP] == (u32)current_map)
             event_text = transient_result.status >= COOP_TRANSIENT_APPLYING
                 ? "LAN EVENTS: HOST AUTHORITY ACTIVE"

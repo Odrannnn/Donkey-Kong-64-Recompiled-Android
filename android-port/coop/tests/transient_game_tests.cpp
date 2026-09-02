@@ -19,6 +19,7 @@ static unsigned checks, script_calls, last_object, last_state;
 
 static u32 role = ROLE_HOST, current_file, current_map = 7, epoch = 9;
 static u32 transient_enabled = 1, transient_revision = 1, transient_page;
+static u32 transient_file, transient_file_changed;
 static CoopTransientInput transient_input{};
 static CoopTransientResult transient_result{};
 static f32 loading_zone_transition_speed;
@@ -49,6 +50,7 @@ static void reset() {
     props = {}; scripts = {};
     role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
     transient_enabled = 1; transient_revision = 1; transient_page = 0;
+    transient_file = transient_file_changed = 0;
     transient_input = {}; transient_result = {};
     loading_zone_transition_speed = 0; is_cutscene_active = 0;
     D_global_asm_807476F8 = -1; D_global_asm_807F5CF0 = D_global_asm_807F5CF4 = 0;
@@ -73,6 +75,7 @@ static void capture_checks() {
     load(0, 0x1A, 2); load(1, 0x1B, 3); load(2, 0x34, 4);
     coop_transient_capture(1);
     CHECK(transient_input.enabled && transient_input.map == 7 && transient_input.epoch == 9);
+    CHECK(transient_file == 1 && !transient_file_changed);
     CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x1A, 2));
     CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x1B, 3));
     CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x34, 4));
@@ -97,6 +100,10 @@ static void capture_checks() {
 
     reset(); load(0, 0x1A, 2); loading_zone_transition_speed = 1;
     coop_transient_capture(1); CHECK(!transient_input.enabled);
+
+    reset(); load(0, 0x1A, 2); coop_transient_capture(1);
+    current_file = 1; coop_transient_capture(1);
+    CHECK(transient_file_changed && !transient_input.enabled);
 }
 
 static void object_apply_checks() {
@@ -113,6 +120,10 @@ static void object_apply_checks() {
     transient_result.records[0] = {COOP_TRANSIENT_SCRIPT, 0x1A, 7, 0};
     transient_result.epoch = 8; coop_transient_apply(); CHECK(script_calls == 1);
     transient_result.epoch = 9; role = ROLE_HOST; coop_transient_apply(); CHECK(script_calls == 1);
+
+    role = ROLE_JOIN; transient_file_changed = 1;
+    transient_result.records[0] = {COOP_TRANSIENT_SCRIPT, 0x1A, 7, 0};
+    coop_transient_apply(); CHECK(script_calls == 1); // Save-slot lock blocks apply too.
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x31, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,

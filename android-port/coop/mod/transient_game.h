@@ -57,8 +57,12 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
 
 static void coop_transient_capture(unsigned present) {
     transient_input = (CoopTransientInput){0};
+    if (transient_enabled && present && current_file < 3) {
+        if (!transient_file) transient_file = current_file + 1;
+        else if (transient_file != current_file + 1) transient_file_changed = 1;
+    }
     if (!transient_enabled || !present || current_file >= 3 || (unsigned)current_map > 255
-            || loading_zone_transition_speed != 0.0f) return;
+            || transient_file_changed || loading_zone_transition_speed != 0.0f) return;
     transient_input.enabled = 1; transient_input.file = current_file;
     transient_input.map = current_map; transient_input.epoch = epoch;
     transient_input.revision = ++transient_revision;
@@ -94,7 +98,8 @@ static void coop_transient_capture(unsigned present) {
 }
 
 static void coop_transient_apply(void) {
-    if (!transient_enabled || role != ROLE_JOIN || transient_result.status != COOP_TRANSIENT_APPLYING
+    if (!transient_enabled || transient_file_changed || role != ROLE_JOIN
+            || transient_result.status != COOP_TRANSIENT_APPLYING
             || transient_result.map != (unsigned)current_map || transient_result.epoch != epoch
             || loading_zone_transition_speed != 0.0f) return;
     for (unsigned i = 0; i < transient_result.count && i < COOP_TRANSIENT_RECORDS; ++i) {
