@@ -116,11 +116,12 @@ int main() {
         else std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     CHECK(response.starts_with("{\"schema\":1,"));
-    CHECK(response.find("\"mod\":\"0.52.0\"") != std::string::npos);
+    CHECK(response.find("\"mod\":\"0.53.0\"") != std::string::npos);
     CHECK(response.find("\"role\":\"host\"") != std::string::npos);
-    CHECK(response.find("\"lan_discovery\":false") != std::string::npos);
+    CHECK(response.find("\"lan_discovery\":true") != std::string::npos);
     CHECK(response.find("\"room_fingerprint\":"
         + std::to_string(uint32_t(123456u * 2654435761u)) + ",\"local_ip\":\"") != std::string::npos);
+    CHECK(response.find("\"authority\":{\"term\":\"0\",\"node\":\"") != std::string::npos);
     CHECK(response.find("\"map\":34") != std::string::npos);
     CHECK(response.find("\"wait_reason\":\"same_level_item\"") != std::string::npos);
     CHECK(response.find("\"wait_item_id\":160") != std::string::npos);
@@ -132,5 +133,5 @@ int main() {
     close_test_socket(blocker2);
     second.stop();
     session.stop();
-    std::puts("PASS: private-LAN trace endpoint rejects malformed requests and returns bounded v52 JSON");
+    std::puts("PASS: private-LAN trace endpoint rejects malformed requests and returns bounded v53 JSON");
 }

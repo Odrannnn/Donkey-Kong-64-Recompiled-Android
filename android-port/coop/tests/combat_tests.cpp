@@ -39,7 +39,7 @@ static void protocol_checks() {
     auto f = frame(100); CHECK(valid_combat(f));
     CHECK(coop_enemy_yaw(f.enemies[0]) == 2048 && coop_enemy_health(f.enemies[0]) == 5);
     CHECK(combat_words(combat_from_words(combat_words(f))) == combat_words(f));
-    Packet p{Kind::state, 5, 6, 7, 123456, {7, 1, 0, active}, {}, f}, out;
+    Packet p{Kind::state, 5, 6, 7, 123456, {7, 1, 0, active}, {}, f}, out; p.authority_node = 8;
     auto b = encode(p); CHECK(b.size() == packet_size && decode(b.data(), b.size(), out));
     CHECK(combat_words(out.combat) == combat_words(f));
     CHECK(b[107] == 1 && b[112] == 0x12 && b[113] == 0x34 && b[114] == 0x56 && b[115] == 0x78);

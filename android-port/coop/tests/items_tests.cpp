@@ -75,7 +75,7 @@ static void func_global_asm_8060DEC8() { ++saves; }
 static unsigned bit(unsigned id) { return 1u << (id % 32); }
 static bool any(const unsigned* words) { for (unsigned i = 0; i < COOP_ITEM_WORDS; ++i) if (words[i]) return true; return false; }
 static void protocol_checks() {
-    Packet p{Kind::state, 10, 123, 456, 123456};
+    Packet p{Kind::state, 10, 123, 456, 123456}; p.authority_node = 789;
     p.items = {1, 2, 1, 2, {0x80000001, 0x12345678, 0x8000, 0x80000000, 0x12345678}, {1, 0, 0x8000, 0, 0x10000000}};
     p.world = {1, 2, 2, 1, 5, 5, {1, 2, 3}};
     Packet out{}; auto b = encode(p);
@@ -102,13 +102,13 @@ static void protocol_checks() {
         b = encode(p); CHECK(!decode(b.data(), b.size(), out));
     }
     for (unsigned page = 0; page < COOP_ITEM_PAGES; ++page) {
-        Packet q{Kind::state, 11, 123, 456, 123456}; q.items = {1, 1, 1, 1}; q.items.page = page;
+        Packet q{Kind::state, 11, 123, 456, 123456}; q.authority_node = 789; q.items = {1, 1, 1, 1}; q.items.page = page;
         unsigned id = page * COOP_ITEM_PAGE_WORDS * 32 + 8;
         q.items.owned[id / 32] = q.items.request[id / 32] = bit(id);
         auto raw = encode(q); CHECK(decode(raw.data(), raw.size(), out));
         CHECK(out.items.page == page && coop_item_has(out.items.owned, id) && coop_item_has(out.items.request, id));
     }
-    Packet reserved{Kind::state, 12, 123, 456, 123456}; reserved.items = {1, 1, 1, 1}; reserved.items.page = COOP_ITEMS / (COOP_ITEM_PAGE_WORDS * 32);
+    Packet reserved{Kind::state, 12, 123, 456, 123456}; reserved.authority_node = 789; reserved.items = {1, 1, 1, 1}; reserved.items.page = COOP_ITEMS / (COOP_ITEM_PAGE_WORDS * 32);
     reserved.items.owned[COOP_ITEMS / 32] = bit(COOP_ITEMS);
     auto invalid_bits = encode(reserved); CHECK(!decode(invalid_bits.data(), invalid_bits.size(), out));
     reserved.items.owned[COOP_ITEMS / 32] = 0; reserved.items.owned[COOP_ITEM_WORDS - 1] = 1;

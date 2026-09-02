@@ -26,7 +26,7 @@ static void receive(CoopGate& g, ProgressResult r) {
     coop_gate_receive(&g, {r.status, r.apply, r.acknowledged, r.session_hi, r.session_lo, r.scope});
 }
 static void protocol_checks() {
-    Packet p{Kind::state, 10, 123, 456, 123456, {7, 1, 0, active}, {1, 2, 1, 2, 1, 0}};
+    Packet p{Kind::state, 10, 123, 456, 123456, {7, 1, 0, active}, {1, 2, 1, 2, 1, 0}}; p.authority_node = 789;
     Packet out{}; auto b = encode(p);
     CHECK(decode(b.data(), b.size(), out));
     CHECK(b[83] == 1 && b[87] == 2 && b[91] == 1 && b[95] == 2 && b[99] == 1 && b[103] == 0);

@@ -9,8 +9,8 @@
 #include "transient.hpp"
 
 namespace dkcoop {
-constexpr uint16_t protocol_version = 52;
-constexpr uint32_t compatibility = 0x00010234; // DK64 US ROM / persistent recovery contract 52.
+constexpr uint16_t protocol_version = 53;
+constexpr uint32_t compatibility = 0x00010235; // DK64 US ROM / authority reconciliation contract 53.
 constexpr size_t item_offset = 104 + COOP_COMBAT_WIRE_WORDS * 4;
 constexpr size_t world_offset = item_offset + COOP_ITEM_WIRE_WORDS * 4;
 // Four new world words reuse the retired Japes-gate wire prefix at bytes
@@ -21,11 +21,13 @@ constexpr uint32_t world_prefix_marker = 0x574F524Cu; // "WORL" in retired gate 
 constexpr size_t world_suffix_words = COOP_WORLD_WIRE_WORDS - world_prefix_words;
 constexpr size_t transition_offset = world_offset + world_suffix_words * 4;
 constexpr size_t transient_offset = transition_offset + 8;
-constexpr size_t packet_size = transient_offset + COOP_TRANSIENT_WIRE_WORDS * 4;
+constexpr size_t authority_offset = transient_offset + COOP_TRANSIENT_WIRE_WORDS * 4;
+constexpr size_t packet_size = authority_offset + 16;
 static_assert(COOP_WORLD_WIRE_WORDS == 19 && world_suffix_words == 15
-    && transition_offset == 1192 && transient_offset == 1200 && packet_size == 1352);
+    && transition_offset == 1192 && transient_offset == 1200
+    && authority_offset == 1352 && packet_size == 1368);
 constexpr size_t state_words = 12;
-enum class Kind : uint16_t { hello = 1, welcome = 2, state = 3, bye = 4, busy = 5 };
+enum class Kind : uint16_t { hello = 1, welcome = 2, state = 3, bye = 4, busy = 5, authority = 6 };
 enum : uint32_t { active = 1, cutscene = 2 };
 struct State {
     uint32_t map = 0, epoch = 0, character = 0, flags = 0;
@@ -47,12 +49,14 @@ struct Packet {
     ItemWire items{};
     WorldWire world{};
     TransientWire transient{};
+    uint64_t authority_term = 0, authority_node = 0;
 };
 using Bytes = std::array<uint8_t, packet_size>;
 bool valid_state(const State& state);
 bool decode(const uint8_t* bytes, size_t size, Packet& output);
 Bytes encode(const Packet& packet);
 bool newer(uint32_t candidate, uint32_t previous);
+bool authority_newer(uint64_t term, uint64_t node, uint64_t known_term, uint64_t known_node);
 std::array<uint32_t, state_words> state_to_words(const State& state);
 State state_from_words(const std::array<uint32_t, state_words>& words);
 }

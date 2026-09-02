@@ -1,5 +1,5 @@
-> Current source: 0.52.0, protocol/native ABI v52. A fifteenth pinned suite
-> covers the checksummed persistent recovery journal. All 15 Linux ASan/UBSan
+> Current source: 0.53.0, protocol/native ABI v53. The protocol and persistent
+> recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
 > suites and the complete maintained MIPS, Android ARM64, Windows x64,
 > ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
 > device validation remain pending.
@@ -150,6 +150,40 @@ the authority record for later peer reconciliation but do not elect between two
 live hosts or automatically demote a former host after a partition. Recovery
 therefore still requires confirming the former host is offline and manually
 returning it as Join.
+
+## Authority reconciliation (0.53.0)
+
+The journal format grows from 68 to 76 bytes and migrates a valid format-1 record
+atomically. It records the current leader separately from the local node. A
+promoted node advances the last observed generation, records itself as leader
+and clears any follower marker. A peer that follows another leader records that
+generation and leader, clears promoted authority and invalidates its old
+checkpoint. Its next promotion therefore advances beyond the authority it last
+observed instead of reusing a generation.
+
+Every protocol-53 datagram carries the claimed 64-bit authority generation and
+leader node. A waiting Host broadcasts a bounded authority advertisement every
+500 ms. Another Host yields when the advertised `(generation, node)` pair is
+lexicographically newer; the generation dominates and the stable random node is
+only a same-generation tie-break. The retiring Host closes its bound socket,
+opens an ephemeral Join socket toward the advertisement source, and journals the
+follower decision before gameplay channels can resume. On the next frame the MIPS
+adapter also changes its authority role to Join while retaining the save copy
+selected before EEPROM load. This avoids changing or copying a live save path.
+
+A disconnected Join rejects advertisements and welcomes older than its durable
+known authority, accepts an exact match at a new address, and accepts a newer
+pair. Established state and goodbye packets must continue to carry the exact
+leader pair, in addition to the existing endpoint, session, nonce, room and
+sequence checks. This lets both a returning former host and an ordinary guest
+find a promoted host after DHCP changes without storing an IP address in the
+campaign journal.
+
+Reconciliation elects one live network authority after LAN reachability returns;
+it does not combine campaign progress created on both sides of a partition.
+Existing save-ahead detection and the explicit validated permanent-progress
+merge remain the boundary for that case. Protocol compatibility `0x00010235`,
+version 53 and export `dk64_coop_tick_v53` reject older peers and companions.
 
 ## Remote actor ownership
 

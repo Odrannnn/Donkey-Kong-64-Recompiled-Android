@@ -2,7 +2,7 @@
 #define COOP_TRACE_TYPES_H
 
 enum {
-    COOP_TRACE_VERSION = 52,
+    COOP_TRACE_VERSION = 53,
     COOP_TRACE_PLAYING = 1u << 0,
     COOP_TRACE_CUTSCENE = 1u << 1,
     COOP_TRACE_LOADING = 1u << 2,

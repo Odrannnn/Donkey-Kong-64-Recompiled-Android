@@ -1,12 +1,16 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.52.0** persists a fully acknowledged guest checkpoint and promoted
+Version **0.53.0** exchanges durable authority generations over LAN. A returning
+former host automatically yields to a newer promoted host, reopens as Join with
+its existing host save copy, and remembers that follower role across restarts.
+Same-generation hosts use stable node identities as a deterministic tie-break.
+Version 0.52.0 persists a fully acknowledged guest checkpoint and promoted
 authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 52 requires a matching peer and native
+address as a direct fallback. Protocol 53 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -158,8 +162,8 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.52.0 adds a
-fifteenth native suite for persistent recovery storage. All 15 Linux
+**This is experimental, not complete campaign co-op. Version 0.53.0 expands the
+persistent recovery and protocol suites with authority reconciliation. All 15 Linux
 ASan/UBSan suites and the complete maintained MIPS, Android ARM64, Windows x64,
 ABI/export, APK, package and Android-importer pipeline pass. Gameplay and device
 validation remain pending.**
@@ -174,7 +178,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.52
+While the native companion is loaded, `tools/query_trace.py` discovers v0.53
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -188,7 +192,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.52.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.53.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -236,7 +240,7 @@ files together before resolving a conflict.
 
 ## Host recovery and address changes
 
-Protocol 52 retains the v0.51 behavior that sends each disconnected Join hello
+Protocol 53 retains the v0.51 behavior that sends each disconnected Join hello
 to both the last known host and
 the active interfaces' LAN broadcast addresses. A matching host replies directly,
 and the guest adopts that source as its new destination. A guest address change
@@ -266,15 +270,23 @@ To recover after the host is confirmed offline:
    restarts while **LAN session** is still **Join** and **Recovery save copy** is
    **Automatic**, that device restores its guest campaign as the effective Host.
    Selecting an explicit save copy disables this automatic role override.
-3. On the former host, set **LAN session** to **Join** and **Recovery save copy**
-   to **Host checkpoint copy**, then connect to the promoted device. If its old
-   host copy contains additional progress, enable **Merge guest progress into
-   host** on the promoted host for that one reconciliation and return it to
-   **Stop safely** after both clients reach SYNCED.
+3. The promoted Host broadcasts its durable authority generation and stable node
+   identity while waiting. When the former Host returns, it recognizes the newer
+   generation, closes its Host socket, reopens as Join toward the promoted device,
+   and keeps its existing host campaign copy. This follower decision is journaled,
+   so the former Host rejoins after another restart even if its configured role
+   still says Host. LAN discovery handles a changed address on either device.
+4. If the former host copy contains additional progress, **GUEST SAVE AHEAD**
+   still stops writes. Enable **Merge guest progress into host** on the promoted
+   Host for that one reconciliation and return it to **Stop safely** after both
+   clients reach SYNCED.
 
-Do not promote during a temporary Wi-Fi interruption. If the old host remains
-active, both devices can become independent authorities; the protocol cannot
-choose safely between them. A failed local host-port bind returns the device to
+Do not promote during a temporary Wi-Fi interruption. A higher authority
+generation wins; two accidental hosts at the same generation use their stable
+node IDs as a deterministic tie-break. This stops two live authorities from
+remaining active once their LAN can exchange advertisements, but it cannot merge
+progress made independently during the partition. The ordinary save-ahead guard
+continues to block that divergence. A failed local host-port bind returns the device to
 Join and requires changing the recovery option away from **Promote now** before
 retrying. The sidecar stores only recovery metadata and a save digest; no raw save
 bytes are copied into it.
@@ -709,7 +721,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v52 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v53 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

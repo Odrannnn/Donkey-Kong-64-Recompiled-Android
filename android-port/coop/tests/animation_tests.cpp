@@ -130,7 +130,7 @@ static void wire_bounds() {
     using namespace dkcoop;
     State s{7, 1, 4, active, 1, 2, 3, 4095, 110, 254};
     CHECK(valid_state(s));
-    Packet p{Kind::state, 1, 2, 3, 123456, s}, decoded;
+    Packet p{Kind::state, 1, 2, 3, 123456, s}, decoded; p.authority_node = 4;
     auto bytes = encode(p); CHECK(decode(bytes.data(), bytes.size(), decoded));
     CHECK(state_to_words(decoded.player) == state_to_words(s));
     bytes[5] = 2; CHECK(!decode(bytes.data(), bytes.size(), decoded));

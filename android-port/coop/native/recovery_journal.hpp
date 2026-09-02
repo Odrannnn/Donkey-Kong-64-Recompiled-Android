@@ -18,14 +18,16 @@ public:
     void reset();
     void observe(bool checkpoint, bool persist_safe, uint32_t snapshot, uint32_t room);
     bool promote(uint32_t room);
+    bool follow(uint64_t term, uint64_t leader);
     uint32_t status() const;
     uint64_t authority_term() const;
+    uint64_t authority_node() const;
     uint64_t node_id() const;
 
 private:
     struct Record {
         uint32_t profile = 0, save_kind = 0, flags = 0, room = 0, snapshot = 0;
-        uint64_t term = 0, node = 0, save_size = 0, save_hash = 0;
+        uint64_t term = 0, node = 0, leader = 0, save_size = 0, save_hash = 0;
     };
     RecoveryJournalConfig config_{};
     std::filesystem::path journal_path_{};

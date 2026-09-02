@@ -64,13 +64,15 @@ Bytes encode(const Packet& p) {
     auto transient = transient_words(p.transient);
     for (size_t i = 0; i < transient.size(); ++i)
         put32(b.data() + transient_offset + 4 * i, transient[i]);
+    put64(b.data() + authority_offset, p.authority_term);
+    put64(b.data() + authority_offset + 8, p.authority_node);
     return b;
 }
 bool decode(const uint8_t* b, size_t size, Packet& output) {
     if (size != packet_size || get32(b) != 0x444B4350 || get16(b + 4) != protocol_version
             || get32(b + 8) != compatibility || get32(b + 36) != 0) return false;
     uint16_t kind = get16(b + 6);
-    if (kind < uint16_t(Kind::hello) || kind > uint16_t(Kind::busy)) return false;
+    if (kind < uint16_t(Kind::hello) || kind > uint16_t(Kind::authority)) return false;
     Packet p;
     p.kind = Kind(kind); p.sequence = get32(b + 12); p.session = get64(b + 16);
     p.nonce = get64(b + 24); p.room = get32(b + 32);
@@ -83,6 +85,8 @@ bool decode(const uint8_t* b, size_t size, Packet& output) {
     for (size_t i = 0; i < transient.size(); ++i)
         transient[i] = get32(b + transient_offset + 4 * i);
     p.transient = transient_from_words(transient);
+    p.authority_term = get64(b + authority_offset);
+    p.authority_node = get64(b + authority_offset + 8);
     std::array<uint32_t, COOP_COMBAT_WIRE_WORDS> combat{};
     for (size_t i = 0; i < combat.size(); ++i) combat[i] = get32(b + 104 + 4 * i);
     p.combat = combat_from_words(combat);
@@ -103,6 +107,7 @@ bool decode(const uint8_t* b, size_t size, Packet& output) {
         for (size_t i = 0; i < world_suffix_words; ++i)
             if (get32(b + world_offset + 4 * i)) return false;
     }
+    if (!p.authority_node) return false;
     if (!valid_world(p.world) || (p.kind != Kind::state && p.world.feature)) return false;
     if (!valid_transient(p.transient) || (p.kind != Kind::state && p.transient.feature)) return false;
     if (p.world.feature && (!p.items.feature || p.world.file != p.items.file
@@ -112,7 +117,7 @@ bool decode(const uint8_t* b, size_t size, Packet& output) {
     if (!valid_progress(p.progress) || (p.kind != Kind::state && p.progress.feature)) return false;
     if (p.kind != Kind::state && (p.player.transition_ticket || p.player.transition_route)) return false;
     if (p.room < 100000 || p.room > 999999 || p.nonce == 0 || !valid_state(p.player)) return false;
-    if (p.kind == Kind::hello || p.kind == Kind::busy) {
+    if (p.kind == Kind::hello || p.kind == Kind::busy || p.kind == Kind::authority) {
         if (p.session != 0) return false;
     } else if (p.session == 0) return false;
     output = p;
@@ -121,5 +126,8 @@ bool decode(const uint8_t* b, size_t size, Packet& output) {
 bool newer(uint32_t candidate, uint32_t previous) {
     uint32_t difference = candidate - previous;
     return difference != 0 && difference < 0x80000000u;
+}
+bool authority_newer(uint64_t term, uint64_t node, uint64_t known_term, uint64_t known_node) {
+    return term > known_term || (term == known_term && node > known_node);
 }
 }

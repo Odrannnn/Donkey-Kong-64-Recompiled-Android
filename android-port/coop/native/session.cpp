@@ -215,7 +215,7 @@ struct TraceWorker {
     std::atomic<bool> stopping{false};
     std::atomic<uint64_t> queries{0}, rejected{0};
     std::mutex response_mutex;
-    std::string response = "{\"schema\":1,\"mod\":\"0.52.0\",\"status\":\"starting\"}";
+    std::string response = "{\"schema\":1,\"mod\":\"0.53.0\",\"status\":\"starting\"}";
     std::thread thread;
 
     ~TraceWorker() { stop(); }
@@ -311,9 +311,9 @@ struct Session::Impl {
     std::vector<sockaddr_in> discovery_targets;
     uint16_t bound_port = 0;
     uint32_t local_ipv4 = 0;
-    bool has_peer = false, received_sequence = false;
+    bool has_peer = false, received_sequence = false, yielded = false;
     uint64_t session = 0, nonce = 0, last_receive = 0, last_state = 0, last_send = 0,
-        last_hello = 0, last_address_refresh = 0;
+        last_hello = 0, last_authority = 0, last_address_refresh = 0;
     uint32_t send_sequence = 0, receive_sequence = 0, item_page_turn = 0, combat_page_turn = 0;
     State local_player{}, remote{};
     AnimationTimeline animation;
@@ -336,8 +336,11 @@ struct Session::Impl {
     bool winsock = false;
 #endif
     bool send(Kind kind, const sockaddr_in& target, const State& local = {}, uint64_t reply_nonce = 0) {
-        Packet packet{kind, ++send_sequence, kind == Kind::hello || kind == Kind::busy ? 0 : session,
+        Packet packet{kind, ++send_sequence,
+            kind == Kind::hello || kind == Kind::busy || kind == Kind::authority ? 0 : session,
             reply_nonce ? reply_nonce : nonce, config.room, local};
+        packet.authority_term = config.authority_term;
+        packet.authority_node = config.authority_node ? config.authority_node : nonce;
         if (kind == Kind::state) packet.progress = progress_wire(config.role == Role::host,
             local_progress, remote_progress, status == Status::connected, session);
         if (kind == Kind::state) {
@@ -395,7 +398,7 @@ struct Session::Impl {
         char destination_address[INET_ADDRSTRLEN] = "";
         if (config.role == Role::join)
             inet_ntop(AF_INET, &destination.sin_addr, destination_address, sizeof(destination_address));
-        result << "{\"schema\":1,\"mod\":\"0.52.0\",\"protocol\":" << protocol_version
+        result << "{\"schema\":1,\"mod\":\"0.53.0\",\"protocol\":" << protocol_version
             << ",\"role\":\"" << role_name(config.role) << "\",\"status\":\"" << status_name(status)
             << "\",\"room_fingerprint\":" << room_fingerprint
             << ",\"local_ip\":\"" << local_address << "\",\"coop_port\":" << bound_port
@@ -408,6 +411,9 @@ struct Session::Impl {
             << ",\"last_state_ms\":" << (last_state && now >= last_state ? now - last_state : 0)
             << ",\"packets\":{\"sent\":" << stats.sent << ",\"received\":" << stats.received
             << ",\"rejected\":" << stats.rejected << "}"
+            << ",\"authority\":{\"term\":\"" << config.authority_term
+            << "\",\"node\":\"" << std::hex << config.authority_node << std::dec
+            << "\",\"yielded\":" << (yielded ? "true" : "false") << "}"
             << ",\"player\":{\"map\":" << local_player.map << ",\"level\":" << local_trace.level
             << ",\"epoch\":" << local_player.epoch << ",\"kong\":" << local_player.character
             << ",\"state_flags\":" << local_player.flags << ",\"game_flags\":" << local_trace.flags << "}"
@@ -458,6 +464,8 @@ bool Session::start(const Config& config, uint64_t now) {
     auto fail = [&](const char* reason) { stop(); s.status = Status::error; s.error = reason; return false; };
     if ((config.role != Role::host && config.role != Role::join) || config.room < 100000 || config.room > 999999)
         return fail("Invalid role or six-digit room code");
+    if (s.config.role == Role::host && !s.config.authority_node)
+        s.config.authority_node = random_id();
 #ifdef _WIN32
     WSADATA data{};
     if (WSAStartup(MAKEWORD(2, 2), &data) != 0) return fail("Winsock initialization failed");
@@ -487,7 +495,7 @@ bool Session::start(const Config& config, uint64_t now) {
     if (config.role == Role::join && (config.port == 0 || inet_pton(AF_INET, config.host_ip.c_str(), &s.destination.sin_addr) != 1
             || s.destination.sin_addr.s_addr == INADDR_ANY || s.destination.sin_addr.s_addr == INADDR_BROADCAST))
         return fail("Join requires the host's numeric IPv4 address and port");
-    if (config.role == Role::join) {
+    {
         bool discovery_enabled = false;
 #ifdef _WIN32
         BOOL enabled = TRUE;
@@ -550,6 +558,9 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
     // context with last frame's combat payload in that reply.
     s.combat_sync.update(s.config.role == Role::host, outgoing, combat, s.remote, s.remote_combat,
         s.status == Status::connected && now - s.last_state <= stale_ms);
+    bool yield_to_new_authority = false;
+    sockaddr_in authority_target{};
+    uint64_t authority_term = 0, authority_node = 0;
     // The game thread performs bounded, nonblocking work. No networking thread touches game memory.
     for (unsigned budget = 0; budget < 32; budget++) {
         uint8_t buffer[packet_size + 1]; sockaddr_in from{}; SockLen length = sizeof(from);
@@ -559,6 +570,30 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
         Packet packet;
         if (!decode(buffer, size_t(count), packet) || packet.room != s.config.room) { s.stats.rejected++; continue; }
         s.stats.received++;
+        if (packet.kind == Kind::authority) {
+            if (ntohs(from.sin_port) != s.config.port) { s.stats.rejected++; continue; }
+            if (s.config.role == Role::host) {
+                if (authority_newer(packet.authority_term, packet.authority_node,
+                        s.config.authority_term, s.config.authority_node)) {
+                    yield_to_new_authority = true; authority_target = from;
+                    authority_term = packet.authority_term; authority_node = packet.authority_node;
+                } else if (authority_newer(s.config.authority_term, s.config.authority_node,
+                        packet.authority_term, packet.authority_node)) {
+                    s.send(Kind::authority, from);
+                }
+            } else if (!s.has_peer && (!s.config.authority_node
+                    || packet.authority_term > s.config.authority_term
+                    || (packet.authority_term == s.config.authority_term
+                        && packet.authority_node == s.config.authority_node)
+                    || authority_newer(packet.authority_term, packet.authority_node,
+                        s.config.authority_term, s.config.authority_node))) {
+                s.config.authority_term = packet.authority_term;
+                s.config.authority_node = packet.authority_node;
+                s.destination = from; s.status = Status::connecting;
+                s.nonce = random_id(); s.last_hello = now >= retry_ms ? now - retry_ms : 0;
+            }
+            continue;
+        }
         if (s.config.role == Role::host && packet.kind == Kind::hello) {
             if (!s.has_peer) {
                 s.peer = from; s.has_peer = true; s.session = random_id(); s.nonce = packet.nonce;
@@ -579,15 +614,25 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
             s.status = Status::busy; continue; // Continue retrying; the host may become available.
         }
         if (s.config.role == Role::join && packet.kind == Kind::welcome && host_source
-                && packet.nonce == s.nonce && (!s.has_peer || packet.session == s.session)) {
+                && packet.nonce == s.nonce && (!s.has_peer || packet.session == s.session)
+                && (!s.config.authority_node
+                    || packet.authority_term > s.config.authority_term
+                    || (packet.authority_term == s.config.authority_term
+                        && packet.authority_node == s.config.authority_node)
+                    || authority_newer(packet.authority_term, packet.authority_node,
+                        s.config.authority_term, s.config.authority_node))) {
             if (!s.has_peer) {
                 s.session = packet.session; s.peer = from; s.destination = from; s.has_peer = true;
+                s.config.authority_term = packet.authority_term;
+                s.config.authority_node = packet.authority_node;
                 s.status = Status::connected; s.last_receive = now; s.received_sequence = false;
             }
             s.send(Kind::state, from, outgoing); s.last_send = now;
             continue;
         }
         if (!s.has_peer || !same_peer(from, s.peer) || packet.session != s.session || packet.nonce != s.nonce
+                || packet.authority_term != s.config.authority_term
+                || packet.authority_node != s.config.authority_node
                 || (packet.kind != Kind::state && packet.kind != Kind::bye)
                 || (s.received_sequence && !newer(packet.sequence, s.receive_sequence))) { s.stats.rejected++; continue; }
         if (packet.kind == Kind::bye) { s.clear_peer(now); continue; }
@@ -614,6 +659,15 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
     }
     s.combat_sync.update(s.config.role == Role::host, outgoing, combat, s.remote, s.remote_combat,
         s.status == Status::connected && now - s.last_state <= stale_ms);
+    if (yield_to_new_authority) {
+        char address[INET_ADDRSTRLEN]{};
+        if (!inet_ntop(AF_INET, &authority_target.sin_addr, address, sizeof(address))) return;
+        Config follower = s.config;
+        follower.role = Role::join; follower.host_ip = address;
+        follower.authority_term = authority_term; follower.authority_node = authority_node;
+        if (start(follower, now)) impl->yielded = true;
+        return;
+    }
     // Keep authority/requests through readiness gaps, but do not process them
     // until both inventories are fresh and free of save-ahead conflicts.
     const auto item_status = this->items(now).status;
@@ -627,6 +681,10 @@ void Session::tick(const State& local, uint64_t now, const ProgressInput& progre
         s.send(Kind::hello, s.destination); s.last_hello = now;
         for (const auto& target : s.discovery_targets)
             if (!same_peer(s.destination, target)) s.send(Kind::hello, target);
+    }
+    if (s.config.role == Role::host && !s.has_peer && now - s.last_authority >= retry_ms) {
+        for (const auto& target : s.discovery_targets) s.send(Kind::authority, target);
+        s.last_authority = now;
     }
     if (s.status == Status::connected && now - s.last_send >= heartbeat_ms) {
         s.send(Kind::state, s.peer, outgoing); s.last_send = now;
@@ -674,6 +732,15 @@ CoopCombatResult Session::combat(uint64_t now) const {
 uint16_t Session::bound_port() const { return impl->bound_port; }
 uint16_t Session::trace_port() const { return impl->trace_worker ? impl->trace_worker->port : 0; }
 uint32_t Session::local_ipv4() const { return impl->local_ipv4; }
+Role Session::role() const { return impl->config.role; }
+uint64_t Session::authority_term() const { return impl->config.authority_term; }
+uint64_t Session::authority_node() const { return impl->config.authority_node; }
+bool Session::yielded() const { return impl->yielded; }
+bool Session::set_authority(uint64_t term, uint64_t node) {
+    if (impl->config.role != Role::host || !node) return false;
+    impl->config.authority_term = term; impl->config.authority_node = node;
+    return true;
+}
 const std::string& Session::error() const { return impl->error; }
 Statistics Session::statistics() const {
     auto result = impl->stats;

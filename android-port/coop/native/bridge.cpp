@@ -58,7 +58,11 @@ COOP_EXPORT void dk64_coop_start(uint8_t* rdram, recomp_context* ctx) {
         failed = false;
         uint32_t role = uint32_t(ctx->r4), port = uint32_t(ctx->r6), room = uint32_t(ctx->r7);
         if (role > 2 || port < 1024 || port > 65535) throw std::runtime_error("Invalid role or port");
-        dkcoop::Config config{dkcoop::Role(role), role == 2 ? read_ip(rdram, uint32_t(ctx->r5)) : "", uint16_t(port), room};
+        const auto network_role = dkcoop::Role(role);
+        const uint64_t authority_node = network_role == dkcoop::Role::host
+            ? recovery_journal.node_id() : recovery_journal.authority_node();
+        dkcoop::Config config{network_role, role == 2 ? read_ip(rdram, uint32_t(ctx->r5)) : "",
+            uint16_t(port), room, recovery_journal.authority_term(), authority_node};
         if (!session.start(config, dkcoop::clock_ms())) std::fprintf(stdout, "[dk64-coop] %s\n", session.error().c_str());
         ctx->r2 = uint32_t(session.status()); log_status(session.status());
     } catch (const std::exception& error) {
@@ -69,7 +73,7 @@ COOP_EXPORT void dk64_coop_start(uint8_t* rdram, recomp_context* ctx) {
 COOP_EXPORT void dk64_coop_local_ipv4(uint8_t*, recomp_context* ctx) {
     ctx->r2 = session.local_ipv4();
 }
-COOP_EXPORT void dk64_coop_recovery_configure_v52(uint8_t* rdram, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_recovery_configure_v53(uint8_t* rdram, recomp_context* ctx) {
     try {
         auto bytes = read_string(rdram, uint32_t(ctx->r4), 4095);
         auto path = std::filesystem::path(std::u8string(bytes.begin(), bytes.end()));
@@ -81,14 +85,16 @@ COOP_EXPORT void dk64_coop_recovery_configure_v52(uint8_t* rdram, recomp_context
         ctx->r2 = COOP_RECOVERY_STORAGE_ERROR;
     }
 }
-COOP_EXPORT void dk64_coop_recovery_status_v52(uint8_t*, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_recovery_status_v53(uint8_t*, recomp_context* ctx) {
     ctx->r2 = recovery_journal.status();
 }
-COOP_EXPORT void dk64_coop_recovery_promote_v52(uint8_t*, recomp_context* ctx) {
-    ctx->r2 = recovery_journal.promote(recovery_room) ? 1 : 0;
+COOP_EXPORT void dk64_coop_recovery_promote_v53(uint8_t*, recomp_context* ctx) {
+    const bool promoted = recovery_journal.promote(recovery_room);
+    ctx->r2 = promoted && session.set_authority(recovery_journal.authority_term(),
+        recovery_journal.node_id()) ? 1 : 0;
 }
 // A new export rejects older NRM/library pairs before reading the larger spans.
-COOP_EXPORT void dk64_coop_tick_v52(uint8_t* rdram, recomp_context* ctx) {
+COOP_EXPORT void dk64_coop_tick_v53(uint8_t* rdram, recomp_context* ctx) {
     uint32_t local_address = uint32_t(ctx->r4), remote_address = uint32_t(ctx->r5);
     uint32_t progress_address = uint32_t(ctx->r6), result_address = uint32_t(ctx->r7);
     constexpr size_t bytes = dkcoop::state_words * sizeof(uint32_t);
@@ -111,8 +117,17 @@ COOP_EXPORT void dk64_coop_tick_v52(uint8_t* rdram, recomp_context* ctx) {
         // retired wire words now carry the expanded world-state prefix.
         if (!failed) session.tick(dkcoop::state_from_words(local), now, {}, progress.combat,
             progress.items, progress.world, progress.transient, progress.trace);
+        bool followed_new_authority = false;
+        if (!failed && session.role() == dkcoop::Role::join && session.authority_node()
+                && (recovery_journal.authority_term() != session.authority_term()
+                    || recovery_journal.authority_node() != session.authority_node())) {
+            if (!recovery_journal.follow(session.authority_term(), session.authority_node())) {
+                session.stop(); failed = true;
+            } else followed_new_authority = true;
+        }
         recovery_journal.observe(
-            (progress.trace.flags & COOP_TRACE_RECOVERY_CHECKPOINT) != 0,
+            !followed_new_authority
+                && (progress.trace.flags & COOP_TRACE_RECOVERY_CHECKPOINT) != 0,
             (progress.trace.flags & COOP_TRACE_RECOVERY_PERSIST_SAFE) != 0,
             progress.trace.recovery_fingerprint, recovery_room);
         auto remote = dkcoop::state_to_words(session.remote(now));

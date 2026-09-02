@@ -17,10 +17,11 @@
 
 namespace dkcoop {
 namespace {
-constexpr uint32_t format = 1;
+constexpr uint32_t format = 2;
 constexpr uint32_t flag_checkpoint = 1u << 0;
 constexpr uint32_t flag_promoted = 1u << 1;
-constexpr size_t record_size = 68;
+constexpr uint32_t flag_follower = 1u << 2;
+constexpr size_t legacy_record_size = 68, record_size = 76;
 constexpr std::array<uint8_t, 8> magic{'D','K','6','4','C','R','J','1'};
 
 void put32(std::vector<uint8_t>& bytes, uint32_t value) {
@@ -108,6 +109,11 @@ uint32_t RecoveryJournal::configure(const RecoveryJournalConfig& config) {
         configured_ = true;
         if (!load()) return status();
         if (!record_.node) record_.node = random_node();
+        if (!std::filesystem::exists(journal_path_)) {
+            record_.profile = config_.profile; record_.save_kind = config_.save_kind;
+            record_.room = config_.room; record_.leader = record_.node;
+            if (!commit(record_)) { error_ = true; return status(); }
+        }
         if (record_.flags & flag_checkpoint) {
             uint64_t size = 0, hash = 0;
             if (!digest(size, hash)) {
@@ -130,27 +136,40 @@ bool RecoveryJournal::load() {
         record_.room = config_.room; record_.node = random_node();
         return true;
     }
-    if (std::filesystem::file_size(journal_path_) != record_size) { error_ = true; return false; }
+    const auto size = std::filesystem::file_size(journal_path_);
+    if (size != legacy_record_size && size != record_size) { error_ = true; return false; }
     std::array<uint8_t, record_size> bytes{};
     std::ifstream input(journal_path_, std::ios::binary);
-    input.read(reinterpret_cast<char*>(bytes.data()), bytes.size());
+    input.read(reinterpret_cast<char*>(bytes.data()), std::streamsize(size));
     if (!input || !std::equal(magic.begin(), magic.end(), bytes.begin())
-            || crc32(bytes.data(), bytes.size() - 4) !=
-                (uint32_t(bytes[64]) << 24 | uint32_t(bytes[65]) << 16
-                    | uint32_t(bytes[66]) << 8 | bytes[67])) {
+            || crc32(bytes.data(), size_t(size) - 4) !=
+                (uint32_t(bytes[size_t(size) - 4]) << 24 | uint32_t(bytes[size_t(size) - 3]) << 16
+                    | uint32_t(bytes[size_t(size) - 2]) << 8 | bytes[size_t(size) - 1])) {
         error_ = true; return false;
     }
     const uint8_t* p = bytes.data() + magic.size();
-    if (get32(p) != format) { error_ = true; return false; }
+    const uint32_t loaded_format = get32(p);
+    if (!((loaded_format == 1 && size == legacy_record_size)
+            || (loaded_format == 2 && size == record_size))) { error_ = true; return false; }
     Record candidate;
     candidate.profile = get32(p); candidate.save_kind = get32(p); candidate.flags = get32(p);
     candidate.room = get32(p); candidate.snapshot = get32(p); candidate.term = get64(p);
-    candidate.node = get64(p); candidate.save_size = get64(p); candidate.save_hash = get64(p);
+    candidate.node = get64(p);
+    if (loaded_format >= 2) candidate.leader = get64(p);
+    candidate.save_size = get64(p); candidate.save_hash = get64(p);
+    if (loaded_format == 1 && (candidate.flags & flag_promoted)) candidate.leader = candidate.node;
     if (candidate.profile != config_.profile || candidate.save_kind != config_.save_kind
-            || (candidate.flags & ~(flag_checkpoint | flag_promoted)) || !candidate.node) {
+            || (candidate.flags & ~(flag_checkpoint | flag_promoted | flag_follower)) || !candidate.node
+            || ((candidate.flags & flag_promoted) && candidate.leader != candidate.node)
+            || ((candidate.flags & flag_follower) && (!candidate.leader || candidate.leader == candidate.node))
+            || ((candidate.flags & flag_promoted) && (candidate.flags & flag_follower))) {
         error_ = true; return false;
     }
     record_ = candidate;
+    if (loaded_format == 1) {
+        if (!record_.leader) record_.leader = record_.node;
+        if (!commit(record_)) { error_ = true; return false; }
+    }
     return true;
 }
 
@@ -176,7 +195,7 @@ bool RecoveryJournal::commit(const Record& record) {
     std::vector<uint8_t> bytes(magic.begin(), magic.end());
     put32(bytes, format); put32(bytes, record.profile); put32(bytes, record.save_kind);
     put32(bytes, record.flags); put32(bytes, record.room); put32(bytes, record.snapshot);
-    put64(bytes, record.term); put64(bytes, record.node); put64(bytes, record.save_size);
+    put64(bytes, record.term); put64(bytes, record.node); put64(bytes, record.leader); put64(bytes, record.save_size);
     put64(bytes, record.save_hash); put32(bytes, crc32(bytes.data(), bytes.size()));
     if (bytes.size() != record_size) return false;
     auto temporary = journal_path_; temporary += ".tmp";
@@ -220,9 +239,22 @@ void RecoveryJournal::observe(bool checkpoint, bool persist_safe, uint32_t snaps
 
 bool RecoveryJournal::promote(uint32_t room) {
     if (!configured_ || error_ || !(record_.flags & flag_checkpoint)) return false;
-    Record candidate = record_; candidate.flags |= flag_promoted; candidate.room = room;
+    Record candidate = record_;
+    candidate.flags = (candidate.flags | flag_promoted) & ~flag_follower;
+    candidate.room = room; candidate.leader = candidate.node;
     candidate.term = candidate.term == UINT64_MAX ? UINT64_MAX : candidate.term + 1;
     if (!candidate.term) candidate.term = 1;
+    if (!commit(candidate)) { error_ = true; return false; }
+    return true;
+}
+
+bool RecoveryJournal::follow(uint64_t term, uint64_t leader) {
+    if (!configured_ || error_ || !leader || leader == record_.node) return false;
+    if ((record_.flags & flag_follower) && record_.term == term && record_.leader == leader)
+        return true;
+    Record candidate = record_;
+    candidate.flags = (candidate.flags | flag_follower) & ~(flag_promoted | flag_checkpoint);
+    candidate.term = term; candidate.leader = leader;
     if (!commit(candidate)) { error_ = true; return false; }
     return true;
 }
@@ -231,11 +263,15 @@ uint32_t RecoveryJournal::status() const {
     uint32_t result = configured_ ? COOP_RECOVERY_STORAGE_CONFIGURED : 0;
     if (record_.flags & flag_checkpoint) result |= COOP_RECOVERY_STORAGE_CHECKPOINT;
     if (record_.flags & flag_promoted) result |= COOP_RECOVERY_STORAGE_PROMOTED;
+    if (record_.flags & flag_follower) result |= COOP_RECOVERY_STORAGE_FOLLOWER;
     if (save_advanced_) result |= COOP_RECOVERY_STORAGE_SAVE_ADVANCED;
     if (error_) result |= COOP_RECOVERY_STORAGE_ERROR;
     return result;
 }
 uint64_t RecoveryJournal::authority_term() const { return record_.term; }
+uint64_t RecoveryJournal::authority_node() const {
+    return record_.flags & (flag_promoted | flag_follower) ? record_.leader : 0;
+}
 uint64_t RecoveryJournal::node_id() const { return record_.node; }
 
 }

@@ -24,9 +24,10 @@ static unsigned checks = 0;
 static void protocol_tests() {
     Packet p{Kind::state, 0x12345678, 0x0102030405060708ULL, 0x1122334455667788ULL, 123456,
         {34, 3, 4, active, 1.0f, -2.5f, 0.0f, 4095, 5, 3.5f, 11, 0x000007A9u}};
+    p.authority_term = 9; p.authority_node = 0x8877665544332211ULL;
     auto bytes = encode(p); Packet decoded;
     CHECK(bytes.size() == packet_size);
-    const std::array<uint8_t, 40> header{0x44,0x4b,0x43,0x50,0,52,0,3,0,1,2,0x34,0x12,0x34,0x56,0x78,
+    const std::array<uint8_t, 40> header{0x44,0x4b,0x43,0x50,0,53,0,3,0,1,2,0x35,0x12,0x34,0x56,0x78,
         1,2,3,4,5,6,7,8,0x11,0x22,0x33,0x44,0x55,0x66,0x77,0x88,0,1,0xe2,0x40,0,0,0,0};
     for (size_t i = 0; i < header.size(); ++i) CHECK(bytes[i] == header[i]);
     CHECK(bytes[56] == 0x3f && bytes[57] == 0x80 && bytes[60] == 0xc0 && bytes[61] == 0x20);
@@ -34,12 +35,16 @@ static void protocol_tests() {
         && bytes[1198] == 7 && bytes[1199] == 0xa9);
     CHECK(decode(bytes.data(), bytes.size(), decoded));
     CHECK(decoded.session == p.session && decoded.nonce == p.nonce && decoded.sequence == p.sequence);
+    CHECK(decoded.authority_term == p.authority_term && decoded.authority_node == p.authority_node);
     CHECK(state_to_words(decoded.player) == state_to_words(p.player));
     for (size_t length = 0; length < packet_size; length++) CHECK(!decode(bytes.data(), length, decoded));
     CHECK(!decode(bytes.data(), packet_size + 1, decoded));
     for (size_t index : {size_t(0), size_t(4), size_t(8), size_t(36)}) {
         auto bad = bytes; bad[index] ^= 0x80; CHECK(!decode(bad.data(), bad.size(), decoded));
     }
+    auto no_authority = bytes;
+    for (size_t i = 0; i < 8; ++i) no_authority[authority_offset + 8 + i] = 0;
+    CHECK(!decode(no_authority.data(), no_authority.size(), decoded));
     auto rejected = [&](Packet invalid) { auto raw = encode(invalid); CHECK(!decode(raw.data(), raw.size(), decoded)); };
     auto bad = p; bad.player.x = std::numeric_limits<float>::infinity(); rejected(bad);
     bad = p; bad.player.z = std::numeric_limits<float>::quiet_NaN(); rejected(bad);
@@ -66,6 +71,10 @@ static void protocol_tests() {
     rejected(welcome);
     CHECK(newer(0, 0xffffffffu)); CHECK(!newer(0xffffffffu, 0));
     CHECK(!newer(1, 1)); CHECK(!newer(0x80000000u, 0));
+    CHECK(authority_newer(2, 1, 1, UINT64_MAX));
+    CHECK(authority_newer(2, 11, 2, 10));
+    CHECK(!authority_newer(2, 10, 2, 10));
+    CHECK(!authority_newer(1, UINT64_MAX, 2, 1));
     std::mt19937 random(42);
     for (unsigned i = 0; i < 50000; i++) {
         std::array<uint8_t, packet_size + 16> fuzz{}; for (auto& byte : fuzz) byte = uint8_t(random());
@@ -195,6 +204,7 @@ static void changed_host_address_tests() {
     }
     CHECK(got_hello && hello.kind == Kind::hello && hello.room == 654321 && hello.session == 0);
     Packet welcome{Kind::welcome, 1, 0x123456789ABCDEFu, hello.nonce, 654321, {}};
+    welcome.authority_term = 4; welcome.authority_node = 99;
     new_address.send(welcome);
     for (unsigned i = 0; i < 100 && guest.status() != Status::connected; ++i) {
         now += 10; guest.tick(local, now);
@@ -211,6 +221,45 @@ static void changed_host_address_tests() {
         && state.nonce == welcome.nonce);
 }
 
+static void authority_selection_tests() {
+    uint64_t now = 30000;
+    RawPeer leader(0, "127.0.0.1");
+    Session guest;
+    Config config{Role::join, "127.0.0.1", leader.port(), 456789, 5, 50};
+    CHECK(guest.start(config, now));
+    leader.target_port(guest.bound_port());
+    State local{34, 1, 1, active, 1, 2, 3, 4};
+
+    Packet advertisement{Kind::authority, 1, 0, 111, 456789, {}};
+    advertisement.authority_term = 4; advertisement.authority_node = UINT64_MAX;
+    leader.send(advertisement);
+    for (unsigned i = 0; i < 20; ++i) {
+        guest.tick(local, ++now); std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    CHECK(guest.authority_term() == 5 && guest.authority_node() == 50);
+
+    advertisement.sequence++; advertisement.authority_term = 5; advertisement.authority_node = 51;
+    leader.send(advertisement);
+    Packet hello{}; bool discovered = false;
+    for (unsigned i = 0; i < 200 && !discovered; ++i) {
+        now += 10; guest.tick(local, now);
+        Packet candidate{};
+        if (leader.receive(candidate) && candidate.kind == Kind::hello
+                && candidate.authority_term == 5 && candidate.authority_node == 51) {
+            hello = candidate; discovered = true;
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    CHECK(discovered && guest.authority_term() == 5 && guest.authority_node() == 51);
+    Packet welcome{Kind::welcome, 10, 900, hello.nonce, 456789, {}};
+    welcome.authority_term = 5; welcome.authority_node = 51;
+    leader.send(welcome);
+    for (unsigned i = 0; i < 100 && guest.status() != Status::connected; ++i) {
+        now += 10; guest.tick(local, now); std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    CHECK(guest.status() == Status::connected && !guest.yielded());
+}
+
 static void adversarial_session_tests() {
     uint64_t now = 10000;
     Session host;
@@ -222,12 +271,16 @@ static void adversarial_session_tests() {
             host.tick(h, ++now); std::this_thread::sleep_for(std::chrono::milliseconds(1));
         }
     };
-    peer.send({Kind::hello, 1, 0, 0x123456789, 123456, {}});
+    Packet request{Kind::hello, 1, 0, 0x123456789, 123456, {}};
+    request.authority_node = 1;
+    peer.send(request);
     Packet welcome{}; bool welcomed = false;
     for (unsigned i = 0; i < 10 && !welcomed; i++) { pump(); welcomed = peer.receive(welcome); }
     CHECK(welcomed && welcome.kind == Kind::welcome && welcome.nonce == 0x123456789);
     Packet state{Kind::state, 100, welcome.session, welcome.nonce, 123456,
         {34, 2, 1, active, 40, 50, 60, 100, 0, 0}};
+    state.authority_term = welcome.authority_term;
+    state.authority_node = welcome.authority_node;
     peer.send(state); pump();
     CHECK(host.status() == Status::connected && host.remote(now).x == 40);
     auto rejected_before = host.statistics().rejected;
@@ -251,6 +304,7 @@ static void adversarial_session_tests() {
     CHECK(host.status() == Status::listening);
 }
 int main() {
-    protocol_tests(); session_tests(); changed_host_address_tests(); adversarial_session_tests();
+    protocol_tests(); session_tests(); changed_host_address_tests(); authority_selection_tests();
+    adversarial_session_tests();
     std::printf("PASS: %u assertions, 50000 malformed-packet probes, live UDP lifecycle tests\n", checks);
 }

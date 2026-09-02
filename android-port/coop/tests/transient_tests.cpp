@@ -91,9 +91,10 @@ int main() {
     CHECK(guest.result().status == COOP_TRANSIENT_WAITING && !guest.result().count);
 
     Packet packet{}; packet.kind = Kind::state; packet.sequence = 1; packet.session = 2;
+    packet.authority_node = 4;
     packet.nonce = 3; packet.room = 123456; packet.player = hs; packet.transient = wire;
     auto bytes = encode(packet); Packet roundtrip{};
-    CHECK(bytes.size() == 1352 && decode(bytes.data(), bytes.size(), roundtrip));
+    CHECK(bytes.size() == 1368 && decode(bytes.data(), bytes.size(), roundtrip));
     CHECK(roundtrip.transient.count == 5 && roundtrip.transient.records[4].kind == COOP_TRANSIENT_SEQUENCE);
     bytes[transient_offset + 6 * 4 + 1] = 7; // Kind 7 is outside the bounded enum.
     CHECK(!decode(bytes.data(), bytes.size(), roundtrip));
