@@ -2039,6 +2039,18 @@ The receiving state-11 script retains the 60-frame timer, camera, sound, box
 animation, linked object `2` and permanent flag `218`. State 0 initialization,
 completed state and every linked action remain local.
 
+## Hideout Helm instrument pads (0.49.0)
+
+Hideout Helm map 17 objects `0x2C` through `0x30` are the Bongo, Triangle, Sax,
+Trombone and Guitar pads. Bongo enters state 2 from ready state 1. The other
+four are armed locally at state 11 and enter state 12 after their matching
+instrument checks. Typed triggers mirror only those five edges.
+
+Each local script retains its availability flags, door object, sound and reset.
+The final Guitar path, Helm timer, barrel rooms and completion flags remain
+local. Lever object `0x3B` is excluded because it owns a map transition and the
+end-sequence path rather than a room-only activation.
+
 ## Fungi rear-mill triangle pad (0.49.0)
 
 Fungi Mill Back map 62 object `0` is the triangle pad. It initializes to ready

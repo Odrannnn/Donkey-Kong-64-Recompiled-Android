@@ -98,6 +98,11 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Fungi rear-mill triangle pad enters its local crusher activation and
     // reward path at state 2 after the stock instrument check.
     {62, 0x00, COOP_TRANSIENT_TRIGGER, 2},
+    // Hideout Helm instrument pads. Bongo uses its state-2 entry; the other
+    // four are armed at state 11 and enter their local door sequence at 12.
+    {17, 0x2C, COOP_TRANSIENT_TRIGGER, 2}, {17, 0x2D, COOP_TRANSIENT_TRIGGER, 12},
+    {17, 0x2E, COOP_TRANSIENT_TRIGGER, 12}, {17, 0x2F, COOP_TRANSIENT_TRIGGER, 12},
+    {17, 0x30, COOP_TRANSIENT_TRIGGER, 12},
     // Isles level-lobby feather switches. State 2 starts the local panel/door
     // presentation in the Aztec and Fungi lobbies respectively.
     {173, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {178, 0x05, COOP_TRANSIENT_TRIGGER, 2},
@@ -262,6 +267,8 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         return activation == 3 && raw == 2;
     if (map == 72 && object == 0x2F)
         return activation == 13 && raw == 12;
+    if (map == 17 && object >= 0x2D && object <= 0x30)
+        return activation == 12 && raw == 11;
     if (map == 164 && object == 0x09)
         return activation == 5 && raw == 1;
     return raw > 0 && raw < activation;

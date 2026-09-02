@@ -181,6 +181,20 @@ static void capture_checks() {
     reset(); current_map = 62; load(0, 0x00, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x00, 2, 2));
+    reset(); current_map = 17;
+    load(0, 0x2C, 2); load(1, 0x2D, 11); load(2, 0x2E, 12);
+    load(3, 0x2F, 13); load(4, 0x30, 11);
+    bool saw_helm_2c = false, saw_helm_2d = false, saw_helm_2e = false;
+    bool saw_helm_2f = false, saw_helm_30 = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_helm_2c |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2C, 2, 2);
+        saw_helm_2d |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2D, 1, 12);
+        saw_helm_2e |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2E, 2, 12);
+        saw_helm_2f |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2F, 2, 12);
+        saw_helm_30 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 1, 12);
+    }
+    CHECK(saw_helm_2c && saw_helm_2d && saw_helm_2e && saw_helm_2f && saw_helm_30);
 
     reset(); current_map = 173; load(0, 0x10, 2);
     coop_transient_capture(1);
@@ -582,6 +596,18 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x00 && last_state == 2);
     scripts[0x00].unk48[0] = 3; coop_transient_apply();
     CHECK(script_calls == 1); // Completed pad path cannot be replayed.
+    reset(); role = ROLE_JOIN; current_map = 17; load(0, 0x2C, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 17, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x2C, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x2C && last_state == 2);
+    reset(); role = ROLE_JOIN; current_map = 17; load(0, 0x2F, 11);
+    transient_result = {COOP_TRANSIENT_APPLYING, 17, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x2F, 2, 12}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x2F && last_state == 12);
+    scripts[0x2F].unk48[0] = 10; coop_transient_apply();
+    CHECK(script_calls == 1); // Local Helm pad setup must reach state 11.
     reset(); role = ROLE_JOIN; current_map = 58; load(0, 0x00, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 58, 9, 1,
         {{COOP_TRANSIENT_TRIGGER, 0x00, 2, 2}}};
