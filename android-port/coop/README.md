@@ -7,7 +7,9 @@ and Tiny's six dartboard targets.
 The peer enters each allowlisted switch's exact vanilla activation state; piano
 progress advances one locally valid note at a time. Local timers, presentation,
 enemies and reward scripts run normally. Raw controller states are never copied
-and permanent GB ownership still uses the item channel. It retains
+and permanent GB ownership still uses the item channel. Galleon water and Fungi
+day/night timer records now align the actual countdown once per fresh network
+sample without freezing local script time between packets. It retains
 the read-only LAN trace endpoint and query tool for
 diagnosing live host/peer sessions without exposing ROM or save bytes. It also
 retains the 0.46.0 additions: the last vanilla colored-banana collectible that was

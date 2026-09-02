@@ -1692,3 +1692,16 @@ The network cannot start the controller, choose a target actor or supply a raw
 state. Both copies must reach the first local wait state. An ahead guest is not
 rewound, completion is idempotent, and every catch-up step waits for the preceding
 local delay to reach the next pinned wait state.
+
+## Same-area timer countdowns (0.49.0)
+
+The existing typed timer records for Galleon objects `0`/`1` and Fungi objects
+`4`/`5` now carry the script's unsigned 16-bit timer at offset `0x44` together
+with its reviewed state. The guest enters the host state through the vanilla
+script-state function and applies that timer sample. A per-room cache applies
+each distinct network sample once; repeated render frames cannot keep resetting
+the countdown to a stale value and freeze it between UDP updates.
+
+No other script field or timer is exposed. The cache resets on room epoch change,
+records remain constrained to the four allowlisted objects, and malformed timer
+values are rejected by the native protocol validator.

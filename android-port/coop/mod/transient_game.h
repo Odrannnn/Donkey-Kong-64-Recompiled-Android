@@ -25,6 +25,31 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {26, 0x7F, COOP_TRANSIENT_SEQUENCE, 0}, // Tiny's dartboard controller.
 };
 
+// The bridge result persists between fresh UDP samples. Remember the last timer
+// sample applied in this room so a countdown can keep running locally instead of
+// being reset to the same network value on every render frame.
+static CoopTransientRecord coop_transient_applied_timers[COOP_TRANSIENT_RECORDS];
+static unsigned coop_transient_applied_timer_epoch;
+
+static unsigned coop_transient_timer_sample_is_new(CoopTransientRecord record) {
+    if (coop_transient_applied_timer_epoch != epoch) {
+        coop_transient_applied_timer_epoch = epoch;
+        for (unsigned i = 0; i < COOP_TRANSIENT_RECORDS; ++i)
+            coop_transient_applied_timers[i] = (CoopTransientRecord){0};
+    }
+    unsigned free_slot = COOP_TRANSIENT_RECORDS;
+    for (unsigned i = 0; i < COOP_TRANSIENT_RECORDS; ++i) {
+        CoopTransientRecord* previous = &coop_transient_applied_timers[i];
+        if (!previous->kind && free_slot == COOP_TRANSIENT_RECORDS) free_slot = i;
+        if (previous->kind != record.kind || previous->key != record.key) continue;
+        if (previous->state == record.state && previous->value == record.value) return 0;
+        *previous = record; return 1;
+    }
+    if (free_slot == COOP_TRANSIENT_RECORDS) free_slot = record.key % COOP_TRANSIENT_RECORDS;
+    coop_transient_applied_timers[free_slot] = record;
+    return 1;
+}
+
 // The piano controller has 25 correct-note gates. A received count never
 // selects a raw state: the adapter can only enter the next correct-hit state
 // from its matching local wait state, preserving every intermediate block.
@@ -98,7 +123,9 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
     unsigned state = script->unk48[0];
     if (state > 0xFF) return;
     unsigned value = 0;
-    if (kind == COOP_TRANSIENT_TRIGGER) {
+    if (kind == COOP_TRANSIENT_TIMER) {
+        value = (unsigned short)script->unk44[0];
+    } else if (kind == COOP_TRANSIENT_TRIGGER) {
         value = coop_transient_object_activation(current_map, object);
         if (value < 2) return;
         state = state >= value && state < 20 ? 2 : 1;
@@ -196,6 +223,13 @@ static void coop_transient_apply(void) {
             if (record.state <= count && record.state > progress && progress < count
                     && script->unk48[0] == waits[progress])
                 coop_live_world_set_object(record.key, hits[progress]);
+            continue;
+        }
+        if (kind == COOP_TRANSIENT_TIMER) {
+            if (!coop_transient_timer_sample_is_new(record)) continue;
+            if (script->unk48[0] != record.state)
+                coop_live_world_set_object(record.key, record.state);
+            script->unk44[0] = (short)record.value;
             continue;
         }
         if (script->unk48[0] == record.state) continue;

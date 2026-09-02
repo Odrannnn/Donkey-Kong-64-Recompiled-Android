@@ -11,7 +11,7 @@ using u8 = unsigned char; using s8 = signed char; using u16 = unsigned short;
 using s16 = short; using u32 = unsigned; using s32 = int; using f32 = float;
 enum { ROLE_HOST = 1, ROLE_JOIN = 2 };
 
-struct Prop_ScriptData { u8 unk48[1]{}; };
+struct Prop_ScriptData { s16 unk44[2]{}; u8 unk48[1]{}; };
 struct Prop { Prop_ScriptData* unk7C{}; };
 
 static unsigned checks, script_calls, last_object, last_state;
@@ -51,15 +51,18 @@ static void reset() {
     role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
     transient_enabled = 1; transient_revision = 1; transient_page = 0;
     transient_file = transient_file_changed = 0;
+    coop_transient_applied_timer_epoch = 0;
+    std::fill(std::begin(coop_transient_applied_timers), std::end(coop_transient_applied_timers), CoopTransientRecord{});
     transient_input = {}; transient_result = {};
     loading_zone_transition_speed = 0; is_cutscene_active = 0;
     D_global_asm_807476F8 = -1; D_global_asm_807F5CF0 = D_global_asm_807F5CF4 = 0;
     script_calls = last_object = last_state = 0;
 }
-static void load(unsigned slot, unsigned object, unsigned state) {
+static void load(unsigned slot, unsigned object, unsigned state, unsigned timer = 0) {
     CHECK(slot < 600 && object < scripts.size());
     D_global_asm_807F6240[slot] = static_cast<s16>(object);
     scripts[object].unk48[0] = static_cast<u8>(state);
+    scripts[object].unk44[0] = static_cast<s16>(timer);
     props[object].unk7C = &scripts[object];
 }
 static bool contains(unsigned kind, unsigned key, unsigned state) {
@@ -88,11 +91,11 @@ static void capture_checks() {
     CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x1B, 3));
     CHECK(contains(COOP_TRANSIENT_SCRIPT, 0x34, 4));
 
-    reset(); current_map = 30; load(0, 0, 10); load(1, 1, 6);
+    reset(); current_map = 30; load(0, 0, 10, 123); load(1, 1, 6, 45);
     coop_transient_capture(1);
     coop_transient_capture(1); // Galleon's reviewed script rows occupy page zero.
-    CHECK(contains(COOP_TRANSIENT_TIMER, 0, 10));
-    CHECK(contains(COOP_TRANSIENT_TIMER, 1, 6));
+    CHECK(contains_value(COOP_TRANSIENT_TIMER, 0, 10, 123));
+    CHECK(contains_value(COOP_TRANSIENT_TIMER, 1, 6, 45));
 
     reset(); current_map = 194; load(0, 6, 2);
     coop_transient_capture(1);
@@ -197,6 +200,17 @@ static void object_apply_checks() {
     coop_transient_apply(); CHECK(script_calls == 2); // Host never rewinds an ahead peer.
     transient_result.records[0].state = 26;
     coop_transient_apply(); CHECK(script_calls == 2); // Out-of-range progress rejected.
+
+    reset(); role = ROLE_JOIN; current_map = 30; load(0, 0, 3, 100);
+    transient_result = {COOP_TRANSIENT_APPLYING, 30, 9, 1,
+        {{COOP_TRANSIENT_TIMER, 0, 3, 75}}};
+    coop_transient_apply();
+    CHECK(!script_calls && scripts[0].unk44[0] == 75); // Same state still aligns timer.
+    scripts[0].unk44[0] = 74; coop_transient_apply();
+    CHECK(scripts[0].unk44[0] == 74); // Repeated render frame does not freeze countdown.
+    transient_result.records[0] = {COOP_TRANSIENT_TIMER, 0, 4, 60};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_state == 4 && scripts[0].unk44[0] == 60);
 
     reset(); role = ROLE_JOIN; current_map = 26; load(0, 0x7F, 17);
     transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
