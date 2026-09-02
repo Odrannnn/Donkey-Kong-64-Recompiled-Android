@@ -1741,6 +1741,19 @@ The lava gate itself is not driven directly by the packet; it observes the local
 flag through its original script. This prevents the network from choosing gate or
 cutscene states and keeps persistent ownership in the item/world transaction.
 
+## Llama Temple matching heads (0.49.0)
+
+Llama Temple objects `0x19` through `0x28` are the sixteen matching-game heads.
+Each head finishes its local initialization in state 11 and a grape hit enters
+state 12. A typed trigger mirrors only that `11→12` edge. The receiving head then
+runs its own five-frame debounce, matching sound and controller notification.
+
+State 10 is deliberately rejected because it has not yet enabled contact or its
+sound actor. Later states cannot be selected by a packet, repeated samples are
+idempotent, and the controller, wrong-pair reset, temporary active flag and
+Golden Banana reward remain local vanilla behavior. Permanent GB ownership
+continues through the item channel.
+
 ## Tiny Temple opening, guitar and charge switches (0.49.0)
 
 Tiny Temple map 16 objects `0`, `4` and `0x14` are the opening switch, Diddy's

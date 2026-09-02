@@ -161,6 +161,18 @@ static void capture_checks() {
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x12, 1, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x16, 2, 2));
 
+    reset(); current_map = 20;
+    for (unsigned object = 0x19; object <= 0x28; ++object)
+        load(object - 0x19, object, object == 0x23 ? 12 : 11);
+    bool saw_matching_ready = false, saw_matching_hit = false, saw_matching_last = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_matching_ready |= contains_value(COOP_TRANSIENT_TRIGGER, 0x19, 1, 12);
+        saw_matching_hit |= contains_value(COOP_TRANSIENT_TRIGGER, 0x23, 2, 12);
+        saw_matching_last |= contains_value(COOP_TRANSIENT_TRIGGER, 0x28, 1, 12);
+    }
+    CHECK(saw_matching_ready && saw_matching_hit && saw_matching_last);
+
     reset(); current_map = 16; load(0, 0, 1); load(1, 4, 2); load(2, 0x14, 3);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0, 1, 2));
@@ -337,6 +349,17 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x16, 2, 2}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x16 && last_state == 2);
+
+    reset(); role = ROLE_JOIN; current_map = 20; load(0, 0x23, 11);
+    transient_result = {COOP_TRANSIENT_APPLYING, 20, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x23, 2, 12}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x23 && last_state == 12);
+    coop_transient_apply(); CHECK(script_calls == 1); // A held record cannot replay the hit.
+    scripts[0x23].unk48[0] = 10; coop_transient_apply();
+    CHECK(script_calls == 1); // The network cannot arm an uninitialized head.
+    scripts[0x23].unk48[0] = 11; transient_result.records[0].value = 11;
+    coop_transient_apply(); CHECK(script_calls == 1); // Pinned activation is mandatory.
 
     reset(); role = ROLE_JOIN; current_map = 16; load(0, 4, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 16, 9, 1,

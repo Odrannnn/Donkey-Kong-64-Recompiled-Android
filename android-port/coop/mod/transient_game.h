@@ -38,6 +38,17 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Llama Temple coconut switch and DK bongo pad. Their local state-2
     // sequences own the cooling/llama-spit flags and linked gate presentation.
     {20, 0x12, COOP_TRANSIENT_TRIGGER, 2}, {20, 0x16, COOP_TRANSIENT_TRIGGER, 2},
+    // Llama Temple matching game heads. Every head is armed in state 11 and
+    // enters state 12 after a local grape hit. Its own script supplies the
+    // sound, five-frame debounce and matching-controller notification.
+    {20, 0x19, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x1A, COOP_TRANSIENT_TRIGGER, 12},
+    {20, 0x1B, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x1C, COOP_TRANSIENT_TRIGGER, 12},
+    {20, 0x1D, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x1E, COOP_TRANSIENT_TRIGGER, 12},
+    {20, 0x1F, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x20, COOP_TRANSIENT_TRIGGER, 12},
+    {20, 0x21, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x22, COOP_TRANSIENT_TRIGGER, 12},
+    {20, 0x23, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x24, COOP_TRANSIENT_TRIGGER, 12},
+    {20, 0x25, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x26, COOP_TRANSIENT_TRIGGER, 12},
+    {20, 0x27, COOP_TRANSIENT_TRIGGER, 12}, {20, 0x28, COOP_TRANSIENT_TRIGGER, 12},
     // Tiny Temple opening switch, Diddy guitar pad and charge switch.
     {16, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {16, 0x04, COOP_TRANSIENT_TRIGGER, 2},
     {16, 0x14, COOP_TRANSIENT_TRIGGER, 2},
@@ -162,6 +173,15 @@ static unsigned coop_transient_trigger_fired(unsigned map, unsigned object,
     return raw >= activation && raw < 20;
 }
 
+static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
+        unsigned raw, unsigned activation) {
+    // Matching heads must already be armed. Accepting state 10 would bypass
+    // the vanilla initialization that enables contact and the sound actor.
+    if (map == 20 && object >= 0x19 && object <= 0x28)
+        return activation == 12 && raw == 11;
+    return raw > 0 && raw < activation;
+}
+
 static Prop_ScriptData* coop_transient_script(unsigned object) {
     for (unsigned slot = 0; slot < COOP_LIVE_WORLD_SCRIPT_SLOTS; ++slot) {
         if ((unsigned short)D_global_asm_807F6240[slot] != object) continue;
@@ -268,7 +288,8 @@ static void coop_transient_apply(void) {
             // action. The only remote command is the reviewed vanilla entry.
             unsigned activation = coop_transient_object_activation(current_map, record.key);
             if (record.value == activation && record.state == 2
-                    && script->unk48[0] > 0 && script->unk48[0] < activation)
+                    && coop_transient_trigger_ready(current_map, record.key,
+                        script->unk48[0], activation))
                 coop_live_world_set_object(record.key, activation);
             continue;
         }
