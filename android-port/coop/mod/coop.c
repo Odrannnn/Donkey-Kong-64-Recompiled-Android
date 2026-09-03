@@ -201,7 +201,9 @@ extern void func_global_asm_8063DA78(s16 script_slot, s16 state, s16 state_index
 extern void func_global_asm_80641874(s16 spawner, s16 state);
 extern s8 D_global_asm_807FC8C0[16];
 extern void playActorAnimation(Actor* actor, s32 animation);
+extern void func_global_asm_80613C48(Actor* actor, s16 animation, f32 start, f32 blend);
 extern void func_global_asm_80614D00(Actor* actor, f32 speed, f32 start);
+extern void func_global_asm_806883F4(Actor* actor, s32 channel, s16 mode, f32 blend);
 extern s32 playCutscene(Actor* actor, s16 cutscene, u8 mode);
 extern u8 getLevelIndex(Maps map, u8 include_lobbies);
 extern s8 is_cutscene_active;
@@ -477,6 +479,43 @@ static unsigned coop_live_world_rabbit_ready(void) {
 
 static unsigned coop_live_world_rabbit_refresh(void) {
     return coop_live_world_rabbit_ready();
+}
+
+static Actor* coop_live_world_beanstalk_actor(void) {
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (actor && actor->unk58 == ACTOR_BEANSTALK
+                && (actor->object_properties_bitfield & 0x10)) return actor;
+    }
+    return 0;
+}
+
+// The beanstalk's flag-complete initializer selects model 0x597 and state 3.
+// A loaded incomplete actor has model 0x598 at scale zero with collision
+// disabled, so an idle remote completion also restores the terminal scale and
+// collision chosen by the stock growth sequence. States 1 and 2 already own
+// that local cutscene and are allowed to finish without being fast-forwarded.
+static unsigned coop_live_world_beanstalk_ready(void) {
+    Actor* actor = coop_live_world_beanstalk_actor();
+    if (!actor) return 1;
+    return actor->control_state == 0 || actor->control_state == 1
+        || actor->control_state == 2 || actor->control_state == 3;
+}
+
+static unsigned coop_live_world_beanstalk_refresh(void) {
+    Actor* actor = coop_live_world_beanstalk_actor();
+    if (!actor) return 1;
+    if (actor->control_state == 1 || actor->control_state == 2
+            || actor->control_state == 3) return 1;
+    if (actor->control_state != 0) return 0;
+    func_global_asm_80613C48(actor, 0x597, 0.0f, 0.0f);
+    func_global_asm_80614D00(actor, 1.0f, 0.0f);
+    func_global_asm_806883F4(actor, 0, 0, 0.0f);
+    actor->noclip_byte = 2;
+    actor->object_properties_bitfield |= 4;
+    actor->control_state = 3;
+    actor->control_state_progress = 0;
+    return 1;
 }
 
 // The Mermaid is an actor rather than an instance-script prop. Her vanilla

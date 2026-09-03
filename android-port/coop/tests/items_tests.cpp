@@ -40,6 +40,10 @@ static unsigned live_llama_progress = 0, live_llama_deleted = 0;
 static unsigned live_seal_cage_available = 0, live_seal_cage_state = 0, live_seal_cage_progress = 0;
 static unsigned live_seal_race_available = 0, live_seal_race_state = 0, live_seal_race_progress = 0;
 static unsigned live_rabbit_available = 0, live_rabbit_state = 0;
+static unsigned live_beanstalk_available = 0, live_beanstalk_state = 0;
+static unsigned live_beanstalk_progress = 0, live_beanstalk_model = 0x598;
+static float live_beanstalk_scale = 0.0f;
+static unsigned live_beanstalk_noclip = 1, live_beanstalk_properties = 0;
 static unsigned char live_raw[0x200]{};
 static void func_global_asm_8063DA40(short slot, short state) {
     ++live_calls; live_slot = (unsigned short)slot; live_state = (unsigned short)state;
@@ -151,6 +155,21 @@ static unsigned coop_live_world_rabbit_ready(void) {
 }
 static unsigned coop_live_world_rabbit_refresh(void) {
     return coop_live_world_rabbit_ready();
+}
+static unsigned coop_live_world_beanstalk_ready(void) {
+    return !live_beanstalk_available || live_beanstalk_state <= 3;
+}
+static unsigned coop_live_world_beanstalk_refresh(void) {
+    if (!coop_live_world_beanstalk_ready()) return 0;
+    if (!live_beanstalk_available || live_beanstalk_state == 1
+            || live_beanstalk_state == 2 || live_beanstalk_state == 3) return 1;
+    live_beanstalk_model = 0x597;
+    live_beanstalk_scale = 1.0f;
+    live_beanstalk_noclip = 2;
+    live_beanstalk_properties |= 4;
+    live_beanstalk_state = 3;
+    live_beanstalk_progress = 0;
+    return 1;
 }
 static void* D_global_asm_807FD730 = nullptr;
 static unsigned pickups[1700]{};
@@ -332,6 +351,9 @@ static void reset_engine() {
     live_seal_cage_available = live_seal_cage_state = live_seal_cage_progress = 0;
     live_seal_race_available = live_seal_race_state = live_seal_race_progress = 0;
     live_rabbit_available = live_rabbit_state = 0;
+    live_beanstalk_available = live_beanstalk_state = live_beanstalk_progress = 0;
+    live_beanstalk_model = 0x598; live_beanstalk_scale = 0.0f;
+    live_beanstalk_noclip = 1; live_beanstalk_properties = 0;
     D_global_asm_80754280 = &hud_object;
 }
 static unsigned main_map_for_level(unsigned level) {
@@ -817,7 +839,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 262);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 263);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -898,6 +920,22 @@ static void world_refresh_checks() {
     CHECK(coop_live_world_refresh(0x0F8) && live_calls == 0 && live_rabbit_state == 0x1E);
     live_rabbit_state = 2;
     CHECK(!coop_live_world_refresh(0x0F8) && live_calls == 0 && live_rabbit_state == 2);
+
+    // An idle, invisible beanstalk converges to the stock completed model and
+    // collision state immediately. A local growth sequence retains ownership.
+    reset_engine(); current_map = 48; live_beanstalk_available = 1;
+    CHECK(coop_live_world_refresh(0x0FB) && live_calls == 0
+        && live_beanstalk_model == 0x597 && live_beanstalk_scale == 1.0f
+        && live_beanstalk_state == 3 && live_beanstalk_progress == 0
+        && live_beanstalk_noclip == 2 && (live_beanstalk_properties & 4));
+    reset_engine(); current_map = 48; live_beanstalk_available = 1;
+    live_beanstalk_state = 2; live_beanstalk_progress = 4;
+    CHECK(coop_live_world_refresh(0x0FB) && live_beanstalk_state == 2
+        && live_beanstalk_progress == 4 && live_beanstalk_model == 0x598);
+    live_beanstalk_state = 4;
+    CHECK(!coop_live_world_refresh(0x0FB) && live_beanstalk_state == 4);
+    reset_engine(); current_map = 48;
+    CHECK(coop_live_world_refresh(0x0FB));
 
     // Factory storage's three box scripts replay as one atomic completion.
     reset_engine(); current_map = 26;

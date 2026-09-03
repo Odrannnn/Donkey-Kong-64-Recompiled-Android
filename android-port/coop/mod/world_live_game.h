@@ -27,8 +27,9 @@ enum {
     COOP_LIVE_WORLD_SEAL = 11,
     COOP_LIVE_WORLD_MUSHROOM_SWITCH = 12,
     COOP_LIVE_WORLD_RABBIT = 13,
+    COOP_LIVE_WORLD_BEANSTALK = 14,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 262
+    COOP_LIVE_WORLD_STATE_COUNT = 263
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -383,6 +384,11 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // finish from changing the rules of a first race already in progress.
     { 48, 0x0F8, 0xFFFF, 0, COOP_LIVE_WORLD_RABBIT},
 
+    // The beanstalk is an actor rather than an instance-script prop. Its
+    // adapter restores the completed model, scale and collision when idle,
+    // while preserving a local growth cutscene that is already underway.
+    { 48, 0x0FB, 0xFFFF, 0, COOP_LIVE_WORLD_BEANSTALK},
+
     // These completions are consumed only inside their submaps. Receiving one
     // in the corresponding main world needs a save, but no loaded script or
     // map rebuild; the target room initializes from the flag on entry.
@@ -451,6 +457,7 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
                 && state->mode != COOP_LIVE_WORLD_SEAL
                 && state->mode != COOP_LIVE_WORLD_MUSHROOM_SWITCH
                 && state->mode != COOP_LIVE_WORLD_RABBIT
+                && state->mode != COOP_LIVE_WORLD_BEANSTALK
                 && !coop_live_world_find_object(state->object, 0)) return 0;
         if (state->mode == COOP_LIVE_WORLD_MERMAID
                 && !coop_live_world_mermaid_ready()) return 0;
@@ -466,6 +473,8 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
                 && !coop_live_world_mushroom_switch_ready(state->object)) return 0;
         if (state->mode == COOP_LIVE_WORLD_RABBIT
                 && !coop_live_world_rabbit_ready()) return 0;
+        if (state->mode == COOP_LIVE_WORLD_BEANSTALK
+                && !coop_live_world_beanstalk_ready()) return 0;
         if (state->mode == COOP_LIVE_WORLD_CONTINUE_GALLEON) {
             unsigned raw = 0;
             if (!coop_live_world_object_raw_state(state->object, &raw)
@@ -539,6 +548,10 @@ static inline unsigned coop_live_world_refresh(unsigned flag) {
         }
         if (state->mode == COOP_LIVE_WORLD_RABBIT) {
             if (!coop_live_world_rabbit_refresh()) return 0;
+            continue;
+        }
+        if (state->mode == COOP_LIVE_WORLD_BEANSTALK) {
+            if (!coop_live_world_beanstalk_refresh()) return 0;
             continue;
         }
         if (state->mode == COOP_LIVE_WORLD_REVEAL) {
