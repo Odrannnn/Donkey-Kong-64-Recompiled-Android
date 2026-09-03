@@ -493,9 +493,6 @@ static void coop_reset_loaded_map(void) {
     remove_remote();
     transient_page = 0;
     transient_result = (CoopTransientResult){0};
-    // A normal transition already rebuilt the old map, so a queued refresh
-    // for it is no longer needed.
-    if (items.refresh_pending && items.refresh_map != (u32)current_map) items.refresh_pending = 0;
     if (items.world_save_pending && (u32)current_map != 194) items.world_save_pending = 0;
 }
 
@@ -521,7 +518,7 @@ static u32 coop_recovery_local_safe(u32 playing) {
     if (!shared_items) return 1;
     return coop_items_safe_map() && items.input.ready && items.baseline && items.live_snapshot
         && !items.deferred && !items.file_changed && !items.counter_error
-        && !items.save_pending && !items.world_save_pending && !items.refresh_pending
+        && !items.save_pending && !items.world_save_pending
         && !coop_item_words_any(items.input.request);
 }
 
@@ -701,7 +698,6 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
         | (coop_items_snapshot_map() ? COOP_TRACE_ITEM_SNAPSHOT_MAP : 0)
         | (D_global_asm_807FD730 ? COOP_TRACE_REWARD_QUEUE : 0)
         | (D_global_asm_80754280 ? COOP_TRACE_HUD_READY : 0)
-        | (items.refresh_pending ? COOP_TRACE_REFRESH_PENDING : 0)
         | (items.save_pending ? COOP_TRACE_SAVE_PENDING : 0)
         | (items.world_save_pending ? COOP_TRACE_WORLD_SAVE_PENDING : 0)
         | (host_recovery.checkpoint ? COOP_TRACE_RECOVERY_CHECKPOINT : 0)
@@ -715,7 +711,9 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     trace.item_live_snapshot = items.live_snapshot;
     trace.item_wait_reason = items.wait_reason;
     trace.item_wait_id = items.wait_id;
-    trace.item_refresh_map = items.refresh_map;
+    // Retained as zero in the private trace ABI. World updates now defer their
+    // flag write instead of scheduling an automatic same-map reload.
+    trace.item_refresh_map = 0;
     trace.item_result_status = items.result.status;
     trace.world_result_status = world.result.status;
     trace.world_pending = world.result.pending;
@@ -744,28 +742,6 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
                 && !D_global_asm_807FD730 && gPlayerPointer)
             playCutscene(gPlayerPointer, 3, 1);
         items.training_scene_pending = 0;
-    }
-    u8 world_refresh_started = 0;
-    if (items.refresh_pending) {
-        if (items.refresh_map != (u32)current_map) {
-            items.refresh_pending = 0;
-        } else if (loading_zone_transition_speed != 0.0f) {
-            // A player-initiated transition, including a same-map transition,
-            // already provides the required vanilla actor/script rebuild.
-            items.refresh_pending = 0;
-        } else if (playing && loading_zone_transition_speed == 0.0f && !items.save_pending
-                && !D_global_asm_807FD730) {
-            // Re-enter through the same entrance. This rebuilds every actor and
-            // instance script through vanilla initialization without guessing
-            // at their private live state.
-            func_global_asm_805FF378(current_map, current_exit);
-            if (loading_zone_transition_speed != 0.0f) {
-                items.refresh_pending = 0;
-                world_refresh_started = 1;
-                remove_remote();
-                recomp_printf("[dk64-coop] Reloading the current map to apply shared world state.\n");
-            }
-        }
     }
     u32 recovery_command = recomp_get_config_u32("host_recovery");
     if (recovery_command > COOP_RECOVERY_PROMOTE) recovery_command = COOP_RECOVERY_OFF;
@@ -797,7 +773,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     combat_result = extra_result.combat;
     unsigned blast_follow = transient_enabled && current_character_index[0] == 0
         && !D_global_asm_807FD730 && remote_state[STATE_MAP] == (u32)current_map;
-    if (!world_refresh_started && coop_transition_should_follow(&transition_follow,
+    if (coop_transition_should_follow(&transition_follow,
             status == NET_CONNECTED, follow_host_transitions && role == ROLE_JOIN, blast_follow,
             playing, loading_zone_transition_speed != 0.0f, current_map, remote_state[STATE_FLAGS],
             remote_state[STATE_TRANSITION_TICKET], remote_state[STATE_TRANSITION_ROUTE])) {
