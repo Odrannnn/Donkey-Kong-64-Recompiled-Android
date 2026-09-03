@@ -730,7 +730,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 194);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 195);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -854,6 +854,11 @@ static void world_refresh_checks() {
     reset_engine(); current_map = 72;
     for (unsigned i = 0; i < 5; ++i) D_global_asm_807F6240[10 + i] = caves_pads[i];
     CHECK(!coop_live_world_refresh(0x128) && live_calls == 0);
+
+    // The saved Caves encounter clear disables its delayed spawn controller.
+    reset_engine(); current_map = 72; D_global_asm_807F6240[4] = 0x34;
+    CHECK(coop_live_world_refresh(0x12C) && live_calls == 1
+        && live_slot == 4 && live_state == 0);
 
     // The Isles boulder applies both exact terminal controller states and the
     // inverse of object 0x56's visibility gate as one reviewed loaded unit.
