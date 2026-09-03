@@ -730,7 +730,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 232);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 239);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -912,6 +912,19 @@ static void world_refresh_checks() {
     for (unsigned i = 0; i < 5; ++i)
         D_global_asm_807F6240[60 + i] = (short)aztec_tower[i];
     CHECK(!coop_live_world_refresh(0x035) && live_calls == 0 && live_reveals == 0);
+
+    // Aztec's totem activation replays all seven saved-complete initializers
+    // only when the full temple unit is loaded.
+    reset_engine(); current_map = 38;
+    const unsigned short aztec_totem[] = {0x28, 0x27, 0x10, 0x11, 0x12, 0x13, 0x14};
+    for (unsigned i = 0; i < 7; ++i)
+        D_global_asm_807F6240[70 + i] = (short)aztec_totem[i];
+    CHECK(coop_live_world_refresh(0x037) && live_calls == 7
+        && live_slot == 76 && live_state == 0);
+    reset_engine(); current_map = 38;
+    for (unsigned i = 0; i < 6; ++i)
+        D_global_asm_807F6240[70 + i] = (short)aztec_totem[i];
+    CHECK(!coop_live_world_refresh(0x037) && live_calls == 0);
 
     // The Isles boulder applies both exact terminal controller states and the
     // inverse of object 0x56's visibility gate as one reviewed loaded unit.
