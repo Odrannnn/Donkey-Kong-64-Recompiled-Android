@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 187
+    COOP_LIVE_WORLD_STATE_COUNT = 188
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -225,6 +225,11 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // linked switch call or permanent-flag write.
     {178, 0x195, 0x009,  0, COOP_LIVE_WORLD_REPLAY},
     {178, 0x195, 0x004,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Lanky's Caves igloo balloon pad has a dedicated saved-revealed state-0
+    // branch. It selects the normal active interaction state without replaying
+    // the local encounter completion, flag write, sound or camera sequence.
+    { 85, 0x118, 0x000,  0, COOP_LIVE_WORLD_REPLAY},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
