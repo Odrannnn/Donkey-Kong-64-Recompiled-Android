@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 179
+    COOP_LIVE_WORLD_STATE_COUNT = 181
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -198,6 +198,12 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // only its completed initializer and never the coconut-hit cutscene path.
     {170, 0x197, 0x000, 10, COOP_LIVE_WORLD_PERMANENT},
     {170, 0x197, 0x002,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Factory lobby's panel and linked platform expose their exact persistent
+    // entry states. Selecting 20/10 preserves the platform actor/effect setup
+    // while bypassing the local lever interaction and its reward cutscene.
+    {175, 0x18D, 0x00C, 20, COOP_LIVE_WORLD_PERMANENT},
+    {175, 0x18D, 0x00D, 10, COOP_LIVE_WORLD_PERMANENT},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
