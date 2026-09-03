@@ -1,8 +1,13 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.73.0** expands live permanent-world application to 68 audited flags
-and 168 loaded-object rows. Incoming pearls now remove their exact loaded prop
+Version **0.74.0** expands live permanent-world application to 73 audited flags
+and 173 loaded-object rows. The four Helm and Helm-lobby Bananaport tags now run
+their exact saved-tag visibility initializers without a reload. An incoming
+Isles trombone completion sends the stock high-rocket-barrel spawner notification
+and disables the pad without replaying the instrument edge or cutscene; a local
+reveal already in progress continues untouched. Version **0.73.0** made incoming
+pearls remove their exact loaded prop
 in Galleon's treasure chest. In the Mermaid room they recompute her vanilla
 zero/partial/all-five state, so the stock dialogue and final reward sequence
 run without a room reload or synthesized pickup. Active and completed reward
@@ -234,7 +239,8 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.73.0 applies the
+**This is experimental, not complete campaign co-op. Version 0.74.0 applies the
+four Helm Bananaport tags and Isles rocket-barrel reveal live, retains the
 five-pearl treasure/Mermaid sequence live, applies the Isles boulder live,
 preserves active Galleon opening sequences, retains the
 reviewed breakable, container and machine completions, keeps all seven
@@ -275,7 +281,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.73.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.74.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -853,7 +859,7 @@ result is written by the transition channel.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v73 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v74 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

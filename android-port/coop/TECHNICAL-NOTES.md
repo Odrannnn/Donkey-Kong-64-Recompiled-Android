@@ -1,4 +1,4 @@
-> Current source: 0.73.0, protocol/native ABI v73. The complete Linux
+> Current source: 0.74.0, protocol/native ABI v74. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -2958,3 +2958,26 @@ all unrelated grants. Only their exact loaded pearl unit may be written and
 saved there. The live table now contains 68 unique permanent flags and 168
 rows. Packet and bridge sizes remain unchanged. Protocol 73, compatibility
 `0x00010249`, v73 exports and manifest 0.73.0 reject older peers and companions.
+
+## Helm tags and Isles rocket-barrel reveal (0.74.0)
+
+The four permanent Bananaport tags in Helm lobby and Helm now apply without a
+map reload. Lobby flags `0x1A1/0x1A2` select objects `0x08/0x09` in map 170;
+Helm flags `0x305/0x306` select objects `0x59/0x58` in map 17. Each pinned
+state-0 flag-positive branch contains only opcode 38 with tagged target 0, so
+the live adapter wakes that exact initializer. A missing prop fails closed and
+retains the reload fallback. Helm lobby admits only its matching loaded tag;
+unrelated grants remain deferred.
+
+Isles flag `0x1AA` is more complex. Object `0x31` is Lanky's trombone pad and
+its stock completion starts a cutscene, then sends actor-spawner notification
+`(9, 0)` to reveal Diddy's high rocket barrel, records the flag and selects pad
+mode 2. After a remote flag write, idle states 0-2 skip the instrument and
+cutscene, send that exact final notification, enter terminal script state 6 and
+select the same pad mode. States 3-6 already own a local reveal and continue
+untouched. Missing objects and unknown states fail before any loaded state is
+changed.
+
+The live table now contains 73 unique permanent flags and 173 rows. Packet and
+bridge sizes remain unchanged. Protocol 74, compatibility `0x0001024A`, v74
+exports and manifest 0.74.0 reject older peers and companions.
