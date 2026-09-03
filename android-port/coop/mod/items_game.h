@@ -20,7 +20,8 @@ static inline unsigned coop_items_snapshot_map(void) {
     // Galleon, Fungi and Caves lobbies have no supported enemy, so they are
     // absent from the combat allowlist despite using the same stable inventory.
     return coop_items_safe_map() || current_map == 176 || coop_combat_map(current_map)
-        || current_map == 174 || current_map == 178 || current_map == 194;
+        || current_map == 174 || current_map == 178 || current_map == 187
+        || current_map == 194;
 }
 static inline unsigned coop_training_ground_apply_id(unsigned id) {
     return (id >= COOP_TRAINING_SPAWNED && id <= COOP_FIRST_SLAM)
@@ -132,7 +133,19 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
     }
     unsigned stable = safe_to_save;
     unsigned training_ground = stable && current_map == 176;
-    if (g->deferred && !training_ground) {
+    unsigned live_world_applied = 0;
+    unsigned live_only = g->deferred && !training_ground;
+    unsigned pending_live_world = 0;
+    if (live_only && stable && g->refresh_enabled
+            && (g->result.status == 2 || g->result.status == 3)) {
+        for (unsigned id = COOP_WORLD_FIRST; id < COOP_PROGRESSION_END; ++id)
+            if (coop_item_has(g->result.apply, id) && !coop_item_owned(id)
+                    && coop_live_world_has_flag(
+                        coop_world_unlocks[id - COOP_WORLD_FIRST].flag)) {
+                pending_live_world = 1; break;
+            }
+    }
+    if (live_only && !pending_live_world) {
         coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, 0xFFFFFFFFu); return;
     }
     if (g->file_changed) {
@@ -150,6 +163,16 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
         g->applying = 1;
         for (unsigned id = 0; id < COOP_ITEMS; ++id) {
             if (!coop_item_has(g->result.apply, id) || coop_item_owned(id)) continue;
+            unsigned exact_live_world = id >= COOP_WORLD_FIRST
+                && id < COOP_PROGRESSION_END && stable && g->refresh_enabled
+                && coop_live_world_has_flag(
+                    coop_world_unlocks[id - COOP_WORLD_FIRST].flag);
+            // A reviewed interior admits only its exact loaded permanent-world
+            // unit. Inventory, rewards, purchases and unrelated flags remain
+            // deferred until the ordinary save-safe map policy resumes.
+            if (live_only && !exact_live_world) {
+                coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, id); continue;
+            }
             if (id >= COOP_TROFF_FIRST && id < COOP_TROFF_END) {
                 if (!coop_troff_apply(g, id, safe_to_save, here)) {
                     g->troff_pending = 1;
@@ -160,20 +183,26 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
             }
             if (id >= COOP_PROGRESSION_FIRST && id < COOP_PROGRESSION_END) {
                 if (!coop_progression_valid()) { g->counter_error = 1; break; }
-                unsigned progression_safe = safe_to_save
+                unsigned progression_safe = safe_to_save || exact_live_world
                     || (training_ground && coop_training_ground_apply_id(id));
                 if (!progression_safe) {
                     coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, id); continue;
                 }
-                unsigned refresh = id >= COOP_WORLD_FIRST
-                    && here == coop_world_unlocks[id - COOP_WORLD_FIRST].level;
+                unsigned refresh = exact_live_world || (id >= COOP_WORLD_FIRST
+                    && here == coop_world_unlocks[id - COOP_WORLD_FIRST].level);
                 if (training_ground && id == COOP_WORLD_TRAINING_EXIT) refresh = 1;
-                if (coop_progression_apply(id, progression_safe, here, g->refresh_enabled)) {
+                if (live_only && exact_live_world && !coop_live_world_ready(
+                        coop_world_unlocks[id - COOP_WORLD_FIRST].flag)) {
+                    coop_items_wait(g, COOP_TRACE_WAIT_PROGRESSION_CONTEXT, id); continue;
+                }
+                if (coop_progression_apply(id, progression_safe, here,
+                        g->refresh_enabled)) {
                     // Simple loaded doors and gates enter the same completed
                     // vanilla state selected by their flag-positive initializer.
                     // Everything else retains the full map-rebuild fallback.
                     unsigned live = refresh && coop_live_world_refresh(
                         coop_world_unlocks[id - COOP_WORLD_FIRST].flag);
+                    if (exact_live_world && live) live_world_applied = 1;
                     if (refresh && !live && !training_ground) {
                         g->refresh_pending = 1;
                         g->refresh_map = current_map;
@@ -292,7 +321,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
         g->applying = 0;
     }
     if (g->counter_error) { g->input.ready = 0; return; }
-    unsigned save_safe = safe_to_save || training_ground;
+    unsigned save_safe = safe_to_save || training_ground || live_world_applied;
     if (save_safe && g->hud_pending && D_global_asm_80754280) {
         func_global_asm_806F8278(0); g->hud_pending = 0;
     }

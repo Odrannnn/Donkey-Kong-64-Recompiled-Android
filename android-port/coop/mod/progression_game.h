@@ -33,7 +33,8 @@ static inline unsigned coop_training_prerequisites(void) {
 }
 static inline unsigned coop_progression_apply(unsigned id, unsigned safe, unsigned here,
         unsigned refresh_loaded_world) {
-    if (!safe || !D_global_asm_80754280 || here >= 8 || id < COOP_PROGRESSION_FIRST || id >= COOP_PROGRESSION_END) return 0;
+    if (!safe || !D_global_asm_80754280 || id < COOP_PROGRESSION_FIRST
+            || id >= COOP_PROGRESSION_END) return 0;
     if (id >= COOP_WORLD_FIRST) {
         const CoopWorldUnlock* unlock = &coop_world_unlocks[id - COOP_WORLD_FIRST];
         // Normally leave the entire level: related actors/scripts may exist in
@@ -54,7 +55,8 @@ static inline unsigned coop_progression_apply(unsigned id, unsigned safe, unsign
         // Only the permanent completion bit. No live script state, cutscene,
         // carried bean, race timer, pickup drop or extra GB/inventory award.
         setFlag(unlock->flag, 1, 0);
-    } else if (id >= COOP_WARP_FIRST) {
+    } else if (here >= 8) return 0;
+    else if (id >= COOP_WARP_FIRST) {
         if (id < COOP_BLOCKER_FIRST) {
             const CoopWarpTag* pad = &coop_warp_tags[id - COOP_WARP_FIRST];
             // Never change the state of a loaded pad or force a teleport.

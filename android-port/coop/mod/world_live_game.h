@@ -1,17 +1,26 @@
 #ifndef COOP_WORLD_LIVE_GAME_H
 #define COOP_WORLD_LIVE_GAME_H
 
-// Pinned US 1.0 instance-script metadata. Every row is a flag-positive state-0
-// initializer whose only action selects this completed state. Every object that
-// reads the flag in the listed map is represented, and the selected state's
-// immediate blocks contain only local model/collision/script-state operations.
-// Complex scripts keep the full vanilla map-reload fallback.
+// Pinned US 1.0 instance-script metadata. Direct rows select a reviewed
+// completed state. Replay rows wake state 0 after the permanent flag is written,
+// so the loaded object executes the same flag-positive initializer used on map
+// load. Dependency rows are checked but never changed. Audited no-op rows mean
+// that the flag has no consumer in this loaded map and will initialize naturally
+// when its actual room is entered.
 typedef struct {
     unsigned short map, flag, object;
-    unsigned char state;
+    unsigned char state, mode;
 } CoopLiveWorldState;
 
-enum { COOP_LIVE_WORLD_STATE_COUNT = 73, COOP_LIVE_WORLD_SCRIPT_SLOTS = 600 };
+enum {
+    COOP_LIVE_WORLD_DIRECT = 0,
+    COOP_LIVE_WORLD_REPLAY = 1,
+    COOP_LIVE_WORLD_PERMANENT = 2,
+    COOP_LIVE_WORLD_REQUIRE = 3,
+    COOP_LIVE_WORLD_NOOP = 4,
+    COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
+    COOP_LIVE_WORLD_STATE_COUNT = 104
+};
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20}, { 7, 0x000, 0x01B, 20},
     { 7, 0x007, 0x034, 20}, { 7, 0x007, 0x035, 20}, { 7, 0x007, 0x033, 20},
@@ -49,24 +58,86 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // Training exit switch and door. State 20 is each flag-positive vanilla
     // initializer and runs their normal completed presentation/removal path.
     {176, 0x181, 0x039, 20}, {176, 0x181, 0x049, 20},
+
+    // Breakable walls, grates and gates. Replay mode is intentionally state 0:
+    // each loaded script runs its own flag-positive completion branch, including
+    // linked collision-region updates on the Caves ice walls.
+    {  7, 0x02B, 0x115,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x04E, 0x044,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x04E, 0x09C,  0, COOP_LIVE_WORLD_REPLAY},
+    { 26, 0x077, 0x13C,  0, COOP_LIVE_WORLD_REPLAY},
+    { 26, 0x085, 0x03C,  0, COOP_LIVE_WORLD_REPLAY},
+    { 26, 0x097, 0x04E,  0, COOP_LIVE_WORLD_REPLAY},
+    { 26, 0x097, 0x04C,  0, COOP_LIVE_WORLD_REPLAY},
+    { 26, 0x097, 0x106,  0, COOP_LIVE_WORLD_REPLAY},
+    { 30, 0x09F, 0x021,  0, COOP_LIVE_WORLD_REPLAY},
+    { 30, 0x0A2, 0x005,  0, COOP_LIVE_WORLD_REPLAY},
+    { 30, 0x0A2, 0x00C,  0, COOP_LIVE_WORLD_REPLAY},
+    { 30, 0x0B9, 0x03F,  0, COOP_LIVE_WORLD_REPLAY},
+    { 72, 0x109, 0x01F,  0, COOP_LIVE_WORLD_REPLAY},
+    { 72, 0x10A, 0x01E,  0, COOP_LIVE_WORLD_REPLAY},
+    { 72, 0x10B, 0x01D,  0, COOP_LIVE_WORLD_REPLAY},
+    { 87, 0x144, 0x020,  0, COOP_LIVE_WORLD_REPLAY},
+    { 16, 0x045, 0x004,  0, COOP_LIVE_WORLD_REPLAY},
+    { 16, 0x045, 0x00A,  0, COOP_LIVE_WORLD_REPLAY},
+    {112, 0x138, 0x011, 30, COOP_LIVE_WORLD_PERMANENT},
+    {163, 0x157, 0x028,  0, COOP_LIVE_WORLD_REPLAY},
+    {163, 0x158, 0x029,  0, COOP_LIVE_WORLD_REPLAY},
+    {163, 0x159, 0x02A,  0, COOP_LIVE_WORLD_REPLAY},
+    {163, 0x15A, 0x02B,  0, COOP_LIVE_WORLD_REPLAY},
+    {163, 0x15B, 0x02C,  0, COOP_LIVE_WORLD_REPLAY},
+    {163, 0x15C, 0x02D,  0, COOP_LIVE_WORLD_REPLAY},
+    {187, 0x144, 0x000,  0, COOP_LIVE_WORLD_REPLAY},
+    {187, 0x144, 0x001,  0, COOP_LIVE_WORLD_REPLAY},
+    {187, 0x144, 0x002,  0, COOP_LIVE_WORLD_REPLAY},
+    {187, 0x144, 0x003,  0, COOP_LIVE_WORLD_REPLAY},
+    {194, 0x198, 0x000,  0, COOP_LIVE_WORLD_REPLAY},
+    {194, 0x199, 0x001,  0, COOP_LIVE_WORLD_REPLAY},
 };
 
 // Portal rows exist only to apply an accepted permanent flag. Their ordinary
 // in-progress script states belong to local Troff/boss flow and must never
 // consume records or become host-authoritative in the transient channel.
 static inline unsigned coop_live_world_transient_eligible(const CoopLiveWorldState* state) {
-    return state->flag != 0x02E && state->flag != 0x06C && state->flag != 0x098
+    return state->mode == COOP_LIVE_WORLD_DIRECT
+        && state->flag != 0x02E && state->flag != 0x06C && state->flag != 0x098
         && state->flag != 0x0CB && state->flag != 0x102 && state->flag != 0x12E
         && state->flag != 0x160;
 }
 
-static inline unsigned coop_live_world_set_object(unsigned object, unsigned state) {
+static inline unsigned coop_live_world_has_flag(unsigned flag) {
+    for (unsigned row = 0; row < COOP_LIVE_WORLD_STATE_COUNT; ++row)
+        if (coop_live_world_states[row].map == (unsigned)current_map
+                && coop_live_world_states[row].flag == flag) return 1;
+    return 0;
+}
+
+static inline unsigned coop_live_world_find_object(unsigned object, unsigned* found_slot) {
     for (unsigned slot = 0; slot < COOP_LIVE_WORLD_SCRIPT_SLOTS; ++slot) {
         if ((unsigned short)D_global_asm_807F6240[slot] != object) continue;
-        func_global_asm_8063DA40((short)slot, (short)state);
+        if (found_slot) *found_slot = slot;
         return 1;
     }
     return 0;
+}
+
+static inline unsigned coop_live_world_set_object(unsigned object, unsigned state) {
+    unsigned slot = 0;
+    if (!coop_live_world_find_object(object, &slot)) return 0;
+    func_global_asm_8063DA40((short)slot, (short)state);
+    return 1;
+}
+
+static inline unsigned coop_live_world_ready(unsigned flag) {
+    unsigned expected = 0;
+    for (unsigned row = 0; row < COOP_LIVE_WORLD_STATE_COUNT; ++row) {
+        const CoopLiveWorldState* state = &coop_live_world_states[row];
+        if (state->map != (unsigned)current_map || state->flag != flag) continue;
+        ++expected;
+        if (state->mode != COOP_LIVE_WORLD_NOOP
+                && !coop_live_world_find_object(state->object, 0)) return 0;
+    }
+    return expected != 0;
 }
 
 // Start the exact loaded vanilla switch sequence for the reversible world
@@ -84,16 +155,19 @@ static inline unsigned coop_live_reversible_refresh(unsigned toggle, unsigned de
 }
 
 static inline unsigned coop_live_world_refresh(unsigned flag) {
-    unsigned expected = 0, updated = 0;
+    // Preflight the complete reviewed unit before changing any loaded script.
+    // This prevents a partial update if a linked object has not spawned yet.
+    if (!coop_live_world_ready(flag)) return 0;
     for (unsigned row = 0; row < COOP_LIVE_WORLD_STATE_COUNT; ++row) {
         const CoopLiveWorldState* state = &coop_live_world_states[row];
-        if (state->map != (unsigned)current_map || state->flag != flag) continue;
-        ++expected;
-        updated += coop_live_world_set_object(state->object, state->state);
+        if (state->map != (unsigned)current_map || state->flag != flag
+                || state->mode == COOP_LIVE_WORLD_NOOP
+                || state->mode == COOP_LIVE_WORLD_REQUIRE) continue;
+        // REPLAY deliberately selects state 0. func_global_asm_8063DA40 also
+        // wakes a paused script, so vanilla evaluates the newly written flag.
+        if (!coop_live_world_set_object(state->object, state->state)) return 0;
     }
-    // A partial setup must use the full reload path; never report success when
-    // a reviewed object is absent or the flag has no complete live-state row.
-    return expected && updated == expected;
+    return 1;
 }
 
 #endif

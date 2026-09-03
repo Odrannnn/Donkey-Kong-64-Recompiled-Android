@@ -649,7 +649,7 @@ static void world_refresh_checks() {
     current_map = 7; mock_level = 0; D_global_asm_807F6240[4] = 0x1A;
     coop_items_capture(&g, 1, 1, 0); coop_items_receive(&g, r);
     g.refresh_enabled = 1; coop_items_apply(&g, 1);
-    CHECK(flags[0] && live_calls == 1 && g.refresh_pending && g.refresh_map == 7);
+    CHECK(flags[0] && live_calls == 0 && g.refresh_pending && g.refresh_map == 7);
 
     // The full Japes shell gate and each hut's switch plus door use the exact
     // flag-positive initializer states audited from the pinned US scripts.
@@ -678,7 +678,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 73);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 104);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -689,12 +689,54 @@ static void world_refresh_checks() {
     }
     CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[43]));
 
+    // Permanent breakables replay their exact flag-positive initializer and
+    // never become transient host-owned scripts.
+    reset_engine(); current_map = 72; D_global_asm_807F6240[2] = 0x1F;
+    CHECK(coop_live_world_refresh(0x109) && live_calls == 1 && live_state == 0);
+    CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[85]));
+
+    // A reviewed ordinary interior may accept only its exact loaded world
+    // unit. The flag, replay and isolated save complete without a map reload.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 16; mock_level = 1;
+    D_global_asm_807F6240[2] = 0x04; D_global_asm_807F6240[3] = 0x0A;
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.deferred);
+    r = {}; r.status = 2; r.scope = 1; r.session_lo = 904;
+    unsigned temple_ice = (unsigned)coop_item_id(0x045);
+    r.apply[temple_ice / 32] = bit(temple_ice);
+    r.apply[78 / 32] |= bit(78); // Unrelated Nintendo coin stays deferred.
+    coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
+    CHECK(flags[0x045] && !flags[0x084] && writes == 1 && saves == 1
+        && live_calls == 2 && live_state == 0 && !g.refresh_pending);
+
+    // Preflight is atomic: a missing component leaves both the flag and loaded
+    // scripts untouched so the same unit can be retried on a later frame.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 16; mock_level = 1; D_global_asm_807F6240[2] = 0x04;
+    coop_items_capture(&g, 1, 1, 0);
+    r = {}; r.status = 2; r.scope = 1; r.session_lo = 906;
+    r.apply[temple_ice / 32] = bit(temple_ice); coop_items_receive(&g, r);
+    g.refresh_enabled = 1; coop_items_apply(&g, 1);
+    CHECK(!flags[0x045] && !writes && !saves && !live_calls
+        && g.wait_reason == COOP_TRACE_WAIT_PROGRESSION_CONTEXT);
+
+    // Level-less lobbies are admitted only through the same exact table match.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 194; mock_level = 255; D_global_asm_807F6240[4] = 0;
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.deferred);
+    r = {}; r.status = 2; r.scope = 1; r.session_lo = 905;
+    unsigned caves_wall = (unsigned)coop_item_id(0x198);
+    r.apply[caves_wall / 32] = bit(caves_wall);
+    coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
+    CHECK(flags[0x198] && writes == 1 && saves == 1 && live_calls == 1
+        && live_state == 0 && !g.refresh_pending);
+
     // A partially loaded portal must still request the full reload fallback.
     reset_engine(); current_map = 38;
     for (unsigned i = 0; i < portals[1].count - 1; ++i)
         D_global_asm_807F6240[20 + i] = (short)portals[1].object[i];
     CHECK(!coop_live_world_refresh(portals[1].flag)
-        && live_calls == portals[1].count - 1);
+        && live_calls == 0);
 
     // Training's switch and exit door must advance as one reviewed live unit.
     reset_engine(); current_map = 176;
