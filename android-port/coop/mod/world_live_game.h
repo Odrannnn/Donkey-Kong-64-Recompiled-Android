@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 175
+    COOP_LIVE_WORLD_STATE_COUNT = 177
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -185,6 +185,12 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // it cannot enter the projectile, cutscene or permanent-flag write path.
     {173, 0x18F, 0x010,  0, COOP_LIVE_WORLD_REPLAY},
     {173, 0x18F, 0x00F,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Galleon lobby's Chunky slam switch and door likewise have isolated
+    // flag-positive initializers. They apply the completed switch animation
+    // and hide/disable the open door without replaying the slam or cutscene.
+    {174, 0x191, 0x00A,  0, COOP_LIVE_WORLD_REPLAY},
+    {174, 0x191, 0x00C,  0, COOP_LIVE_WORLD_REPLAY},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
