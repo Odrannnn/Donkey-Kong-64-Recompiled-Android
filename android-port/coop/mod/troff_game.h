@@ -6,10 +6,10 @@ static inline unsigned coop_troff_owned(unsigned id) {
     return coop_troff_bucket(id, &level, &kong, &amount)
         && D_global_asm_807FC950[0].character_progress[kong].coloured_bananas_fed_to_tns[level] >= amount;
 }
-static inline unsigned coop_troff_apply(CoopItems* g, unsigned id, unsigned safe, unsigned here) {
+static inline unsigned coop_troff_apply(CoopItems* g, unsigned id, unsigned safe) {
     unsigned level, kong, amount;
     if (!coop_troff_bucket(id, &level, &kong, &amount) || !safe || !g->bound
-            || !coop_items_main_world() || !D_global_asm_80754280 || here >= 8 || here == level) return 0;
+            || !D_global_asm_80754280 || current_map == 42) return 0; // MAP_TROFF_N_SCOFF
     CoopCharacterProgress* p = &D_global_asm_807FC950[0].character_progress[kong];
     unsigned fed = p->coloured_bananas_fed_to_tns[level], available = p->coloured_bananas[level];
     if (fed + available > COOP_TROFF_CAPACITY) { g->counter_error = 1; return 0; }
@@ -26,8 +26,8 @@ static inline unsigned coop_troff_apply(CoopItems* g, unsigned id, unsigned safe
         total += paid;
     }
     // Vanilla's flying-banana effect updates this cache after the fed counter.
-    // Outside the entire level there is no live feeding animation. Rebuild the
-    // cache from actual counters, allowing a lagging cache but never an excess.
+    // Outside Troff & Scoff's own room there is no live feeding animation.
+    // Rebuild from actual counters, allowing a lagging cache but never excess.
     if (D_global_asm_807FC930[level] > total) { g->counter_error = 1; return 0; }
     p->coloured_bananas[level] = available - 1;
     p->coloured_bananas_fed_to_tns[level] = fed + 1;

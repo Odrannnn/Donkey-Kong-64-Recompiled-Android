@@ -327,6 +327,7 @@ static void engine_checks() {
 static void reset_engine() {
     std::memset(flags, 0, sizeof(flags));
     std::memset(pickups, 0, sizeof(pickups));
+    std::memset(D_global_asm_807FC930, 0, sizeof(D_global_asm_807FC930));
     D_global_asm_807FD730 = nullptr; mock_level = 7; mock_layout_error = 0;
     // Sentinel all unrelated inventory, unused levels, extra Kong and other players.
     std::memset(D_global_asm_807FC950, 0xA5, sizeof(D_global_asm_807FC950));
@@ -627,6 +628,76 @@ static void same_level_gb_delivery_checks() {
     block_write = 0; coop_items_apply(&g, 1);
     CHECK(writes == 2 && saves == 1 && flags[0x019]);
     CHECK(D_global_asm_807FC950[0].character_progress[kong].golden_bananas[level] == 1);
+}
+static void troff_delivery_checks() {
+    // Every Kong/level bucket can receive its first payment while the player
+    // remains in that owning level's main map.
+    for (unsigned level = 0; level < COOP_TROFF_LEVELS; ++level) {
+        for (unsigned kong = 0; kong < COOP_TROFF_KONGS; ++kong) {
+            reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+            current_map = main_map_for_level(level); mock_level = level;
+            auto& p = D_global_asm_807FC950[0].character_progress[kong];
+            p.coloured_bananas[level] = 1;
+            coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !g.deferred);
+            CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 400 + level;
+            unsigned id = coop_troff_id(level, kong, 1);
+            r.apply[id / 32] = bit(id); coop_items_receive(&g, r);
+            coop_items_apply(&g, 1);
+            CHECK(!g.counter_error && !g.troff_pending && p.coloured_bananas[level] == 0
+                && p.coloured_bananas_fed_to_tns[level] == 1
+                && D_global_asm_807FC930[level] == 1 && saves == 1
+                && coop_item_owned(id) && !any(g.input.request));
+        }
+    }
+
+    // Multiple milestones apply in order in an owning-level interior. The
+    // same transaction is also valid from a level-less reviewed Helm lobby.
+    for (unsigned destination : {4u, 170u}) {
+        reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+        unsigned level = destination == 4 ? 0 : 3, kong = destination == 4 ? 2 : 4;
+        current_map = destination; mock_level = destination == 4 ? level : 7;
+        auto& p = D_global_asm_807FC950[0].character_progress[kong];
+        p.coloured_bananas[level] = 3;
+        coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !g.deferred);
+        CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 500 + destination;
+        for (unsigned amount = 1; amount <= 3; ++amount) {
+            unsigned id = coop_troff_id(level, kong, amount);
+            r.apply[id / 32] |= bit(id);
+        }
+        coop_items_receive(&g, r); coop_items_apply(&g, 1);
+        CHECK(!g.troff_pending && p.coloured_bananas[level] == 0
+            && p.coloured_bananas_fed_to_tns[level] == 3
+            && D_global_asm_807FC930[level] == 3 && saves == 1);
+    }
+
+    // Troff & Scoff's own room retains the stock flying-banana transaction.
+    reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+    current_map = 7; mock_level = 0;
+    auto& p = D_global_asm_807FC950[0].character_progress[0];
+    p.coloured_bananas[0] = 1; coop_items_capture(&g, 1, 1, 0);
+    CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 600;
+    unsigned id = coop_troff_id(0, 0, 1); r.apply[id / 32] = bit(id);
+    coop_items_receive(&g, r); current_map = 42; coop_items_capture(&g, 1, 1, 0);
+    CHECK(g.input.ready && g.deferred); coop_items_apply(&g, 1);
+    CHECK(p.coloured_bananas[0] == 1 && !p.coloured_bananas_fed_to_tns[0]
+        && !D_global_asm_807FC930[0] && !saves);
+
+    // Funding, binding, HUD, stable-frame and aggregate-integrity guards all
+    // fail before mutating either saved banana bucket.
+    for (unsigned scenario = 0; scenario < 5; ++scenario) {
+        reset_engine(); g = {}; current_game = &g; g.join = 1;
+        current_map = 4; mock_level = 0; p.coloured_bananas[0] = scenario == 0 ? 0 : 1;
+        coop_items_capture(&g, 1, 1, 0);
+        r = {}; r.status = 2; r.scope = 1; r.session_lo = 700 + scenario;
+        r.apply[id / 32] = bit(id);
+        if (scenario != 1) coop_items_receive(&g, r); else g.result = r;
+        if (scenario == 2) D_global_asm_80754280 = nullptr;
+        if (scenario == 4) D_global_asm_807FC930[0] = 1;
+        coop_items_apply(&g, scenario != 3);
+        CHECK(p.coloured_bananas[0] == (scenario == 0 ? 0u : 1u)
+            && !p.coloured_bananas_fed_to_tns[0] && !saves);
+        CHECK(bool(g.counter_error) == (scenario == 4));
+    }
 }
 static void japes_boulder_bunch_checks() {
     reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
@@ -1620,6 +1691,6 @@ static void live_checks() {
 #include "progression_checks.h"
 #include "training_checks.h"
 int main() {
-    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); same_level_gb_delivery_checks(); actor_collectible_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); arcade_payment_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
+    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); same_level_gb_delivery_checks(); actor_collectible_checks(); troff_delivery_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); arcade_payment_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
     std::printf("PASS: %u item, all GBs/1700 pickups adapter, inventory preservation, authority, deduplication, lossy UDP and reconnect checks\n", checks);
 }

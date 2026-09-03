@@ -645,10 +645,10 @@ Caves and Castle are covered; no extra setting or save migration is required.
 
 1. Connect and wait for **LAN ITEMS: SYNCED** before feeding on the guest.
 2. Feed Troff & Scoff normally and let the feeding animation finish. Leave their
-   room afterward so your game can capture settled counters in a supported main map.
-3. The recipient must leave that entire level for Isles or another main world.
-   Return both players to Isles for the simplest exchange. DK's treehouse does
-   not apply numeric feeding deductions.
+   room afterward so your game can capture settled counters in a reviewed map.
+3. The recipient only needs to be outside Troff & Scoff's room in any reviewed
+   normal map. It may remain in the owning level, use an ordinary interior,
+   lobby, Helm or DK's treehouse; leaving the whole level is no longer required.
 4. Wait for **LAN ITEMS: SYNCED**, then revisit Troff & Scoff. The received fed
    total counts toward their normal requirement; the game opens the door through
    its own initialization. No boss, cutscene or player transition is forced.
@@ -965,7 +965,7 @@ Before relying on a save:
 4. Buy moves, guns, instruments, global upgrades and Candy melon upgrades from
    both devices. Check the correct Kongs, use of each move, retained coins,
    unchanged current health/ammo and no charge when merely receiving an upgrade.
-   Feed Troff & Scoff on either peer, leave the level and receive its cumulative
+   Feed Troff & Scoff on either peer, leave their room and receive its cumulative
    feeding on the other: preserve available-plus-fed and avoid duplicate deductions.
    Check a remote 75-banana medal.
 5. Rescue each Kong, turn each key and finish K. Lumsy's sequence. Leave the

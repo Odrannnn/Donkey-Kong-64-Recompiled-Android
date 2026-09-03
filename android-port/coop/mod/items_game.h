@@ -177,7 +177,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, id); continue;
             }
             if (id >= COOP_TROFF_FIRST && id < COOP_TROFF_END) {
-                if (!coop_troff_apply(g, id, safe_to_save, here)) {
+                if (!coop_troff_apply(g, id, safe_to_save)) {
                     g->troff_pending = 1;
                     coop_items_wait(g, COOP_TRACE_WAIT_TROFF, id);
                 }

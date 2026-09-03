@@ -953,8 +953,8 @@ address or arbitrary amount is accepted. `coop_item_flag` returns -1 for these
 IDs and flag observation searches only the earlier flag-backed range.
 
 Incoming feeding runs after pickup credits and permanent grants. For a milestone
-`fed + 1`, the adapter requires a bound ready session, safe main-world gameplay,
-a HUD, no reward queue, and a location outside the affected level. It verifies
+`fed + 1`, the adapter requires a bound ready session, a reviewed writable map,
+a HUD, no reward queue, and a location outside Troff & Scoff's own room. It verifies
 all five Kong balances for that level satisfy `available + fed <= 100` and waits
 if the selected Kong has no available banana or an earlier milestone is missing.
 It deducts one available banana, increments the fed bucket and updates the level
@@ -973,9 +973,9 @@ Pinned decomp evidence:
 - `global_asm/hud.c:changeCollectableCount` updates the available counter;
   the medal check applies only to positive collected-banana credits.
 - `global_asm/code_11BE00.c:func_global_asm_8071D0F0` increments
-  `D_global_asm_807FC930[level]` after the flying-banana effect completes, later
-  than the fed-counter write. Remote application runs outside the whole level
-  and reconstructs this aggregate from actual fed counters. A lagging aggregate
+`D_global_asm_807FC930[level]` after the flying-banana effect completes, later
+than the fed-counter write. Remote application runs outside the feeding room
+and reconstructs this aggregate from actual fed counters. A lagging aggregate
   is allowed; an aggregate greater than the counters fails closed as a conflict.
 - `global_asm/code_3C10.c:func_global_asm_805FF0C8` compares that aggregate with
   the boss-door requirement. `code_9DD70.c:func_global_asm_8069DD40` reads it at
