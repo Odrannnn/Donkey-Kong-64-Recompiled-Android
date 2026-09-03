@@ -1329,7 +1329,8 @@ static void coop_transient_capture(unsigned present) {
         for (unsigned earlier = 0; earlier < row; ++earlier)
             duplicate |= coop_live_world_states[earlier].map == state->map
                 && coop_live_world_states[earlier].object == state->object;
-        if (!duplicate && coop_transient_object_kind(state->map, state->object) == COOP_TRANSIENT_SCRIPT)
+        if (!duplicate && coop_live_world_transient_eligible(state)
+                && coop_transient_object_kind(state->map, state->object) == COOP_TRANSIENT_SCRIPT)
             coop_transient_add_object(state->object, COOP_TRANSIENT_SCRIPT,
                 transient_page, &ordinal, &transient_input);
     }

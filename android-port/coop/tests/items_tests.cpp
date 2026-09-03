@@ -666,6 +666,36 @@ static void world_refresh_checks() {
     reset_engine(); current_map = 26; D_global_asm_807F6240[6] = 0x2D;
     CHECK(coop_live_world_refresh(0x081) && live_calls == 1 && live_state == 20);
 
+    // Every main-level boss portal component enters the same terminal vanilla
+    // state. The saved flag initializes any separate-map consumers on entry.
+    struct PortalCase { unsigned map, flag, count; unsigned short object[5]; };
+    const PortalCase portals[] = {
+        { 7, 0x02E, 3, {0x02C, 0x037, 0x11A}},
+        {38, 0x06C, 5, {0x008, 0x009, 0x00A, 0x00B, 0x0EC}},
+        {26, 0x098, 5, {0x046, 0x047, 0x048, 0x049, 0x04A}},
+        {30, 0x0CB, 5, {0x022, 0x023, 0x024, 0x025, 0x026}},
+        {48, 0x102, 5, {0x015, 0x016, 0x03B, 0x047, 0x052}},
+        {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
+        {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
+    };
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 73);
+    CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
+    for (const auto& portal : portals) {
+        reset_engine(); current_map = portal.map;
+        for (unsigned i = 0; i < portal.count; ++i)
+            D_global_asm_807F6240[20 + i] = (short)portal.object[i];
+        CHECK(coop_live_world_refresh(portal.flag) && live_calls == portal.count
+            && live_slot == 19 + portal.count && live_state == 20);
+    }
+    CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[43]));
+
+    // A partially loaded portal must still request the full reload fallback.
+    reset_engine(); current_map = 38;
+    for (unsigned i = 0; i < portals[1].count - 1; ++i)
+        D_global_asm_807F6240[20 + i] = (short)portals[1].object[i];
+    CHECK(!coop_live_world_refresh(portals[1].flag)
+        && live_calls == portals[1].count - 1);
+
     // Training's switch and exit door must advance as one reviewed live unit.
     reset_engine(); current_map = 176;
     D_global_asm_807F6240[5] = 0x39; D_global_asm_807F6240[8] = 0x49;

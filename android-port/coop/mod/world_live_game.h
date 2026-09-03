@@ -11,7 +11,7 @@ typedef struct {
     unsigned char state;
 } CoopLiveWorldState;
 
-enum { COOP_LIVE_WORLD_STATE_COUNT = 43, COOP_LIVE_WORLD_SCRIPT_SLOTS = 600 };
+enum { COOP_LIVE_WORLD_STATE_COUNT = 73, COOP_LIVE_WORLD_SCRIPT_SLOTS = 600 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20}, { 7, 0x000, 0x01B, 20},
     { 7, 0x007, 0x034, 20}, { 7, 0x007, 0x035, 20}, { 7, 0x007, 0x033, 20},
@@ -30,10 +30,35 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     {48, 0x0CF, 0x017, 20}, {48, 0x0CF, 0x018, 20}, {48, 0x0CF, 0x019, 20},
     {48, 0x0D0, 0x01C, 20}, {48, 0x0D0, 0x01A, 20}, {48, 0x0D0, 0x01B, 20},
     {48, 0x0D2, 0x01D, 20}, {48, 0x0D2, 0x01E, 20},
+    // Closed boss portals. State 20 is terminal in every loaded main-map
+    // portal script, so it removes the model/collision without replaying a
+    // boss transition, reward or cutscene. Other-map consumers initialize
+    // from the saved flag when those maps are entered.
+    { 7, 0x02E, 0x02C, 20}, { 7, 0x02E, 0x037, 20}, { 7, 0x02E, 0x11A, 20},
+    {38, 0x06C, 0x008, 20}, {38, 0x06C, 0x009, 20}, {38, 0x06C, 0x00A, 20},
+    {38, 0x06C, 0x00B, 20}, {38, 0x06C, 0x0EC, 20},
+    {26, 0x098, 0x046, 20}, {26, 0x098, 0x047, 20}, {26, 0x098, 0x048, 20},
+    {26, 0x098, 0x049, 20}, {26, 0x098, 0x04A, 20},
+    {30, 0x0CB, 0x022, 20}, {30, 0x0CB, 0x023, 20}, {30, 0x0CB, 0x024, 20},
+    {30, 0x0CB, 0x025, 20}, {30, 0x0CB, 0x026, 20},
+    {48, 0x102, 0x015, 20}, {48, 0x102, 0x016, 20}, {48, 0x102, 0x03B, 20},
+    {48, 0x102, 0x047, 20}, {48, 0x102, 0x052, 20},
+    {72, 0x12E, 0x023, 20}, {72, 0x12E, 0x024, 20},
+    {72, 0x12E, 0x025, 20}, {72, 0x12E, 0x026, 20},
+    {87, 0x160, 0x00B, 20}, {87, 0x160, 0x00C, 20}, {87, 0x160, 0x00D, 20},
     // Training exit switch and door. State 20 is each flag-positive vanilla
     // initializer and runs their normal completed presentation/removal path.
     {176, 0x181, 0x039, 20}, {176, 0x181, 0x049, 20},
 };
+
+// Portal rows exist only to apply an accepted permanent flag. Their ordinary
+// in-progress script states belong to local Troff/boss flow and must never
+// consume records or become host-authoritative in the transient channel.
+static inline unsigned coop_live_world_transient_eligible(const CoopLiveWorldState* state) {
+    return state->flag != 0x02E && state->flag != 0x06C && state->flag != 0x098
+        && state->flag != 0x0CB && state->flag != 0x102 && state->flag != 0x12E
+        && state->flag != 0x160;
+}
 
 static inline unsigned coop_live_world_set_object(unsigned object, unsigned state) {
     for (unsigned slot = 0; slot < COOP_LIVE_WORLD_SCRIPT_SLOTS; ++slot) {

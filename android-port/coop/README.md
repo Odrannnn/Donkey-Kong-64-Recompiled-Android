@@ -1,7 +1,11 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.69.0** synchronizes the five direct vanilla Baboon Blast completion
+Version **0.70.0** applies the saved boss-portal closure live in all seven main
+levels. After the existing boss-key prerequisite succeeds, every loaded portal
+component enters its terminal vanilla state without a map reload. A missing
+component fails closed to the existing reload path; no boss transition, reward
+or cutscene is started. Version 0.69.0 synchronizes the five direct vanilla Baboon Blast completion
 exits in Japes, Aztec, Galleon, Factory and Castle while both players are active
 Donkey in the same course. Either player may finish; the other uses the exact
 scripted loading-zone dispatcher and trigger action. Rewards and permanent
@@ -182,8 +186,8 @@ Independent exploration remains the default. Players may use
 different maps while collectible and progression synchronization continues;
 the remote model and combat pause until they share a map again. A join-side
 **Follow host** option restores coordinated travel through 169 reviewed ordinary routes.
-Live application now covers 17 permanent gate, hut, switch and door flags:
-41 affected loaded objects enter their flag-positive vanilla script state without
+Live application now covers 25 permanent flags:
+73 affected loaded objects enter their flag-positive vanilla script state without
 a room reload, while complex changes keep the reload fallback. Galleon water and
 Fungi day/night now use their loaded vanilla switch scripts too. This version
 shares bounded damage phases for Army Dillo, Dogadon, Mad Jack, Pufftoss, King
@@ -218,8 +222,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.69.0 adds the
-five direct Baboon Blast finish routes and keeps bidirectional Fungi Owl Race,
+**This is experimental, not complete campaign co-op. Version 0.70.0 applies all
+seven boss-portal closures live and keeps the five direct Baboon Blast finish
+routes, bidirectional Fungi Owl Race,
 Batty Barrel Bandit, Rabbit Race and Minecart Mayhem success,
 the lobby instrument-pad loops,
 bidirectional Kosh success, the reviewed same-level reward allowlist,
@@ -241,7 +246,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.69
+While the native companion is loaded, `tools/query_trace.py` discovers v0.70
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -255,7 +260,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.69.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.70.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -564,10 +569,13 @@ their collectible flags and are not assigned duplicate IDs.
 - **Helm:** saved shutdown completion, coin/crown doors and both warp tags.
   This does not share an ongoing Helm timer or partial minigame phases.
 - The seven levels' boss portals can share their saved closure once their key
-  is owned. These closure flags do not pay Troff & Scoff or synchronize an ongoing boss
+  is owned. With automatic world refresh enabled, all loaded portal components
+  close immediately in the receiving main map. A partial setup falls back to a
+  reload. These flags do not pay Troff & Scoff or synchronize an ongoing boss
   fight. Feeding itself is shared by the separate 0.16 path below.
 
-**Receive ordinary world changes outside their affected level, then return.**
+**Receive ordinary world changes outside their affected level, then return,**
+unless the change is one of the reviewed live rows and automatic refresh is on.
 The same safe snapshot maps still apply. Interior-only lobby, training-exit and
 Fairy Island changes may arrive in any safe map, including DK's treehouse,
 because their scripts are unloaded there. Item pages continue exchanging through
@@ -656,8 +664,9 @@ Install both files from the matching platform ZIP with the game closed.
   cutscenes and collectible-credit queues to exchange changes. Ordinary item
   writes still require Isles, a main level or DK's treehouse. With
   **Auto-refresh shared world** enabled, an incoming Galleon water or Fungi
-  day/night change may apply from that level's main map; the mod saves and reloads
-  the map once through its current entrance. With the option Off, leave for Isles,
+  day/night change runs the selected loaded vanilla switch sequence in that
+  level's main map. A missing switch falls back to one reload through the current
+  entrance. With the option Off, leave for Isles,
   wait for **LAN WORLD: SYNCED**, then re-enter as before. Local switches still
   perform their normal local animations.
 - **LAN WORLD: PENDING - LEAVE LEVEL** means a request, revision or save readback
@@ -674,8 +683,9 @@ Install both files from the matching platform ZIP with the game closed.
 
 Only flags `0xA0`, `0xCE` and `0x19D` use this channel. First-use switch cutscenes,
 timers, carried objects and other reversible puzzles remain local. Fungi
-lighting/actor state and Galleon water physics are not patched
-live; their optional reload asks vanilla initialization to rebuild them. The
+lighting/actor state and Galleon water physics are updated by their loaded
+vanilla switch sequences when available; the reload fallback asks vanilla
+initialization to rebuild them. The
 Caves-lobby switch uses its exact loaded state-2/state-6 sequence and falls back
 to a same-lobby reload if object 6 is absent. Existing
 permanent-item IDs and isolated `items_host_v6` / `items_guest_v6`
@@ -828,7 +838,7 @@ result is written by the transition channel.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v69 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v70 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

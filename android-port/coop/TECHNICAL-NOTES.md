@@ -1,6 +1,7 @@
-> Current source: 0.69.0, protocol/native ABI v69. Focused Linux ASan/UBSan
-> transient suites, native ABI/trace tests and the maintained MIPS compile pass.
-> Gameplay and device validation remain pending.
+> Current source: 0.70.0, protocol/native ABI v70. The complete Linux
+> ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
+> builds, artifact checks and Android importer smoke pass. Gameplay and device
+> validation remain pending.
 
 # Prototype integration and limits
 
@@ -2848,3 +2849,30 @@ triples, verifies all five pinned trigger centers and exercises authority,
 eligibility, disconnect, source, cutscene/loading, stale and one-shot gates.
 Packet and bridge sizes remain unchanged. Protocol 69, compatibility
 `0x00010245`, v69 exports and manifest 0.69.0 reject older peers and companions.
+
+## Live boss-portal closures (0.70.0)
+
+The pinned US ROM instance scripts select terminal state 20 when each level's
+saved boss-portal flag is already set. The reviewed main-map rows are Japes flag
+`0x02E` with objects `0x02C/0x037/0x11A`; Aztec `0x06C` with
+`0x008/0x009/0x00A/0x00B/0x0EC`; Factory `0x098` with
+`0x046..0x04A`; Galleon `0x0CB` with `0x022..0x026`; Fungi `0x102`
+with `0x015/0x016/0x03B/0x047/0x052`; Caves `0x12E` with
+`0x023..0x026`; and Castle `0x160` with `0x00B..0x00D`.
+
+State 20 has no execution block for these objects. Applying it removes the
+loaded portal presentation and collision without launching a transition,
+cutscene, reward, boss controller or actor. The existing item prerequisite still
+requires the matching boss key before the closure flag can be accepted. Troff
+feeding and boss combat remain separate systems.
+
+Castle's same flag is also read by object `0x004` in map 151 and object `0x002`
+in map 183. They are deliberately absent from the Castle main-map live unit:
+they are unloaded while map 87 is refreshed and consume the saved flag through
+their ordinary initializer when entered. Each live unit succeeds only when all
+of its reviewed current-map objects resolve. Any missing component returns to
+the existing save-and-reload path, preventing a partially closed portal.
+
+The live table now contains 25 unique permanent flags and 73 object rows.
+Packet and bridge sizes remain unchanged. Protocol 70, compatibility
+`0x00010246`, v70 exports and manifest 0.70.0 reject older peers and companions.
