@@ -1,4 +1,4 @@
-> Current source: 0.76.0, protocol/native ABI v76. The complete Linux
+> Current source: 0.77.0, protocol/native ABI v77. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -3028,3 +3028,27 @@ The frame adapter's automatic same-map transition has been removed. The private
 trace refresh fields remain reserved and zero, preserving bridge layout. Packet and
 bridge sizes are unchanged. Protocol 76, compatibility `0x0001024C`, v76 exports
 and manifest 0.76.0 reject older peers and companions.
+
+## Original world unlock live consumers (0.77.0)
+
+The ten original Aztec, Galleon and Fungi progression flags now have audited
+loaded-map consumers, raising the live table from 239 to 263 rows. Aztec llama
+rescue atomically replays the three exterior scripts before retiring an idle
+caged llama. Temple cooling replays both water consumers and selects the vanilla
+completed llama state. Galleon seal rescue replays its controller and converges
+the loaded cage and race-entrance actors only from their idle states.
+
+The five Giant Mushroom gun-switch flags replay each switch's flag-positive
+initializer and advance the shared board to the current permanent-flag count.
+The fifth switch deliberately enters the board's stock reveal sequence. First
+rabbit-race completion waits for an idle or completed rabbit because that actor
+reads the permanent flag every tick. The beanstalk changes an idle invisible
+actor to model `0x597`, restores full scale and collision, and enters completed
+state 3; an already-running local growth sequence is preserved.
+
+Every multi-object unit is preflighted before the permanent flag changes. Actors
+that have not spawned yet are safe because their vanilla initializer reads the
+new flag when they appear. Active dialogue, race, reward, rescue and reveal paths
+remain local and retain the deferred retry. Packet and bridge layouts are
+unchanged. Protocol 77, compatibility `0x0001024D`, v77 exports and manifest
+0.77.0 prevent mixed packages and peers.

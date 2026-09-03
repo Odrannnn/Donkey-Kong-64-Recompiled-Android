@@ -1,14 +1,19 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.76.0** replaces forced same-map reloads with atomic deferred
+Version **0.77.0** completes live application for the ten original Aztec,
+Galleon and Fungi world unlocks: llama rescue and temple cooling, seal rescue,
+the five Giant Mushroom gun switches, first rabbit race and the beanstalk.
+Their exact loaded scripts and actors now converge without leaving the level,
+while active local cutscenes, races and growth sequences keep ownership. The
+table now covers 90 unique permanent flags through 263 audited rows. Version
+**0.76.0** replaced forced same-map reloads with atomic deferred
 convergence. If a required permanent-world script, linked object, Mermaid actor,
 or reversible switch is absent or in an unreviewed state, the receiver leaves the
 flag pending and retries on later stable frames. Leaving the area applies it through
 normal save initialization, so synchronization never sends the player back to the
 entrance. Version **0.75.0** completed live application for all 82 expansion
-permanent-world flags. The table covers 90 unique permanent flags through 239 audited loaded-object
-rows, including lobby and Fairy Island structures, Caves and Castle encounters,
+permanent-world flags, including lobby and Fairy Island structures, Caves and Castle encounters,
 Aztec's beetle tower and temple totem, and Helm's shutdown, coin and crown doors.
 Multi-object changes preflight every required object before a write and replay only
 saved-complete branches or exact terminal controller/visibility states. Version
@@ -211,7 +216,7 @@ different maps while collectible and progression synchronization continues;
 the remote model and combat pause until they share a map again. A join-side
 **Follow host** option restores coordinated travel through 169 reviewed ordinary routes.
 Live application now covers 90 permanent flags:
-239 affected loaded objects or actors enter their reviewed completion path without a room
+263 affected loaded objects, actors or safe no-op map consumers enter their reviewed completion path without a room
 reload. A missing or unrecognized required object defers the flag and retries without
 changing the save; leaving the area applies it through normal initialization. Galleon water and
 Fungi day/night now use their loaded vanilla switch scripts too. This version
@@ -247,9 +252,10 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.76.0 defers missing
-or unrecognized loaded units without a forced reload and retains the 0.75.0 coverage of all
-82 expansion permanent-world flags live through 90 unique flags and 239 audited
+**This is experimental, not complete campaign co-op. Version 0.77.0 gives the ten
+original Aztec/Galleon/Fungi unlocks audited live consumers, and retains the 0.76.0
+deferred retry policy for missing or unrecognized loaded units. All 82 expansion
+permanent-world flags are covered live through 90 unique flags and 263 audited
 rows, including the lobby, Fairy Island, Caves, Castle, Aztec and Helm structures;
 it retains the four Helm Bananaport tags and Isles rocket-barrel reveal, the
 five-pearl treasure/Mermaid sequence live, applies the Isles boulder live,
@@ -292,7 +298,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.76.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.77.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -870,7 +876,7 @@ result is written by the transition channel.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v76 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v77 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
