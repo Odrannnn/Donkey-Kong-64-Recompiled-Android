@@ -22,7 +22,7 @@ enum {
     COOP_LIVE_WORLD_REVEAL = 6,
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 168
+    COOP_LIVE_WORLD_STATE_COUNT = 172
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -171,6 +171,14 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 45, 0x0BC, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
     { 45, 0x0BD, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
     { 45, 0x0BE, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
+
+    // Helm and its lobby use the same two Bananaport scripts. Their sole
+    // flag-positive state-0 operation selects the vanilla tagged visibility
+    // target; no interaction, cutscene, destination or second flag is replayed.
+    {170, 0x1A1, 0x008,  0, COOP_LIVE_WORLD_REPLAY},
+    {170, 0x1A2, 0x009,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x305, 0x059,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x306, 0x058,  0, COOP_LIVE_WORLD_REPLAY},
 
     // These completions are consumed only inside their submaps. Receiving one
     // in the corresponding main world needs a save, but no loaded script or

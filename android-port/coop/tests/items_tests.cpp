@@ -715,7 +715,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 168);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 172);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -838,6 +838,35 @@ static void world_refresh_checks() {
     coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
     CHECK(flags[0xBA] && writes == 1 && saves == 1 && live_mermaid_state == 31
         && live_mermaid_refreshes == 1 && !g.refresh_pending);
+
+    // Helm and Helm-lobby tags replay only their exact tagged-visibility
+    // initializer. Each flag names one loaded Bananaport and no paired script.
+    struct HelmTagCase { unsigned map, flag, object; };
+    const HelmTagCase helm_tags[] = {
+        {170, 0x1A1, 0x008}, {170, 0x1A2, 0x009},
+        { 17, 0x305, 0x059}, { 17, 0x306, 0x058},
+    };
+    for (const auto& tag : helm_tags) {
+        reset_engine(); current_map = tag.map; flags[tag.flag] = 1;
+        D_global_asm_807F6240[6] = (short)tag.object;
+        CHECK(coop_live_world_refresh(tag.flag) && live_calls == 1
+            && live_slot == 6 && live_state == 0);
+    }
+    reset_engine(); current_map = 170; flags[0x1A1] = 1;
+    CHECK(!coop_live_world_refresh(0x1A1) && live_calls == 0);
+
+    // Helm lobby admits a verified snapshot only so its exact incoming tag can
+    // update and save in place; unrelated grants remain deferred.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 170; mock_level = 7; D_global_asm_807F6240[3] = 0x08;
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.deferred);
+    r = {}; r.status = 2; r.scope = 1; r.session_lo = 906;
+    unsigned helm_lobby_tag = (unsigned)coop_item_id(0x1A1);
+    CHECK(helm_lobby_tag < COOP_ITEMS);
+    r.apply[helm_lobby_tag / 32] = bit(helm_lobby_tag);
+    coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
+    CHECK(flags[0x1A1] && writes == 1 && saves == 1 && live_calls == 1
+        && live_slot == 3 && live_state == 0 && !g.refresh_pending);
 
     // Interior-only structures do not reload an unrelated main map.
     reset_engine(); current_map = 38;
