@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 183
+    COOP_LIVE_WORLD_STATE_COUNT = 185
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -211,6 +211,13 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // prevents that loop from scheduling another fade.
     {189, 0x189, 0x01D,  0, COOP_LIVE_WORLD_REPLAY},
     {189, 0x189, 0x01E,  0, COOP_LIVE_WORLD_REVEAL},
+
+    // Aztec lobby's rotating panel and encounter platform each have an
+    // isolated flag-positive initializer. Replaying state 0 performs their
+    // normal linked-model/platform completion without entering the enemy,
+    // reward, camera or permanent-flag write sequence.
+    {173, 0x190, 0x004,  0, COOP_LIVE_WORLD_REPLAY},
+    {173, 0x190, 0x011,  0, COOP_LIVE_WORLD_REPLAY},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility

@@ -730,7 +730,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 183);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 185);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -820,6 +820,15 @@ static void world_refresh_checks() {
     CHECK(live_reveals == 1 && live_reveal_object == 0x1E);
     reset_engine(); current_map = 189; D_global_asm_807F6240[1] = 0x1D;
     CHECK(!coop_live_world_refresh(0x189) && live_calls == 0 && live_reveals == 0);
+
+    // Aztec lobby replays both saved-complete initializers atomically, leaving
+    // the combat/reward sequence local while applying its permanent platform.
+    reset_engine(); current_map = 173;
+    D_global_asm_807F6240[1] = 0x04; D_global_asm_807F6240[2] = 0x11;
+    CHECK(coop_live_world_refresh(0x190) && live_calls == 2
+        && live_slot == 2 && live_state == 0);
+    reset_engine(); current_map = 173; D_global_asm_807F6240[1] = 0x11;
+    CHECK(!coop_live_world_refresh(0x190) && live_calls == 0);
 
     // The Isles boulder applies both exact terminal controller states and the
     // inverse of object 0x56's visibility gate as one reviewed loaded unit.
