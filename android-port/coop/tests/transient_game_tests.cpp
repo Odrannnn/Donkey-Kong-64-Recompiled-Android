@@ -343,6 +343,18 @@ static unsigned coop_live_world_mermaid_ready(void) { return 0; }
 static unsigned coop_live_world_mermaid_refresh(void) { return 0; }
 static unsigned coop_live_world_isles_trombone_ready(void) { return 0; }
 static unsigned coop_live_world_isles_trombone_refresh(void) { return 0; }
+static unsigned coop_live_world_llama_free_ready(void) { return 0; }
+static unsigned coop_live_world_llama_free_refresh(void) { return 0; }
+static unsigned coop_live_world_llama_water_ready(void) { return 0; }
+static unsigned coop_live_world_llama_water_refresh(void) { return 0; }
+static unsigned coop_live_world_seal_ready(void) { return 0; }
+static unsigned coop_live_world_seal_refresh(void) { return 0; }
+static unsigned coop_live_world_mushroom_switch_ready(unsigned) { return 0; }
+static unsigned coop_live_world_mushroom_switch_refresh(unsigned) { return 0; }
+static unsigned coop_live_world_rabbit_ready(void) { return 0; }
+static unsigned coop_live_world_rabbit_refresh(void) { return 0; }
+static unsigned coop_live_world_beanstalk_ready(void) { return 0; }
+static unsigned coop_live_world_beanstalk_refresh(void) { return 0; }
 static void func_global_asm_8063DA40(s16 slot, s16 state) {
     CHECK(slot >= 0 && slot < 600);
     unsigned object = static_cast<unsigned short>(D_global_asm_807F6240[slot]);
