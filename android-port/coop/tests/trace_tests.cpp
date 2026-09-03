@@ -78,6 +78,13 @@ int main() {
 
     TestSocket query = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     CHECK(query != invalid_test_socket);
+    // Bind the probe explicitly. WSL can discard a reply to an implicitly
+    // bound UDP socket when the server worker answers from another thread.
+    sockaddr_in query_local{}; query_local.sin_family = AF_INET;
+    query_local.sin_addr.s_addr = htonl(INADDR_ANY);
+    query_local.sin_port = 0;
+    CHECK(bind(query, reinterpret_cast<const sockaddr*>(&query_local),
+        sizeof(query_local)) == 0);
 #ifdef _WIN32
     u_long nonblocking = 1;
     CHECK(ioctlsocket(query, FIONBIO, &nonblocking) == 0);
@@ -86,7 +93,9 @@ int main() {
     CHECK(flags >= 0 && fcntl(query, F_SETFL, flags | O_NONBLOCK) == 0);
 #endif
     sockaddr_in target{}; target.sin_family = AF_INET; target.sin_port = htons(session.trace_port());
-    CHECK(inet_pton(AF_INET, "127.0.0.1", &target.sin_addr) == 1);
+    const uint32_t local_ipv4 = session.local_ipv4();
+    target.sin_addr.s_addr = htonl(local_ipv4 ? local_ipv4 : INADDR_LOOPBACK);
+    CHECK(connect(query, reinterpret_cast<const sockaddr*>(&target), sizeof(target)) == 0);
 
     dkcoop::State player{34, 7, 2, dkcoop::active, 1, 2, 3, 4, 5, 6,
         7, 0x0000A922u}; // Japes -> Japes lobby, exit 0.
@@ -133,24 +142,33 @@ int main() {
     CHECK(no_packet(query));
 
     constexpr char request[] = "DK64COOP_TRACE_V1";
-    CHECK(sendto(query, request, int(sizeof(request) - 1), 0,
-        reinterpret_cast<const sockaddr*>(&target), sizeof(target)) == int(sizeof(request) - 1));
     std::string response;
+    int receive_error = 0;
     // The trace worker must answer from the last immutable snapshot even when
     // the emulator/game thread is paused and Session::tick is not running.
-    // Give the UDP worker a scheduling point before polling the nonblocking
-    // client. Some host schedulers otherwise delay it behind the receive loop.
-    std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    for (unsigned attempt = 0; attempt < 1000 && response.empty(); ++attempt) {
-        char buffer[8192];
-        int count = int(recvfrom(query, buffer, sizeof(buffer), 0, nullptr, nullptr));
-        if (count > 0) response.assign(buffer, size_t(count));
-        else std::this_thread::sleep_for(std::chrono::milliseconds(2));
+    // UDP does not guarantee delivery, so the diagnostic client contract is
+    // to retry the idempotent request rather than assume one probe is enough.
+    for (unsigned request_attempt = 0; request_attempt < 20 && response.empty(); ++request_attempt) {
+        CHECK(sendto(query, request, int(sizeof(request) - 1), 0,
+            reinterpret_cast<const sockaddr*>(&target), sizeof(target)) == int(sizeof(request) - 1));
+        for (unsigned poll = 0; poll < 100 && response.empty(); ++poll) {
+            char buffer[8192];
+            int count = int(recv(query, buffer, sizeof(buffer), 0));
+            if (count > 0) response.assign(buffer, size_t(count));
+            else {
+#ifdef _WIN32
+                receive_error = WSAGetLastError();
+#else
+                receive_error = errno;
+#endif
+                std::this_thread::sleep_for(std::chrono::milliseconds(2));
+            }
+        }
     }
     if (!response.starts_with("{\"schema\":2,"))
-        std::fprintf(stderr, "TRACE RESPONSE %zu queries=%llu rejected=%llu: %.120s\n",
+        std::fprintf(stderr, "TRACE RESPONSE %zu queries=%llu rejected=%llu error=%d: %.120s\n",
             response.size(), (unsigned long long)session.statistics().trace_queries,
-            (unsigned long long)session.statistics().trace_rejected, response.c_str());
+            (unsigned long long)session.statistics().trace_rejected, receive_error, response.c_str());
     CHECK(response.starts_with("{\"schema\":2,"));
     CHECK(response.find("\"mod\":\"0.78.1\"") != std::string::npos);
     CHECK(response.find("\"role\":\"host\"") != std::string::npos);
@@ -173,7 +191,7 @@ int main() {
     CHECK(response.find("\"wait_item_id\":160") != std::string::npos);
     CHECK(response.find("\"recovery\":{\"checkpoint\":true,\"promoted_host\":true,\"state\":7}")
         != std::string::npos);
-    CHECK(session.statistics().trace_queries == 1 && session.statistics().trace_rejected == 1);
+    CHECK(session.statistics().trace_queries >= 1 && session.statistics().trace_rejected == 1);
     close_test_socket(query);
     close_test_socket(blocker3);
     close_test_socket(blocker2);
