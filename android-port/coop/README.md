@@ -1,8 +1,12 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.72.0** expands live permanent-world application to 63 audited flags
-and 158 loaded-object rows. The Isles boulder now applies its two exact terminal
+Version **0.73.0** expands live permanent-world application to 68 audited flags
+and 168 loaded-object rows. Incoming pearls now remove their exact loaded prop
+in Galleon's treasure chest. In the Mermaid room they recompute her vanilla
+zero/partial/all-five state, so the stock dialogue and final reward sequence
+run without a room reload or synthesized pickup. Active and completed reward
+states are never rewound. Version **0.72.0** made the Isles boulder apply its two exact terminal
 controller states plus the inverse vanilla visibility gate as one atomic unit.
 Galleon's ship and lighthouse opening may continue through their audited active
 states when the permanent flag arrives; the sync initializes only a controller
@@ -194,8 +198,8 @@ Independent exploration remains the default. Players may use
 different maps while collectible and progression synchronization continues;
 the remote model and combat pause until they share a map again. A join-side
 **Follow host** option restores coordinated travel through 169 reviewed ordinary routes.
-Live application now covers 63 permanent flags:
-158 affected loaded objects enter their reviewed completion path without a room
+Live application now covers 68 permanent flags:
+168 affected loaded objects or actors enter their reviewed completion path without a room
 reload, while complex changes keep the reload fallback. Galleon water and
 Fungi day/night now use their loaded vanilla switch scripts too. This version
 shares bounded damage phases for Army Dillo, Dogadon, Mad Jack, Pufftoss, King
@@ -230,8 +234,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.72.0 applies the
-Isles boulder live, preserves active Galleon opening sequences, retains the
+**This is experimental, not complete campaign co-op. Version 0.73.0 applies the
+five-pearl treasure/Mermaid sequence live, applies the Isles boulder live,
+preserves active Galleon opening sequences, retains the
 reviewed breakable, container and machine completions, keeps all seven
 boss-portal closures live, and keeps the five direct Baboon Blast finish
 routes, bidirectional Fungi Owl Race,
@@ -270,7 +275,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.72.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.73.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -848,7 +853,7 @@ result is written by the transition channel.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v72 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v73 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

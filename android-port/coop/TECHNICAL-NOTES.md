@@ -1,4 +1,4 @@
-> Current source: 0.72.0, protocol/native ABI v72. The complete Linux
+> Current source: 0.73.0, protocol/native ABI v73. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -2935,3 +2935,26 @@ operations and cutscene while the permanent flag is accepted.
 The live table now contains 63 unique permanent flags and 158 object rows.
 Packet and bridge sizes remain unchanged. Protocol 72, compatibility
 `0x00010248`, v72 exports and manifest 0.72.0 reject older peers and companions.
+
+## Galleon pearl sequence (0.73.0)
+
+The five pearl flags `0xBA` through `0xBE` now have exact live consumers in
+both relevant rooms. Treasure Chest map 44 replays state 0 only on the matching
+objects `0x00` through `0x04`; each script then follows its stock flag-positive
+initializer and removes that pearl without replaying its interaction or flag
+write. A missing prop fails before the write and retains the reload fallback.
+
+Mermaid map 45 has no instance-script flag reader. Its initialized Mermaid
+actor is therefore preflighted in the four vanilla pearl/reward states 30, 31,
+39 and 32. After the permanent flag is written, the adapter recounts the five
+pearls and selects the same state used by the actor initializer: 31 for a
+partial set and 39 for all five. State 39 remains owned by the stock actor
+handler, which starts dialogue/cutscene and calls the original reward script.
+An actor already in state 39 or 32 is left untouched, preventing reward or
+post-reward dialogue from being restarted. Unknown states fail closed.
+
+These two rooms may publish a verified item snapshot, but remain deferred for
+all unrelated grants. Only their exact loaded pearl unit may be written and
+saved there. The live table now contains 68 unique permanent flags and 168
+rows. Packet and bridge sizes remain unchanged. Protocol 73, compatibility
+`0x00010249`, v73 exports and manifest 0.73.0 reject older peers and companions.
