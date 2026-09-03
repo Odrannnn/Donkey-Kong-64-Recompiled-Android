@@ -539,6 +539,14 @@ static void coop_combat_init(void) {
         D_global_asm_8074C0A0[combat_enemy_types[i].type] = combat_enemy_behavior;
     combat_hooks = 1;
 }
+static void coop_combat_local_kong_changed(void) {
+    // A projectile may remain in the six-frame sampling hold after its actor
+    // disappears. Drop that old-Kong visual immediately when Tag Anywhere or
+    // a vanilla tag changes the local player; live projectiles already prevent
+    // Tag Anywhere from accepting the swap.
+    for (unsigned i = 0; i < COOP_SHOTS; ++i)
+        combat_local_shots[i] = (CoopLocalShotSlot){0};
+}
 static void combat_retire_shot(CoopShotSlot* slot) {
     if (slot->actor && actor_is_alive(slot->actor, slot->generation)) {
         slot->retiring = slot->actor; slot->retiring_generation = slot->generation;

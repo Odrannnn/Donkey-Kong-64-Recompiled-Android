@@ -817,6 +817,15 @@ int main() {
     }
     coop_combat_capture(); CHECK(!combat_input.shots[0].id);
 
+    // A Tag Anywhere or vanilla Kong swap must not carry a retained projectile
+    // sample over to the new remote Kong model.
+    combat_local_shots[0].shot = {901, COOP_COCONUT, 1, 2, 3, 4, float_bits(1.0f)};
+    combat_local_shots[0].missed = 2;
+    combat_local_shots[1].shot = {902, COOP_ORANGE, 5, 6, 7, 8, float_bits(1.0f)};
+    coop_combat_local_kong_changed();
+    for (unsigned i = 0; i < COOP_SHOTS; ++i)
+        CHECK(!combat_local_shots[i].shot.id && !combat_local_shots[i].missed);
+
     // Game snapshots page every supported live record instead of starving keys
     // after the first twenty.
     enum { CROWD_COUNT = 24 };

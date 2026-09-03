@@ -259,6 +259,7 @@ static CoopCombatFrame combat_input;
 static CoopCombatResult combat_result;
 static u32 local_ipv4;
 static u32 local_state[STATE_WORDS], remote_state[STATE_WORDS];
+static u32 local_kong = 5;
 static Actor* remote_actor;
 static Actor* retiring_actor;
 static u32 remote_generation, retiring_generation;
@@ -904,8 +905,17 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     local_state[STATE_FLAGS] = 0;
     local_state[STATE_ANIM] = local_state[STATE_FRAME] = 0;
     unsigned pose_rows = animation_rows();
+    // Per-frame callbacks from other mods run sequentially in configurable
+    // mod order. Accept either the complete pre-tag or complete post-tag state,
+    // but never publish a mismatched model/index if a tag implementation ever
+    // defers part of its update across frames.
     u8 present = game_mode == GAME_MODE_ADVENTURE && gPlayerPointer != NULL
-        && gPlayerPointer->animation_state != NULL && current_character_index[0] < 5;
+        && gPlayerPointer->animation_state != NULL && current_character_index[0] < 5
+        && (u32)gPlayerPointer->unk58 == (u32)current_character_index[0] + 2;
+    if (present && local_kong != current_character_index[0]) {
+        if (local_kong < 5) coop_combat_local_kong_changed();
+        local_kong = current_character_index[0];
+    }
     u8 playing = present && is_cutscene_active == 0;
     if (playing) {
         local_state[STATE_FLAGS] = STATE_ACTIVE;
