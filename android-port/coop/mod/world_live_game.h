@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 196
+    COOP_LIVE_WORLD_STATE_COUNT = 198
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -250,6 +250,13 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // for the stock room-ready condition, reveals actor spawner 0 and pauses.
     // Replaying state 0 bypasses the enemy/camera/flag-write sequence itself.
     { 88, 0x130, 0x003,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Castle tower's saved-clear branch selects the balloon pad's active state,
+    // while a fresh completed map relies on default visibility. The loaded
+    // incomplete pad was explicitly hidden, so restore the stock fully-visible
+    // target after replaying its state-0 completed branch.
+    {105, 0x133, 0x001,  0, COOP_LIVE_WORLD_REPLAY},
+    {105, 0x133, 0x001,  0, COOP_LIVE_WORLD_REVEAL},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
