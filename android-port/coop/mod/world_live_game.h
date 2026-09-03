@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 181
+    COOP_LIVE_WORLD_STATE_COUNT = 183
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -204,6 +204,13 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // while bypassing the local lever interaction and its reward cutscene.
     {175, 0x18D, 0x00C, 20, COOP_LIVE_WORLD_PERMANENT},
     {175, 0x18D, 0x00D, 10, COOP_LIVE_WORLD_PERMANENT},
+
+    // Fairy Island's door has a saved-open state-0 branch. The Rareware GB
+    // prop may be partway through its locked-room fade loop when the flag
+    // arrives, so apply the exact fully-visible target; the new flag then
+    // prevents that loop from scheduling another fade.
+    {189, 0x189, 0x01D,  0, COOP_LIVE_WORLD_REPLAY},
+    {189, 0x189, 0x01E,  0, COOP_LIVE_WORLD_REVEAL},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
