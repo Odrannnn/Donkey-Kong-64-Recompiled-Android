@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 195
+    COOP_LIVE_WORLD_STATE_COUNT = 196
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -245,6 +245,11 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // Caves' persistent encounter controller has a saved-clear state-0 branch
     // that pauses it before the delayed spawn/camera path can run.
     { 72, 0x12C, 0x034,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Castle ballroom's saved-clear initializer selects state 10, which waits
+    // for the stock room-ready condition, reveals actor spawner 0 and pauses.
+    // Replaying state 0 bypasses the enemy/camera/flag-write sequence itself.
+    { 88, 0x130, 0x003,  0, COOP_LIVE_WORLD_REPLAY},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
