@@ -1,6 +1,12 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
+Version **0.78.0** makes every reviewed same-area trigger and ordered puzzle
+step bidirectional through host validation. Eighteen audited temporary passages
+retain one activation per room visit for late peers, Tiny Temple keeps its full
+non-monotonic guitar-opening path visible, and five exact Helm linked-controller
+commands recover instrument edges that can pass between 20 Hz samples. Raw
+scripts, timers, actor state, cutscenes and rewards remain host-owned or local.
 Version **0.77.0** completes live application for the ten original Aztec,
 Galleon and Fungi world unlocks: llama rescue and temple cooling, seal rescue,
 the five Giant Mushroom gun switches, first rabbit race and the beanstalk.
@@ -252,7 +258,7 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.77.0 gives the ten
+**This is experimental, not complete campaign co-op. Version 0.78.0 retains the ten
 original Aztec/Galleon/Fungi unlocks audited live consumers, and retains the 0.76.0
 deferred retry policy for missing or unrecognized loaded units. All 82 expansion
 permanent-world flags are covered live through 90 unique flags and 263 audited
@@ -298,7 +304,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.77.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.78.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -873,7 +879,7 @@ result is written by the transition channel.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v77 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v78 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

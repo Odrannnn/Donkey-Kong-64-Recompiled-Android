@@ -1,4 +1,4 @@
-> Current source: 0.77.0, protocol/native ABI v77. The complete Linux
+> Current source: 0.78.0, protocol/native ABI v78. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -3054,7 +3054,7 @@ remain local and retain the deferred retry. Packet and bridge layouts are
 unchanged. Protocol 77, compatibility `0x0001024D`, v77 exports and manifest
 0.77.0 prevent mixed packages and peers.
 
-## Exact-source collectible retirement (post-0.77 development)
+## Exact-source collectible retirement (0.78.0)
 
 Numeric collectible delivery no longer waits merely because the receiver is on
 the collectible's own map. The generated vanilla metadata now retains each
@@ -3081,7 +3081,7 @@ adapter matches the flag stored in that actor spawner's vanilla spawn payload
 and retires it too. Minecart and race reward maps remain excluded overlays. The
 network and bridge layouts are unchanged.
 
-## Bidirectional reviewed room actions (post-0.77 development)
+## Bidirectional reviewed room actions (0.78.0)
 
 Typed `TRIGGER` and `SEQUENCE` records are now host-arbitrated in either
 direction. A Join's fired trigger or positive bounded sequence progress reaches
@@ -3097,7 +3097,7 @@ cutscene state remain filtered. Existing room, file, epoch, session, freshness
 and active-play boundaries clear requests instead of carrying them between room
 instances. This changes no packet or bridge structure.
 
-## Tiny Temple guitar late-arrival coverage (post-0.77 development)
+## Tiny Temple guitar late-arrival coverage (0.78.0)
 
 Tiny Temple object `0x04` does not keep a monotonic fired state after Diddy's
 guitar activation. Its vanilla opening route is `2 -> 40 -> 20 -> 30 -> 3 -> 4`.
@@ -3106,7 +3106,7 @@ still enters only at reviewed state `2` from local ready state `1`, so its own
 script owns every linked object, timer and presentation step. Unrelated states
 remain ready observations and cannot be selected by a packet.
 
-## One-shot temporary passage latches (post-0.77 development)
+## One-shot temporary passage latches (0.78.0)
 
 Eighteen reviewed temporary passage switches retain a fired observation for the
 current room epoch after their local timer closes: Japes' feather/grape doors
@@ -3122,7 +3122,7 @@ Once both clients observe the latch their ordinary trigger snapshots agree, so
 the event channel returns to `SYNCED` instead of repeatedly applying a closed
 door's historical activation.
 
-## Helm durable instrument commands (post-0.77 development)
+## Helm durable instrument commands (0.78.0)
 
 Helm's five instrument-pad edges last only two local script ticks. Their exact
 linked controllers now expose a derived typed trigger after the pad has issued
@@ -3135,3 +3135,7 @@ No arbitrary controller state is copied. States `0`, `2`, `20` and every other
 local reward, reset or permanent-flag path are rejected. The durable controller
 record therefore covers missed 20 Hz samples and late arrival without replaying
 instrument input or selecting Helm's timer, barrel rooms, final lever or ending.
+
+Packet and bridge sizes remain unchanged. Protocol 78, compatibility
+`0x0001024E`, v78 exports and manifest 0.78.0 prevent one-way older clients from
+connecting to the host-arbitrated room-action behavior.
