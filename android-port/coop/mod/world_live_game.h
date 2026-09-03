@@ -18,7 +18,7 @@ enum {
     COOP_LIVE_WORLD_PERMANENT = 2,
     COOP_LIVE_WORLD_REQUIRE = 3,
     COOP_LIVE_WORLD_NOOP = 4,
-    COOP_LIVE_WORLD_GUARD_ZERO = 5,
+    COOP_LIVE_WORLD_CONTINUE_GALLEON = 5,
     COOP_LIVE_WORLD_REVEAL = 6,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
     COOP_LIVE_WORLD_STATE_COUNT = 158
@@ -139,10 +139,11 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 26, 0x06F, 0x00B,  0, COOP_LIVE_WORLD_REQUIRE},
     { 26, 0x06F, 0x00C,  0, COOP_LIVE_WORLD_REQUIRE},
     { 26, 0x06F, 0x00D,  0, COOP_LIVE_WORLD_REQUIRE},
-    // State 0 bypasses activation states 10-12 and runs the completed setup,
-    // but only if neither controller has begun a local activation sequence.
-    { 30, 0x09C, 0x027,  0, COOP_LIVE_WORLD_GUARD_ZERO},
-    { 30, 0x09C, 0x051,  0, COOP_LIVE_WORLD_GUARD_ZERO},
+    // A waiting controller replays its saved-complete initializer. A controller
+    // already inside the audited ship/lighthouse sequence keeps running; the
+    // incoming flag must not rewind its cutscene, timer or linked operations.
+    { 30, 0x09C, 0x027,  0, COOP_LIVE_WORLD_CONTINUE_GALLEON},
+    { 30, 0x09C, 0x051,  0, COOP_LIVE_WORLD_CONTINUE_GALLEON},
     { 48, 0x0D4, 0x025, 50, COOP_LIVE_WORLD_PERMANENT},
     { 48, 0x0D4, 0x027, 12, COOP_LIVE_WORLD_PERMANENT},
     { 48, 0x0D5, 0x025, 50, COOP_LIVE_WORLD_PERMANENT},
@@ -202,6 +203,15 @@ static inline unsigned coop_live_world_set_object(unsigned object, unsigned stat
     return 1;
 }
 
+static inline unsigned coop_live_world_galleon_state_valid(unsigned object, unsigned raw) {
+    if (raw == 0) return 1;
+    // Object 0x27 owns activation states 10-17 and its ordinary post-opening
+    // interaction states 26-28. Object 0x51 owns activation states 10-14.
+    if (object == 0x027) return (raw >= 10 && raw <= 17) || (raw >= 26 && raw <= 28);
+    if (object == 0x051) return raw >= 10 && raw <= 14;
+    return 0;
+}
+
 static inline unsigned coop_live_world_ready(unsigned flag) {
     unsigned expected = 0;
     for (unsigned row = 0; row < COOP_LIVE_WORLD_STATE_COUNT; ++row) {
@@ -210,9 +220,10 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
         ++expected;
         if (state->mode != COOP_LIVE_WORLD_NOOP
                 && !coop_live_world_find_object(state->object, 0)) return 0;
-        if (state->mode == COOP_LIVE_WORLD_GUARD_ZERO) {
+        if (state->mode == COOP_LIVE_WORLD_CONTINUE_GALLEON) {
             unsigned raw = 0;
-            if (!coop_live_world_object_raw_state(state->object, &raw) || raw != 0) return 0;
+            if (!coop_live_world_object_raw_state(state->object, &raw)
+                    || !coop_live_world_galleon_state_valid(state->object, raw)) return 0;
         }
         if (state->mode == COOP_LIVE_WORLD_REVEAL) {
             unsigned raw = 0;
@@ -248,6 +259,11 @@ static inline unsigned coop_live_world_refresh(unsigned flag) {
         if (state->mode == COOP_LIVE_WORLD_REVEAL) {
             if (!coop_live_world_reveal_object(state->object)) return 0;
             continue;
+        }
+        if (state->mode == COOP_LIVE_WORLD_CONTINUE_GALLEON) {
+            unsigned raw = 0;
+            if (!coop_live_world_object_raw_state(state->object, &raw)) return 0;
+            if (raw != 0) continue;
         }
         // REPLAY deliberately selects state 0. func_global_asm_8063DA40 also
         // wakes a paused script, so vanilla evaluates the newly written flag.

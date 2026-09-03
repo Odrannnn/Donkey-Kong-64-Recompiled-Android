@@ -753,14 +753,26 @@ static void world_refresh_checks() {
     D_global_asm_807F6240[1] = 0x3C; D_global_asm_807F6240[2] = 0x00;
     CHECK(!coop_live_world_refresh(0x1AE) && live_calls == 0 && live_reveals == 0);
 
-    // Galleon's paired controllers may restart only from their paused raw
-    // state 0; an active local activation sequence fails closed to reload.
+    // Waiting Galleon controllers run their saved-complete initializer. Active
+    // vanilla activation and steady interaction states continue untouched.
     reset_engine(); current_map = 30;
     D_global_asm_807F6240[2] = 0x27; D_global_asm_807F6240[3] = 0x51;
     CHECK(coop_live_world_refresh(0x09C) && live_calls == 2 && live_state == 0);
     reset_engine(); current_map = 30;
     D_global_asm_807F6240[2] = 0x27; D_global_asm_807F6240[3] = 0x51;
-    live_raw[0x27] = 10;
+    live_raw[0x27] = 10; live_raw[0x51] = 10;
+    CHECK(coop_live_world_refresh(0x09C) && live_calls == 0);
+    live_raw[0x27] = 15; live_raw[0x51] = 14;
+    CHECK(coop_live_world_refresh(0x09C) && live_calls == 0);
+    live_raw[0x27] = 26; live_raw[0x51] = 0;
+    CHECK(coop_live_world_refresh(0x09C) && live_calls == 1 && live_slot == 3);
+
+    // Unknown script states still fail closed before either controller changes.
+    reset_engine(); current_map = 30;
+    D_global_asm_807F6240[2] = 0x27; D_global_asm_807F6240[3] = 0x51;
+    live_raw[0x27] = 9;
+    CHECK(!coop_live_world_refresh(0x09C) && live_calls == 0);
+    live_raw[0x27] = 10; live_raw[0x51] = 15;
     CHECK(!coop_live_world_refresh(0x09C) && live_calls == 0);
 
     // Interior-only structures do not reload an unrelated main map.
