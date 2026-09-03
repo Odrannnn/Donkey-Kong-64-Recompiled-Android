@@ -45,6 +45,9 @@ bool valid_record(const CoopTransientRecord& record) {
         case COOP_TRANSIENT_MINECART_SUCCESS:
             return record.key >= 1u && record.key <= 3u
                 && record.state == 1u && !record.value;
+        case COOP_TRANSIENT_RABBIT_SUCCESS:
+            return record.key >= 1u && record.key <= 2u
+                && record.state == 1u && !record.value;
     }
     return false;
 }
@@ -147,9 +150,10 @@ void TransientSync::update(bool host, const State& local, const CoopTransientInp
     for (unsigned i = 0; i < remote.count && output.count < COOP_TRANSIENT_RECORDS; ++i) {
         const auto& wanted = remote.records[i];
         // All established same-area state remains host-authoritative. The two
-        // reviewed minigame success events are monotonic and bidirectional.
+        // reviewed minigame/race success events are monotonic and bidirectional.
         if (host && wanted.kind != COOP_TRANSIENT_MINIGAME_SUCCESS
-                && wanted.kind != COOP_TRANSIENT_MINECART_SUCCESS) continue;
+                && wanted.kind != COOP_TRANSIENT_MINECART_SUCCESS
+                && wanted.kind != COOP_TRANSIENT_RABBIT_SUCCESS) continue;
         const CoopTransientRecord* current = nullptr;
         for (unsigned j = 0; j < input.count; ++j)
             if (input.records[j].kind == wanted.kind && input.records[j].key == wanted.key) {

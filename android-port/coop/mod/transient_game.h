@@ -287,12 +287,22 @@ static unsigned coop_minecart_hook, coop_minecart_pending_epoch, coop_minecart_p
 static unsigned coop_minecart_applied_epoch, coop_minecart_applied_key;
 static unsigned coop_minecart_success_epoch, coop_minecart_success_key;
 
+// Both Fungi Rabbit Race rounds use one main-map actor. Round one is the
+// permanent 0xF8 progression step; round two exposes the object 0x57 GB.
+// The wrapper shares only the stock state-2 to state-0x28 success edge.
+static void coop_rabbit_behavior(void);
+static void (*coop_rabbit_original)(void);
+static unsigned coop_rabbit_hook, coop_rabbit_pending_epoch, coop_rabbit_pending_key;
+static unsigned coop_rabbit_applied_epoch, coop_rabbit_applied_key;
+static unsigned coop_rabbit_success_epoch, coop_rabbit_success_key;
+
 extern CharacterSpawner* D_global_asm_807FDC9C;
 extern s32 func_global_asm_805FF800(Maps* map, s32* exit);
 extern void func_bonus_80024158(void);
 extern void func_bonus_800264E0(u8 success, u8 text);
 extern void func_minecart_80024FD0(void);
 extern void func_minecart_80024000(u8 success, u8 text);
+extern void func_global_asm_806BE8BC(void);
 extern void func_global_asm_80726EE0(u8 state);
 
 static unsigned coop_kosh_actor_live(Actor* actor, unsigned generation) {
@@ -425,6 +435,79 @@ static void coop_minecart_behavior(void) {
     }
 }
 
+static unsigned coop_rabbit_round_key(void) {
+    if (isFlagSet(PERMFLAG_ITEM_GB_FUNGI_RABBIT_RACE, FLAG_TYPE_PERMANENT)) return 0;
+    return isFlagSet(PERMFLAG_PROGRESS_RABBIT_RACE_1_COMPLETE,
+        FLAG_TYPE_PERMANENT) ? 2 : 1;
+}
+
+static unsigned coop_rabbit_identity(Actor* actor) {
+    if (!coop_rabbit_hook || !actor || actor != gCurrentActorPointer
+            || (unsigned)current_map != MAP_FUNGI || current_character_index[0] != 2
+            || actor->unk58 != ACTOR_RABBIT_RACE
+            || !(actor->object_properties_bitfield & 0x10) || !actor->animation_state
+            || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer || !gPlayerPointer->additional_actor_data
+            || !extra_player_info_pointer
+            || gPlayerPointer->additional_actor_data != extra_player_info_pointer
+            || (extra_player_info_pointer->unk1F0 & 0x100000)
+            || !(extra_player_info_pointer->unk1F4 & 0x40)
+            || !(D_global_asm_807FBB64 & 4)
+            || D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] != coop_rabbit_behavior
+            || !coop_kosh_actor_live(actor, actor->unk54)) return 0;
+    Prop_ScriptData* race = coop_transient_script(0x1F);
+    if (!race || race->unk48[0] != 3) return 0;
+    unsigned key = coop_rabbit_round_key();
+    if (key == 2 && !coop_transient_script(0x57)) return 0;
+    return key;
+}
+
+static void coop_rabbit_latch_success(unsigned key) {
+    coop_rabbit_success_epoch = epoch;
+    coop_rabbit_success_key = key;
+    coop_rabbit_applied_epoch = epoch;
+    coop_rabbit_applied_key = key;
+    coop_rabbit_pending_key = 0;
+}
+
+static void coop_rabbit_behavior(void) {
+    Actor* actor = gCurrentActorPointer;
+    unsigned generation = actor ? actor->unk54 : 0;
+    unsigned key = coop_rabbit_identity(actor);
+    unsigned before = key ? actor->control_state : 0;
+    if (coop_rabbit_pending_key && (coop_rabbit_pending_epoch != epoch
+            || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer)) coop_rabbit_pending_key = 0;
+    if (coop_rabbit_original) coop_rabbit_original();
+    if (!key || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer || !coop_kosh_actor_live(actor, generation)
+            || coop_rabbit_identity(actor) != key) {
+        coop_rabbit_pending_key = 0;
+        return;
+    }
+    if (before == 2 && actor->control_state == 0x28) {
+        if (!transient_file_changed && loading_zone_transition_speed == 0.0f
+                && gPlayerPointer) coop_rabbit_latch_success(key);
+        else coop_rabbit_pending_key = 0;
+        return;
+    }
+    if (before != 2 || actor->control_state == 0x27) {
+        coop_rabbit_pending_key = 0;
+        return;
+    }
+    if (actor->control_state == 2
+            && coop_rabbit_pending_epoch == epoch && coop_rabbit_pending_key == key
+            && !(coop_rabbit_applied_epoch == epoch && coop_rabbit_applied_key == key)
+            && !transient_file_changed && loading_zone_transition_speed == 0.0f
+            && gPlayerPointer) {
+        actor->control_state = 0x28;
+        actor->control_state_progress = 0;
+        coop_rabbit_latch_success(key);
+    } else if (actor->control_state != 2) {
+        coop_rabbit_pending_key = 0;
+    }
+}
+
 static void coop_transient_init(void) {
     if (!transient_enabled) return;
     coop_kosh_original = D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER];
@@ -442,6 +525,15 @@ static void coop_transient_init(void) {
     } else {
         D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = coop_minecart_behavior;
         coop_minecart_hook = 1;
+    }
+    coop_rabbit_original = D_global_asm_8074C0A0[ACTOR_RABBIT_RACE];
+    if (coop_rabbit_original != func_global_asm_806BE8BC) {
+        recomp_printf("[dk64-coop] Rabbit Race actor modified by another mod; shared Rabbit success disabled.\n");
+        coop_rabbit_original = 0;
+        coop_rabbit_hook = 0;
+    } else {
+        D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] = coop_rabbit_behavior;
+        coop_rabbit_hook = 1;
     }
 }
 
@@ -479,6 +571,24 @@ static void coop_transient_apply_minecart(CoopTransientRecord record) {
                 && coop_minecart_applied_key == record.key)) return;
     coop_minecart_pending_epoch = epoch;
     coop_minecart_pending_key = record.key;
+}
+
+static void coop_transient_add_rabbit(CoopTransientInput* input) {
+    if (coop_rabbit_success_epoch != epoch || !coop_rabbit_success_key
+            || coop_rabbit_success_key > 2 || input->count >= COOP_TRANSIENT_RECORDS
+            || (unsigned)current_map != MAP_FUNGI) return;
+    input->records[input->count++] = (CoopTransientRecord){
+        COOP_TRANSIENT_RABBIT_SUCCESS, coop_rabbit_success_key, 1, 0};
+}
+
+static void coop_transient_apply_rabbit(CoopTransientRecord record) {
+    if (!coop_rabbit_hook || record.key < 1 || record.key > 2
+            || record.state != 1 || record.value || (unsigned)current_map != MAP_FUNGI
+            || coop_rabbit_round_key() != record.key
+            || (coop_rabbit_applied_epoch == epoch
+                && coop_rabbit_applied_key == record.key)) return;
+    coop_rabbit_pending_epoch = epoch;
+    coop_rabbit_pending_key = record.key;
 }
 
 static unsigned coop_transient_timer_sample_is_new(CoopTransientRecord record) {
@@ -876,6 +986,7 @@ static void coop_transient_capture(unsigned present) {
     coop_transient_add_tomato_clock(transient_page, &ordinal, &transient_input);
     coop_transient_add_kosh(&transient_input);
     coop_transient_add_minecart(&transient_input);
+    coop_transient_add_rabbit(&transient_input);
     // Retain the last same-epoch target briefly after the host finishes so a
     // lagging copy can consume missed phases. Apply still requires the Join to
     // be running the exact same cutscene and flags, so this cannot launch one.
@@ -920,6 +1031,10 @@ static void coop_transient_apply(void) {
         }
         if (record.kind == COOP_TRANSIENT_MINECART_SUCCESS) {
             coop_transient_apply_minecart(record);
+            continue;
+        }
+        if (record.kind == COOP_TRANSIENT_RABBIT_SUCCESS) {
+            coop_transient_apply_rabbit(record);
             continue;
         }
         if (role != ROLE_JOIN) continue;

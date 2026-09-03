@@ -1,8 +1,6 @@
-> Current source: 0.65.0, protocol/native ABI v65. The protocol and persistent
-> recovery suites cover durable authority reconciliation. All 15 Linux ASan/UBSan
-> suites and the complete maintained MIPS, Android ARM64, Windows x64,
-> ABI/export, APK, package and Android-importer pipeline pass. Gameplay and
-> device validation remain pending.
+> Current source: 0.66.0, protocol/native ABI v66. Focused Linux ASan/UBSan
+> transient suites, native ABI/trace tests and the maintained MIPS compile pass.
+> Gameplay and device validation remain pending.
 
 # Prototype integration and limits
 
@@ -2689,3 +2687,38 @@ reward crosses the wire. The item transaction remains the only owner of the
 Golden Banana save. Packet and bridge sizes remain unchanged. Protocol 65,
 compatibility `0x00010241`, v65 exports and manifest 0.65.0 reject older peers
 and companions.
+
+## Fungi Rabbit Race shared success (0.66.0)
+
+Both rounds of the Fungi Forest Rabbit Race use actor 252 and behavior
+`func_global_asm_806BE8BC` directly in map 48. The adapter installs a wrapper
+only when that exact actor-table entry is unmodified. Round key 1 requires
+first-race progression flag `0xF8` and Rabbit GB flag `0xF9` both unset. Round
+key 2 requires `0xF8` set and `0xF9` unset; its reward object `0x57` must also
+be loaded.
+
+The wrapper always runs the original Rabbit first. A local active state 2 that
+reaches state `0x28`, progress zero publishes success. State `0x27` is the
+distinct local failure edge and always discards a queued remote success. A
+receiver queues only a key 1 or 2, state 1, value zero record for map 48 and
+the matching room epoch. Host and Join may both consume it. The wrapper applies
+only the two stock terminal assignments, state `0x28` and progress zero; the
+next ordinary Rabbit frame owns the cutscene, dialogue, animation, first-round
+melon refill or second-round object `0x57` activation, permanent flags and
+cleanup.
+
+Application additionally requires Lanky, a live initialized actor with matching
+generation and animation state, the wrapper still installed, live player and
+extra-player pointers, availability bit `0x100000` clear, race-global bit 4 and
+player-race bit `0x40` set, loaded race script object `0x1F` in raw state 3,
+and exact `0xF8`/`0xF9` round ownership. Actor liveness, generation, scripts and
+identity are rechecked after the original call before any injected write.
+Loading, file or epoch changes, actor replacement, handler conflicts, malformed
+records, inactive states and persistent ownership discard the pending event.
+Repeated packets are idempotent.
+
+No Rabbit checkpoint, rank, speed, position, timer, input, script state,
+cutscene, flag or reward crosses the wire. Existing Kosh, Minecart and all
+host-authoritative transient records retain their prior semantics. Packet and
+bridge sizes remain unchanged. Protocol 66, compatibility `0x00010242`, v66
+exports and manifest 0.66.0 reject older peers and companions.

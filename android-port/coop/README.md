@@ -1,8 +1,11 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.65.0** shares successful completion of the three exact vanilla
-Minecart Mayhem instances while both players are in the same instance. Either
+Version **0.66.0** shares successful completion of both Fungi Forest Rabbit
+Race rounds while both players are in the active matching round. Either player
+may win; each local Rabbit runs its own normal success presentation, first-round
+refill or second-round reward, and cleanup. Version 0.65.0 shares successful
+completion of the three exact vanilla Minecart Mayhem instances while both players are in the same instance. Either
 player may win; each local controller runs its own normal cleanup, success
 presentation and exit, and the item channel remains solely responsible for the
 reward. Version 0.64.0 shares the 24 generic instrument-pad timer loops in the
@@ -49,7 +52,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 65 requires a matching peer and native
+address as a direct fallback. Protocol 66 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -202,17 +205,17 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.65.0 adds
-bidirectional Minecart Mayhem success and keeps the lobby instrument-pad loops,
+**This is experimental, not complete campaign co-op. Version 0.66.0 adds
+bidirectional Rabbit Race success and keeps bidirectional Minecart Mayhem success,
+the lobby instrument-pad loops,
 bidirectional Kosh success, the reviewed same-level reward allowlist,
 retained cutscene target,
 missed-phase recovery, the bounded Ice Tomato board/clock
 adapter, Spider movement, pose and final-hit adapters,
 the actor-driven environment-cycle, and persistent
-recovery and authority-reconciliation suites. All 15 Linux
-ASan/UBSan suites and the complete maintained MIPS, Android ARM64, Windows x64,
-ABI/export, APK, package and Android-importer pipeline pass. Gameplay and device
-validation remain pending.**
+recovery and authority-reconciliation suites. The focused Linux ASan/UBSan
+transient suites, protocol, native ABI/trace tests and maintained MIPS compile
+pass. Gameplay and device validation remain pending.**
 Earlier 0.10 results below do not validate
 the expanded combat or later progression changes.
 Back up experimental saves before using the build.
@@ -224,7 +227,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.65
+While the native companion is loaded, `tools/query_trace.py` discovers v0.66
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -238,7 +241,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.65.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.66.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -795,7 +798,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v65 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v66 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -810,6 +813,10 @@ mismatch is left alone rather than being overwritten later.
   adds a single final-hit step; Tiny's hits are
   committed by the foot actor in the shoe map. Full pose mode also corrects a
   matching local boss clip to the host's normalized frame. Other boss state remains local.
+- Bidirectional completion for the four exact Kremling Kosh instances, three
+  Minecart Mayhem instances and both Fungi Rabbit Race rounds. Each receiver
+  must already be running the matching local controller; vanilla owns failure,
+  presentation, reward and cleanup.
 - The first Japes gate is part of ordinary item/world sharing. The former
   standalone gate experiment is retired and its old save files are ignored.
 - Proxy cleanup across disconnects, map/Kong changes and actor destruction;

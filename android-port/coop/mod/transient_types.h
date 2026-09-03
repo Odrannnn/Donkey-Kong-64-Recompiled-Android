@@ -36,7 +36,10 @@ enum {
     // One of three exact vanilla Minecart Mayhem controllers completed. This
     // is separate from Kosh because Minecart has its own terminal state gate.
     COOP_TRANSIENT_MINECART_SUCCESS,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_MINECART_SUCCESS
+    // One of Fungi Forest's two vanilla Rabbit Race rounds completed. The
+    // stock Rabbit owns both presentations, the first-round refill and GB.
+    COOP_TRANSIENT_RABBIT_SUCCESS,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_RABBIT_SUCCESS
 };
 enum {
     COOP_TRANSIENT_OFF,

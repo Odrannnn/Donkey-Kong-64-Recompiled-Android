@@ -32,9 +32,13 @@ struct CharacterSpawner {
     union { u8 unkA_u8[2]; u16 unkA_u16; s16 unkA_s16; };
     u8 unkC{}, unkD{}, unkE{}, unkF{}, unk10{}, unk11{}, unk12{}, unk13{};
 };
+struct ExtraPlayerInfo { u32 unk1F0{}, unk1F4{}; };
 enum { MAP_JAPES_SHELL = 12, MAP_CAVES_ICE_CASTLE = 98,
+    MAP_FUNGI = 48,
     ACTOR_TOMATO_ICE = 164, ACTOR_TIMER_CONTROLLER = 177, ACTOR_CLAM = 286,
-    ACTOR_MINECART_BONUS = 87, ACTOR_MINIGAME_CONTROLLER = 256,
+    ACTOR_MINECART_BONUS = 87, ACTOR_RABBIT_RACE = 252, ACTOR_MINIGAME_CONTROLLER = 256,
+    PERMFLAG_PROGRESS_RABBIT_RACE_1_COMPLETE = 0xF8,
+    PERMFLAG_ITEM_GB_FUNGI_RABBIT_RACE = 0xF9,
     TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE = 0x30,
     FLAG_TYPE_PERMANENT = 0, FLAG_TYPE_TEMPORARY = 2 };
 
@@ -79,6 +83,9 @@ static CharacterSpawner character_spawners[2];
 static CharacterSpawner* D_global_asm_807FDC9C = character_spawners;
 static Actor* gCurrentActorPointer;
 static Actor* gPlayerPointer;
+static ExtraPlayerInfo rabbit_player_info;
+static ExtraPlayerInfo* extra_player_info_pointer;
+static u32 D_global_asm_807FBB64;
 static u8 current_character_index[1];
 static void (*D_global_asm_8074C0A0[300])(void);
 static Maps kosh_parent;
@@ -91,6 +98,9 @@ static unsigned minecart_original_calls, minecart_success_calls, minecart_cleanu
 static unsigned minecart_success_arg, minecart_success_text, minecart_original_mode;
 static char minecart_order[16];
 static unsigned minecart_order_count;
+static AnimationState rabbit_animation;
+static bool rabbit_first_complete, rabbit_gb_owned;
+static unsigned rabbit_original_calls, rabbit_original_mode, rabbit_outcome_calls;
 
 static void minecart_log(char step) {
     CHECK(minecart_order_count + 1 < sizeof(minecart_order));
@@ -150,6 +160,39 @@ static void func_minecart_80024FD0(void) {
         ++gCurrentActorPointer->unk11C->unk54;
     }
 }
+static void func_global_asm_806BE8BC(void) {
+    ++rabbit_original_calls;
+    if (!gCurrentActorPointer) return;
+    if (rabbit_original_mode == 1 && gCurrentActorPointer->control_state == 2) {
+        gCurrentActorPointer->control_state = 0x28;
+        gCurrentActorPointer->control_state_progress = 0;
+    } else if (rabbit_original_mode == 2 && gCurrentActorPointer->control_state == 2) {
+        gCurrentActorPointer->control_state = 0x27;
+        gCurrentActorPointer->control_state_progress = 0;
+    } else if (rabbit_original_mode == 3) {
+        D_global_asm_807FB930[0].actor = nullptr;
+    } else if (rabbit_original_mode == 4) {
+        ++gCurrentActorPointer->unk54;
+    } else if (rabbit_original_mode == 5) {
+        current_map = 49;
+    } else if (rabbit_original_mode == 6) {
+        D_global_asm_807FBB64 &= ~4u;
+    } else if (rabbit_original_mode == 7) {
+        scripts[0x1F].unk48[0] = 2;
+    } else if (rabbit_original_mode == 8) {
+        gCurrentActorPointer = &actors[1];
+    } else if (rabbit_original_mode == 9) {
+        // Explicit no-op used to prove non-active states cannot consume a packet.
+    } else if (rabbit_original_mode == 10) {
+        gPlayerPointer->additional_actor_data = nullptr;
+    } else if (gCurrentActorPointer->control_state == 0x28) {
+        ++rabbit_outcome_calls;
+        if (rabbit_first_complete) rabbit_gb_owned = true;
+        else rabbit_first_complete = true;
+        gCurrentActorPointer->control_state = 0x37;
+        gCurrentActorPointer->control_state_progress = 0;
+    }
+}
 static void recomp_printf(const char*, ...) {}
 
 static s16 func_global_asm_80659470(s32 object) {
@@ -171,6 +214,10 @@ static void func_global_asm_8063DA78(s16 slot, s16 state, s16 state_index) {
 }
 static u8 isFlagSet(s16 flag, u8 type) {
     if (flag == 0x19D && type == FLAG_TYPE_PERMANENT) return caves_pad_available;
+    if (flag == PERMFLAG_PROGRESS_RABBIT_RACE_1_COMPLETE && type == FLAG_TYPE_PERMANENT)
+        return rabbit_first_complete;
+    if (flag == PERMFLAG_ITEM_GB_FUNGI_RABBIT_RACE && type == FLAG_TYPE_PERMANENT)
+        return rabbit_gb_owned;
     CHECK(flag == TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE && type == FLAG_TYPE_TEMPORARY);
     return tomato_board_active;
 }
@@ -211,6 +258,7 @@ static void reset() {
     std::fill(std::begin(D_global_asm_8074C0A0), std::end(D_global_asm_8074C0A0), nullptr);
     D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
     D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
+    D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] = func_global_asm_806BE8BC;
     kosh_parent = 0; kosh_exit = 0; kosh_parent_valid = false;
     kosh_original_calls = kosh_success_calls = kosh_success_arg = kosh_success_text = 0;
     coop_kosh_original = nullptr; coop_kosh_hook = 0;
@@ -226,6 +274,14 @@ static void reset() {
     coop_minecart_pending_epoch = coop_minecart_pending_key = 0;
     coop_minecart_applied_epoch = coop_minecart_applied_key = 0;
     coop_minecart_success_epoch = coop_minecart_success_key = 0;
+    rabbit_animation = {}; rabbit_player_info = {};
+    extra_player_info_pointer = &rabbit_player_info; D_global_asm_807FBB64 = 0;
+    rabbit_first_complete = rabbit_gb_owned = false;
+    rabbit_original_calls = rabbit_original_mode = rabbit_outcome_calls = 0;
+    coop_rabbit_original = nullptr; coop_rabbit_hook = 0;
+    coop_rabbit_pending_epoch = coop_rabbit_pending_key = 0;
+    coop_rabbit_applied_epoch = coop_rabbit_applied_key = 0;
+    coop_rabbit_success_epoch = coop_rabbit_success_key = 0;
     coop_transient_init();
 }
 static void load(unsigned slot, unsigned object, unsigned state, unsigned timer = 0) {
@@ -290,6 +346,23 @@ static void load_minecart(unsigned key) {
     gCurrentActorPointer = &actors[0]; gPlayerPointer = &actors[2];
     D_global_asm_807FB930[0].actor = &actors[0];
     D_global_asm_807FB930[1].actor = &actors[1]; D_global_asm_807FBB34 = 2;
+}
+static void load_rabbit(unsigned key) {
+    CHECK(key >= 1 && key <= 2);
+    current_map = MAP_FUNGI; current_character_index[0] = 2;
+    rabbit_first_complete = key == 2; rabbit_gb_owned = false;
+    actors[0].object_properties_bitfield = 0x10;
+    actors[0].unk54 = 113; actors[0].unk58 = ACTOR_RABBIT_RACE;
+    actors[0].animation_state = &rabbit_animation;
+    actors[0].control_state = 2; actors[0].control_state_progress = 7;
+    gCurrentActorPointer = &actors[0]; gPlayerPointer = &actors[2];
+    actors[2].additional_actor_data = &rabbit_player_info;
+    extra_player_info_pointer = &rabbit_player_info;
+    rabbit_player_info.unk1F0 = 0; rabbit_player_info.unk1F4 = 0x40;
+    D_global_asm_807FBB64 = 4;
+    D_global_asm_807FB930[0].actor = &actors[0]; D_global_asm_807FBB34 = 1;
+    load(0x1F, 0x1F, 3);
+    if (key == 2) load(0x57, 0x57, 0);
 }
 static bool contains(unsigned kind, unsigned key, unsigned state) {
     for (unsigned i = 0; i < transient_input.count; ++i) {
@@ -1757,8 +1830,176 @@ static void minecart_checks() {
     CHECK(!coop_kosh_hook && !coop_minecart_hook);
 }
 
+static void rabbit_checks() {
+    // Each round publishes the same exact natural-success edge under its own
+    // key. The wrapper observes stock code and never performs outcome work.
+    for (unsigned key = 1; key <= 2; ++key) {
+        reset(); load_rabbit(key); rabbit_original_mode = 1;
+        D_global_asm_8074C0A0[ACTOR_RABBIT_RACE]();
+        CHECK(rabbit_original_calls == 1 && actors[0].control_state == 0x28
+            && actors[0].control_state_progress == 0 && !rabbit_outcome_calls
+            && !coop_rabbit_pending_key);
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_RABBIT_SUCCESS, key, 1, 0));
+    }
+
+    // Host and Join can consume either round. Injection only writes the stock
+    // terminal state; the next ordinary call owns flags/scripts/presentation.
+    for (unsigned receiver_role : {ROLE_HOST, ROLE_JOIN}) for (unsigned key = 1; key <= 2; ++key) {
+        reset(); load_rabbit(key); role = receiver_role;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_RABBIT_SUCCESS, key, 1, 0}}};
+        coop_transient_apply();
+        CHECK(coop_rabbit_pending_key == key && !rabbit_original_calls);
+        D_global_asm_8074C0A0[ACTOR_RABBIT_RACE]();
+        CHECK(rabbit_original_calls == 1 && actors[0].control_state == 0x28
+            && actors[0].control_state_progress == 0 && !rabbit_outcome_calls
+            && !script_calls && !coop_rabbit_pending_key);
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_RABBIT_SUCCESS, key, 1, 0));
+        D_global_asm_8074C0A0[ACTOR_RABBIT_RACE]();
+        CHECK(rabbit_original_calls == 2 && rabbit_outcome_calls == 1
+            && actors[0].control_state == 0x37);
+        CHECK(key == 1 ? (rabbit_first_complete && !rabbit_gb_owned)
+                       : (rabbit_first_complete && rabbit_gb_owned));
+        coop_transient_apply();
+        D_global_asm_8074C0A0[ACTOR_RABBIT_RACE]();
+        CHECK(rabbit_outcome_calls == 1 && !coop_rabbit_pending_key);
+    }
+
+    // Malformed, stale and wrong-round results never queue an event.
+    for (unsigned scenario = 0; scenario < 8; ++scenario) {
+        reset(); load_rabbit(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_RABBIT_SUCCESS, 1, 1, 0}}};
+        if (scenario == 0) transient_result.records[0].key = 0;
+        if (scenario == 1) transient_result.records[0].key = 2;
+        if (scenario == 2) transient_result.records[0].key = 3;
+        if (scenario == 3) transient_result.records[0].state = 2;
+        if (scenario == 4) transient_result.records[0].value = 1;
+        if (scenario == 5) transient_result.epoch--;
+        if (scenario == 6) transient_result.map++;
+        if (scenario == 7) loading_zone_transition_speed = 1.0f;
+        coop_transient_apply();
+        CHECK(!coop_rabbit_pending_key);
+    }
+    reset(); load_rabbit(2); role = ROLE_JOIN;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_RABBIT_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); CHECK(!coop_rabbit_pending_key);
+    for (unsigned key = 1; key <= 2; ++key) {
+        reset(); load_rabbit(key); role = ROLE_JOIN; rabbit_gb_owned = true;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_RABBIT_SUCCESS, key, 1, 0}}};
+        coop_transient_apply(); CHECK(!coop_rabbit_pending_key);
+    }
+
+    // Every actor, player, race, script and round identity gate fails closed.
+    // Post-original unload/replacement/generation cases also prove the saved
+    // actor is revalidated before the wrapper touches its state.
+    for (unsigned scenario = 0; scenario < 25; ++scenario) {
+        unsigned key = scenario == 16 ? 2 : 1;
+        reset(); load_rabbit(key); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_RABBIT_SUCCESS, key, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_rabbit_pending_key == key);
+        if (scenario == 0) ++current_map;
+        if (scenario == 1) current_character_index[0] = 1;
+        if (scenario == 2) actors[0].unk58 = ACTOR_MINIGAME_CONTROLLER;
+        if (scenario == 3) actors[0].object_properties_bitfield = 0;
+        if (scenario == 4) actors[0].animation_state = nullptr;
+        if (scenario == 5) gPlayerPointer = nullptr;
+        if (scenario == 6) extra_player_info_pointer = nullptr;
+        if (scenario == 7) rabbit_player_info.unk1F0 = 0x100000;
+        if (scenario == 8) rabbit_player_info.unk1F4 = 0;
+        if (scenario == 9) D_global_asm_807FBB64 = 0;
+        if (scenario == 10) D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] = func_global_asm_806BE8BC;
+        if (scenario == 11) D_global_asm_807FB930[0].actor = nullptr;
+        if (scenario == 12) rabbit_original_mode = 4;
+        if (scenario == 13) rabbit_original_mode = 3;
+        if (scenario == 14) props[0x1F].unk7C = nullptr;
+        if (scenario == 15) scripts[0x1F].unk48[0] = 2;
+        if (scenario == 16) props[0x57].unk7C = nullptr;
+        if (scenario == 17) rabbit_first_complete = true;
+        if (scenario == 18) rabbit_gb_owned = true;
+        if (scenario == 19) rabbit_original_mode = 5;
+        if (scenario == 20) rabbit_original_mode = 8;
+        if (scenario == 21) rabbit_original_mode = 6;
+        if (scenario == 22) rabbit_original_mode = 7;
+        if (scenario == 23) actors[2].additional_actor_data = nullptr;
+        if (scenario == 24) rabbit_original_mode = 10;
+        coop_rabbit_behavior();
+        CHECK(rabbit_original_calls == 1 && !rabbit_outcome_calls
+            && !coop_rabbit_pending_key);
+        if (scenario != 10) CHECK(actors[0].control_state != 0x28);
+    }
+
+    // No inactive, introductory, failure, outcome or cleanup state consumes a
+    // queued success, even though the stock handler is still called once.
+    for (unsigned state : {0u, 0x13u, 0x1Eu, 0x1Fu, 0x27u, 0x28u, 0x37u, 0x40u}) {
+        reset(); load_rabbit(1); role = ROLE_JOIN;
+        actors[0].control_state = static_cast<u8>(state); rabbit_original_mode = 9;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_RABBIT_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); coop_rabbit_behavior();
+        CHECK(rabbit_original_calls == 1 && actors[0].control_state == state
+            && !rabbit_outcome_calls && !coop_rabbit_pending_key);
+    }
+
+    // A local failure always wins over an already queued remote success.
+    reset(); load_rabbit(1); role = ROLE_JOIN;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_RABBIT_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); rabbit_original_mode = 2; coop_rabbit_behavior();
+    CHECK(rabbit_original_calls == 1 && actors[0].control_state == 0x27
+        && !coop_rabbit_pending_key);
+    coop_transient_capture(1);
+    CHECK(!contains(COOP_TRANSIENT_RABBIT_SUCCESS, 1, 1));
+
+    // Natural success also wins over a queued packet and is latched once.
+    reset(); load_rabbit(2); role = ROLE_JOIN;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_RABBIT_SUCCESS, 2, 1, 0}}};
+    coop_transient_apply(); rabbit_original_mode = 1; coop_rabbit_behavior();
+    CHECK(rabbit_original_calls == 1 && actors[0].control_state == 0x28
+        && !rabbit_outcome_calls && !coop_rabbit_pending_key);
+    coop_transient_capture(1);
+    CHECK(contains_value(COOP_TRANSIENT_RABBIT_SUCCESS, 2, 1, 0));
+
+    // All stale lifecycle boundaries clear a queued event before application.
+    for (unsigned scenario = 0; scenario < 4; ++scenario) {
+        reset(); load_rabbit(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_RABBIT_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_rabbit_pending_key == 1);
+        if (scenario == 0) loading_zone_transition_speed = 1.0f;
+        if (scenario == 1) transient_file_changed = 1;
+        if (scenario == 2) gPlayerPointer = nullptr;
+        if (scenario == 3) ++epoch;
+        coop_rabbit_behavior();
+        CHECK(rabbit_original_calls == 1 && actors[0].control_state == 2
+            && !coop_rabbit_pending_key);
+    }
+
+    // A Rabbit handler conflict disables only Rabbit; global transient Off
+    // installs none of the three reviewed minigame/race hooks.
+    reset();
+    D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
+    D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
+    D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] = nullptr;
+    coop_kosh_hook = coop_minecart_hook = coop_rabbit_hook = 0; coop_transient_init();
+    CHECK(coop_kosh_hook && coop_minecart_hook && !coop_rabbit_hook);
+    reset(); transient_enabled = 0;
+    coop_kosh_hook = coop_minecart_hook = coop_rabbit_hook = 0;
+    D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
+    D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
+    D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] = func_global_asm_806BE8BC;
+    coop_transient_init();
+    CHECK(!coop_kosh_hook && !coop_minecart_hook && !coop_rabbit_hook);
+}
+
 int main() {
     capture_checks(); object_apply_checks(); cutscene_checks(); lobby_instrument_pad_checks();
-    kosh_checks(); minecart_checks();
+    kosh_checks(); minecart_checks(); rabbit_checks();
     std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }
