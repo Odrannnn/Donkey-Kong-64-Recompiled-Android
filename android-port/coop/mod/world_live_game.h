@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 200
+    COOP_LIVE_WORLD_STATE_COUNT = 226
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -267,6 +267,40 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // enters only its completed hide/presentation path; crown ownership remains
     // a prerequisite and no crown count or local opening sequence is copied.
     { 17, 0x304, 0x004,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Helm shutdown is one 21-script permanent unit: the K. Rool door, four
+    // instrument pads, fifteen power beams and the final door controller all
+    // expose flag-positive state-0 initializers. Replaying those branches
+    // applies the vanilla shutdown layout without copying the Helm timer,
+    // barrel rooms, instrument challenges, cameras or completion sequence.
+    { 17, 0x302, 0x005,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x02D,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x02E,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x02F,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x030,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x020,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x00E,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x008,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x026,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x011,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x009,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x024,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x00A,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x00F,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x01E,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x00B,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x010,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x022,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x00D,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x00C,  0, COOP_LIVE_WORLD_REPLAY},
+    { 17, 0x302, 0x1F6,  0, COOP_LIVE_WORLD_REPLAY},
+    // Each power-beam group calls its matching medal barrier's state 10. Make
+    // those five dependencies part of preflight without scheduling them twice.
+    { 17, 0x302, 0x01F,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 17, 0x302, 0x021,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 17, 0x302, 0x023,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 17, 0x302, 0x025,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 17, 0x302, 0x027,  0, COOP_LIVE_WORLD_REQUIRE},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
