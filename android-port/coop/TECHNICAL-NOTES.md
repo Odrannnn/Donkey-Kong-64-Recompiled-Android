@@ -1,4 +1,4 @@
-> Current source: 0.68.0, protocol/native ABI v68. Focused Linux ASan/UBSan
+> Current source: 0.69.0, protocol/native ABI v69. Focused Linux ASan/UBSan
 > transient suites, native ABI/trace tests and the maintained MIPS compile pass.
 > Gameplay and device validation remain pending.
 
@@ -2803,3 +2803,48 @@ No ring encounter, hoop spawn, position, input, fuel, timer, flag or reward
 crosses the wire. Packet and bridge sizes remain unchanged. Protocol 68,
 compatibility `0x00010244`, v68 exports and manifest 0.68.0 reject older peers
 and companions.
+
+## Direct Baboon Blast completion exits (0.69.0)
+
+The pinned US ROM has five Baboon Blast courses whose successful course path
+ends at a type-`0x0C` loading-zone trigger: Japes `37 -> 7`, exit 7; Aztec
+`41 -> 38`, exit 11; Galleon `54 -> 30`, exit 16; Factory `110 -> 26`, exit 15;
+and Castle `187 -> 87`, exit 17. These five triples form a dedicated classifier
+outside the 169 ordinary-route table. All entry routes, wrong exits and every
+other scripted minigame transition remain invalid.
+
+A finishing peer publishes a bounded monotonic ticket only on the original
+loading transition's rising edge. The network must already be connected,
+same-area events enabled, both states active in the same course, and the local
+player must be Donkey in normal play with no pending reward queue. Host and Join
+have equal authority for these five records. Ordinary routes retain their
+original Host-only publication and opted-in Join-only receipt.
+
+The receiver rechecks connected normal play, Donkey, the source course, active
+remote state, no cutscene, no reward queue and no local transition. It dispatches
+through `func_global_asm_805FF9AC(destination, exit, 0, 0)`, rather than the
+ordinary two-argument transition helper, and follows with vanilla's
+`func_global_asm_806F3BEC(player, trigger_x, trigger_z, 0x46)` action using the
+five trigger centers pinned from the ROM records. Loading consumes the ticket;
+disconnect, source departure and stale/replayed tickets fail closed. A local
+natural transition wins because a receiver already loading is ineligible.
+
+The dispatcher never writes a reward, permanent flag, instance-script state,
+cannon state or bonus result. Japes' course GB, Aztec's llama unlock, Factory's
+Arcade lever, Galleon's seal release and Castle's tree opening remain vanilla
+outcomes whose durable ownership travels through the established item/world
+channels.
+
+Fungi map 188 and Caves map 186 are intentionally excluded. Their final cannon
+paths reach nested bonus barrels: Fungi barrel 22 launches Peril Path Panic Easy
+in map 145, and Caves barrel 19 launches Busy Barrel Barrage Hard in map 131.
+Those second minigames own the actual logical checks and rewards. Caves has no
+type-`0x0C` course finish trigger at all, and treating Fungi's later `188 -> 48`,
+exit 26 route as the Baboon Blast terminal would bypass or misclassify its nested
+bonus result.
+
+The route-policy test exhaustively counts 169 ordinary plus five direct finish
+triples, verifies all five pinned trigger centers and exercises authority,
+eligibility, disconnect, source, cutscene/loading, stale and one-shot gates.
+Packet and bridge sizes remain unchanged. Protocol 69, compatibility
+`0x00010245`, v69 exports and manifest 0.69.0 reject older peers and companions.

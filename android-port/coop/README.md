@@ -1,7 +1,13 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.68.0** shares successful completion of Fungi Forest's vanilla
+Version **0.69.0** synchronizes the five direct vanilla Baboon Blast completion
+exits in Japes, Aztec, Galleon, Factory and Castle while both players are active
+Donkey in the same course. Either player may finish; the other uses the exact
+scripted loading-zone dispatcher and trigger action. Rewards and permanent
+progress remain owned by vanilla plus the existing item/world channels. Fungi
+and Caves remain on their nested bonus-barrel paths and are deliberately not
+treated as course completion. Version 0.68.0 shares successful completion of Fungi Forest's vanilla
 Diddy Owl Race while both players are in the active race. Either player may
 win; each local Owl owns its rings, flight, dialogue, cutscene, permanent flag
 and Golden Banana reward. Version 0.67.0 shares successful completion of the three exact vanilla
@@ -212,8 +218,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.68.0 adds
-bidirectional Fungi Owl Race success and keeps Batty Barrel Bandit, Rabbit Race and Minecart Mayhem success,
+**This is experimental, not complete campaign co-op. Version 0.69.0 adds the
+five direct Baboon Blast finish routes and keeps bidirectional Fungi Owl Race,
+Batty Barrel Bandit, Rabbit Race and Minecart Mayhem success,
 the lobby instrument-pad loops,
 bidirectional Kosh success, the reviewed same-level reward allowlist,
 retained cutscene target,
@@ -234,7 +241,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.68
+While the native companion is loaded, `tools/query_trace.py` discovers v0.69
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -248,7 +255,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.68.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.69.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -801,11 +808,27 @@ cutscene maps, menus and transition variants with extra parameters remain local.
 If either player takes a different route at nearly the same time, the map
 mismatch is left alone rather than being overwritten later.
 
+Version 0.69 adds a separate same-area path for the five direct Baboon Blast
+finishes. It is enabled by **Same-area events**, independent of the Host-follow
+setting, and permits either role to publish only these exact ROM routes: Japes
+`37 -> 7/7`, Aztec `41 -> 38/11`, Galleon `54 -> 30/16`, Factory
+`110 -> 26/15`, and Castle `187 -> 87/17`. Both peers must be active Donkey in
+the same course; cutscenes, an existing transition, a reward queue, a missing
+peer, a wrong exit, or leaving the source cancels/defer the ticket. The receiver
+uses the stock four-argument scripted transition function and the pinned
+type-`0x0C` trigger center, then consumes the ticket once loading starts.
+
+Fungi map 188 ends at a nested Peril Path Panic barrel and Caves map 186 ends at
+a nested Busy Barrel Barrage barrel. Those bonus-game successes own the logical
+checks and rewards, so their course exits and nested entries are rejected by
+this dispatcher. No completion flag, reward, cannon/controller state or bonus
+result is written by the transition channel.
+
 ## Other implemented features
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v68 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v69 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -822,7 +845,8 @@ mismatch is left alone rather than being overwritten later.
   matching local boss clip to the host's normalized frame. Other boss state remains local.
 - Bidirectional completion for the four exact Kremling Kosh instances, three
   Minecart Mayhem instances, both Fungi Rabbit Race rounds and three reviewed
-  Batty Barrel Bandit instances and Fungi's Diddy Owl Race. Each receiver
+  Batty Barrel Bandit instances and Fungi's Diddy Owl Race, plus the five direct
+  Baboon Blast finish routes. Each race/minigame receiver
   must already be running the matching local controller; vanilla owns failure,
   presentation, reward and cleanup.
 - The first Japes gate is part of ordinary item/world sharing. The former
@@ -835,7 +859,8 @@ correction suppresses animation callbacks while evaluating the already-local cli
 it does not synchronize attacks, sounds, effects or damage. Enemy health
 from the guest is speculative until host acceptance; there is no rollback. Other enemies, boss behavior outside the bounded phase adapters, enemy drops, shared
 player damage/ammo, secondary animation layers, sounds/effects, other puzzles/doors,
-transitions outside the 169-route reviewed ordinary-route allowlist
+transitions outside the 169-route reviewed ordinary-route allowlist and five
+direct Baboon Blast finish routes
 and world progression outside the allowlist are **not synchronized**. The remote
 shot visuals cannot themselves hit enemies or switches.
 Full Tag Anywhere compatibility is not established.

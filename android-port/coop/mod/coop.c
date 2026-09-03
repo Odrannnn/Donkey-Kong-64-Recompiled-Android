@@ -17,7 +17,7 @@
 
 typedef struct { CoopGateInput gate; CoopCombatFrame combat; CoopItemInput items; CoopWorldInput world; CoopTransientInput transient; CoopTraceInput trace; } CoopExtraInput;
 typedef struct { CoopGateResult gate; CoopCombatResult combat; CoopItemResult items; CoopWorldResult world; CoopTransientResult transient; } CoopExtraResult;
-_Static_assert(sizeof(CoopExtraInput) == 2868 && sizeof(CoopExtraResult) == 3476, "v68 bridge ABI");
+_Static_assert(sizeof(CoopExtraInput) == 2868 && sizeof(CoopExtraResult) == 3476, "v69 bridge ABI");
 _Static_assert(sizeof(CoopCharacterProgress) == 0x5E && __builtin_offsetof(CoopCharacterProgress, golden_bananas) == 0x42
     && __builtin_offsetof(CoopCharacterProgress, coins) == 0x6
     && __builtin_offsetof(CoopCharacterProgress, coloured_bananas) == 0xA
@@ -162,10 +162,10 @@ _Static_assert(COOP_TROFF_FIRST == 2394 && COOP_TROFF_END == 5894 && COOP_JAPES_
 
 RECOMP_IMPORT(".", u32 dk64_coop_start(u32 role, const char* ip, u32 port, u32 room));
 RECOMP_IMPORT(".", u32 dk64_coop_local_ipv4(void));
-RECOMP_IMPORT(".", u32 dk64_coop_recovery_configure_v68(const char* save_path, u32 profile, u32 save_kind, u32 room));
-RECOMP_IMPORT(".", u32 dk64_coop_recovery_status_v68(void));
-RECOMP_IMPORT(".", u32 dk64_coop_recovery_promote_v68(void));
-RECOMP_IMPORT(".", u32 dk64_coop_tick_v68(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
+RECOMP_IMPORT(".", u32 dk64_coop_recovery_configure_v69(const char* save_path, u32 profile, u32 save_kind, u32 room));
+RECOMP_IMPORT(".", u32 dk64_coop_recovery_status_v69(void));
+RECOMP_IMPORT(".", u32 dk64_coop_recovery_promote_v69(void));
+RECOMP_IMPORT(".", u32 dk64_coop_tick_v69(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
 RECOMP_IMPORT(".", void dk64_coop_stop(void));
 
 extern Actor *gPlayerPointer, *gCurrentActorPointer, *gLastSpawnedActor;
@@ -175,6 +175,8 @@ extern Maps next_map;
 extern s32 next_exit;
 extern f32 loading_zone_transition_speed;
 extern void func_global_asm_805FF378(Maps nextMap, s32 nextExit);
+extern void func_global_asm_805FF9AC(Maps map, s32 exit, s32 transition, s16 mode);
+extern void func_global_asm_806F3BEC(Actor* player, s16 x, s16 z, u8 action);
 extern u8 game_mode;
 extern u8 current_file;
 extern u8 isFlagSet(s16 flagIndex, u8 flagType);
@@ -335,7 +337,7 @@ static void coop_select_save(void) {
     unsigned char* save_path = recomp_get_save_file_path();
     u32 save_kind = (using_host_save ? COOP_RECOVERY_SAVE_HOST : 0)
         | (shared_items ? COOP_RECOVERY_SAVE_ITEMS : 0);
-    recovery_storage_status = dk64_coop_recovery_configure_v68((const char*)save_path,
+    recovery_storage_status = dk64_coop_recovery_configure_v69((const char*)save_path,
         save_profile, save_kind, recomp_get_config_u32("room"));
     recomp_free(save_path);
     host_recovery.checkpoint = (recovery_storage_status & COOP_RECOVERY_STORAGE_CHECKPOINT) != 0;
@@ -460,7 +462,7 @@ static u32 coop_promote_guest(void) {
         coop_host_recovery_complete(&host_recovery, 0);
         return 0;
     }
-    if (!dk64_coop_recovery_promote_v68()) {
+    if (!dk64_coop_recovery_promote_v69()) {
         dk64_coop_stop();
         status = coop_start_network(ROLE_JOIN);
         coop_host_recovery_complete(&host_recovery, 0);
@@ -564,8 +566,13 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
         local_state[STATE_KONG] = current_character_index[0];
     }
     unsigned transition_ticket = 0, transition_route = 0;
+    unsigned peer_in_course = remote_state[STATE_MAP] == (u32)current_map
+        && (remote_state[STATE_FLAGS] & STATE_ACTIVE)
+        && !(remote_state[STATE_FLAGS] & STATE_CUTSCENE);
+    unsigned blast_eligible = playing && current_character_index[0] == 0
+        && !D_global_asm_807FD730 && peer_in_course;
     coop_transition_capture(&transition_capture,
-        role == ROLE_HOST && status == NET_CONNECTED, playing,
+        status == NET_CONNECTED, role == ROLE_HOST, transient_enabled, playing, blast_eligible,
         loading_zone_transition_speed != 0.0f, current_map, next_map, next_exit,
         &transition_ticket, &transition_route);
     local_state[STATE_TRANSITION_TICKET] = transition_ticket;
@@ -617,7 +624,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     trace.recovery_fingerprint = coop_recovery_fingerprint();
     CoopExtraInput extra = {{0}, combat_input, items.input, world.input, transient_input, trace};
     CoopExtraResult extra_result = {0};
-    status = dk64_coop_tick_v68(local_state, remote_state, &extra, &extra_result);
+    status = dk64_coop_tick_v69(local_state, remote_state, &extra, &extra_result);
     coop_items_receive(&items, extra_result.items);
     coop_world_receive(&world, extra_result.world);
     transient_result = extra_result.transient;
@@ -661,7 +668,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     }
     u32 recovery_command = recomp_get_config_u32("host_recovery");
     if (recovery_command > COOP_RECOVERY_PROMOTE) recovery_command = COOP_RECOVERY_OFF;
-    recovery_storage_status = dk64_coop_recovery_status_v68();
+    recovery_storage_status = dk64_coop_recovery_status_v69();
     if (role == ROLE_HOST && (recovery_storage_status & COOP_RECOVERY_STORAGE_FOLLOWER)) {
         role = ROLE_JOIN; promoted_host = 0; merge_guest_progress = 0;
         host_recovery.promoted = 0; host_recovery.checkpoint = 0;
@@ -687,12 +694,21 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
         return;
     }
     combat_result = extra_result.combat;
+    unsigned blast_follow = transient_enabled && current_character_index[0] == 0
+        && !D_global_asm_807FD730 && remote_state[STATE_MAP] == (u32)current_map;
     if (!world_refresh_started && coop_transition_should_follow(&transition_follow,
-            status == NET_CONNECTED, follow_host_transitions && role == ROLE_JOIN,
+            status == NET_CONNECTED, follow_host_transitions && role == ROLE_JOIN, blast_follow,
             playing, loading_zone_transition_speed != 0.0f, current_map, remote_state[STATE_FLAGS],
             remote_state[STATE_TRANSITION_TICKET], remote_state[STATE_TRANSITION_ROUTE])) {
         unsigned route = remote_state[STATE_TRANSITION_ROUTE];
-        func_global_asm_805FF378((Maps)coop_transition_destination(route), coop_transition_exit(route));
+        int trigger_x, trigger_z;
+        if (coop_transition_bblast_trigger(route, &trigger_x, &trigger_z)) {
+            func_global_asm_805FF9AC((Maps)coop_transition_destination(route),
+                coop_transition_exit(route), 0, 0);
+            func_global_asm_806F3BEC(gPlayerPointer, (s16)trigger_x, (s16)trigger_z, 0x46);
+        } else {
+            func_global_asm_805FF378((Maps)coop_transition_destination(route), coop_transition_exit(route));
+        }
         if (loading_zone_transition_speed != 0.0f) {
             coop_transition_consumed(&transition_follow);
             remove_remote();
