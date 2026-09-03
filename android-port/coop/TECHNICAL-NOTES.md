@@ -3053,3 +3053,30 @@ new flag when they appear. Active dialogue, race, reward, rescue and reveal path
 remain local and retain the deferred retry. Packet and bridge layouts are
 unchanged. Protocol 77, compatibility `0x0001024D`, v77 exports and manifest
 0.77.0 prevent mixed packages and peers.
+
+## Exact-source collectible retirement (post-0.77 development)
+
+Numeric collectible delivery no longer waits merely because the receiver is on
+the collectible's own map. The generated vanilla metadata now retains each
+model-two object ID and type, each balloon/rainbow actor-spawner ID and type,
+and all 43 physical bonus-barrel spawner IDs. A same-map transaction preflights
+the exact loaded identity before changing a permanent bit or counter. Missing,
+replaced or type-mismatched sources leave the network result pending.
+
+After flag/pickup-bit readback and the numeric counter update both succeed, the
+adapter retires the loaded source through the stock engine path. Model-two
+bananas, coins and GB props detach their collision record and delete the prop,
+which also repairs the compact prop/object lookup. Balloons, rainbow patches and
+bonus barrels remove their actor spawner together with any tied actor. Chunky's
+rear-Japes boulder bunch uses its audited spawner 6/type `0x3D` in the same way.
+Multiple rewards in one frame resolve their handles again after every removal,
+so compacted prop arrays cannot leave stale indices.
+
+Seven scripted GB rewards in writable source maps have no persistent collectible
+object: Japes' boulder GB, Aztec's vulture GB and the five Isles instrument-pad
+GBs. Their permanent reward flag is the vanilla controller's completion input;
+they apply only on an ordinary stable frame with no active collectible-credit
+queue. If a controller has already spawned its dynamic golden-banana actor, the
+adapter matches the flag stored in that actor spawner's vanilla spawn payload
+and retires it too. Minecart and race reward maps remain excluded overlays. The
+network and bridge layouts are unchanged.

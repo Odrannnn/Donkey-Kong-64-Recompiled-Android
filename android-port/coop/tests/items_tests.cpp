@@ -206,6 +206,27 @@ static void setFlag(int flag, unsigned value, unsigned type) {
         ++D_global_asm_807FC950[0].character_progress[(flag - 0x1FD) % 5].golden_bananas[(flag - 0x1FD) / 5];
 }
 static void func_global_asm_8060DEC8() { ++saves; }
+static unsigned collectible_source_block = 0;
+static unsigned collectible_prop_retires = 0, collectible_actor_retires = 0;
+static unsigned collectible_reward_retires = 0, collectible_last_reward_flag = 0;
+static unsigned collectible_last_object = 0, collectible_last_type = 0;
+static unsigned coop_collectible_prop_ready(unsigned object, unsigned type) {
+    collectible_last_object = object; collectible_last_type = type;
+    return !collectible_source_block;
+}
+static void coop_collectible_prop_retire(unsigned object, unsigned type) {
+    CHECK(coop_collectible_prop_ready(object, type)); ++collectible_prop_retires;
+}
+static unsigned coop_collectible_actor_ready(unsigned object, unsigned type) {
+    collectible_last_object = object; collectible_last_type = type;
+    return !collectible_source_block;
+}
+static void coop_collectible_actor_retire(unsigned object, unsigned type) {
+    CHECK(coop_collectible_actor_ready(object, type)); ++collectible_actor_retires;
+}
+static void coop_collectible_reward_actor_retire(unsigned flag) {
+    ++collectible_reward_retires; collectible_last_reward_flag = flag;
+}
 #include "../mod/world_live_game.h"
 #include "../mod/items_game.h"
 #include "../mod/world_game.h"
@@ -344,6 +365,9 @@ static void reset_engine() {
     for (auto& object : D_global_asm_807F6240) object = -1;
     std::memset(live_raw, 0, sizeof(live_raw));
     writes = saves = hud_updates = block_write = mutate_counter = live_calls = live_slot = live_state = 0;
+    collectible_source_block = collectible_prop_retires = collectible_actor_retires = 0;
+    collectible_reward_retires = collectible_last_reward_flag = 0;
+    collectible_last_object = collectible_last_type = 0;
     live_reveals = live_reveal_object = 0;
     live_mermaid_available = live_mermaid_refreshes = 0;
     live_mermaid_state = 30; live_mermaid_progress = 0;
@@ -454,10 +478,6 @@ static void remaining_collectible_checks() {
         current_map = main_map_for_level(l); mock_level = l;
         coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
         g.result.status = 2; g.result.apply[id / 32] = bit(id);
-        current_map = source;
-        if (coop_items_apply_map()) {
-            coop_items_apply(&g, 1); CHECK(!writes && !saves); // Exact source reward stays local.
-        }
         unsigned destination = same_level_delivery_map(l, source);
         current_map = destination ? destination : main_map_for_level((l + 1) % 8);
         mock_level = destination ? l : (l + 1) % 8;
@@ -491,10 +511,6 @@ static void remaining_collectible_checks() {
         coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.baseline);
         CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 123;
         r.apply[id / 32] = bit(id); coop_items_receive(&g, r);
-        current_map = source;
-        if (coop_items_apply_map()) {
-            coop_items_apply(&g, 1); CHECK(!writes && !pickups[i]);
-        }
         unsigned destination = same_level_delivery_map(l, source);
         current_map = destination ? destination : main_map_for_level((l + 1) % 8);
         mock_level = destination ? l : (l + 1) % 8;
@@ -553,10 +569,7 @@ static void actor_collectible_checks() {
         current_map = main_map_for_level(a.level); mock_level = a.level;
         coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
         CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 123; r.apply[id / 32] = bit(id);
-        coop_items_receive(&g, r); current_map = a.map;
-        if (coop_items_apply_map()) {
-            coop_items_apply(&g, 1); CHECK(!writes && !saves);
-        }
+        coop_items_receive(&g, r);
         unsigned destination = same_level_delivery_map(a.level, a.map);
         current_map = destination ? destination : main_map_for_level((a.level + 1) % 8);
         mock_level = destination ? a.level : (a.level + 1) % 8;
@@ -606,13 +619,12 @@ static void same_level_gb_delivery_checks() {
         CHECK(D_global_asm_807FC950[0].character_progress[kong].golden_bananas[level] == 1);
     }
 
-    // The exact source map remains guarded while its old reward controller is
-    // loaded. Save, HUD, reward-queue and failed-write guards remain intact.
+    // Save, HUD, reward-queue and failed-write guards remain intact.
     unsigned id = (unsigned)coop_item_id(0x019), level = 0, kong = 0;
     CHECK(coop_item_gb(id, &level, &kong));
-    for (unsigned scenario = 0; scenario < 4; ++scenario) {
+    for (unsigned scenario = 0; scenario < 3; ++scenario) {
         reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
-        current_map = scenario == 3 ? 7 : 4; mock_level = level;
+        current_map = 4; mock_level = level;
         coop_items_capture(&g, 1, 1, 0); g.result.status = 2;
         g.result.apply[id / 32] = bit(id);
         if (scenario == 1) D_global_asm_80754280 = nullptr;
@@ -620,6 +632,15 @@ static void same_level_gb_delivery_checks() {
         coop_items_apply(&g, scenario != 0);
         CHECK(!writes && !saves && !hud_updates && !flags[0x019]);
     }
+    // A scripted reward has no persistent prop to remove. Its vanilla reward
+    // flag can therefore commit on the exact map once no credit is active.
+    reset_engine(); CoopItems exact{}; current_game = &exact; exact.join = 1;
+    current_map = 7; mock_level = 0; coop_items_capture(&exact, 1, 1, 0);
+    exact.result.status = 2; exact.result.apply[id / 32] = bit(id);
+    coop_items_apply(&exact, 1);
+    CHECK(writes == 1 && saves == 1 && flags[0x019] && !collectible_prop_retires
+        && !collectible_actor_retires && collectible_reward_retires == 1
+        && collectible_last_reward_flag == 0x019);
     reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
     current_map = 4; mock_level = 0; coop_items_capture(&g, 1, 1, 0);
     g.result.status = 2; g.result.apply[id / 32] = bit(id); block_write = 1;
@@ -628,6 +649,63 @@ static void same_level_gb_delivery_checks() {
     block_write = 0; coop_items_apply(&g, 1);
     CHECK(writes == 2 && saves == 1 && flags[0x019]);
     CHECK(D_global_asm_807FC950[0].character_progress[kong].golden_bananas[level] == 1);
+}
+
+static void exact_collectible_source_checks() {
+    // A loaded model-two GB is verified and retired after its save transaction.
+    unsigned gb_index = (unsigned)coop_item_id(0x004) - COOP_GB_FIRST;
+    auto gb = coop_golden_bananas[gb_index]; unsigned gb_id = COOP_GB_FIRST + gb_index;
+    reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
+    current_map = gb.map; mock_level = gb.level; coop_items_capture(&g, 1, 1, 0);
+    g.result.status = 2; g.result.apply[gb_id / 32] = bit(gb_id); coop_items_apply(&g, 1);
+    CHECK(flags[gb.flag] && saves == 1 && collectible_prop_retires == 1
+        && collectible_last_object == gb.prop && collectible_last_type == gb.prop_type
+        && collectible_reward_retires == 1 && collectible_last_reward_flag == gb.flag);
+
+    // Missing or type-mismatched source state fails before the permanent write.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = gb.map; mock_level = gb.level; coop_items_capture(&g, 1, 1, 0);
+    g.result.status = 2; g.result.apply[gb_id / 32] = bit(gb_id);
+    collectible_source_block = 1; coop_items_apply(&g, 1);
+    CHECK(!flags[gb.flag] && !writes && !saves && !collectible_prop_retires
+        && g.wait_reason == COOP_TRACE_WAIT_SAME_LEVEL_ITEM && g.wait_id == gb_id);
+
+    // Ordinary model-two pickups and actor pickups use their generated object,
+    // type and spawner identities on the exact source map.
+    unsigned pickup_index = 0; auto pickup = coop_pickups[pickup_index];
+    unsigned pickup_level = coop_pickup_level(pickup_index);
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = pickup.map; mock_level = pickup_level; coop_items_capture(&g, 1, 1, 0);
+    unsigned pickup_id = COOP_PICKUP_FIRST + pickup_index;
+    g.result.status = 2; g.result.apply[pickup_id / 32] = bit(pickup_id); coop_items_apply(&g, 1);
+    CHECK(pickups[pickup_index] && collectible_prop_retires == 1
+        && collectible_last_object == pickup.object && collectible_last_type == pickup.type);
+
+    unsigned actor_index = 0; auto actor = coop_actor_pickups[actor_index];
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = actor.map; mock_level = actor.level; coop_items_capture(&g, 1, 1, 0);
+    unsigned actor_id = COOP_ACTOR_PICKUP_FIRST + actor_index;
+    g.result.status = 2; g.result.apply[actor_id / 32] = bit(actor_id); coop_items_apply(&g, 1);
+    CHECK(flags[actor.flag] && collectible_actor_retires == 1
+        && collectible_last_object == actor.object && collectible_last_type == actor.type);
+
+    // Physical bonus barrels and the rear-Japes boulder use actor-spawner
+    // retirement too; their reward bits/counters remain the transaction owner.
+    unsigned barrel_index = (unsigned)coop_item_id(0x001) - COOP_GB_FIRST;
+    auto barrel = coop_golden_bananas[barrel_index]; unsigned barrel_id = COOP_GB_FIRST + barrel_index;
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = barrel.map; mock_level = barrel.level; coop_items_capture(&g, 1, 1, 0);
+    g.result.status = 2; g.result.apply[barrel_id / 32] = bit(barrel_id); coop_items_apply(&g, 1);
+    CHECK(flags[barrel.flag] && collectible_actor_retires == 1
+        && collectible_last_object == barrel.barrel && collectible_last_type == 0x1C
+        && collectible_reward_retires == 1 && collectible_last_reward_flag == barrel.flag);
+
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 7; mock_level = 0; coop_items_capture(&g, 1, 1, 0);
+    g.result.status = 2; g.result.apply[COOP_JAPES_BOULDER_BUNCH / 32] = bit(COOP_JAPES_BOULDER_BUNCH);
+    coop_items_apply(&g, 1);
+    CHECK(flags[0x01D] && collectible_actor_retires == 1
+        && collectible_last_object == 6 && collectible_last_type == 0x3D);
 }
 static void troff_delivery_checks() {
     // Every Kong/level bucket can receive its first payment while the player
@@ -1691,6 +1769,6 @@ static void live_checks() {
 #include "progression_checks.h"
 #include "training_checks.h"
 int main() {
-    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); same_level_gb_delivery_checks(); actor_collectible_checks(); troff_delivery_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); arcade_payment_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
+    protocol_checks(); policy_checks(); engine_checks(); snide_and_medal_checks(); remaining_collectible_checks(); same_level_gb_delivery_checks(); actor_collectible_checks(); exact_collectible_source_checks(); troff_delivery_checks(); japes_boulder_bunch_checks(); krool_completion_checks(); arcade_payment_checks(); progression_checks(); training_checks(); world_refresh_checks(); world_authority_checks(); cross_area_cache_checks(); live_checks();
     std::printf("PASS: %u item, all GBs/1700 pickups adapter, inventory preservation, authority, deduplication, lossy UDP and reconnect checks\n", checks);
 }

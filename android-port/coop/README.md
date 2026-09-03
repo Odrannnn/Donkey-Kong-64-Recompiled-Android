@@ -973,6 +973,9 @@ Before relying on a save:
    Verify no duplicate GB, repeated scene or missed progression.
 6. Lock/unlock, leave/rejoin, transition maps and reconnect. Confirm no repeated
    reward and no writes during cutscenes/collection queues.
+   Also receive a banana, coin, balloon/rainbow patch, physical GB and bonus
+   barrel reward while standing on its exact source map. The old source must
+   disappear immediately, remain collected after restart and never award twice.
 7. Save, fully close, reopen and check persistence on both clients. Check the
    ordinary non-mod saves remain unchanged. Also test Android-to-Android.
 8. Tag pads separately on each peer, leave their maps to receive, then return.

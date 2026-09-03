@@ -34,6 +34,58 @@ static inline unsigned coop_training_ground_apply_id(unsigned id) {
     return (id >= COOP_TRAINING_SPAWNED && id <= COOP_FIRST_SLAM)
         || id == COOP_WORLD_TRAINING_EXIT;
 }
+static inline unsigned coop_collectible_source_ready(unsigned id) {
+    if (id >= COOP_PICKUP_FIRST && id < COOP_ACTOR_PICKUP_FIRST) {
+        const CoopPickup* pickup = &coop_pickups[id - COOP_PICKUP_FIRST];
+        return (unsigned)current_map != pickup->map
+            || coop_collectible_prop_ready(pickup->object, pickup->type);
+    }
+    if (id >= COOP_ACTOR_PICKUP_FIRST && id < COOP_PROGRESSION_FIRST) {
+        const CoopActorPickup* actor = &coop_actor_pickups[id - COOP_ACTOR_PICKUP_FIRST];
+        return (unsigned)current_map != actor->map
+            || coop_collectible_actor_ready(actor->object, actor->type);
+    }
+    if (id >= COOP_GB_FIRST && id < COOP_PICKUP_FIRST) {
+        const CoopGoldenBanana* gb = &coop_golden_bananas[id - COOP_GB_FIRST];
+        if ((unsigned)current_map != gb->map) return 1;
+        if (gb->prop != 0xFFFF && !coop_collectible_prop_ready(gb->prop, gb->prop_type)) return 0;
+        if (gb->barrel != 0xFF && !coop_collectible_actor_ready(gb->barrel, 0x1C)) return 0;
+        // Scripted reward controllers have no persistent collectible object.
+        // Their permanent reward flag is the vanilla completion input; an
+        // active credit is already excluded by D_global_asm_807FD730 above.
+        return 1;
+    }
+    if (id == COOP_JAPES_BOULDER_BUNCH)
+        return (unsigned)current_map != 7 || coop_collectible_actor_ready(6, 0x3D);
+    return 1;
+}
+static inline void coop_collectible_source_retire(unsigned id) {
+    if (id >= COOP_PICKUP_FIRST && id < COOP_ACTOR_PICKUP_FIRST) {
+        const CoopPickup* pickup = &coop_pickups[id - COOP_PICKUP_FIRST];
+        if ((unsigned)current_map == pickup->map)
+            coop_collectible_prop_retire(pickup->object, pickup->type);
+        return;
+    }
+    if (id >= COOP_ACTOR_PICKUP_FIRST && id < COOP_PROGRESSION_FIRST) {
+        const CoopActorPickup* actor = &coop_actor_pickups[id - COOP_ACTOR_PICKUP_FIRST];
+        if ((unsigned)current_map == actor->map)
+            coop_collectible_actor_retire(actor->object, actor->type);
+        return;
+    }
+    if (id >= COOP_GB_FIRST && id < COOP_PICKUP_FIRST) {
+        const CoopGoldenBanana* gb = &coop_golden_bananas[id - COOP_GB_FIRST];
+        if ((unsigned)current_map != gb->map) return;
+        if (gb->prop != 0xFFFF) coop_collectible_prop_retire(gb->prop, gb->prop_type);
+        if (gb->barrel != 0xFF) coop_collectible_actor_retire(gb->barrel, 0x1C);
+        // Scripted boulder/vulture/instrument rewards, and any reward already
+        // spawned by a local controller, use a dynamic GB actor carrying this
+        // same permanent flag. Retire it before it can be collected twice.
+        coop_collectible_reward_actor_retire(gb->flag);
+        return;
+    }
+    if (id == COOP_JAPES_BOULDER_BUNCH && (unsigned)current_map == 7)
+        coop_collectible_actor_retire(6, 0x3D);
+}
 #include "troff_game.h"
 static inline unsigned coop_item_owned(unsigned id) {
     if (id == COOP_JAPES_BOULDER_BUNCH) return isFlagSet(0x01D, 0) != 0;
@@ -264,10 +316,10 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 if (!D_global_asm_80754280) {
                     coop_items_wait(g, COOP_TRACE_WAIT_HUD, id); continue;
                 }
-                // A reward can now arrive anywhere else in its owning level.
-                // Keep only the exact source map guarded while its old prop,
-                // balloon, rainbow patch or scripted reward controller is live.
-                if (current_map == source_map) {
+                // On the exact source map, preflight the generated vanilla
+                // prop/spawner identity. The source is retired only after the
+                // permanent bit and numeric counter both commit below.
+                if (current_map == source_map && !coop_collectible_source_ready(id)) {
                     coop_items_wait(g, COOP_TRACE_WAIT_SAME_LEVEL_ITEM, id); continue;
                 }
                 if (gb && id < COOP_MEDAL_FIRST && !isFlagSet(0x1D5 + id - COOP_SNIDE_FIRST, 0)) {
@@ -312,6 +364,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                     }
                 }
             }
+            if (current_map == source_map) coop_collectible_source_retire(id);
             g->previous[id / 32] |= 1u << (id % 32);
             g->save_pending = 1;
         }

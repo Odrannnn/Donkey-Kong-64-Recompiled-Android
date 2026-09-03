@@ -196,6 +196,10 @@ extern s16 func_global_asm_80631C20(u8 level);
 extern s16 D_global_asm_807F6240[];
 extern Prop* D_global_asm_807F6000;
 extern s16 func_global_asm_80659470(s32 object);
+extern ActorSpawner* actor_spawner_pointer;
+extern void func_global_asm_806362C4(s32 object, u8 indexed);
+extern void func_global_asm_806355DC(s32 object, u8 indexed);
+extern void func_global_asm_806896D0(ActorSpawner* spawner);
 extern void func_global_asm_8063DA40(s16 script_slot, s16 state);
 extern void func_global_asm_8063DA78(s16 script_slot, s16 state, s16 state_index);
 extern void func_global_asm_80641874(s16 spawner, s16 state);
@@ -268,6 +272,63 @@ static Gfx* draw_coop_status(Gfx* dl, Actor* unused);
 
 static u32 float_bits(f32 value) { union { f32 f; u32 u; } bits; bits.f = value; return bits.u; }
 static f32 bits_float(u32 value) { union { f32 f; u32 u; } bits; bits.u = value; return bits.f; }
+
+// Exact-source collectible delivery uses the same engine identities and
+// teardown calls as local collection. These checks run before the permanent
+// bit/counter transaction; a modded or missing source therefore fails closed.
+static unsigned coop_collectible_prop_ready(unsigned object, unsigned type) {
+    if (object >= 600 || !D_global_asm_807F6000) return 0;
+    s16 handle = D_global_asm_807F6240[object];
+    if (handle < 0) return 0;
+    s16 prop = func_global_asm_80659470(handle);
+    return prop >= 0 && (unsigned short)D_global_asm_807F6000[prop].unk8A == object
+        && (unsigned short)D_global_asm_807F6000[prop].object_type == type;
+}
+
+static void coop_collectible_prop_retire(unsigned object, unsigned type) {
+    if (!coop_collectible_prop_ready(object, type)) return;
+    s16 handle = D_global_asm_807F6240[object];
+    // Stock model-two collection first detaches its collision record, then
+    // removes the prop and repairs the compact prop/object lookup arrays.
+    func_global_asm_806362C4(handle, 1);
+    func_global_asm_806355DC(handle, 1);
+}
+
+static ActorSpawner* coop_collectible_actor_source(unsigned object, unsigned type) {
+    for (ActorSpawner* spawner = actor_spawner_pointer; spawner; spawner = spawner->next_spawner) {
+        if ((unsigned short)spawner->id != object
+                || (unsigned short)(spawner->actor_type + 0x10) != type) continue;
+        if (spawner->tied_actor && (unsigned short)spawner->tied_actor->unk58 != type) return 0;
+        return spawner;
+    }
+    return 0;
+}
+
+static unsigned coop_collectible_actor_ready(unsigned object, unsigned type) {
+    return coop_collectible_actor_source(object, type) != 0;
+}
+
+static void coop_collectible_actor_retire(unsigned object, unsigned type) {
+    ActorSpawner* spawner = coop_collectible_actor_source(object, type);
+    if (spawner) func_global_asm_806896D0(spawner);
+}
+
+static ActorSpawner* coop_collectible_reward_actor_source(unsigned flag) {
+    for (ActorSpawner* spawner = actor_spawner_pointer; spawner; spawner = spawner->next_spawner) {
+        if ((unsigned short)(spawner->actor_type + 0x10) != ACTOR_GOLDEN_BANANA) continue;
+        // Dynamic reward spawners retain func_806A5DF0's three spawn values in
+        // pad24 even when distance culling has not created the tied actor yet.
+        // Value two is the signed permanent reward flag.
+        f32* spawn = (f32*)spawner->pad24;
+        if ((short)spawn[2] == (short)flag) return spawner;
+    }
+    return 0;
+}
+
+static void coop_collectible_reward_actor_retire(unsigned flag) {
+    ActorSpawner* spawner = coop_collectible_reward_actor_source(flag);
+    if (spawner) func_global_asm_806896D0(spawner);
+}
 
 static unsigned coop_live_world_object_raw_state(unsigned object, unsigned* raw) {
     for (unsigned slot = 0; slot < 600; ++slot) {
