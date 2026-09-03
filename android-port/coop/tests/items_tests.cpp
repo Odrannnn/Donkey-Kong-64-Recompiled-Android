@@ -34,6 +34,7 @@ static unsigned live_calls = 0, live_slot = 0, live_state = 0;
 static unsigned live_reveals = 0, live_reveal_object = 0;
 static unsigned live_mermaid_available = 0, live_mermaid_state = 30;
 static unsigned live_mermaid_progress = 0, live_mermaid_refreshes = 0;
+static unsigned live_trombone_notifications = 0, live_trombone_mode = 0;
 static unsigned char live_raw[0x200]{};
 static void func_global_asm_8063DA40(short slot, short state) {
     ++live_calls; live_slot = (unsigned short)slot; live_state = (unsigned short)state;
@@ -65,6 +66,19 @@ static unsigned coop_live_world_mermaid_refresh(void) {
     live_mermaid_state = flags[0xBF] ? 32 : (pearls == 5 ? 39 : (pearls ? 31 : 30));
     live_mermaid_progress = 0;
     ++live_mermaid_refreshes;
+    return 1;
+}
+static unsigned coop_live_world_isles_trombone_ready(void) {
+    unsigned raw = 0;
+    return coop_live_world_object_raw_state(0x31, &raw) && raw <= 6;
+}
+static unsigned coop_live_world_isles_trombone_refresh(void) {
+    unsigned raw = 0;
+    if (!coop_live_world_object_raw_state(0x31, &raw) || raw > 6) return 0;
+    if (raw >= 3) return 1;
+    ++live_trombone_notifications;
+    live_trombone_mode = 2;
+    live_raw[0x31] = 6;
     return 1;
 }
 static void* D_global_asm_807FD730 = nullptr;
@@ -242,6 +256,7 @@ static void reset_engine() {
     live_reveals = live_reveal_object = 0;
     live_mermaid_available = live_mermaid_refreshes = 0;
     live_mermaid_state = 30; live_mermaid_progress = 0;
+    live_trombone_notifications = live_trombone_mode = 0;
     D_global_asm_80754280 = &hud_object;
 }
 static unsigned main_map_for_level(unsigned level) {
@@ -715,7 +730,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 172);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 173);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -867,6 +882,44 @@ static void world_refresh_checks() {
     coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
     CHECK(flags[0x1A1] && writes == 1 && saves == 1 && live_calls == 1
         && live_slot == 3 && live_state == 0 && !g.refresh_pending);
+
+    // A remotely completed Isles trombone pad sends only the stock rocket-
+    // barrel spawner notification, enters terminal state 6 and disables the
+    // pad. All three idle states are accepted; active reveal states continue.
+    for (unsigned raw = 0; raw <= 2; ++raw) {
+        reset_engine(); current_map = 34; flags[0x1AA] = 1;
+        D_global_asm_807F6240[5] = 0x31; live_raw[0x31] = (unsigned char)raw;
+        CHECK(coop_live_world_refresh(0x1AA));
+        CHECK(live_trombone_notifications == 1 && live_trombone_mode == 2
+            && live_raw[0x31] == 6 && live_calls == 0);
+    }
+    for (unsigned raw = 3; raw <= 6; ++raw) {
+        reset_engine(); current_map = 34; flags[0x1AA] = 1;
+        D_global_asm_807F6240[5] = 0x31; live_raw[0x31] = (unsigned char)raw;
+        CHECK(coop_live_world_refresh(0x1AA));
+        CHECK(!live_trombone_notifications && !live_trombone_mode
+            && live_raw[0x31] == raw && live_calls == 0);
+    }
+    reset_engine(); current_map = 34; flags[0x1AA] = 1;
+    D_global_asm_807F6240[5] = 0x31; live_raw[0x31] = 7;
+    CHECK(!coop_live_world_refresh(0x1AA) && !live_trombone_notifications);
+    reset_engine(); current_map = 34; flags[0x1AA] = 1;
+    CHECK(!coop_live_world_refresh(0x1AA) && !live_trombone_notifications);
+
+    // The network path writes and saves the permanent flag, then applies the
+    // loaded reveal without scheduling a main-map rebuild.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 34; mock_level = 7; D_global_asm_807F6240[4] = 0x31;
+    live_raw[0x31] = 2;
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !g.deferred);
+    r = {}; r.status = 2; r.scope = 1; r.session_lo = 907;
+    unsigned isles_trombone = (unsigned)coop_item_id(0x1AA);
+    CHECK(isles_trombone < COOP_ITEMS);
+    r.apply[isles_trombone / 32] = bit(isles_trombone);
+    coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
+    CHECK(flags[0x1AA] && writes == 1 && saves == 1
+        && live_trombone_notifications == 1 && live_trombone_mode == 2
+        && live_raw[0x31] == 6 && !g.refresh_pending);
 
     // Interior-only structures do not reload an unrelated main map.
     reset_engine(); current_map = 38;

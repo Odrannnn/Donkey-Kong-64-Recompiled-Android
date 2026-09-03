@@ -21,8 +21,9 @@ enum {
     COOP_LIVE_WORLD_CONTINUE_GALLEON = 5,
     COOP_LIVE_WORLD_REVEAL = 6,
     COOP_LIVE_WORLD_MERMAID = 7,
+    COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 172
+    COOP_LIVE_WORLD_STATE_COUNT = 173
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -172,6 +173,12 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 45, 0x0BD, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
     { 45, 0x0BE, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
 
+    // Isles' trombone pad reveals the high rocket barrel through actor spawner
+    // 9. The special adapter skips the cutscene and instrument edge, performs
+    // only the stock completed notification/pad mode, and preserves any local
+    // reveal sequence already active in states 3-6.
+    { 34, 0x1AA, 0x031, 0, COOP_LIVE_WORLD_ISLES_TROMBONE},
+
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
     // target; no interaction, cutscene, destination or second flag is replayed.
@@ -246,6 +253,8 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
                 && !coop_live_world_find_object(state->object, 0)) return 0;
         if (state->mode == COOP_LIVE_WORLD_MERMAID
                 && !coop_live_world_mermaid_ready()) return 0;
+        if (state->mode == COOP_LIVE_WORLD_ISLES_TROMBONE
+                && !coop_live_world_isles_trombone_ready()) return 0;
         if (state->mode == COOP_LIVE_WORLD_CONTINUE_GALLEON) {
             unsigned raw = 0;
             if (!coop_live_world_object_raw_state(state->object, &raw)
@@ -284,6 +293,10 @@ static inline unsigned coop_live_world_refresh(unsigned flag) {
                 || state->mode == COOP_LIVE_WORLD_REQUIRE) continue;
         if (state->mode == COOP_LIVE_WORLD_MERMAID) {
             if (!coop_live_world_mermaid_refresh()) return 0;
+            continue;
+        }
+        if (state->mode == COOP_LIVE_WORLD_ISLES_TROMBONE) {
+            if (!coop_live_world_isles_trombone_refresh()) return 0;
             continue;
         }
         if (state->mode == COOP_LIVE_WORLD_REVEAL) {

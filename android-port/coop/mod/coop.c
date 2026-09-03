@@ -198,6 +198,7 @@ extern Prop* D_global_asm_807F6000;
 extern s16 func_global_asm_80659470(s32 object);
 extern void func_global_asm_8063DA40(s16 script_slot, s16 state);
 extern void func_global_asm_8063DA78(s16 script_slot, s16 state, s16 state_index);
+extern void func_global_asm_80641874(s16 spawner, s16 state);
 extern s8 D_global_asm_807FC8C0[16];
 extern void playActorAnimation(Actor* actor, s32 animation);
 extern void func_global_asm_80614D00(Actor* actor, f32 speed, f32 start);
@@ -290,6 +291,33 @@ static unsigned coop_live_world_reveal_object(unsigned object) {
         script->unk60 = 1;
         script->unk62 = 0xFF;
         script->unk66 = 0xFF;
+        return 1;
+    }
+    return 0;
+}
+
+// Isles object 0x31 is the trombone pad which reveals Diddy's high rocket
+// barrel. Its stock completion sends actor-spawner notification (9, 0), leaves
+// the script in state 6 and selects pad mode 2. A remote permanent flag may
+// perform those exact final operations only while the local sequence is idle;
+// states 3-6 already own their cutscene/reveal path and must continue untouched.
+static unsigned coop_live_world_isles_trombone_ready(void) {
+    unsigned raw = 0;
+    return coop_live_world_object_raw_state(0x31, &raw) && raw <= 6;
+}
+
+static unsigned coop_live_world_isles_trombone_refresh(void) {
+    for (unsigned slot = 0; slot < 600; ++slot) {
+        if ((unsigned short)D_global_asm_807F6240[slot] != 0x31) continue;
+        s16 prop = func_global_asm_80659470(D_global_asm_807F6240[slot]);
+        if (prop < 0 || !D_global_asm_807F6000 || !D_global_asm_807F6000[prop].unk7C) return 0;
+        Prop_ScriptData* script = D_global_asm_807F6000[prop].unk7C;
+        unsigned raw = (unsigned short)script->unk48[0];
+        if (raw > 6) return 0;
+        if (raw >= 3) return 1;
+        func_global_asm_80641874(9, 0);
+        script->unk48[0] = 6;
+        script->unk54 = 2;
         return 1;
     }
     return 0;
