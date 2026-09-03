@@ -462,6 +462,23 @@ static unsigned coop_live_world_mushroom_switch_refresh(unsigned object) {
     return 1;
 }
 
+// The rabbit recomputes the round-one completion flag at the start of every
+// actor tick. No state rewrite is needed while it is idle; an active race,
+// finish or reward sequence delays the flag so its local round cannot change.
+static unsigned coop_live_world_rabbit_ready(void) {
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (actor && actor->unk58 == ACTOR_RABBIT_RACE
+                && (actor->object_properties_bitfield & 0x10)
+                && actor->control_state != 0x1E && actor->control_state != 0x40) return 0;
+    }
+    return 1;
+}
+
+static unsigned coop_live_world_rabbit_refresh(void) {
+    return coop_live_world_rabbit_ready();
+}
+
 // The Mermaid is an actor rather than an instance-script prop. Her vanilla
 // initializer selects state 30 (no pearls), 31 (partial set), 39 (all five),
 // or 32 (reward already owned). Re-selecting one of those entry states after a

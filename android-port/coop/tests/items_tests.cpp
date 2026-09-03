@@ -39,6 +39,7 @@ static unsigned live_llama_available = 0, live_llama_state = 0;
 static unsigned live_llama_progress = 0, live_llama_deleted = 0;
 static unsigned live_seal_cage_available = 0, live_seal_cage_state = 0, live_seal_cage_progress = 0;
 static unsigned live_seal_race_available = 0, live_seal_race_state = 0, live_seal_race_progress = 0;
+static unsigned live_rabbit_available = 0, live_rabbit_state = 0;
 static unsigned char live_raw[0x200]{};
 static void func_global_asm_8063DA40(short slot, short state) {
     ++live_calls; live_slot = (unsigned short)slot; live_state = (unsigned short)state;
@@ -144,6 +145,12 @@ static unsigned coop_live_world_mushroom_switch_refresh(unsigned object) {
         if (count > board_state) func_global_asm_8063DA40((short)board_slot, (short)count);
     }
     return 1;
+}
+static unsigned coop_live_world_rabbit_ready(void) {
+    return !live_rabbit_available || live_rabbit_state == 0x1E || live_rabbit_state == 0x40;
+}
+static unsigned coop_live_world_rabbit_refresh(void) {
+    return coop_live_world_rabbit_ready();
 }
 static void* D_global_asm_807FD730 = nullptr;
 static unsigned pickups[1700]{};
@@ -324,6 +331,7 @@ static void reset_engine() {
     live_llama_available = live_llama_state = live_llama_progress = live_llama_deleted = 0;
     live_seal_cage_available = live_seal_cage_state = live_seal_cage_progress = 0;
     live_seal_race_available = live_seal_race_state = live_seal_race_progress = 0;
+    live_rabbit_available = live_rabbit_state = 0;
     D_global_asm_80754280 = &hud_object;
 }
 static unsigned main_map_for_level(unsigned level) {
@@ -809,7 +817,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 261);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 262);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -883,6 +891,13 @@ static void world_refresh_checks() {
     CHECK(!coop_live_world_refresh(0x0E6) && live_calls == 0);
     reset_engine(); current_map = 48;
     CHECK(coop_live_world_refresh(0x0EA) && live_calls == 0);
+
+    // The rabbit consumes the new round flag itself on its next idle tick.
+    // Applying it during a race would change that race's speed/reward branch.
+    reset_engine(); current_map = 48; live_rabbit_available = 1; live_rabbit_state = 0x1E;
+    CHECK(coop_live_world_refresh(0x0F8) && live_calls == 0 && live_rabbit_state == 0x1E);
+    live_rabbit_state = 2;
+    CHECK(!coop_live_world_refresh(0x0F8) && live_calls == 0 && live_rabbit_state == 2);
 
     // Factory storage's three box scripts replay as one atomic completion.
     reset_engine(); current_map = 26;
