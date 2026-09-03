@@ -1,4 +1,4 @@
-> Current source: 0.70.0, protocol/native ABI v70. The complete Linux
+> Current source: 0.71.0, protocol/native ABI v71. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -2876,3 +2876,39 @@ the existing save-and-reload path, preventing a partially closed portal.
 The live table now contains 25 unique permanent flags and 73 object rows.
 Packet and bridge sizes remain unchanged. Protocol 70, compatibility
 `0x00010246`, v70 exports and manifest 0.70.0 reject older peers and companions.
+
+## Live structures and machines (0.71.0)
+
+The pinned US-ROM audit expands the live table to 62 unique permanent flags and
+155 rows. Besides direct terminal-state rows, the table now has three bounded
+actions: replay state 0 so the loaded script runs its own saved-complete
+initializer, require a linked object without changing it, and acknowledge an
+audited main-map no-op when the flag has no loaded consumer there. Every unit is
+preflighted before any script state changes, preventing partial local updates.
+
+The replay set covers the Japes Rambi wall, Aztec tunnel and Tiny Temple ice,
+Factory grates and storage box, Galleon gates and chests, Caves ice walls,
+Castle tree/basement/crypt structures, Fungi mill boxes, the mushroom board and
+the Castle toolshed box. The vanilla positive initializer performs the local
+model, collision, linked-region, pause and reveal setup. These branches contain
+no reward grant, transition, cutscene start or further permanent flag write.
+All replay, permanent-only, dependency and no-op rows are excluded from the
+same-area transient script channel.
+
+Factory's entry hatch and production controllers, Fungi's pulley and conveyor,
+and Galleon's ship/lighthouse pair use audited controller states. Factory
+production requires all thirteen child scripts before its two controllers are
+woken. Galleon's pair can restart at state 0 only when both raw states are still
+0; an active local activation sequence returns to the established reload path.
+The Isles boulder, pearl actors and Helm shutdown remain outside this live set
+because their completion paths require inverse object operations, reward/NPC
+chains, or more than twenty conditional controllers.
+
+Reviewed interiors can accept only an incoming world ID whose flag has a table
+unit in the exact current map. Numeric inventory, rewards, purchases, unrelated
+progress and all non-table world flags remain deferred. An interior unit must
+resolve all scripts before the permanent flag is written, then it is saved
+through the isolated item-save path. Main maps retain the reload fallback when
+a reviewed component is unexpectedly missing. Packet and bridge sizes remain
+unchanged. Protocol 71, compatibility `0x00010247`, v71 exports and manifest
+0.71.0 reject older peers and companions.

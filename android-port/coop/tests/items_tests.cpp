@@ -650,7 +650,7 @@ static void world_refresh_checks() {
     current_map = 7; mock_level = 0; D_global_asm_807F6240[4] = 0x1A; D_global_asm_807F6240[9] = 0x1B;
     coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
     r = {}; r.status = 2; r.scope = 1; r.session_lo = 902;
-    unsigned first_gate = COOP_WORLD_FIRST + COOP_WORLD_FIRST_GATE;
+    unsigned first_gate = (unsigned)COOP_WORLD_FIRST + (unsigned)COOP_WORLD_FIRST_GATE;
     r.apply[first_gate / 32] = bit(first_gate); coop_items_receive(&g, r);
     g.refresh_enabled = 1; coop_items_apply(&g, 1);
     CHECK(flags[0] && writes == 1 && saves == 1 && live_calls == 2 && live_slot == 9
@@ -1050,7 +1050,7 @@ static void live_checks() {
     }
     pump(400);
     for (unsigned retry = 0; retry < 300 && (h.result.status != 3 || g.result.status != 3); ++retry) pump(1);
-    CHECK(h.result.status == 3 && g.result.status == 3 && hw == 1070 + (COOP_ITEMS - COOP_PROGRESSION_FIRST) && !any(g.input.request));
+    CHECK(h.result.status == 3 && g.result.status == 3 && hw == 1070 + ((unsigned)COOP_ITEMS - (unsigned)COOP_PROGRESSION_FIRST) && !any(g.input.request));
     for (unsigned id = 0; id < COOP_ITEMS; ++id) CHECK(coop_item_has(ho, id) && coop_item_has(go, id));
     ho[4] &= ~0x80000000u; pump(100); CHECK(h.result.status == 4 && g.result.status == 4);
     CHECK(!(ho[4] & 0x80000000u) && !any(h.result.apply) && !any(g.result.apply));

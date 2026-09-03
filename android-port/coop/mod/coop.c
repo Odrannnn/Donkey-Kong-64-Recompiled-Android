@@ -17,7 +17,7 @@
 
 typedef struct { CoopGateInput gate; CoopCombatFrame combat; CoopItemInput items; CoopWorldInput world; CoopTransientInput transient; CoopTraceInput trace; } CoopExtraInput;
 typedef struct { CoopGateResult gate; CoopCombatResult combat; CoopItemResult items; CoopWorldResult world; CoopTransientResult transient; } CoopExtraResult;
-_Static_assert(sizeof(CoopExtraInput) == 2868 && sizeof(CoopExtraResult) == 3476, "v70 bridge ABI");
+_Static_assert(sizeof(CoopExtraInput) == 2868 && sizeof(CoopExtraResult) == 3476, "v71 bridge ABI");
 _Static_assert(sizeof(CoopCharacterProgress) == 0x5E && __builtin_offsetof(CoopCharacterProgress, golden_bananas) == 0x42
     && __builtin_offsetof(CoopCharacterProgress, coins) == 0x6
     && __builtin_offsetof(CoopCharacterProgress, coloured_bananas) == 0xA
@@ -162,10 +162,10 @@ _Static_assert(COOP_TROFF_FIRST == 2394 && COOP_TROFF_END == 5894 && COOP_JAPES_
 
 RECOMP_IMPORT(".", u32 dk64_coop_start(u32 role, const char* ip, u32 port, u32 room));
 RECOMP_IMPORT(".", u32 dk64_coop_local_ipv4(void));
-RECOMP_IMPORT(".", u32 dk64_coop_recovery_configure_v70(const char* save_path, u32 profile, u32 save_kind, u32 room));
-RECOMP_IMPORT(".", u32 dk64_coop_recovery_status_v70(void));
-RECOMP_IMPORT(".", u32 dk64_coop_recovery_promote_v70(void));
-RECOMP_IMPORT(".", u32 dk64_coop_tick_v70(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
+RECOMP_IMPORT(".", u32 dk64_coop_recovery_configure_v71(const char* save_path, u32 profile, u32 save_kind, u32 room));
+RECOMP_IMPORT(".", u32 dk64_coop_recovery_status_v71(void));
+RECOMP_IMPORT(".", u32 dk64_coop_recovery_promote_v71(void));
+RECOMP_IMPORT(".", u32 dk64_coop_tick_v71(const u32* local, u32* remote, const CoopExtraInput* input, CoopExtraResult* result));
 RECOMP_IMPORT(".", void dk64_coop_stop(void));
 
 extern Actor *gPlayerPointer, *gCurrentActorPointer, *gLastSpawnedActor;
@@ -348,7 +348,7 @@ static void coop_select_save(void) {
     unsigned char* save_path = recomp_get_save_file_path();
     u32 save_kind = (using_host_save ? COOP_RECOVERY_SAVE_HOST : 0)
         | (shared_items ? COOP_RECOVERY_SAVE_ITEMS : 0);
-    recovery_storage_status = dk64_coop_recovery_configure_v70((const char*)save_path,
+    recovery_storage_status = dk64_coop_recovery_configure_v71((const char*)save_path,
         save_profile, save_kind, recomp_get_config_u32("room"));
     recomp_free(save_path);
     host_recovery.checkpoint = (recovery_storage_status & COOP_RECOVERY_STORAGE_CHECKPOINT) != 0;
@@ -473,7 +473,7 @@ static u32 coop_promote_guest(void) {
         coop_host_recovery_complete(&host_recovery, 0);
         return 0;
     }
-    if (!dk64_coop_recovery_promote_v70()) {
+    if (!dk64_coop_recovery_promote_v71()) {
         dk64_coop_stop();
         status = coop_start_network(ROLE_JOIN);
         coop_host_recovery_complete(&host_recovery, 0);
@@ -635,7 +635,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     trace.recovery_fingerprint = coop_recovery_fingerprint();
     CoopExtraInput extra = {{0}, combat_input, items.input, world.input, transient_input, trace};
     CoopExtraResult extra_result = {0};
-    status = dk64_coop_tick_v70(local_state, remote_state, &extra, &extra_result);
+    status = dk64_coop_tick_v71(local_state, remote_state, &extra, &extra_result);
     coop_items_receive(&items, extra_result.items);
     coop_world_receive(&world, extra_result.world);
     transient_result = extra_result.transient;
@@ -679,7 +679,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     }
     u32 recovery_command = recomp_get_config_u32("host_recovery");
     if (recovery_command > COOP_RECOVERY_PROMOTE) recovery_command = COOP_RECOVERY_OFF;
-    recovery_storage_status = dk64_coop_recovery_status_v70();
+    recovery_storage_status = dk64_coop_recovery_status_v71();
     if (role == ROLE_HOST && (recovery_storage_status & COOP_RECOVERY_STORAGE_FOLLOWER)) {
         role = ROLE_JOIN; promoted_host = 0; merge_guest_progress = 0;
         host_recovery.promoted = 0; host_recovery.checkpoint = 0;

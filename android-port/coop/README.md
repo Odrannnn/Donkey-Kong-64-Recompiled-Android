@@ -1,6 +1,13 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
+Version **0.71.0** expands live permanent-world application to 62 audited flags
+and 155 loaded-object rows. Breakable walls and grates, chests and boxes, linked
+reveal/setup controllers, and Factory/Galleon/Fungi machines now select exact
+completed states or replay their vanilla saved-complete initializer. Reviewed
+interiors admit only their exact loaded world unit; every component is preflighted
+before an interior flag write, and these permanent replays are excluded from
+temporary script ownership. Main maps with no consumer no longer reload.
 Version **0.70.0** applies the saved boss-portal closure live in all seven main
 levels. After the existing boss-key prerequisite succeeds, every loaded portal
 component enters its terminal vanilla state without a map reload. A missing
@@ -222,8 +229,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.70.0 applies all
-seven boss-portal closures live and keeps the five direct Baboon Blast finish
+**This is experimental, not complete campaign co-op. Version 0.71.0 applies the
+reviewed breakable, container and machine completions live, keeps all seven
+boss-portal closures live, and keeps the five direct Baboon Blast finish
 routes, bidirectional Fungi Owl Race,
 Batty Barrel Bandit, Rabbit Race and Minecart Mayhem success,
 the lobby instrument-pad loops,
@@ -246,7 +254,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.70
+While the native companion is loaded, `tools/query_trace.py` discovers v0.71
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -260,7 +268,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.70.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.71.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -838,7 +846,7 @@ result is written by the transition channel.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v70 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v71 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
