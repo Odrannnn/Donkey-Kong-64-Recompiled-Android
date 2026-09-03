@@ -9,8 +9,8 @@
 #include "transient.hpp"
 
 namespace dkcoop {
-constexpr uint16_t protocol_version = 75;
-constexpr uint32_t compatibility = 0x0001024B; // DK64 US ROM / live structure contract 75.
+constexpr uint16_t protocol_version = 76;
+constexpr uint32_t compatibility = 0x0001024C; // DK64 US ROM / live structure contract 76.
 constexpr size_t item_offset = 104 + COOP_COMBAT_WIRE_WORDS * 4;
 constexpr size_t world_offset = item_offset + COOP_ITEM_WIRE_WORDS * 4;
 // Four new world words reuse the retired Japes-gate wire prefix at bytes

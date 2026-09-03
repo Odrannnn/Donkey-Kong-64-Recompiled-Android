@@ -1,4 +1,4 @@
-> Current source: 0.75.0, protocol/native ABI v75. The complete Linux
+> Current source: 0.76.0, protocol/native ABI v76. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -3006,3 +3006,25 @@ replays exact saved-complete initializers or writes audited terminal controller 
 visibility states. Missing objects and unknown states fail closed and retain the
 reload fallback. Packet and bridge sizes are unchanged. Protocol 75, compatibility
 `0x0001024B`, v75 exports and manifest 0.75.0 reject older peers and companions.
+
+## Deferred world convergence (0.76.0)
+
+Permanent-world application no longer writes a flag and then forces a same-map
+reload when its loaded unit cannot be preflighted. All exact table matches now
+require the complete script, actor and dependency unit before the save bit changes.
+Missing objects, temporarily unavailable actors and unreviewed active script states
+leave the network result unacknowledged and are retried on later stable frames.
+The preflight remains atomic, so no subset of a multi-object unit is changed.
+
+The ten older permanent-world rows without an audited loaded consumer also retain
+their network request while the receiver remains in the affected level. If the
+player leaves before the unit becomes ready, ordinary outside-level application
+writes and saves the flag; vanilla initializes the completed state on the next
+entry. Reversible Galleon water, Fungi day/night and Caves-lobby pressure changes
+use the same ordering: the selected switch must resolve before either the flag or
+save changes. A missing switch is retried or applied after departure.
+
+The frame adapter's automatic same-map transition has been removed. The private
+trace refresh fields remain reserved and zero, preserving bridge layout. Packet and
+bridge sizes are unchanged. Protocol 76, compatibility `0x0001024C`, v76 exports
+and manifest 0.76.0 reject older peers and companions.
