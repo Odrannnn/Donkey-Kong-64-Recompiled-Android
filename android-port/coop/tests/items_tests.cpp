@@ -678,7 +678,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 104);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 122);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -694,6 +694,25 @@ static void world_refresh_checks() {
     reset_engine(); current_map = 72; D_global_asm_807F6240[2] = 0x1F;
     CHECK(coop_live_world_refresh(0x109) && live_calls == 1 && live_state == 0);
     CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[85]));
+
+    // Factory storage's three box scripts replay as one atomic completion.
+    reset_engine(); current_map = 26;
+    D_global_asm_807F6240[1] = 0x61; D_global_asm_807F6240[2] = 0x62;
+    D_global_asm_807F6240[3] = 0x77;
+    CHECK(coop_live_world_refresh(0x078) && live_calls == 3 && live_state == 0);
+    CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[104]));
+
+    // The front-mill box requires its linked controller but does not reset it;
+    // the box initializer itself wakes that controller in vanilla.
+    reset_engine(); current_map = 61; D_global_asm_807F6240[1] = 0x06;
+    CHECK(!coop_live_world_refresh(0x0DA) && live_calls == 0);
+    D_global_asm_807F6240[2] = 0x02;
+    CHECK(coop_live_world_refresh(0x0DA) && live_calls == 1 && live_state == 0);
+
+    // Receiving that interior-only flag in Fungi's main map is an audited
+    // no-op, avoiding a reload that cannot affect any loaded script.
+    reset_engine(); current_map = 48;
+    CHECK(coop_live_world_refresh(0x0DA) && live_calls == 0);
 
     // A reviewed ordinary interior may accept only its exact loaded world
     // unit. The flag, replay and isolated save complete without a map reload.

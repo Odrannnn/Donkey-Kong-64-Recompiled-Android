@@ -19,7 +19,7 @@ enum {
     COOP_LIVE_WORLD_REQUIRE = 3,
     COOP_LIVE_WORLD_NOOP = 4,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 104
+    COOP_LIVE_WORLD_STATE_COUNT = 122
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20}, { 7, 0x000, 0x01B, 20},
@@ -93,6 +93,28 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     {187, 0x144, 0x003,  0, COOP_LIVE_WORLD_REPLAY},
     {194, 0x198, 0x000,  0, COOP_LIVE_WORLD_REPLAY},
     {194, 0x199, 0x001,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Chests, boxes and their completion controllers. The state-0 replays run
+    // only the saved-complete initializer, never the interaction/reward path.
+    { 26, 0x078, 0x061,  0, COOP_LIVE_WORLD_REPLAY},
+    { 26, 0x078, 0x062,  0, COOP_LIVE_WORLD_REPLAY},
+    { 26, 0x078, 0x077,  0, COOP_LIVE_WORLD_REPLAY},
+    { 30, 0x0B3, 0x00D,  0, COOP_LIVE_WORLD_REPLAY},
+    // This exact initializer also creates the vanilla fairy reveal controller.
+    { 30, 0x0B4, 0x045,  0, COOP_LIVE_WORLD_REPLAY},
+    { 30, 0x0B5, 0x043,  0, COOP_LIVE_WORLD_REPLAY},
+    { 30, 0x0B5, 0x00E,  0, COOP_LIVE_WORLD_REPLAY},
+    { 61, 0x0DA, 0x006,  0, COOP_LIVE_WORLD_REPLAY},
+    { 61, 0x0DA, 0x002,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 48, 0x0DA, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 62, 0x0DE, 0x001,  0, COOP_LIVE_WORLD_REPLAY},
+    { 48, 0x0DE, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 48, 0x0DF, 0x02D,  0, COOP_LIVE_WORLD_REPLAY},
+    { 62, 0x0DF, 0x003,  0, COOP_LIVE_WORLD_REPLAY},
+    { 64, 0x0E5, 0x00B,  0, COOP_LIVE_WORLD_REPLAY},
+    { 48, 0x0E5, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    {166, 0x141, 0x005,  0, COOP_LIVE_WORLD_REPLAY},
+    { 87, 0x141, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
 };
 
 // Portal rows exist only to apply an accepted permanent flag. Their ordinary
