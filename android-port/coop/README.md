@@ -298,11 +298,14 @@ endpoint reports protocol/session identity, role, current map and epoch,
 connection age, item/world/event/combat status, and the local reason a pending
 item cannot apply. Schema 2 also reports both transition tickets with decoded
 source/destination/exit values and the bounded local, remote and applied
-same-area record arrays. It never returns ROM data, save bytes, arbitrary memory, or
-configuration secrets. Requests are accepted only from loopback or private IPv4
-addresses and replies are bounded JSON. The trace worker answers from a cached
-snapshot, so pausing emulation does not make diagnostics disappear and the
-worker never accesses game memory itself.
+same-area record arrays. It never returns ROM data, save bytes, arbitrary
+memory, or configuration secrets. Requests are accepted only from loopback or
+private IPv4 addresses and replies are bounded JSON. The trace worker answers
+from a cached snapshot, so pausing emulation does not make diagnostics
+disappear and the worker never accesses game memory itself.
+
+See [GAMEPLAY-TRACE-AUDIT.md](GAMEPLAY-TRACE-AUDIT.md) for the retained-capture
+result, static candidate list, safety exclusions and acceptance rule.
 
 ## Install and connect
 
