@@ -919,7 +919,11 @@ transitions outside the 169-route reviewed ordinary-route allowlist and five
 direct Baboon Blast finish routes
 and world progression outside the allowlist are **not synchronized**. The remote
 shot visuals cannot themselves hit enemies or switches.
-Full Tag Anywhere compatibility is not established.
+Tag Anywhere 1.0.1 is source-audited as compatible with independent Kong
+choices on either or both peers. Local model/index coherence is checked before
+publishing presence, and retained old-Kong projectile samples are cleared on a
+tag. Two-device gameplay certification is still pending; see
+[TAG-ANYWHERE-COMPATIBILITY.md](TAG-ANYWHERE-COMPATIBILITY.md).
 
 ## Validation history and gameplay checklist
 

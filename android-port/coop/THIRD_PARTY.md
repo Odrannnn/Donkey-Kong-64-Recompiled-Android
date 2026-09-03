@@ -10,8 +10,11 @@
   https://github.com/Zelda64Recomp/MMRecompModTemplate at
   `0c3e82c919dc16993ccc32f1dacb8b74ad19f8ac`, CC0-1.0.
   Unmodified copies and original license are in `vendor/recomp/`.
-- DK64 Tag Anywhere was inspected as an example of DK64 frame-event usage:
-  https://github.com/Killklli/DK64TagAnywhereRecomp. Its gameplay code is not bundled here.
+- DK64 Tag Anywhere 1.0.1 at
+  `b7e009133ba3d716a0d214a5fe0131b828f35e18` was inspected for frame-event,
+  player-swap, save and mod-conflict compatibility:
+  https://github.com/Killklli/DK64TagAnywhereRecomp. Its gameplay code is not
+  bundled here.
 - Windows cross-compiler: official llvm-mingw release 20260826,
   https://github.com/mstorsjo/llvm-mingw/releases/tag/20260826,
   `llvm-mingw-20260826-ucrt-ubuntu-22.04-x86_64.tar.xz`.
