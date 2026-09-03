@@ -730,7 +730,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 173);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 175);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -774,6 +774,15 @@ static void world_refresh_checks() {
         D_global_asm_807F6240[object + 1] = (short)object;
     CHECK(coop_live_world_refresh(0x06F) && live_calls == 2 && live_state == 0);
     CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[122]));
+
+    // Aztec lobby applies the accepted permanent panel flag through both
+    // vanilla saved-complete initializers as one loaded-map transaction.
+    reset_engine(); current_map = 173;
+    D_global_asm_807F6240[1] = 0x10; D_global_asm_807F6240[2] = 0x0F;
+    CHECK(coop_live_world_refresh(0x18F) && live_calls == 2
+        && live_slot == 2 && live_state == 0);
+    reset_engine(); current_map = 173; D_global_asm_807F6240[1] = 0x10;
+    CHECK(!coop_live_world_refresh(0x18F) && live_calls == 0);
 
     // The Isles boulder applies both exact terminal controller states and the
     // inverse of object 0x56's visibility gate as one reviewed loaded unit.
