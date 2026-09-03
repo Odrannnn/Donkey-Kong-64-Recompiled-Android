@@ -1,4 +1,4 @@
-> Current source: 0.74.0, protocol/native ABI v74. The complete Linux
+> Current source: 0.75.0, protocol/native ABI v75. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -2981,3 +2981,28 @@ changed.
 The live table now contains 73 unique permanent flags and 173 rows. Packet and
 bridge sizes remain unchanged. Protocol 74, compatibility `0x0001024A`, v74
 exports and manifest 0.74.0 reject older peers and companions.
+
+## Complete permanent-world live application (0.75.0)
+
+All 82 expansion permanent-world flags now have reviewed loaded-map consumers.
+Together with the earlier lanes, the table covers 90 unique permanent flags through
+239 rows. The new lobby and island group covers Factory platform `0x18D`, Aztec
+stone panel and encounter platform `0x18F/0x190`, Galleon door `0x191`, Fungi gun
+order `0x195`, Helm coconut route `0x197`, and Fairy Island Rareware room `0x189`.
+The Caves and Castle group covers the igloo balloon pad and five-pad reveal,
+encounter clear, ballroom clear and tower balloon pad (`0x118`, `0x128`, `0x12C`,
+`0x130`, `0x133`).
+
+Helm shutdown `0x302` preflights all 21 saved-complete consumers plus five linked
+medal-barrier dependencies before scheduling any replay. The coin and crown doors
+(`0x303/0x304`) use their exact saved-complete branches. Aztec's beetle tower
+`0x35` replays the four gongs and tower while explicitly restoring the loaded GB
+prop's positive visibility. Temple-totem completion `0x37` atomically preflights
+and replays all seven scripts. Visibility inverses use explicit reveal operations;
+linked setup requirements are checked before any state is changed.
+
+The adapter still refuses active interaction, cutscene and reward paths. It only
+replays exact saved-complete initializers or writes audited terminal controller and
+visibility states. Missing objects and unknown states fail closed and retain the
+reload fallback. Packet and bridge sizes are unchanged. Protocol 75, compatibility
+`0x0001024B`, v75 exports and manifest 0.75.0 reject older peers and companions.
