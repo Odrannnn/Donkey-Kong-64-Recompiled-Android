@@ -1,7 +1,7 @@
 # Tag Anywhere compatibility
 
 Audit date: 2026-09-03  
-Co-op version: 0.78.0 development branch  
+Co-op version: 0.78.1
 Tag Anywhere source: 1.0.1, commit
 `b7e009133ba3d716a0d214a5fe0131b828f35e18`
 

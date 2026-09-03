@@ -1,6 +1,10 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
+Version **0.78.1** exposes actionable schema-2 transition and transient traces,
+documents a source audit against Tag Anywhere 1.0.1, requires the live player
+model to match the selected Kong before publishing presence, and clears retained
+old-Kong projectile samples after a local tag. Protocol and native ABI remain v78.
 Version **0.78.0** makes every reviewed same-area trigger and ordered puzzle
 step bidirectional through host validation. Eighteen audited temporary passages
 retain one activation per room visit for late peers, Tiny Temple keeps its full
@@ -258,7 +262,7 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.78.0 retains the ten
+**This is experimental, not complete campaign co-op. Version 0.78.1 retains the ten
 original Aztec/Galleon/Fungi unlocks audited live consumers, and retains the 0.76.0
 deferred retry policy for missing or unrecognized loaded units. All 82 expansion
 permanent-world flags are covered live through 90 unique flags and 263 audited
@@ -309,7 +313,7 @@ result, static candidate list, safety exclusions and acceptance rule.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.78.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.78.1** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.

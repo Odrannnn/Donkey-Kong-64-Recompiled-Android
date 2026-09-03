@@ -1,7 +1,7 @@
 # Gameplay blocker audit
 
 Audit date: 2026-09-03  
-Co-op version audited: 0.78.0  
+Co-op version audited: 0.78.1
 Protocol version: 78
 
 ## Runtime evidence

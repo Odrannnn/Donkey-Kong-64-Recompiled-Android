@@ -152,7 +152,7 @@ int main() {
             response.size(), (unsigned long long)session.statistics().trace_queries,
             (unsigned long long)session.statistics().trace_rejected, response.c_str());
     CHECK(response.starts_with("{\"schema\":2,"));
-    CHECK(response.find("\"mod\":\"0.78.0\"") != std::string::npos);
+    CHECK(response.find("\"mod\":\"0.78.1\"") != std::string::npos);
     CHECK(response.find("\"role\":\"host\"") != std::string::npos);
     CHECK(response.find("\"lan_discovery\":true") != std::string::npos);
     CHECK(response.find("\"room_fingerprint\":"

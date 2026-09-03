@@ -1,4 +1,4 @@
-> Current source: 0.78.0, protocol/native ABI v78. The complete Linux
+> Current source: 0.78.1, protocol/native ABI v78. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -3154,3 +3154,23 @@ host arbitration and an applied result while preserving the endpoint's cached,
 read-only design. It still cannot discover an object absent from the reviewed
 game adapter; those require a concrete gameplay report or separate ROM audit.
 Packet layout, bridge ABI, protocol 78 and gameplay behavior are unchanged.
+
+## Tag Anywhere compatibility hardening (0.78.1)
+
+The co-op source was audited against Tag Anywhere 1.0.1 at commit
+`b7e009133ba3d716a0d214a5fe0131b828f35e18`. Both mods use ordinary
+`dk64recomp_every_frame` callbacks and separate state; Tag Anywhere does not
+replace a function or subscribe to the co-op map-load, EEPROM-load or flag
+events. A same-toolchain MIPS compile and link also verifies that both mods can
+be built against the prepared upstream 1.0.2 headers.
+
+Presence capture now requires the live player model to agree with
+`current_character_index[0]`. After a local tag, co-op clears its retained
+six-frame projectile sample window so an orange or shot from the previous Kong
+cannot be republished under the new Kong. Tag Anywhere still owns the local tag
+and co-op resumes ordinary capture on the first coherent post-tag frame.
+
+Trace schema 2 accompanies this audit with decoded transition tickets and the
+local, remote and apply-result transient records needed to diagnose a concrete
+same-area compatibility failure. Packet layout, bridge ABI, protocol 78 and
+v78 exports remain unchanged.
