@@ -88,7 +88,18 @@ int main() {
     sockaddr_in target{}; target.sin_family = AF_INET; target.sin_port = htons(session.trace_port());
     CHECK(inet_pton(AF_INET, "127.0.0.1", &target.sin_addr) == 1);
 
-    dkcoop::State player{34, 7, 2, dkcoop::active, 1, 2, 3, 4, 5, 6};
+    dkcoop::State player{34, 7, 2, dkcoop::active, 1, 2, 3, 4, 5, 6,
+        7, 0x0000A922u}; // Japes -> Japes lobby, exit 0.
+    dkcoop::State peer{34, 8, 3, dkcoop::active, 7, 8, 9, 10, 11, 12,
+        9, 0x000222A9u}; // Japes lobby -> Japes, exit 2.
+    CoopTransientInput local_transient{};
+    local_transient.enabled = 1; local_transient.file = 0; local_transient.map = 34;
+    local_transient.epoch = 7; local_transient.revision = 11; local_transient.count = 1;
+    local_transient.records[0] = {COOP_TRANSIENT_TRIGGER, 0x5D, 1, 10};
+    CoopTransientInput peer_transient{};
+    peer_transient.enabled = 1; peer_transient.file = 0; peer_transient.map = 34;
+    peer_transient.epoch = 8; peer_transient.revision = 12; peer_transient.count = 1;
+    peer_transient.records[0] = {COOP_TRANSIENT_TRIGGER, 0x5D, 2, 10};
     CoopTraceInput trace{}; trace.version = COOP_TRACE_VERSION;
     trace.flags = COOP_TRACE_PLAYING | COOP_TRACE_ITEM_SAFE_MAP | COOP_TRACE_HUD_READY
         | COOP_TRACE_RECOVERY_CHECKPOINT | COOP_TRACE_PROMOTED_HOST;
@@ -96,10 +107,28 @@ int main() {
     trace.item_wait_reason = COOP_TRACE_WAIT_SAME_LEVEL_ITEM; trace.item_wait_id = 160;
     trace.recovery_state = 7;
 
+    uint64_t now = dkcoop::clock_ms();
+    for (unsigned attempt = 0; attempt < 200
+            && (session.status() != dkcoop::Status::connected
+                || second.status() != dkcoop::Status::connected); ++attempt) {
+        now += 10;
+        session.tick(player, now, {}, {}, {}, {}, local_transient, trace);
+        second.tick(peer, now, {}, {}, {}, {}, peer_transient, {});
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+    CHECK(session.status() == dkcoop::Status::connected
+        && second.status() == dkcoop::Status::connected);
+    for (unsigned attempt = 0; attempt < 20; ++attempt) {
+        now += 10;
+        session.tick(player, now, {}, {}, {}, {}, local_transient, trace);
+        second.tick(peer, now, {}, {}, {}, {}, peer_transient, {});
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
+    }
+
     const char malformed[] = "DK64COOP_TRACE_V0";
     CHECK(sendto(query, malformed, int(sizeof(malformed) - 1), 0,
         reinterpret_cast<const sockaddr*>(&target), sizeof(target)) == int(sizeof(malformed) - 1));
-    session.tick(player, dkcoop::clock_ms(), {}, {}, {}, {}, {}, trace);
+    session.tick(player, ++now, {}, {}, {}, {}, local_transient, trace);
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
     CHECK(no_packet(query));
 
@@ -109,13 +138,20 @@ int main() {
     std::string response;
     // The trace worker must answer from the last immutable snapshot even when
     // the emulator/game thread is paused and Session::tick is not running.
-    for (unsigned attempt = 0; attempt < 100 && response.empty(); ++attempt) {
-        char buffer[4096];
+    // Give the UDP worker a scheduling point before polling the nonblocking
+    // client. Some host schedulers otherwise delay it behind the receive loop.
+    std::this_thread::sleep_for(std::chrono::milliseconds(250));
+    for (unsigned attempt = 0; attempt < 1000 && response.empty(); ++attempt) {
+        char buffer[8192];
         int count = int(recvfrom(query, buffer, sizeof(buffer), 0, nullptr, nullptr));
         if (count > 0) response.assign(buffer, size_t(count));
         else std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
-    CHECK(response.starts_with("{\"schema\":1,"));
+    if (!response.starts_with("{\"schema\":2,"))
+        std::fprintf(stderr, "TRACE RESPONSE %zu queries=%llu rejected=%llu: %.120s\n",
+            response.size(), (unsigned long long)session.statistics().trace_queries,
+            (unsigned long long)session.statistics().trace_rejected, response.c_str());
+    CHECK(response.starts_with("{\"schema\":2,"));
     CHECK(response.find("\"mod\":\"0.78.0\"") != std::string::npos);
     CHECK(response.find("\"role\":\"host\"") != std::string::npos);
     CHECK(response.find("\"lan_discovery\":true") != std::string::npos);
@@ -123,6 +159,16 @@ int main() {
         + std::to_string(uint32_t(123456u * 2654435761u)) + ",\"local_ip\":\"") != std::string::npos);
     CHECK(response.find("\"authority\":{\"term\":\"0\",\"node\":\"") != std::string::npos);
     CHECK(response.find("\"map\":34") != std::string::npos);
+    CHECK(response.find("\"transition\":{\"local\":{\"ticket\":7,\"route\":43298,\"source\":34,\"destination\":169,\"exit\":0}")
+        != std::string::npos);
+    CHECK(response.find("\"remote\":{\"ticket\":9,\"route\":139945,\"source\":169,\"destination\":34,\"exit\":2}")
+        != std::string::npos);
+    CHECK(response.find("\"local\":{\"enabled\":1,\"file\":0,\"map\":34,\"epoch\":7,\"revision\":11,\"count\":1,\"records\":[{\"kind\":5,\"key\":93,\"state\":1,\"value\":10}]")
+        != std::string::npos);
+    CHECK(response.find("\"remote\":{\"enabled\":1,\"file\":0,\"map\":34,\"epoch\":8,\"revision\":12,\"count\":1,\"records\":[{\"kind\":5,\"key\":93,\"state\":2,\"value\":10}]")
+        != std::string::npos);
+    CHECK(response.find("\"result\":{\"status\":2,\"map\":34,\"epoch\":7,\"count\":1,\"records\":[{\"kind\":5,\"key\":93,\"state\":2,\"value\":10}]")
+        != std::string::npos);
     CHECK(response.find("\"wait_reason\":\"same_level_item\"") != std::string::npos);
     CHECK(response.find("\"wait_item_id\":160") != std::string::npos);
     CHECK(response.find("\"recovery\":{\"checkpoint\":true,\"promoted_host\":true,\"state\":7}")

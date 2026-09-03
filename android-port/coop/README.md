@@ -290,13 +290,15 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.71
+While the native companion is loaded, `tools/query_trace.py` discovers current
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
 endpoint reports protocol/session identity, role, current map and epoch,
 connection age, item/world/event/combat status, and the local reason a pending
-item cannot apply. It never returns ROM data, save bytes, arbitrary memory, or
+item cannot apply. Schema 2 also reports both transition tickets with decoded
+source/destination/exit values and the bounded local, remote and applied
+same-area record arrays. It never returns ROM data, save bytes, arbitrary memory, or
 configuration secrets. Requests are accepted only from loopback or private IPv4
 addresses and replies are bounded JSON. The trace worker answers from a cached
 snapshot, so pausing emulation does not make diagnostics disappear and the

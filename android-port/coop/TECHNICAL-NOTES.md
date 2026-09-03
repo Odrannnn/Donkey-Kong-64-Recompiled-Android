@@ -3139,3 +3139,18 @@ instrument input or selecting Helm's timer, barrel rooms, final lever or ending.
 Packet and bridge sizes remain unchanged. Protocol 78, compatibility
 `0x0001024E`, v78 exports and manifest 0.78.0 prevent one-way older clients from
 connecting to the host-arbitrated room-action behavior.
+
+## Actionable gameplay trace records (0.78.0)
+
+Trace schema 2 exposes the state already held by the native session without
+adding a wire field or reading game memory from the trace worker. The local and
+remote transition tickets include their packed route and decoded source,
+destination and signed exit. Same-area diagnostics include the local input,
+remote wire snapshot and apply result with their file, map, epoch, revision and
+all eight bounded `(kind, key, state, value)` records.
+
+This distinguishes map/file/epoch disagreement, a missed trigger observation,
+host arbitration and an applied result while preserving the endpoint's cached,
+read-only design. It still cannot discover an object absent from the reviewed
+game adapter; those require a concrete gameplay report or separate ROM audit.
+Packet layout, bridge ABI, protocol 78 and gameplay behavior are unchanged.

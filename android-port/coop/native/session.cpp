@@ -98,6 +98,27 @@ const char* wait_name(uint32_t reason) {
         default: return "unknown";
     }
 }
+void append_transient_records(std::ostringstream& out, const CoopTransientRecord* records,
+        uint32_t count) {
+    out << '[';
+    const uint32_t bounded_count = count <= COOP_TRANSIENT_RECORDS
+        ? count : COOP_TRANSIENT_RECORDS;
+    for (uint32_t i = 0; i < bounded_count; ++i) {
+        if (i) out << ',';
+        out << "{\"kind\":" << records[i].kind << ",\"key\":" << records[i].key
+            << ",\"state\":" << records[i].state << ",\"value\":" << records[i].value << '}';
+    }
+    out << ']';
+}
+void append_transition(std::ostringstream& out, const State& state) {
+    const uint32_t exit_byte = (state.transition_route >> 16) & 0xFFu;
+    const int exit = exit_byte >= 128 ? int(exit_byte) - 256 : int(exit_byte);
+    out << "{\"ticket\":" << state.transition_ticket
+        << ",\"route\":" << state.transition_route
+        << ",\"source\":" << (state.transition_route & 0xFFu)
+        << ",\"destination\":" << ((state.transition_route >> 8) & 0xFFu)
+        << ",\"exit\":" << exit << '}';
+}
 bool usable_ipv4(uint32_t address) {
     const uint32_t first = address >> 24;
     return address && address != 0xFFFFFFFFu && first != 127 && first < 224
@@ -210,12 +231,13 @@ std::vector<sockaddr_in> discovery_broadcasts(uint16_t port) {
 }
 
 struct TraceWorker {
+    static constexpr size_t response_limit = 8192;
     Socket socket = invalid_socket;
     uint16_t port = 0;
     std::atomic<bool> stopping{false};
     std::atomic<uint64_t> queries{0}, rejected{0};
     std::mutex response_mutex;
-    std::string response = "{\"schema\":1,\"mod\":\"0.78.0\",\"status\":\"starting\"}";
+    std::string response = "{\"schema\":2,\"mod\":\"0.78.0\",\"status\":\"starting\"}";
     std::thread thread;
 
     ~TraceWorker() { stop(); }
@@ -281,11 +303,11 @@ struct TraceWorker {
                     std::lock_guard lock(response_mutex);
                     snapshot = response;
                 }
-                if (snapshot.size() <= 4096) {
+                if (snapshot.size() <= response_limit) {
                     int sent = int(sendto(socket, snapshot.data(), int(snapshot.size()), 0,
                         reinterpret_cast<const sockaddr*>(&from), sizeof(from)));
                     if (sent == int(snapshot.size())) queries.fetch_add(1, std::memory_order_relaxed);
-                }
+                } else rejected.fetch_add(1, std::memory_order_relaxed);
             }
             if (!received) std::this_thread::sleep_for(std::chrono::milliseconds(5));
         }
@@ -398,7 +420,7 @@ struct Session::Impl {
         char destination_address[INET_ADDRSTRLEN] = "";
         if (config.role == Role::join)
             inet_ntop(AF_INET, &destination.sin_addr, destination_address, sizeof(destination_address));
-        result << "{\"schema\":1,\"mod\":\"0.78.0\",\"protocol\":" << protocol_version
+        result << "{\"schema\":2,\"mod\":\"0.78.0\",\"protocol\":" << protocol_version
             << ",\"role\":\"" << role_name(config.role) << "\",\"status\":\"" << status_name(status)
             << "\",\"room_fingerprint\":" << room_fingerprint
             << ",\"local_ip\":\"" << local_address << "\",\"coop_port\":" << bound_port
@@ -419,6 +441,11 @@ struct Session::Impl {
             << ",\"state_flags\":" << local_player.flags << ",\"game_flags\":" << local_trace.flags << "}"
             << ",\"remote\":{\"map\":" << remote.map << ",\"epoch\":" << remote.epoch
             << ",\"kong\":" << remote.character << ",\"state_flags\":" << remote.flags << "}"
+            << ",\"transition\":{\"local\":";
+        append_transition(result, local_player);
+        result << ",\"remote\":";
+        append_transition(result, remote);
+        result << '}'
             << ",\"items\":{\"enabled\":" << local_items.enabled << ",\"file\":" << local_items.file
             << ",\"ready\":" << local_items.ready << ",\"scope\":" << local_items.scope
             << ",\"status\":" << item_result.status << ",\"previous_status\":" << local_trace.item_result_status
@@ -431,7 +458,22 @@ struct Session::Impl {
             << ",\"world\":{\"status\":" << world_result.status << ",\"pending\":" << world_result.pending
             << ",\"game_status\":" << local_trace.world_result_status << "}"
             << ",\"transient\":{\"status\":" << transient_result.status
-            << ",\"game_status\":" << local_trace.transient_status << "}"
+            << ",\"game_status\":" << local_trace.transient_status
+            << ",\"local\":{\"enabled\":" << local_transient.enabled
+            << ",\"file\":" << local_transient.file << ",\"map\":" << local_transient.map
+            << ",\"epoch\":" << local_transient.epoch << ",\"revision\":" << local_transient.revision
+            << ",\"count\":" << local_transient.count << ",\"records\":";
+        append_transient_records(result, local_transient.records, local_transient.count);
+        result << "},\"remote\":{\"enabled\":" << remote_transient.feature
+            << ",\"file\":" << remote_transient.file << ",\"map\":" << remote_transient.map
+            << ",\"epoch\":" << remote_transient.epoch << ",\"revision\":" << remote_transient.revision
+            << ",\"count\":" << remote_transient.count << ",\"records\":";
+        append_transient_records(result, remote_transient.records, remote_transient.count);
+        result << "},\"result\":{\"status\":" << transient_result.status
+            << ",\"map\":" << transient_result.map << ",\"epoch\":" << transient_result.epoch
+            << ",\"count\":" << transient_result.count << ",\"records\":";
+        append_transient_records(result, transient_result.records, transient_result.count);
+        result << "}}"
             << ",\"combat\":{\"status\":" << combat_result.status
             << ",\"game_status\":" << local_trace.combat_status << "}"
             << ",\"recovery\":{\"checkpoint\":"

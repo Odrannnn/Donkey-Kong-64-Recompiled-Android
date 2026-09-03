@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Discover and query running DK64 LAN co-op v0.48 peers."""
+"""Discover and query running DK64 LAN co-op peers."""
 
 import argparse
 import ipaddress
@@ -85,7 +85,7 @@ def main():
             for reply in sorted(replies, key=lambda row: (row.get("role", ""), row["reply_ip"])):
                 print(json.dumps(reply, indent=2, sort_keys=True))
         else:
-            print("No v0.48 peers replied. Check that the game is running and UDP traffic is allowed.")
+            print("No DK64 LAN co-op peers replied. Check that the game is running and UDP traffic is allowed.")
         if not args.watch:
             break
         time.sleep(args.watch)
