@@ -3080,3 +3080,19 @@ queue. If a controller has already spawned its dynamic golden-banana actor, the
 adapter matches the flag stored in that actor spawner's vanilla spawn payload
 and retires it too. Minecart and race reward maps remain excluded overlays. The
 network and bridge layouts are unchanged.
+
+## Bidirectional reviewed room actions (post-0.77 development)
+
+Typed `TRIGGER` and `SEQUENCE` records are now host-arbitrated in either
+direction. A Join's fired trigger or positive bounded sequence progress reaches
+the Host only as an apply request. It never replaces the Host's outgoing
+snapshot. The Host game adapter must still find the immutable map/object entry,
+the exact activation value and the exact local ready state; ordered controllers
+advance through only their next pinned vanilla step. Once accepted, the Host's
+next normal capture republishes the resulting local state to the Join.
+
+Ready trigger observations, zero sequence progress, lower/equal sequence
+progress and all guest raw script, timer, platform, actor-cycle, board and
+cutscene state remain filtered. Existing room, file, epoch, session, freshness
+and active-play boundaries clear requests instead of carrying them between room
+instances. This changes no packet or bridge structure.

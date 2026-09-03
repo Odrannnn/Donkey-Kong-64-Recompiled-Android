@@ -67,6 +67,18 @@ bool same_record(const CoopTransientRecord& a, const CoopTransientRecord& b) {
         return a.state >= b.state;
     return a.kind == b.kind && a.key == b.key && a.state == b.state && a.value == b.value;
 }
+bool bidirectional_event(const CoopTransientRecord& record) {
+    // These records are bounded commands rather than copied runtime state.
+    // The receiving game adapter still validates the immutable map/object
+    // allowlist and the exact local ready state before executing one step.
+    if (record.kind == COOP_TRANSIENT_TRIGGER) return record.state == 2u;
+    if (record.kind == COOP_TRANSIENT_SEQUENCE) return record.state > 0u;
+    return record.kind == COOP_TRANSIENT_MINIGAME_SUCCESS
+        || record.kind == COOP_TRANSIENT_MINECART_SUCCESS
+        || record.kind == COOP_TRANSIENT_RABBIT_SUCCESS
+        || record.kind == COOP_TRANSIENT_BATTY_SUCCESS
+        || record.kind == COOP_TRANSIENT_OWL_SUCCESS;
+}
 unsigned lobby_pad_index(unsigned map, unsigned key) {
     if (map == 173 && key <= 0x03) return key + 1;
     if (map == 174 && key >= 0x04 && key <= 0x08) return 5 + key - 0x04;
@@ -154,20 +166,20 @@ void TransientSync::update(bool host, const State& local, const CoopTransientInp
     output.status = COOP_TRANSIENT_SYNCED;
     for (unsigned i = 0; i < remote.count && output.count < COOP_TRANSIENT_RECORDS; ++i) {
         const auto& wanted = remote.records[i];
-        // All established same-area state remains host-authoritative. Reviewed
-        // minigame/race success events are monotonic and bidirectional.
-        if (host && wanted.kind != COOP_TRANSIENT_MINIGAME_SUCCESS
-                && wanted.kind != COOP_TRANSIENT_MINECART_SUCCESS
-                && wanted.kind != COOP_TRANSIENT_RABBIT_SUCCESS
-                && wanted.kind != COOP_TRANSIENT_BATTY_SUCCESS
-                && wanted.kind != COOP_TRANSIENT_OWL_SUCCESS) continue;
+        // Raw scripts, timers, platforms, actor cycles, cutscenes and boards
+        // remain host-authoritative. Reviewed activation and ordered-sequence
+        // commands are safe in either direction because the game adapter can
+        // execute only their next pinned vanilla entry from an exact ready
+        // state. The host therefore validates a Join request locally and its
+        // next captured frame rebroadcasts the accepted result.
+        if (host && !bidirectional_event(wanted)) continue;
         const CoopTransientRecord* current = nullptr;
         for (unsigned j = 0; j < input.count; ++j)
             if (input.records[j].kind == wanted.kind && input.records[j].key == wanted.key) {
                 current = &input.records[j]; break;
             }
         bool deliver = !current || !same_record(*current, wanted);
-        unsigned pad = !host && wanted.kind == COOP_TRANSIENT_TRIGGER
+        unsigned pad = wanted.kind == COOP_TRANSIENT_TRIGGER
             ? lobby_pad_index(remote.map, wanted.key) : 0;
         if (pad && wanted.value == 2u) {
             uint8_t& observed = remote_lobby_pad_state[pad - 1];

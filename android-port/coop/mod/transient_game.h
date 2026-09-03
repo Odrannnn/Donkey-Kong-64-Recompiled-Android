@@ -1406,7 +1406,12 @@ static void coop_transient_apply(void) {
             coop_transient_apply_owl(record);
             continue;
         }
-        if (role != ROLE_JOIN) continue;
+        // Only immutable reviewed activation and ordered-sequence records may
+        // travel Join-to-Host. Every copied runtime-state kind remains a
+        // follower-only command. The trigger/sequence adapters below still
+        // require an exact map/object identity and exact local ready state.
+        if (role != ROLE_JOIN && record.kind != COOP_TRANSIENT_TRIGGER
+                && record.kind != COOP_TRANSIENT_SEQUENCE) continue;
         if (record.kind == COOP_TRANSIENT_ACTOR_CYCLE) {
             coop_transient_apply_clam(record);
             continue;

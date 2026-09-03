@@ -1200,6 +1200,20 @@ static void object_apply_checks() {
     transient_result.epoch = 8; coop_transient_apply(); CHECK(script_calls == 1);
     transient_result.epoch = 9; role = ROLE_HOST; coop_transient_apply(); CHECK(script_calls == 1);
 
+    // A Host accepts only reviewed activation/sequence commands from a Join.
+    // Raw runtime-state records above remain follower-only.
+    reset(); role = ROLE_HOST; load(0, 0x31, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x31, 2, 2}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x31 && last_state == 2);
+
+    reset(); role = ROLE_HOST; current_map = 26; load(0, 0x7F, 17);
+    transient_result = {COOP_TRANSIENT_APPLYING, 26, 9, 1,
+        {{COOP_TRANSIENT_SEQUENCE, 0x7F, 4, 0}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x7F && last_state == 54);
+
     role = ROLE_JOIN; transient_file_changed = 1;
     transient_result.records[0] = {COOP_TRANSIENT_SCRIPT, 0x1A, 7, 0};
     coop_transient_apply(); CHECK(script_calls == 1); // Save-slot lock blocks apply too.
@@ -1866,16 +1880,22 @@ static void lobby_instrument_pad_checks() {
     coop_transient_apply(); CHECK(!script_calls && scripts[0x10].unk48[0] == 1);
     caves_pad_available = true; coop_transient_apply(); CHECK(script_calls == 1);
 
-    // Existing context and host-authority guards apply to the new rows too.
-    for (unsigned scenario = 0; scenario < 5; ++scenario) {
+    // Reviewed triggers are intentionally accepted by either role. Stale room
+    // context, transitions and a mismatched activation value still reject it.
+    for (unsigned receiver_role : {ROLE_HOST, ROLE_JOIN}) {
+        reset(); role = receiver_role; current_map = 173; load(0, 0, 1);
+        transient_result = {COOP_TRANSIENT_APPLYING, 173, epoch, 1,
+            {{COOP_TRANSIENT_TRIGGER, 0, 2, 2}}};
+        coop_transient_apply(); CHECK(script_calls == 1 && scripts[0].unk48[0] == 2);
+    }
+    for (unsigned scenario = 0; scenario < 4; ++scenario) {
         reset(); role = ROLE_JOIN; current_map = 173; load(0, 0, 1);
         transient_result = {COOP_TRANSIENT_APPLYING, 173, epoch, 1,
             {{COOP_TRANSIENT_TRIGGER, 0, 2, 2}}};
-        if (scenario == 0) role = ROLE_HOST;
-        if (scenario == 1) transient_result.epoch--;
-        if (scenario == 2) transient_result.map++;
-        if (scenario == 3) loading_zone_transition_speed = 1.0f;
-        if (scenario == 4) transient_result.records[0].value = 3;
+        if (scenario == 0) transient_result.epoch--;
+        if (scenario == 1) transient_result.map++;
+        if (scenario == 2) loading_zone_transition_speed = 1.0f;
+        if (scenario == 3) transient_result.records[0].value = 3;
         coop_transient_apply(); CHECK(!script_calls && scripts[0].unk48[0] == 1);
     }
 }

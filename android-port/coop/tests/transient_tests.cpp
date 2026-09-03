@@ -142,6 +142,38 @@ int main() {
     CHECK(host.result().records[0].kind == COOP_TRANSIENT_MINIGAME_SUCCESS
         && host.result().records[0].key == 2);
 
+    // Reviewed activation and ordered-controller commands are also
+    // bidirectional. The host receives only the bounded records; raw guest
+    // scripts remain filtered and the game adapter performs final readiness
+    // validation before executing them.
+    guest_input = frame(7, 20, 121); guest_input.count = 3;
+    guest_input.records[0] = {COOP_TRANSIENT_SCRIPT, 0x34, 1, 0};
+    guest_input.records[1] = {COOP_TRANSIENT_TRIGGER, 0x31, 2, 2};
+    guest_input.records[2] = {COOP_TRANSIENT_SEQUENCE, 0x14, 9, 0};
+    for (unsigned i = 3; i < COOP_TRANSIENT_RECORDS; ++i) guest_input.records[i] = {};
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    host_input = frame(7, 10, 122);
+    host_input.count = 1; // Independent page rotation omitted both requested keys.
+    for (unsigned i = 1; i < COOP_TRANSIENT_RECORDS; ++i) host_input.records[i] = {};
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    CHECK(host.result().status == COOP_TRANSIENT_APPLYING && host.result().count == 2);
+    CHECK(host.wire().count == 1 && host.wire().records[0].kind == COOP_TRANSIENT_SCRIPT);
+    CHECK(host.result().records[0].kind == COOP_TRANSIENT_TRIGGER
+        && host.result().records[0].key == 0x31);
+    CHECK(host.result().records[1].kind == COOP_TRANSIENT_SEQUENCE
+        && host.result().records[1].key == 0x14);
+
+    // A ready guest observation cannot rewind a fired host trigger, nor can a
+    // behind guest sequence rewind the host's ordered controller.
+    guest_input.records[1].state = 1;
+    guest_input.records[2].state = 7;
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    host_input = frame(7, 10, 123);
+    host_input.records[3].state = 2;
+    host_input.records[4].state = 8;
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    CHECK(host.result().status == COOP_TRANSIENT_SYNCED && !host.result().count);
+
     host_input.count = 1;
     host_input.records[0] = {COOP_TRANSIENT_MINIGAME_SUCCESS, 3, 1, 0};
     for (unsigned i = 1; i < COOP_TRANSIENT_RECORDS; ++i) host_input.records[i] = {};
@@ -305,5 +337,5 @@ int main() {
     bytes[transient_offset + 6 * 4 + 1] = 14; // Corrupt the first kind beyond the bounded enum.
     CHECK(!decode(bytes.data(), bytes.size(), roundtrip));
 
-    std::printf("PASS: %u same-area transient protocol checks (typed records, host authority, epochs, stale rejection, cutscene context)\n", checks);
+    std::printf("PASS: %u same-area transient protocol checks (typed records, host-arbitrated actions, epochs, stale rejection, cutscene context)\n", checks);
 }

@@ -15,11 +15,14 @@ enum {
     COOP_TRANSIENT_TIMER,
     COOP_TRANSIENT_PLATFORM,
     COOP_TRANSIENT_CUTSCENE,
-    // A reviewed room action. State 2 means enter the exact vanilla activation
+    // A reviewed room action. State 2 requests the exact vanilla activation
     // state carried in value; state 1 is an inert ready/finished observation.
+    // Either peer may request it; the Host validates and then republishes only
+    // the state its own local script actually accepted.
     COOP_TRANSIENT_TRIGGER,
-    // A reviewed ordered controller. State is bounded logical progress; the
-    // game adapter may execute only its next pinned local step.
+    // A reviewed ordered controller. State is bounded logical progress; either
+    // peer may request catch-up and the game adapter may execute only its next
+    // pinned local step.
     COOP_TRANSIENT_SEQUENCE,
     // A reviewed actor-driven environmental cycle. Key is a one-based entry
     // in the immutable enemy-spawner table; state/timer remain type-specific.
