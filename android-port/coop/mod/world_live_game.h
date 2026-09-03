@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 226
+    COOP_LIVE_WORLD_STATE_COUNT = 232
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -301,6 +301,17 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 17, 0x302, 0x023,  0, COOP_LIVE_WORLD_REQUIRE},
     { 17, 0x302, 0x025,  0, COOP_LIVE_WORLD_REQUIRE},
     { 17, 0x302, 0x027,  0, COOP_LIVE_WORLD_REQUIRE},
+
+    // Aztec's beetle-tower reveal hides four spent gongs and moves the metal
+    // tower controller into its saved state-20 setup. The GB prop was hidden
+    // by the already-loaded incomplete initializer, so restore its exact
+    // fully-visible target without running the race/reward/camera sequence.
+    { 38, 0x035, 0x01A,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x035, 0x01B,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x035, 0x01C,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x035, 0x01D,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x035, 0x01E,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x035, 0x0A3,  0, COOP_LIVE_WORLD_REVEAL},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility

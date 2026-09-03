@@ -730,7 +730,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 226);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 232);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -898,6 +898,20 @@ static void world_refresh_checks() {
     for (unsigned i = 0; i < 25; ++i)
         D_global_asm_807F6240[30 + i] = (short)helm_shutdown[i];
     CHECK(!coop_live_world_refresh(0x302) && live_calls == 0);
+
+    // Aztec's tower reveal updates all four gongs and the tower controller,
+    // then restores the already-loaded GB prop's visible target.
+    reset_engine(); current_map = 38;
+    const unsigned short aztec_tower[] = {0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0xA3};
+    for (unsigned i = 0; i < 6; ++i)
+        D_global_asm_807F6240[60 + i] = (short)aztec_tower[i];
+    CHECK(coop_live_world_refresh(0x035) && live_calls == 5
+        && live_slot == 64 && live_state == 0);
+    CHECK(live_reveals == 1 && live_reveal_object == 0xA3);
+    reset_engine(); current_map = 38;
+    for (unsigned i = 0; i < 5; ++i)
+        D_global_asm_807F6240[60 + i] = (short)aztec_tower[i];
+    CHECK(!coop_live_world_refresh(0x035) && live_calls == 0 && live_reveals == 0);
 
     // The Isles boulder applies both exact terminal controller states and the
     // inverse of object 0x56's visibility gate as one reviewed loaded unit.
