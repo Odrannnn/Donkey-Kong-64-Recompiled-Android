@@ -730,7 +730,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 198);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 199);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -870,6 +870,11 @@ static void world_refresh_checks() {
     CHECK(coop_live_world_refresh(0x133) && live_calls == 1
         && live_slot == 3 && live_state == 0);
     CHECK(live_reveals == 1 && live_reveal_object == 0x01);
+
+    // Helm's coin door applies its saved-open initializer without spending.
+    reset_engine(); current_map = 17; D_global_asm_807F6240[6] = 0x03;
+    CHECK(coop_live_world_refresh(0x303) && live_calls == 1
+        && live_slot == 6 && live_state == 0);
 
     // The Isles boulder applies both exact terminal controller states and the
     // inverse of object 0x56's visibility gate as one reviewed loaded unit.

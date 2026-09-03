@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 198
+    COOP_LIVE_WORLD_STATE_COUNT = 199
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -257,6 +257,11 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // target after replaying its state-0 completed branch.
     {105, 0x133, 0x001,  0, COOP_LIVE_WORLD_REPLAY},
     {105, 0x133, 0x001,  0, COOP_LIVE_WORLD_REVEAL},
+
+    // Helm's coin door has a dedicated flag-positive state-0 branch that
+    // enters its completed hide/presentation path. It never rechecks, deducts
+    // or awards either special coin and skips the local opening cutscene.
+    { 17, 0x303, 0x003,  0, COOP_LIVE_WORLD_REPLAY},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
