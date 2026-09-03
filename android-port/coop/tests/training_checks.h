@@ -22,20 +22,19 @@ static void training_checks() {
         coop_items_capture(&g, 1, 1, 0); coop_items_apply(&g, 1);
         CHECK(g.input.ready && !any(g.input.request) && saves == 1 && writes == 2);
     }
-    // Reviewed ordinary maps, the two pearl-sequence rooms and Helm lobby may
-    // publish a complete first snapshot. The narrower main-world/treehouse set
-    // may apply every progression grant.
+    // Reviewed ordinary maps, the two pearl-sequence rooms, lobbies and Helm
+    // may publish a complete first snapshot and apply inventory grants.
     // Grounds (176) additionally admits only its reviewed training/exit IDs;
     // this loop uses camera to prove unrelated writes remain deferred there.
     // Barrels, Fairy Island (189), Cranky (5), shops and boss overlays remain
     // outside both sets.
     for (unsigned map = 0; map < 216; ++map) {
         reset_engine(); CoopItems g{}; current_game = &g; current_map = map;
-        bool apply_allowed = map == 7 || map == 26 || map == 30 || map == 34 || map == 38
-            || map == 48 || map == 72 || map == 87 || map == 171;
-        bool snapshot_allowed = apply_allowed || map == 176 || coop_combat_map(map)
+        bool snapshot_allowed = map == 7 || map == 26 || map == 30 || map == 34 || map == 38
+            || map == 48 || map == 72 || map == 87 || map == 171 || map == 176 || coop_combat_map(map)
             || map == 174 || map == 178 || map == 187 || map == 194
             || map == 44 || map == 45 || map == 170;
+        bool apply_allowed = snapshot_allowed && map != 176;
         coop_items_capture(&g, 1, 1, 0);
         CHECK(bool(g.input.ready) == snapshot_allowed && bool(g.deferred) == (snapshot_allowed && !apply_allowed)
             && !g.counter_error);
@@ -135,11 +134,10 @@ static void training_checks() {
         for (unsigned k = 0; k < 4; ++k) w.owned[(2192+k)/32] |= bit(2192+k);
         CHECK(valid_items(w));
     }
-    // Treehouse is a training/progression delivery room, not a numeric-reward
-    // loophole: old GB/CB/coin credits retain the main-world restriction.
+    // Treehouse has the normal adventure inventory and receives numeric rewards.
     reset_engine(); g = {}; current_map = 171; coop_items_capture(&g, 1, 1, 0);
     g.result.status = 2; g.result.apply[160/32] = bit(160); g.result.apply[321/32] |= bit(321);
-    coop_items_apply(&g, 1); CHECK(!writes && !saves);
+    coop_items_apply(&g, 1); CHECK(writes == 2 && saves == 1);
     CHECK(!coop_progression_owned(0) && !coop_progression_apply(0, 1, 7, 0));
     CHECK(!coop_progression_owned(COOP_ITEMS) && !coop_progression_apply(COOP_ITEMS, 1, 7, 0));
     std::puts("PASS: 8 training/camera IDs, safe treehouse, first-slam ordering, split-course completion, blocked writes, prerequisites and unchanged resources");

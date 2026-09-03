@@ -13,19 +13,22 @@ static inline unsigned coop_items_safe_map(void) {
 }
 static inline unsigned coop_items_snapshot_map(void) {
     // Reviewed ordinary gameplay maps keep the same persistent inventory
-    // layout as the main worlds. They may establish and refresh a complete
-    // ownership snapshot, but remain deferred so no remote write or save runs
-    // while an interior/lobby/Helm script is loaded. Bosses, shops, races,
-    // bonuses and other overlays are absent from coop_combat_map().
+    // layout as the main worlds. Bosses, shops, races, bonuses and other
+    // overlays are absent from coop_combat_map().
     // Galleon, Fungi and Caves lobbies have no supported enemy, so they are
     // absent from the combat allowlist despite using the same stable inventory.
     // Galleon's treasure chest and Mermaid room, plus the Helm lobby's two
-    // Bananaports, are admitted specifically for exact reviewed live refresh;
-    // other grants stay deferred.
+    // Bananaports, are admitted specifically for reviewed live refresh.
     return coop_items_safe_map() || current_map == 176 || coop_combat_map(current_map)
         || current_map == 174 || current_map == 178 || current_map == 187
         || current_map == 194 || current_map == 44 || current_map == 45
         || current_map == 170;
+}
+static inline unsigned coop_items_apply_map(void) {
+    // Training Grounds has its own narrow training-ID transaction below.
+    // Every other reviewed snapshot map has the normal adventure inventory,
+    // HUD and save context and can therefore receive inventory writes live.
+    return current_map != 176 && coop_items_snapshot_map();
 }
 static inline unsigned coop_training_ground_apply_id(unsigned id) {
     return (id >= COOP_TRAINING_SPAWNED && id <= COOP_FIRST_SLAM)
@@ -114,15 +117,13 @@ static inline void coop_items_capture(CoopItems* g, unsigned enabled, unsigned a
     for (unsigned i = 0; i < COOP_ITEM_WORDS; ++i) g->previous[i] = g->input.owned[i];
     g->baseline = 1;
     g->live_snapshot = 1;
-    // A reviewed ordinary interior can publish this freshly verified state,
-    // including as the first snapshot of a session. Applications still wait
-    // for the narrower save-safe map set above.
-    if (!coop_items_safe_map()) g->deferred = 1;
+    // A reviewed ordinary interior can publish and receive from this freshly
+    // verified state, including as the first snapshot of a session.
+    if (!coop_items_apply_map()) g->deferred = 1;
 }
 static inline void coop_items_save_world_lobby(CoopItems* g, unsigned stable) {
     if (!g->world_save_pending || !stable || current_map != 194 || D_global_asm_807FD730) return;
-    // No item grant is admitted in this publish-only lobby. This saves only
-    // already-verified pending writes, including the reversible switch flag.
+    // Save already-verified pending writes, including the reversible switch.
     func_global_asm_8060DEC8();
     g->world_save_pending = 0;
     g->save_pending = 0;
@@ -162,7 +163,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
         coop_items_wait(g, COOP_TRACE_WAIT_REWARD_QUEUE, 0xFFFFFFFFu); return;
     }
     unsigned here = getLevelIndex(current_map, 1);
-    safe_to_save = stable && coop_items_safe_map();
+    safe_to_save = stable && coop_items_apply_map();
     if (g->result.status == 2 || g->result.status == 3) {
         g->applying = 1;
         for (unsigned id = 0; id < COOP_ITEMS; ++id) {
@@ -171,9 +172,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 && id < COOP_PROGRESSION_END && stable && g->refresh_enabled
                 && coop_live_world_has_flag(
                     coop_world_unlocks[id - COOP_WORLD_FIRST].flag);
-            // A reviewed interior admits only its exact loaded permanent-world
-            // unit. Inventory, rewards, purchases and unrelated flags remain
-            // deferred until the ordinary save-safe map policy resumes.
+            // Excluded overlays admit only an exact loaded permanent-world unit.
             if (live_only && !exact_live_world) {
                 coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, id); continue;
             }
@@ -232,6 +231,7 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 continue;
             }
             unsigned level = 0, kong = 0, before = 0, amount = 1;
+            unsigned source_map = 0xFFFFFFFFu;
             unsigned gb = coop_item_gb(id, &level, &kong);
             unsigned pickup = id >= COOP_PICKUP_FIRST && id < COOP_ACTOR_PICKUP_FIRST;
             unsigned actor = id >= COOP_ACTOR_PICKUP_FIRST && id < COOP_PROGRESSION_FIRST, rainbow = 0;
@@ -242,33 +242,32 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
             if (pickup) {
                 unsigned index = id - COOP_PICKUP_FIRST;
                 level = coop_pickup_level(index); kong = coop_pickups[index].kong;
-                amount = coop_pickups[index].amount;
+                amount = coop_pickups[index].amount; source_map = coop_pickups[index].map;
             }
             if (actor) {
                 const CoopActorPickup* a = &coop_actor_pickups[id - COOP_ACTOR_PICKUP_FIRST];
-                level = a->level; kong = a->kong; amount = a->amount; rainbow = !amount;
+                level = a->level; kong = a->kong; amount = a->amount;
+                source_map = a->map; rainbow = !amount;
             }
-            if (boulder_bunch) { level = 0; kong = 4; amount = 5; }
+            if (id >= COOP_GB_FIRST && id < COOP_PICKUP_FIRST)
+                source_map = coop_golden_bananas[id - COOP_GB_FIRST].map;
+            if (boulder_bunch) { level = 0; kong = 4; amount = 5; source_map = 7; }
             // This flag controls access to a later Arcade run. Let Factory and
             // the Arcade overlay unload before changing it; never copy its fee.
             if (arcade_paid && (!safe_to_save || here == 2)) {
                 coop_items_wait(g, COOP_TRACE_WAIT_SAVE_UNSAFE, id); continue;
             }
             if (gb || pickup || actor || boulder_bunch) {
-                // Outside the reward's level no stale prop/reward script remains
-                // loaded. Next entry sees the save bit and omits the old item.
-                // Snide's flag-guarded menu is safe outside HQ, as in v0.7.
-                if (!safe_to_save || !coop_items_main_world() || here >= 8) {
+                if (!safe_to_save) {
                     coop_items_wait(g, COOP_TRACE_WAIT_SAVE_UNSAFE, id); continue;
                 }
                 if (!D_global_asm_80754280) {
                     coop_items_wait(g, COOP_TRACE_WAIT_HUD, id); continue;
                 }
-                if ((pickup || actor || boulder_bunch) && level == here) {
-                    coop_items_wait(g, COOP_TRACE_WAIT_SAME_LEVEL_ITEM, id); continue;
-                }
-                if (id >= COOP_GB_FIRST && id < COOP_PICKUP_FIRST && level == here
-                        && !coop_gb_same_level_safe(id, current_map)) {
+                // A reward can now arrive anywhere else in its owning level.
+                // Keep only the exact source map guarded while its old prop,
+                // balloon, rainbow patch or scripted reward controller is live.
+                if (current_map == source_map) {
                     coop_items_wait(g, COOP_TRACE_WAIT_SAME_LEVEL_ITEM, id); continue;
                 }
                 if (gb && id < COOP_MEDAL_FIRST && !isFlagSet(0x1D5 + id - COOP_SNIDE_FIRST, 0)) {

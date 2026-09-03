@@ -360,6 +360,15 @@ static unsigned main_map_for_level(unsigned level) {
     static const unsigned maps[8] = {7, 38, 26, 30, 48, 72, 87, 34};
     CHECK(level < 8); return maps[level];
 }
+static unsigned same_level_delivery_map(unsigned level, unsigned source) {
+    static const unsigned maps[8][3] = {
+        {7, 4, 12}, {38, 16, 19}, {26, 26, 26}, {30, 43, 46},
+        {48, 52, 57}, {72, 84, 85}, {87, 88, 105}, {34, 17, 173},
+    };
+    CHECK(level < 8);
+    for (unsigned map : maps[level]) if (map != source) return map;
+    return 0;
+}
 static void snide_and_medal_checks() {
     for (unsigned i = 0; i < 40; ++i) {
         reset_engine(); CoopItems g{}; current_game = &g;
@@ -439,13 +448,18 @@ static void remaining_collectible_checks() {
     for (unsigned id = COOP_GB_FIRST; id < COOP_PICKUP_FIRST; ++id) {
         reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
         unsigned l, k; CHECK(coop_item_gb(id, &l, &k)); ++bucket[l][k];
+        unsigned source = coop_golden_bananas[id - COOP_GB_FIRST].map;
+        CHECK(source < 221);
         current_map = main_map_for_level(l); mock_level = l;
         coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
         g.result.status = 2; g.result.apply[id / 32] = bit(id);
-        if (!coop_gb_same_level_safe(id, current_map)) {
-            coop_items_apply(&g, 1); CHECK(!writes && !saves); // Loaded old GB remains local.
+        current_map = source;
+        if (coop_items_apply_map()) {
+            coop_items_apply(&g, 1); CHECK(!writes && !saves); // Exact source reward stays local.
         }
-        mock_level = (l + 1) % 8;
+        unsigned destination = same_level_delivery_map(l, source);
+        current_map = destination ? destination : main_map_for_level((l + 1) % 8);
+        mock_level = destination ? l : (l + 1) % 8;
         D_global_asm_807FD730 = &hud_object; coop_items_apply(&g, 1); CHECK(!writes);
         D_global_asm_807FD730 = nullptr;
         MockPlayerProgress expected[4]; std::memcpy(expected, D_global_asm_807FC950, sizeof(expected));
@@ -463,7 +477,8 @@ static void remaining_collectible_checks() {
         reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
         unsigned id = COOP_PICKUP_FIRST + i, l = coop_pickup_level(i), k = coop_pickups[i].kong;
         unsigned amount = coop_pickups[i].amount;
-        CHECK(k < 5 && l < 8 && (amount == 0 || amount == 1 || amount == 5));
+        unsigned source = coop_pickups[i].map;
+        CHECK(source < 221 && k < 5 && l < 8 && (amount == 0 || amount == 1 || amount == 5));
         if (!amount) ++coins; else if (amount == 1) ++singles; else ++bunches;
         auto& p = D_global_asm_807FC950[0].character_progress[k];
         // Different local shopping/Troff balances must not be overwritten.
@@ -471,11 +486,17 @@ static void remaining_collectible_checks() {
         MockPlayerProgress expected[4]; std::memcpy(expected, D_global_asm_807FC950, sizeof(expected));
         if (amount) expected[0].character_progress[k].coloured_bananas[l] += amount;
         else ++expected[0].character_progress[k].coins;
-        mock_level = l; coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.baseline);
+        current_map = main_map_for_level(l); mock_level = l;
+        coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.baseline);
         CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 123;
         r.apply[id / 32] = bit(id); coop_items_receive(&g, r);
-        coop_items_apply(&g, 1); CHECK(!writes && !pickups[i]);
-        mock_level = (l + 1) % 8;
+        current_map = source;
+        if (coop_items_apply_map()) {
+            coop_items_apply(&g, 1); CHECK(!writes && !pickups[i]);
+        }
+        unsigned destination = same_level_delivery_map(l, source);
+        current_map = destination ? destination : main_map_for_level((l + 1) % 8);
+        mock_level = destination ? l : (l + 1) % 8;
         block_write = 1; coop_items_apply(&g, 1); CHECK(writes == 1 && !saves && !pickups[i]);
         block_write = 0; coop_items_apply(&g, 1); coop_items_apply(&g, 1);
         CHECK(writes == 2 && saves == 1 && pickups[i] && !any(g.input.request));
@@ -498,6 +519,7 @@ static void remaining_collectible_checks() {
     unsigned l = coop_pickup_level(i), id = COOP_PICKUP_FIRST + i;
     auto& p = D_global_asm_807FC950[0].character_progress[0];
     p.coloured_bananas[l] = 20; p.coloured_bananas_fed_to_tns[l] = 51;
+    current_map = same_level_delivery_map(l, coop_pickups[i].map); mock_level = l;
     coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
     CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 123; r.apply[id/32] = bit(id);
     coop_items_receive(&g, r); coop_items_apply(&g, 1);
@@ -505,6 +527,7 @@ static void remaining_collectible_checks() {
     CHECK(flags[0x225 + l*5] && coop_item_has(g.input.request, COOP_MEDAL_FIRST + l*5));
     CHECK(!coop_item_has(g.input.request, id));
     reset_engine(); g = {}; p.coloured_bananas[l] = 97;
+    current_map = same_level_delivery_map(l, coop_pickups[i].map); mock_level = l;
     coop_items_capture(&g, 1, 1, 0); coop_items_receive(&g, r); coop_items_apply(&g, 1);
     CHECK(g.counter_error && !writes && !pickups[i] && p.coloured_bananas[l] == 97);
     // Changed setup lengths fail closed before reading a different save layout.
@@ -518,6 +541,7 @@ static void actor_collectible_checks() {
     for (unsigned i = 0; i < 120; ++i) {
         reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
         auto a = coop_actor_pickups[i]; unsigned id = COOP_ACTOR_PICKUP_FIRST + i;
+        CHECK(a.map < 221);
         if (a.amount) ++balloons; else ++rainbows;
         for (unsigned k = 0; k < 5; ++k) D_global_asm_807FC950[0].character_progress[k].coins = k * 7;
         auto& p = D_global_asm_807FC950[0].character_progress[a.kong];
@@ -525,10 +549,16 @@ static void actor_collectible_checks() {
         MockPlayerProgress expected[4]; std::memcpy(expected, D_global_asm_807FC950, sizeof(expected));
         if (a.amount) expected[0].character_progress[a.kong].coloured_bananas[a.level] += 10;
         else for (unsigned k = 0; k < 5; ++k) expected[0].character_progress[k].coins += 5;
-        mock_level = a.level; coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
+        current_map = main_map_for_level(a.level); mock_level = a.level;
+        coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
         CoopItemResult r{}; r.status = 2; r.scope = 1; r.session_lo = 123; r.apply[id / 32] = bit(id);
-        coop_items_receive(&g, r); coop_items_apply(&g, 1); CHECK(!writes && !saves);
-        mock_level = (a.level + 1) % 8;
+        coop_items_receive(&g, r); current_map = a.map;
+        if (coop_items_apply_map()) {
+            coop_items_apply(&g, 1); CHECK(!writes && !saves);
+        }
+        unsigned destination = same_level_delivery_map(a.level, a.map);
+        current_map = destination ? destination : main_map_for_level((a.level + 1) % 8);
+        mock_level = destination ? a.level : (a.level + 1) % 8;
         block_write = 1; coop_items_apply(&g, 1); CHECK(writes == 1 && !saves);
         block_write = 0; coop_items_apply(&g, 1); coop_items_apply(&g, 1);
         CHECK(writes == 2 && saves == 1 && flags[a.flag]);
@@ -548,7 +578,7 @@ static void actor_collectible_checks() {
     reset_engine(); CoopItems g{}; current_game = &g;
     unsigned i = 0; while (coop_actor_pickups[i].amount) ++i;
     auto a = coop_actor_pickups[i]; unsigned id = COOP_ACTOR_PICKUP_FIRST + i;
-    mock_level = (a.level + 1) % 8;
+    current_map = same_level_delivery_map(a.level, a.map); mock_level = a.level;
     D_global_asm_807FC950[0].character_progress[4].coins = 995;
     MockPlayerProgress expected[4]; std::memcpy(expected, D_global_asm_807FC950, sizeof(expected));
     coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
@@ -557,64 +587,45 @@ static void actor_collectible_checks() {
     CHECK(std::memcmp(expected, D_global_asm_807FC950, sizeof(expected)) == 0);
 }
 static void same_level_gb_delivery_checks() {
-    // These exact rewards originate in an unloaded lobby/interior while the
-    // receiver is on the owning main map. No source reward controller remains
-    // loaded, so their flag and counter may be committed atomically in place.
-    for (unsigned row = 0; row < COOP_SAME_LEVEL_GB_COUNT; ++row) {
-        int found = coop_item_id(coop_same_level_gbs[row].flag);
-        CHECK(found >= (int)COOP_GB_FIRST && found < (int)COOP_PICKUP_FIRST);
-        unsigned id = (unsigned)found, level = 0, kong = 0;
+    // A minecart reward can arrive on the owning main map, and a main-map
+    // reward can arrive in another reviewed interior of the same level.
+    for (unsigned flag : {0x018u, 0x019u, 0x196u}) {
+        unsigned id = (unsigned)coop_item_id((int)flag), level = 0, kong = 0;
+        CHECK(id >= COOP_GB_FIRST && id < COOP_PICKUP_FIRST);
         CHECK(coop_item_gb(id, &level, &kong));
-        CHECK(main_map_for_level(level) == coop_same_level_gbs[row].map);
-        CHECK(coop_gb_same_level_safe(id, current_map = coop_same_level_gbs[row].map));
-
+        unsigned source = coop_golden_bananas[id - COOP_GB_FIRST].map;
+        unsigned destination = same_level_delivery_map(level, source);
+        CHECK(destination);
         reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
-        current_map = coop_same_level_gbs[row].map; mock_level = level;
-        coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
-        g.result.status = 2; g.result.apply[id / 32] = bit(id);
-        MockPlayerProgress expected[4]; std::memcpy(expected, D_global_asm_807FC950, sizeof(expected));
-        expected[0].character_progress[kong].golden_bananas[level] = 1;
-        coop_items_apply(&g, 1);
-        CHECK(writes == 1 && saves == 1 && hud_updates == 1 && flags[coop_item_flag(id)]);
-        CHECK(std::memcmp(expected, D_global_asm_807FC950, sizeof(expected)) == 0);
-        coop_items_apply(&g, 1); CHECK(writes == 1 && saves == 1 && hud_updates == 1);
-    }
-
-    // Every non-reviewed same-level GB remains deferred. This includes
-    // same-map spawners and reward props such as Seal Race and Baboon Blast.
-    for (unsigned id = COOP_GB_FIRST; id < COOP_PICKUP_FIRST; ++id) {
-        unsigned level = 0, kong = 0; CHECK(coop_item_gb(id, &level, &kong));
-        unsigned map = main_map_for_level(level);
-        if (coop_gb_same_level_safe(id, map)) continue;
-        reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
-        current_map = map; mock_level = level; coop_items_capture(&g, 1, 1, 0);
+        current_map = destination; mock_level = level;
+        coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !g.deferred);
         g.result.status = 2; g.result.apply[id / 32] = bit(id);
         coop_items_apply(&g, 1);
-        CHECK(!writes && !saves && !hud_updates && !flags[coop_item_flag(id)]);
-        CHECK(g.wait_reason == COOP_TRACE_WAIT_SAME_LEVEL_ITEM && g.wait_id == id);
+        CHECK(writes == 1 && saves == 1 && hud_updates == 1 && flags[flag]);
+        CHECK(D_global_asm_807FC950[0].character_progress[kong].golden_bananas[level] == 1);
     }
 
-    // The new allowlist never overrides existing save, HUD, reward-queue, or
-    // exact-map guards, and a failed flag write retries without counter drift.
-    unsigned id = (unsigned)coop_item_id(0x018), level = 0, kong = 0;
+    // The exact source map remains guarded while its old reward controller is
+    // loaded. Save, HUD, reward-queue and failed-write guards remain intact.
+    unsigned id = (unsigned)coop_item_id(0x019), level = 0, kong = 0;
     CHECK(coop_item_gb(id, &level, &kong));
     for (unsigned scenario = 0; scenario < 4; ++scenario) {
         reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
-        current_map = scenario == 3 ? 38 : 7; mock_level = level;
+        current_map = scenario == 3 ? 7 : 4; mock_level = level;
         coop_items_capture(&g, 1, 1, 0); g.result.status = 2;
         g.result.apply[id / 32] = bit(id);
         if (scenario == 1) D_global_asm_80754280 = nullptr;
         if (scenario == 2) D_global_asm_807FD730 = &hud_object;
         coop_items_apply(&g, scenario != 0);
-        CHECK(!writes && !saves && !hud_updates && !flags[0x018]);
+        CHECK(!writes && !saves && !hud_updates && !flags[0x019]);
     }
     reset_engine(); CoopItems g{}; current_game = &g; g.join = 1;
-    current_map = 7; mock_level = 0; coop_items_capture(&g, 1, 1, 0);
+    current_map = 4; mock_level = 0; coop_items_capture(&g, 1, 1, 0);
     g.result.status = 2; g.result.apply[id / 32] = bit(id); block_write = 1;
-    coop_items_apply(&g, 1); CHECK(writes == 1 && !saves && !flags[0x018]);
+    coop_items_apply(&g, 1); CHECK(writes == 1 && !saves && !flags[0x019]);
     CHECK(D_global_asm_807FC950[0].character_progress[kong].golden_bananas[level] == 0);
     block_write = 0; coop_items_apply(&g, 1);
-    CHECK(writes == 2 && saves == 1 && flags[0x018]);
+    CHECK(writes == 2 && saves == 1 && flags[0x019]);
     CHECK(D_global_asm_807FC950[0].character_progress[kong].golden_bananas[level] == 1);
 }
 static void japes_boulder_bunch_checks() {
@@ -1205,7 +1216,7 @@ static void world_refresh_checks() {
     // loaded Mermaid on the same safe frame without scheduling a reload.
     reset_engine(); g = {}; current_game = &g; g.join = 1;
     current_map = 45; mock_level = 3; live_mermaid_available = 1;
-    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.deferred);
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !g.deferred);
     r = {}; r.status = 2; r.scope = 1; r.session_lo = 905;
     unsigned pearl_one = (unsigned)coop_item_id(0xBA);
     CHECK(pearl_one < COOP_ITEMS);
@@ -1230,11 +1241,10 @@ static void world_refresh_checks() {
     reset_engine(); current_map = 170; flags[0x1A1] = 1;
     CHECK(!coop_live_world_refresh(0x1A1) && live_calls == 0);
 
-    // Helm lobby admits a verified snapshot only so its exact incoming tag can
-    // update and save in place; unrelated grants remain deferred.
+    // Helm lobby admits a verified writable snapshot, including its exact tag.
     reset_engine(); g = {}; current_game = &g; g.join = 1;
     current_map = 170; mock_level = 7; D_global_asm_807F6240[3] = 0x08;
-    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.deferred);
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !g.deferred);
     r = {}; r.status = 2; r.scope = 1; r.session_lo = 906;
     unsigned helm_lobby_tag = (unsigned)coop_item_id(0x1A1);
     CHECK(helm_lobby_tag < COOP_ITEMS);
@@ -1287,18 +1297,18 @@ static void world_refresh_checks() {
     reset_engine(); current_map = 87;
     CHECK(coop_live_world_refresh(0x15C) && live_calls == 0);
 
-    // A reviewed ordinary interior may accept only its exact loaded world
-    // unit. The flag, replay and isolated save complete without a map reload.
+    // A reviewed ordinary interior accepts its exact loaded world unit and an
+    // unrelated inventory flag in the same isolated save.
     reset_engine(); g = {}; current_game = &g; g.join = 1;
     current_map = 16; mock_level = 1;
     D_global_asm_807F6240[2] = 0x04; D_global_asm_807F6240[3] = 0x0A;
-    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.deferred);
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !g.deferred);
     r = {}; r.status = 2; r.scope = 1; r.session_lo = 904;
     unsigned temple_ice = (unsigned)coop_item_id(0x045);
     r.apply[temple_ice / 32] = bit(temple_ice);
-    r.apply[78 / 32] |= bit(78); // Unrelated Nintendo coin stays deferred.
+    r.apply[78 / 32] |= bit(78);
     coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
-    CHECK(flags[0x045] && !flags[0x084] && writes == 1 && saves == 1
+    CHECK(flags[0x045] && flags[0x084] && writes == 2 && saves == 1
         && live_calls == 2 && live_state == 0 && !g.refresh_pending);
 
     // Preflight is atomic: a missing component leaves both the flag and loaded
@@ -1312,10 +1322,10 @@ static void world_refresh_checks() {
     CHECK(!flags[0x045] && !writes && !saves && !live_calls
         && g.wait_reason == COOP_TRACE_WAIT_PROGRESSION_CONTEXT);
 
-    // Level-less lobbies are admitted only through the same exact table match.
+    // Level-less lobbies use the same writable snapshot and exact refresh.
     reset_engine(); g = {}; current_game = &g; g.join = 1;
     current_map = 194; mock_level = 255; D_global_asm_807F6240[4] = 0;
-    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.deferred);
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && !g.deferred);
     r = {}; r.status = 2; r.scope = 1; r.session_lo = 905;
     unsigned caves_wall = (unsigned)coop_item_id(0x198);
     r.apply[caves_wall / 32] = bit(caves_wall);
@@ -1425,7 +1435,7 @@ static void world_refresh_checks() {
     reset_engine(); g = {}; current_game = &g; current_map = 194; mock_level = 7;
     coop_items_capture(&g, 1, 1, 0); g.bound = 1;
     w = {}; coop_world_capture(&w, &g);
-    CHECK(g.deferred && g.live_snapshot && w.input.ready && !w.input.values);
+    CHECK(!g.deferred && g.live_snapshot && w.input.ready && !w.input.values);
     flags[0x19D] = 1; coop_world_capture(&w, &g);
     CHECK(w.input.values == 4 && w.input.change[2] == 1);
 }
@@ -1491,23 +1501,23 @@ static void cross_area_cache_checks() {
     coop_items_apply(&g, 1);
     CHECK(flags[0x17B] && writes == 1 && saves == 1);
 
-    // A fresh session may establish its complete snapshot in a reviewed
-    // ordinary interior. It publishes immediately but cannot apply/save there.
+    // A fresh session may establish its complete snapshot and apply/save in a
+    // reviewed ordinary interior.
     reset_engine(); g = {}; current_game = &g; g.join = 1;
     current_map = 4; mock_level = 0; // Japes mountain: reviewed ordinary map.
     coop_items_capture(&g, 1, 1, 0);
-    CHECK(g.input.ready && g.baseline && g.deferred);
+    CHECK(g.input.ready && g.baseline && !g.deferred);
     w = {}; w.input.ready = 1; coop_world_capture(&w, &g); CHECK(!w.input.ready);
     g.result.status = 2; g.result.apply[78 / 32] = bit(78);
     coop_items_apply(&g, 1);
-    CHECK(!flags[0x84] && !writes && !saves);
+    CHECK(flags[0x84] && writes == 1 && saves == 1);
 
     // Peaceful Galleon/Fungi/Caves lobbies are explicit snapshot maps even
     // though they contain no enemy and therefore are not combat-map entries.
     for (unsigned lobby : {174u, 178u, 194u}) {
         reset_engine(); g = {}; current_game = &g; current_map = lobby; mock_level = 7;
         coop_items_capture(&g, 1, 1, 0);
-        CHECK(g.input.ready && g.baseline && g.deferred);
+        CHECK(g.input.ready && g.baseline && !g.deferred);
     }
 
     // An unreviewed overlay still cannot become the first snapshot.

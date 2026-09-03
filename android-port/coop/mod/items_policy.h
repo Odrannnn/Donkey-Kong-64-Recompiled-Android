@@ -160,29 +160,6 @@ static inline unsigned coop_item_gb(unsigned id, unsigned* level, unsigned* kong
     }
     return 0;
 }
-typedef struct {
-    unsigned short flag;
-    unsigned char map;
-} CoopSameLevelGb;
-enum { COOP_SAME_LEVEL_GB_COUNT = 29 };
-static const CoopSameLevelGb coop_same_level_gbs[COOP_SAME_LEVEL_GB_COUNT] = {
-    {0x018, 7},
-    {0x03B, 38}, {0x03C, 38}, {0x049, 38}, {0x04B, 38},
-    {0x08B, 26},
-    {0x0B8, 30}, {0x0C5, 30}, {0x0C6, 30}, {0x0C8, 30}, {0x0CA, 30},
-    {0x0D7, 48}, {0x0E0, 48}, {0x0E3, 48}, {0x0EB, 48},
-    {0x103, 72}, {0x107, 72},
-    {0x131, 87}, {0x132, 87}, {0x137, 87}, {0x13B, 87},
-    {0x13C, 87}, {0x13E, 87}, {0x13F, 87}, {0x145, 87},
-    {0x192, 34}, {0x196, 34}, {0x19F, 34}, {0x1A0, 34},
-};
-static inline unsigned coop_gb_same_level_safe(unsigned id, unsigned map) {
-    if (id < COOP_GB_FIRST || id >= COOP_PICKUP_FIRST) return 0;
-    unsigned flag = coop_item_flag(id);
-    for (unsigned i = 0; i < COOP_SAME_LEVEL_GB_COUNT; ++i)
-        if (coop_same_level_gbs[i].map == map && coop_same_level_gbs[i].flag == flag) return 1;
-    return 0;
-}
 static inline unsigned coop_pickup_level(unsigned index) {
     unsigned level = 0;
     while (level < 7 && index >= coop_pickup_start[level + 1]) ++level;

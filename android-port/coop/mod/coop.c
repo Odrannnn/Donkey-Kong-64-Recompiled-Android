@@ -711,7 +711,7 @@ static u32 coop_recovery_fingerprint(void) {
 static u32 coop_recovery_local_safe(u32 playing) {
     if (!playing || loading_zone_transition_speed != 0.0f || D_global_asm_807FD730) return 0;
     if (!shared_items) return 1;
-    return coop_items_safe_map() && items.input.ready && items.baseline && items.live_snapshot
+    return coop_items_apply_map() && items.input.ready && items.baseline && items.live_snapshot
         && !items.deferred && !items.file_changed && !items.counter_error
         && !items.save_pending && !items.world_save_pending
         && !coop_item_words_any(items.input.request);
@@ -889,7 +889,7 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     trace.flags = (playing ? COOP_TRACE_PLAYING : 0)
         | (is_cutscene_active == 1 ? COOP_TRACE_CUTSCENE : 0)
         | (loading_zone_transition_speed != 0.0f ? COOP_TRACE_LOADING : 0)
-        | (coop_items_safe_map() ? COOP_TRACE_ITEM_SAFE_MAP : 0)
+        | (coop_items_apply_map() ? COOP_TRACE_ITEM_SAFE_MAP : 0)
         | (coop_items_snapshot_map() ? COOP_TRACE_ITEM_SNAPSHOT_MAP : 0)
         | (D_global_asm_807FD730 ? COOP_TRACE_REWARD_QUEUE : 0)
         | (D_global_asm_80754280 ? COOP_TRACE_HUD_READY : 0)

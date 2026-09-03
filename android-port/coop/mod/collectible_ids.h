@@ -2,2005 +2,2005 @@
 // Only collectible IDs, counter destinations and amounts; no ROM assets.
 #ifndef COOP_COLLECTIBLE_IDS_H
 #define COOP_COLLECTIBLE_IDS_H
-typedef struct { unsigned short flag; unsigned char level, kong; } CoopGoldenBanana;
+typedef struct { unsigned short flag; unsigned char map, level, kong; } CoopGoldenBanana;
 static const CoopGoldenBanana coop_golden_bananas[161] = {
-    {0x001, 0, 2},
-    {0x002, 0, 3},
-    {0x003, 0, 0},
-    {0x004, 0, 0},
-    {0x005, 0, 0},
-    {0x008, 0, 3},
-    {0x009, 0, 3},
-    {0x00A, 0, 2},
-    {0x00B, 0, 2},
-    {0x00C, 0, 4},
-    {0x012, 0, 1},
-    {0x013, 0, 2},
-    {0x014, 0, 0},
-    {0x015, 0, 3},
-    {0x016, 0, 4},
-    {0x017, 0, 1},
-    {0x018, 0, 1},
-    {0x019, 0, 4},
-    {0x01C, 0, 4},
-    {0x01F, 0, 1},
-    {0x031, 1, 4},
-    {0x033, 1, 0},
-    {0x034, 1, 4},
-    {0x036, 1, 1},
-    {0x038, 1, 1},
-    {0x039, 1, 0},
-    {0x03A, 1, 3},
-    {0x03B, 1, 4},
-    {0x03C, 1, 2},
-    {0x03E, 1, 0},
-    {0x03F, 1, 1},
-    {0x040, 1, 4},
-    {0x041, 1, 3},
-    {0x043, 1, 1},
-    {0x044, 1, 2},
-    {0x047, 1, 3},
-    {0x048, 1, 2},
-    {0x049, 1, 2},
-    {0x04B, 1, 3},
-    {0x04D, 1, 0},
-    {0x070, 2, 0},
-    {0x071, 2, 1},
-    {0x072, 2, 4},
-    {0x073, 2, 2},
-    {0x074, 2, 3},
-    {0x076, 2, 2},
-    {0x079, 2, 4},
-    {0x07A, 2, 0},
-    {0x07B, 2, 3},
-    {0x07C, 2, 3},
-    {0x07D, 2, 2},
-    {0x07E, 2, 1},
-    {0x07F, 2, 4},
-    {0x080, 2, 0},
-    {0x082, 2, 0},
-    {0x086, 2, 1},
-    {0x087, 2, 1},
-    {0x088, 2, 4},
-    {0x089, 2, 2},
-    {0x08B, 2, 3},
-    {0x09A, 3, 4},
-    {0x09D, 3, 0},
-    {0x0A3, 3, 1},
-    {0x0A4, 3, 2},
-    {0x0A5, 3, 0},
-    {0x0A6, 3, 4},
-    {0x0A7, 3, 1},
-    {0x0B6, 3, 4},
-    {0x0B7, 3, 2},
-    {0x0B8, 3, 3},
-    {0x0BF, 3, 3},
-    {0x0C0, 3, 2},
-    {0x0C1, 3, 0},
-    {0x0C5, 3, 4},
-    {0x0C6, 3, 1},
-    {0x0C7, 3, 2},
-    {0x0C8, 3, 0},
-    {0x0C9, 3, 3},
-    {0x0CA, 3, 3},
-    {0x0CC, 3, 1},
-    {0x0CD, 4, 3},
-    {0x0D1, 4, 3},
-    {0x0D3, 4, 1},
-    {0x0D6, 4, 1},
-    {0x0D7, 4, 4},
-    {0x0D8, 4, 1},
-    {0x0D9, 4, 2},
-    {0x0DB, 4, 0},
-    {0x0DD, 4, 4},
-    {0x0E0, 4, 2},
-    {0x0E1, 4, 4},
-    {0x0E2, 4, 2},
-    {0x0E3, 4, 3},
-    {0x0E4, 4, 0},
-    {0x0EB, 4, 0},
-    {0x0F7, 4, 3},
-    {0x0F9, 4, 2},
-    {0x0FA, 4, 1},
-    {0x0FD, 4, 4},
-    {0x0FE, 4, 0},
-    {0x103, 5, 2},
-    {0x104, 5, 3},
-    {0x105, 5, 0},
-    {0x106, 5, 1},
-    {0x107, 5, 4},
-    {0x108, 5, 2},
-    {0x10C, 5, 4},
-    {0x10E, 5, 4},
-    {0x10F, 5, 2},
-    {0x112, 5, 1},
-    {0x113, 5, 0},
-    {0x114, 5, 0},
-    {0x116, 5, 4},
-    {0x117, 5, 3},
-    {0x119, 5, 2},
-    {0x125, 5, 1},
-    {0x126, 5, 1},
-    {0x127, 5, 3},
-    {0x129, 5, 3},
-    {0x12A, 5, 0},
-    {0x12D, 7, 3},
-    {0x131, 6, 1},
-    {0x132, 6, 2},
-    {0x134, 6, 2},
-    {0x135, 6, 3},
-    {0x136, 6, 1},
-    {0x137, 6, 4},
-    {0x139, 6, 0},
-    {0x13A, 6, 4},
-    {0x13B, 6, 3},
-    {0x13C, 6, 2},
-    {0x13E, 6, 0},
-    {0x13F, 6, 4},
-    {0x140, 6, 0},
-    {0x142, 6, 4},
-    {0x143, 6, 2},
-    {0x145, 6, 3},
-    {0x146, 6, 0},
-    {0x15E, 6, 1},
-    {0x15F, 6, 3},
-    {0x161, 6, 1},
-    {0x17D, 7, 0},
-    {0x18E, 7, 2},
-    {0x192, 7, 3},
-    {0x193, 7, 3},
-    {0x194, 7, 0},
-    {0x196, 7, 4},
-    {0x19A, 7, 1},
-    {0x19B, 7, 0},
-    {0x19F, 7, 2},
-    {0x1A0, 7, 1},
-    {0x1A3, 7, 0},
-    {0x1A4, 7, 3},
-    {0x1A5, 7, 2},
-    {0x1A6, 7, 4},
-    {0x1A7, 7, 1},
-    {0x1A8, 7, 4},
-    {0x1A9, 7, 3},
-    {0x1AC, 7, 1},
-    {0x1AD, 7, 2},
-    {0x1AF, 7, 4},
+    {0x001, 7, 0, 2},
+    {0x002, 7, 0, 3},
+    {0x003, 37, 0, 0},
+    {0x004, 7, 0, 0},
+    {0x005, 7, 0, 0},
+    {0x008, 7, 0, 3},
+    {0x009, 12, 0, 3},
+    {0x00A, 13, 0, 2},
+    {0x00B, 7, 0, 2},
+    {0x00C, 33, 0, 4},
+    {0x012, 7, 0, 1},
+    {0x013, 7, 0, 2},
+    {0x014, 7, 0, 0},
+    {0x015, 7, 0, 3},
+    {0x016, 7, 0, 4},
+    {0x017, 7, 0, 1},
+    {0x018, 6, 0, 1},
+    {0x019, 7, 0, 4},
+    {0x01C, 7, 0, 4},
+    {0x01F, 7, 0, 1},
+    {0x031, 38, 1, 4},
+    {0x033, 38, 1, 0},
+    {0x034, 38, 1, 4},
+    {0x036, 38, 1, 1},
+    {0x038, 21, 1, 1},
+    {0x039, 19, 1, 0},
+    {0x03A, 22, 1, 3},
+    {0x03B, 24, 1, 4},
+    {0x03C, 23, 1, 2},
+    {0x03E, 38, 1, 0},
+    {0x03F, 38, 1, 1},
+    {0x040, 16, 1, 4},
+    {0x041, 16, 1, 3},
+    {0x043, 16, 1, 1},
+    {0x044, 38, 1, 2},
+    {0x047, 20, 1, 3},
+    {0x048, 20, 1, 2},
+    {0x049, 20, 1, 2},
+    {0x04B, 14, 1, 3},
+    {0x04D, 20, 1, 0},
+    {0x070, 29, 2, 0},
+    {0x071, 26, 2, 1},
+    {0x072, 26, 2, 4},
+    {0x073, 26, 2, 2},
+    {0x074, 26, 2, 3},
+    {0x076, 26, 2, 2},
+    {0x079, 26, 2, 4},
+    {0x07A, 26, 2, 0},
+    {0x07B, 26, 2, 3},
+    {0x07C, 26, 2, 3},
+    {0x07D, 26, 2, 2},
+    {0x07E, 26, 2, 1},
+    {0x07F, 26, 2, 4},
+    {0x080, 36, 2, 0},
+    {0x082, 26, 2, 0},
+    {0x086, 26, 2, 1},
+    {0x087, 26, 2, 1},
+    {0x088, 26, 2, 4},
+    {0x089, 26, 2, 2},
+    {0x08B, 27, 2, 3},
+    {0x09A, 30, 3, 4},
+    {0x09D, 49, 3, 0},
+    {0x0A3, 30, 3, 1},
+    {0x0A4, 30, 3, 2},
+    {0x0A5, 39, 3, 0},
+    {0x0A6, 31, 3, 4},
+    {0x0A7, 51, 3, 1},
+    {0x0B6, 30, 3, 4},
+    {0x0B7, 47, 3, 2},
+    {0x0B8, 47, 3, 3},
+    {0x0BF, 45, 3, 3},
+    {0x0C0, 30, 3, 2},
+    {0x0C1, 30, 3, 0},
+    {0x0C5, 43, 3, 4},
+    {0x0C6, 43, 3, 1},
+    {0x0C7, 43, 3, 2},
+    {0x0C8, 46, 3, 0},
+    {0x0C9, 46, 3, 3},
+    {0x0CA, 179, 3, 3},
+    {0x0CC, 30, 3, 1},
+    {0x0CD, 52, 4, 3},
+    {0x0D1, 48, 4, 3},
+    {0x0D3, 48, 4, 1},
+    {0x0D6, 48, 4, 1},
+    {0x0D7, 55, 4, 4},
+    {0x0D8, 56, 4, 1},
+    {0x0D9, 58, 4, 2},
+    {0x0DB, 48, 4, 0},
+    {0x0DD, 61, 4, 4},
+    {0x0E0, 63, 4, 2},
+    {0x0E1, 71, 4, 4},
+    {0x0E2, 70, 4, 2},
+    {0x0E3, 64, 4, 3},
+    {0x0E4, 64, 4, 0},
+    {0x0EB, 59, 4, 0},
+    {0x0F7, 60, 4, 3},
+    {0x0F9, 48, 4, 2},
+    {0x0FA, 48, 4, 1},
+    {0x0FD, 48, 4, 4},
+    {0x0FE, 48, 4, 0},
+    {0x103, 82, 5, 2},
+    {0x104, 93, 5, 3},
+    {0x105, 91, 5, 0},
+    {0x106, 92, 5, 1},
+    {0x107, 90, 5, 4},
+    {0x108, 94, 5, 2},
+    {0x10C, 72, 5, 4},
+    {0x10E, 72, 5, 4},
+    {0x10F, 98, 5, 2},
+    {0x112, 100, 5, 1},
+    {0x113, 86, 5, 0},
+    {0x114, 89, 5, 0},
+    {0x116, 95, 5, 4},
+    {0x117, 84, 5, 3},
+    {0x119, 85, 5, 2},
+    {0x125, 200, 5, 1},
+    {0x126, 72, 5, 1},
+    {0x127, 72, 5, 3},
+    {0x129, 72, 5, 3},
+    {0x12A, 72, 5, 0},
+    {0x12D, 189, 7, 3},
+    {0x131, 88, 6, 1},
+    {0x132, 105, 6, 2},
+    {0x134, 108, 6, 2},
+    {0x135, 108, 6, 3},
+    {0x136, 112, 6, 1},
+    {0x137, 112, 6, 4},
+    {0x139, 114, 6, 0},
+    {0x13A, 113, 6, 4},
+    {0x13B, 151, 6, 3},
+    {0x13C, 163, 6, 2},
+    {0x13E, 106, 6, 0},
+    {0x13F, 164, 6, 4},
+    {0x140, 164, 6, 0},
+    {0x142, 166, 6, 4},
+    {0x143, 168, 6, 2},
+    {0x145, 185, 6, 3},
+    {0x146, 163, 6, 0},
+    {0x15E, 87, 6, 1},
+    {0x15F, 167, 6, 3},
+    {0x161, 163, 6, 1},
+    {0x17D, 34, 7, 0},
+    {0x18E, 34, 7, 2},
+    {0x192, 173, 7, 3},
+    {0x193, 174, 7, 3},
+    {0x194, 34, 7, 0},
+    {0x196, 170, 7, 4},
+    {0x19A, 34, 7, 1},
+    {0x19B, 194, 7, 0},
+    {0x19F, 193, 7, 2},
+    {0x1A0, 195, 7, 1},
+    {0x1A3, 34, 7, 0},
+    {0x1A4, 34, 7, 3},
+    {0x1A5, 34, 7, 2},
+    {0x1A6, 34, 7, 4},
+    {0x1A7, 34, 7, 1},
+    {0x1A8, 34, 7, 4},
+    {0x1A9, 34, 7, 3},
+    {0x1AC, 34, 7, 1},
+    {0x1AD, 97, 7, 2},
+    {0x1AF, 34, 7, 4},
 };
-typedef struct { unsigned char kong, amount; } CoopPickup;
+typedef struct { unsigned char map, kong, amount; } CoopPickup;
 // amount 0 = one coin; amount 1/5 = colored bananas. Ordinal is per level.
 static const unsigned short coop_pickup_start[9] = {0, 226, 489, 734, 979, 1250, 1444, 1697, 1700};
 static const CoopPickup coop_pickups[1700] = {
     // Level 0, setup order within ascending map IDs.
-    {1, 0}, // map 4, object 12
-    {1, 0}, // map 4, object 49
-    {1, 0}, // map 4, object 14
-    {1, 5}, // map 4, object 60
-    {1, 0}, // map 4, object 41
-    {1, 1}, // map 4, object 19
-    {1, 1}, // map 4, object 20
-    {1, 1}, // map 4, object 21
-    {1, 1}, // map 4, object 35
-    {1, 1}, // map 4, object 36
-    {1, 5}, // map 4, object 16
-    {1, 1}, // map 4, object 59
-    {1, 5}, // map 4, object 37
-    {0, 1}, // map 7, object 9
-    {0, 1}, // map 7, object 11
-    {0, 1}, // map 7, object 12
-    {0, 1}, // map 7, object 15
-    {2, 5}, // map 7, object 223
-    {0, 5}, // map 7, object 24
-    {1, 1}, // map 7, object 6
-    {0, 1}, // map 7, object 8
-    {1, 1}, // map 7, object 13
-    {4, 5}, // map 7, object 365
-    {2, 5}, // map 7, object 297
-    {4, 0}, // map 7, object 19
-    {4, 0}, // map 7, object 303
-    {3, 1}, // map 7, object 23
-    {3, 1}, // map 7, object 25
-    {3, 1}, // map 7, object 91
-    {4, 1}, // map 7, object 320
-    {3, 1}, // map 7, object 106
-    {0, 5}, // map 7, object 17
-    {0, 0}, // map 7, object 167
-    {0, 1}, // map 7, object 127
-    {0, 1}, // map 7, object 128
-    {0, 1}, // map 7, object 129
-    {0, 0}, // map 7, object 10
-    {4, 1}, // map 7, object 323
-    {0, 1}, // map 7, object 148
-    {0, 1}, // map 7, object 149
-    {0, 1}, // map 7, object 150
-    {2, 5}, // map 7, object 21
-    {1, 1}, // map 7, object 4
-    {0, 1}, // map 7, object 184
-    {0, 1}, // map 7, object 185
-    {1, 1}, // map 7, object 181
-    {0, 1}, // map 7, object 191
-    {0, 1}, // map 7, object 192
-    {1, 0}, // map 7, object 107
-    {3, 0}, // map 7, object 314
-    {0, 0}, // map 7, object 176
-    {0, 1}, // map 7, object 196
-    {0, 1}, // map 7, object 197
-    {0, 1}, // map 7, object 198
-    {2, 5}, // map 7, object 60
-    {0, 5}, // map 7, object 54
-    {4, 0}, // map 7, object 302
-    {2, 1}, // map 7, object 253
-    {4, 0}, // map 7, object 305
-    {4, 0}, // map 7, object 304
-    {1, 5}, // map 7, object 85
-    {2, 1}, // map 7, object 248
-    {0, 1}, // map 7, object 207
-    {2, 0}, // map 7, object 301
-    {2, 0}, // map 7, object 300
-    {2, 0}, // map 7, object 243
-    {1, 0}, // map 7, object 348
-    {4, 1}, // map 7, object 322
-    {1, 1}, // map 7, object 371
-    {1, 1}, // map 7, object 16
-    {3, 0}, // map 7, object 255
-    {0, 0}, // map 7, object 232
-    {3, 5}, // map 7, object 66
-    {0, 0}, // map 7, object 259
-    {0, 0}, // map 7, object 170
-    {0, 0}, // map 7, object 306
-    {3, 0}, // map 7, object 126
-    {1, 5}, // map 7, object 333
-    {1, 5}, // map 7, object 125
-    {0, 5}, // map 7, object 372
-    {4, 5}, // map 7, object 335
-    {3, 0}, // map 7, object 318
-    {1, 0}, // map 7, object 173
-    {1, 1}, // map 7, object 182
-    {1, 1}, // map 7, object 180
-    {0, 5}, // map 7, object 37
-    {0, 0}, // map 7, object 138
-    {0, 0}, // map 7, object 233
-    {4, 1}, // map 7, object 319
-    {2, 0}, // map 7, object 239
-    {1, 0}, // map 7, object 308
-    {0, 1}, // map 7, object 112
-    {0, 5}, // map 7, object 92
-    {0, 1}, // map 7, object 172
-    {0, 5}, // map 7, object 117
-    {1, 0}, // map 7, object 204
-    {3, 1}, // map 7, object 110
-    {0, 0}, // map 7, object 139
-    {4, 0}, // map 7, object 241
-    {3, 1}, // map 7, object 190
-    {3, 1}, // map 7, object 189
-    {2, 0}, // map 7, object 222
-    {2, 0}, // map 7, object 221
-    {3, 1}, // map 7, object 193
-    {1, 5}, // map 7, object 144
-    {1, 0}, // map 7, object 116
-    {1, 5}, // map 7, object 199
-    {1, 5}, // map 7, object 200
-    {1, 0}, // map 7, object 351
-    {1, 5}, // map 7, object 202
-    {1, 1}, // map 7, object 367
-    {1, 1}, // map 7, object 370
-    {1, 1}, // map 7, object 368
-    {1, 1}, // map 7, object 369
-    {1, 1}, // map 7, object 362
-    {4, 1}, // map 7, object 213
-    {4, 1}, // map 7, object 214
-    {4, 1}, // map 7, object 215
-    {4, 1}, // map 7, object 216
-    {4, 1}, // map 7, object 218
-    {3, 5}, // map 7, object 219
-    {3, 5}, // map 7, object 220
-    {3, 5}, // map 7, object 227
-    {3, 5}, // map 7, object 228
-    {3, 5}, // map 7, object 229
-    {3, 5}, // map 7, object 230
-    {0, 5}, // map 7, object 194
-    {3, 5}, // map 7, object 235
-    {3, 5}, // map 7, object 236
-    {3, 5}, // map 7, object 237
-    {1, 0}, // map 7, object 165
-    {4, 1}, // map 7, object 317
-    {1, 0}, // map 7, object 164
-    {1, 0}, // map 7, object 166
-    {4, 0}, // map 7, object 257
-    {4, 0}, // map 7, object 244
-    {3, 0}, // map 7, object 311
-    {3, 0}, // map 7, object 312
-    {2, 1}, // map 7, object 250
-    {2, 1}, // map 7, object 251
-    {2, 1}, // map 7, object 254
-    {2, 1}, // map 7, object 273
-    {2, 1}, // map 7, object 252
-    {2, 1}, // map 7, object 169
-    {2, 1}, // map 7, object 171
-    {2, 1}, // map 7, object 260
-    {2, 1}, // map 7, object 264
-    {2, 1}, // map 7, object 265
-    {2, 1}, // map 7, object 270
-    {2, 1}, // map 7, object 271
-    {2, 1}, // map 7, object 272
-    {2, 1}, // map 7, object 274
-    {2, 1}, // map 7, object 256
-    {2, 1}, // map 7, object 276
-    {2, 1}, // map 7, object 280
-    {2, 1}, // map 7, object 275
-    {2, 5}, // map 7, object 288
-    {4, 5}, // map 7, object 364
-    {1, 1}, // map 7, object 18
-    {2, 0}, // map 7, object 174
-    {2, 0}, // map 7, object 238
-    {4, 5}, // map 7, object 334
-    {4, 0}, // map 7, object 240
-    {1, 0}, // map 7, object 350
-    {2, 0}, // map 7, object 316
-    {2, 0}, // map 7, object 315
-    {0, 0}, // map 7, object 292
-    {3, 0}, // map 7, object 307
-    {3, 0}, // map 7, object 309
-    {3, 0}, // map 7, object 310
-    {3, 0}, // map 7, object 246
-    {3, 0}, // map 7, object 247
-    {3, 0}, // map 7, object 313
-    {4, 5}, // map 7, object 336
-    {4, 5}, // map 7, object 337
-    {3, 1}, // map 7, object 187
-    {3, 1}, // map 7, object 186
-    {3, 1}, // map 7, object 183
-    {3, 1}, // map 7, object 188
-    {1, 1}, // map 7, object 361
-    {4, 1}, // map 7, object 203
-    {4, 1}, // map 7, object 329
-    {4, 1}, // map 7, object 330
-    {4, 1}, // map 7, object 331
-    {4, 1}, // map 7, object 332
-    {4, 5}, // map 7, object 201
-    {2, 0}, // map 7, object 293
-    {2, 5}, // map 7, object 175
-    {2, 0}, // map 7, object 286
-    {2, 0}, // map 7, object 321
-    {0, 0}, // map 7, object 108
-    {3, 0}, // map 7, object 195
-    {0, 0}, // map 7, object 109
-    {3, 0}, // map 12, object 29
-    {3, 0}, // map 12, object 30
-    {3, 1}, // map 12, object 14
-    {3, 1}, // map 12, object 25
-    {3, 1}, // map 12, object 16
-    {3, 1}, // map 12, object 17
-    {3, 1}, // map 12, object 18
-    {3, 1}, // map 12, object 15
-    {3, 1}, // map 12, object 26
-    {3, 1}, // map 12, object 27
-    {2, 5}, // map 13, object 6
-    {2, 5}, // map 13, object 7
-    {2, 0}, // map 13, object 9
-    {2, 0}, // map 13, object 10
-    {2, 5}, // map 13, object 1
-    {2, 5}, // map 13, object 8
-    {3, 0}, // map 33, object 25
-    {4, 0}, // map 33, object 31
-    {4, 1}, // map 33, object 16
-    {4, 1}, // map 33, object 19
-    {4, 1}, // map 33, object 20
-    {4, 1}, // map 33, object 21
-    {4, 1}, // map 33, object 22
-    {3, 0}, // map 33, object 26
-    {4, 5}, // map 33, object 2
-    {4, 5}, // map 33, object 23
-    {3, 0}, // map 33, object 24
-    {4, 0}, // map 33, object 27
-    {4, 0}, // map 33, object 30
-    {0, 5}, // map 37, object 7
-    {0, 0}, // map 37, object 2
-    {0, 0}, // map 37, object 6
-    {0, 5}, // map 37, object 3
+    {4, 1, 0}, // object 12
+    {4, 1, 0}, // object 49
+    {4, 1, 0}, // object 14
+    {4, 1, 5}, // object 60
+    {4, 1, 0}, // object 41
+    {4, 1, 1}, // object 19
+    {4, 1, 1}, // object 20
+    {4, 1, 1}, // object 21
+    {4, 1, 1}, // object 35
+    {4, 1, 1}, // object 36
+    {4, 1, 5}, // object 16
+    {4, 1, 1}, // object 59
+    {4, 1, 5}, // object 37
+    {7, 0, 1}, // object 9
+    {7, 0, 1}, // object 11
+    {7, 0, 1}, // object 12
+    {7, 0, 1}, // object 15
+    {7, 2, 5}, // object 223
+    {7, 0, 5}, // object 24
+    {7, 1, 1}, // object 6
+    {7, 0, 1}, // object 8
+    {7, 1, 1}, // object 13
+    {7, 4, 5}, // object 365
+    {7, 2, 5}, // object 297
+    {7, 4, 0}, // object 19
+    {7, 4, 0}, // object 303
+    {7, 3, 1}, // object 23
+    {7, 3, 1}, // object 25
+    {7, 3, 1}, // object 91
+    {7, 4, 1}, // object 320
+    {7, 3, 1}, // object 106
+    {7, 0, 5}, // object 17
+    {7, 0, 0}, // object 167
+    {7, 0, 1}, // object 127
+    {7, 0, 1}, // object 128
+    {7, 0, 1}, // object 129
+    {7, 0, 0}, // object 10
+    {7, 4, 1}, // object 323
+    {7, 0, 1}, // object 148
+    {7, 0, 1}, // object 149
+    {7, 0, 1}, // object 150
+    {7, 2, 5}, // object 21
+    {7, 1, 1}, // object 4
+    {7, 0, 1}, // object 184
+    {7, 0, 1}, // object 185
+    {7, 1, 1}, // object 181
+    {7, 0, 1}, // object 191
+    {7, 0, 1}, // object 192
+    {7, 1, 0}, // object 107
+    {7, 3, 0}, // object 314
+    {7, 0, 0}, // object 176
+    {7, 0, 1}, // object 196
+    {7, 0, 1}, // object 197
+    {7, 0, 1}, // object 198
+    {7, 2, 5}, // object 60
+    {7, 0, 5}, // object 54
+    {7, 4, 0}, // object 302
+    {7, 2, 1}, // object 253
+    {7, 4, 0}, // object 305
+    {7, 4, 0}, // object 304
+    {7, 1, 5}, // object 85
+    {7, 2, 1}, // object 248
+    {7, 0, 1}, // object 207
+    {7, 2, 0}, // object 301
+    {7, 2, 0}, // object 300
+    {7, 2, 0}, // object 243
+    {7, 1, 0}, // object 348
+    {7, 4, 1}, // object 322
+    {7, 1, 1}, // object 371
+    {7, 1, 1}, // object 16
+    {7, 3, 0}, // object 255
+    {7, 0, 0}, // object 232
+    {7, 3, 5}, // object 66
+    {7, 0, 0}, // object 259
+    {7, 0, 0}, // object 170
+    {7, 0, 0}, // object 306
+    {7, 3, 0}, // object 126
+    {7, 1, 5}, // object 333
+    {7, 1, 5}, // object 125
+    {7, 0, 5}, // object 372
+    {7, 4, 5}, // object 335
+    {7, 3, 0}, // object 318
+    {7, 1, 0}, // object 173
+    {7, 1, 1}, // object 182
+    {7, 1, 1}, // object 180
+    {7, 0, 5}, // object 37
+    {7, 0, 0}, // object 138
+    {7, 0, 0}, // object 233
+    {7, 4, 1}, // object 319
+    {7, 2, 0}, // object 239
+    {7, 1, 0}, // object 308
+    {7, 0, 1}, // object 112
+    {7, 0, 5}, // object 92
+    {7, 0, 1}, // object 172
+    {7, 0, 5}, // object 117
+    {7, 1, 0}, // object 204
+    {7, 3, 1}, // object 110
+    {7, 0, 0}, // object 139
+    {7, 4, 0}, // object 241
+    {7, 3, 1}, // object 190
+    {7, 3, 1}, // object 189
+    {7, 2, 0}, // object 222
+    {7, 2, 0}, // object 221
+    {7, 3, 1}, // object 193
+    {7, 1, 5}, // object 144
+    {7, 1, 0}, // object 116
+    {7, 1, 5}, // object 199
+    {7, 1, 5}, // object 200
+    {7, 1, 0}, // object 351
+    {7, 1, 5}, // object 202
+    {7, 1, 1}, // object 367
+    {7, 1, 1}, // object 370
+    {7, 1, 1}, // object 368
+    {7, 1, 1}, // object 369
+    {7, 1, 1}, // object 362
+    {7, 4, 1}, // object 213
+    {7, 4, 1}, // object 214
+    {7, 4, 1}, // object 215
+    {7, 4, 1}, // object 216
+    {7, 4, 1}, // object 218
+    {7, 3, 5}, // object 219
+    {7, 3, 5}, // object 220
+    {7, 3, 5}, // object 227
+    {7, 3, 5}, // object 228
+    {7, 3, 5}, // object 229
+    {7, 3, 5}, // object 230
+    {7, 0, 5}, // object 194
+    {7, 3, 5}, // object 235
+    {7, 3, 5}, // object 236
+    {7, 3, 5}, // object 237
+    {7, 1, 0}, // object 165
+    {7, 4, 1}, // object 317
+    {7, 1, 0}, // object 164
+    {7, 1, 0}, // object 166
+    {7, 4, 0}, // object 257
+    {7, 4, 0}, // object 244
+    {7, 3, 0}, // object 311
+    {7, 3, 0}, // object 312
+    {7, 2, 1}, // object 250
+    {7, 2, 1}, // object 251
+    {7, 2, 1}, // object 254
+    {7, 2, 1}, // object 273
+    {7, 2, 1}, // object 252
+    {7, 2, 1}, // object 169
+    {7, 2, 1}, // object 171
+    {7, 2, 1}, // object 260
+    {7, 2, 1}, // object 264
+    {7, 2, 1}, // object 265
+    {7, 2, 1}, // object 270
+    {7, 2, 1}, // object 271
+    {7, 2, 1}, // object 272
+    {7, 2, 1}, // object 274
+    {7, 2, 1}, // object 256
+    {7, 2, 1}, // object 276
+    {7, 2, 1}, // object 280
+    {7, 2, 1}, // object 275
+    {7, 2, 5}, // object 288
+    {7, 4, 5}, // object 364
+    {7, 1, 1}, // object 18
+    {7, 2, 0}, // object 174
+    {7, 2, 0}, // object 238
+    {7, 4, 5}, // object 334
+    {7, 4, 0}, // object 240
+    {7, 1, 0}, // object 350
+    {7, 2, 0}, // object 316
+    {7, 2, 0}, // object 315
+    {7, 0, 0}, // object 292
+    {7, 3, 0}, // object 307
+    {7, 3, 0}, // object 309
+    {7, 3, 0}, // object 310
+    {7, 3, 0}, // object 246
+    {7, 3, 0}, // object 247
+    {7, 3, 0}, // object 313
+    {7, 4, 5}, // object 336
+    {7, 4, 5}, // object 337
+    {7, 3, 1}, // object 187
+    {7, 3, 1}, // object 186
+    {7, 3, 1}, // object 183
+    {7, 3, 1}, // object 188
+    {7, 1, 1}, // object 361
+    {7, 4, 1}, // object 203
+    {7, 4, 1}, // object 329
+    {7, 4, 1}, // object 330
+    {7, 4, 1}, // object 331
+    {7, 4, 1}, // object 332
+    {7, 4, 5}, // object 201
+    {7, 2, 0}, // object 293
+    {7, 2, 5}, // object 175
+    {7, 2, 0}, // object 286
+    {7, 2, 0}, // object 321
+    {7, 0, 0}, // object 108
+    {7, 3, 0}, // object 195
+    {7, 0, 0}, // object 109
+    {12, 3, 0}, // object 29
+    {12, 3, 0}, // object 30
+    {12, 3, 1}, // object 14
+    {12, 3, 1}, // object 25
+    {12, 3, 1}, // object 16
+    {12, 3, 1}, // object 17
+    {12, 3, 1}, // object 18
+    {12, 3, 1}, // object 15
+    {12, 3, 1}, // object 26
+    {12, 3, 1}, // object 27
+    {13, 2, 5}, // object 6
+    {13, 2, 5}, // object 7
+    {13, 2, 0}, // object 9
+    {13, 2, 0}, // object 10
+    {13, 2, 5}, // object 1
+    {13, 2, 5}, // object 8
+    {33, 3, 0}, // object 25
+    {33, 4, 0}, // object 31
+    {33, 4, 1}, // object 16
+    {33, 4, 1}, // object 19
+    {33, 4, 1}, // object 20
+    {33, 4, 1}, // object 21
+    {33, 4, 1}, // object 22
+    {33, 3, 0}, // object 26
+    {33, 4, 5}, // object 2
+    {33, 4, 5}, // object 23
+    {33, 3, 0}, // object 24
+    {33, 4, 0}, // object 27
+    {33, 4, 0}, // object 30
+    {37, 0, 5}, // object 7
+    {37, 0, 0}, // object 2
+    {37, 0, 0}, // object 6
+    {37, 0, 5}, // object 3
     // Level 1, setup order within ascending map IDs.
-    {1, 1}, // map 16, object 75
-    {1, 1}, // map 16, object 76
-    {1, 1}, // map 16, object 77
-    {1, 1}, // map 16, object 47
-    {2, 1}, // map 16, object 51
-    {2, 1}, // map 16, object 52
-    {2, 1}, // map 16, object 53
-    {2, 1}, // map 16, object 54
-    {2, 1}, // map 16, object 55
-    {2, 1}, // map 16, object 56
-    {2, 1}, // map 16, object 57
-    {2, 1}, // map 16, object 58
-    {1, 0}, // map 16, object 59
-    {3, 0}, // map 16, object 507
-    {1, 1}, // map 16, object 84
-    {3, 0}, // map 16, object 505
-    {4, 0}, // map 16, object 504
-    {2, 5}, // map 16, object 116
-    {2, 0}, // map 16, object 66
-    {2, 0}, // map 16, object 501
-    {1, 1}, // map 16, object 73
-    {1, 1}, // map 16, object 71
-    {1, 1}, // map 16, object 74
-    {1, 5}, // map 16, object 35
-    {1, 5}, // map 16, object 33
-    {1, 5}, // map 16, object 34
-    {1, 1}, // map 16, object 85
-    {1, 1}, // map 16, object 83
-    {3, 0}, // map 16, object 506
-    {3, 1}, // map 16, object 82
-    {3, 1}, // map 16, object 86
-    {3, 1}, // map 16, object 87
-    {3, 1}, // map 16, object 88
-    {3, 1}, // map 16, object 89
-    {2, 1}, // map 16, object 68
-    {4, 1}, // map 16, object 69
-    {4, 1}, // map 16, object 70
-    {4, 1}, // map 16, object 115
-    {4, 5}, // map 16, object 121
-    {4, 5}, // map 16, object 118
-    {4, 5}, // map 16, object 119
-    {4, 5}, // map 16, object 120
-    {4, 5}, // map 16, object 122
-    {4, 1}, // map 16, object 123
-    {2, 0}, // map 16, object 500
-    {4, 0}, // map 16, object 502
-    {4, 0}, // map 16, object 503
-    {3, 0}, // map 16, object 508
-    {1, 0}, // map 16, object 509
-    {1, 0}, // map 16, object 510
-    {1, 0}, // map 16, object 511
-    {1, 0}, // map 16, object 512
-    {1, 0}, // map 16, object 513
-    {0, 0}, // map 19, object 29
-    {0, 0}, // map 19, object 30
-    {0, 1}, // map 20, object 46
-    {0, 0}, // map 20, object 23
-    {0, 1}, // map 20, object 50
-    {0, 0}, // map 20, object 103
-    {0, 1}, // map 20, object 54
-    {0, 1}, // map 20, object 55
-    {0, 1}, // map 20, object 56
-    {0, 1}, // map 20, object 57
-    {0, 1}, // map 20, object 58
-    {0, 1}, // map 20, object 59
-    {0, 1}, // map 20, object 60
-    {0, 1}, // map 20, object 61
-    {0, 1}, // map 20, object 62
-    {0, 1}, // map 20, object 63
-    {0, 1}, // map 20, object 64
-    {0, 1}, // map 20, object 65
-    {0, 0}, // map 20, object 47
-    {0, 0}, // map 20, object 44
-    {0, 0}, // map 20, object 45
-    {0, 1}, // map 20, object 49
-    {3, 1}, // map 20, object 73
-    {3, 1}, // map 20, object 74
-    {3, 1}, // map 20, object 75
-    {3, 1}, // map 20, object 76
-    {3, 1}, // map 20, object 118
-    {3, 5}, // map 20, object 120
-    {3, 5}, // map 20, object 121
-    {2, 5}, // map 20, object 124
-    {3, 0}, // map 20, object 13
-    {3, 0}, // map 20, object 131
-    {3, 0}, // map 20, object 132
-    {2, 1}, // map 20, object 134
-    {2, 1}, // map 20, object 135
-    {2, 1}, // map 20, object 136
-    {2, 1}, // map 20, object 137
-    {2, 1}, // map 20, object 138
-    {2, 1}, // map 20, object 139
-    {2, 0}, // map 20, object 141
-    {2, 0}, // map 20, object 142
-    {2, 5}, // map 20, object 130
-    {1, 0}, // map 21, object 13
-    {1, 0}, // map 21, object 14
-    {3, 0}, // map 22, object 7
-    {3, 0}, // map 22, object 8
-    {3, 0}, // map 22, object 9
-    {4, 0}, // map 24, object 26
-    {4, 0}, // map 24, object 31
-    {4, 0}, // map 24, object 33
-    {4, 0}, // map 24, object 34
-    {2, 0}, // map 38, object 392
-    {3, 5}, // map 38, object 63
-    {2, 0}, // map 38, object 435
-    {0, 5}, // map 38, object 315
-    {1, 0}, // map 38, object 81
-    {1, 1}, // map 38, object 270
-    {3, 1}, // map 38, object 256
-    {1, 5}, // map 38, object 96
-    {1, 1}, // map 38, object 253
-    {1, 1}, // map 38, object 254
-    {1, 1}, // map 38, object 255
-    {0, 1}, // map 38, object 93
-    {0, 1}, // map 38, object 94
-    {0, 1}, // map 38, object 95
-    {1, 1}, // map 38, object 271
-    {4, 1}, // map 38, object 56
-    {1, 1}, // map 38, object 269
-    {3, 1}, // map 38, object 261
-    {3, 1}, // map 38, object 259
-    {3, 1}, // map 38, object 257
-    {4, 1}, // map 38, object 337
-    {1, 1}, // map 38, object 252
-    {4, 1}, // map 38, object 49
-    {3, 1}, // map 38, object 260
-    {1, 1}, // map 38, object 339
-    {2, 1}, // map 38, object 54
-    {2, 1}, // map 38, object 53
-    {2, 1}, // map 38, object 52
-    {2, 1}, // map 38, object 51
-    {2, 1}, // map 38, object 50
-    {0, 5}, // map 38, object 318
-    {0, 5}, // map 38, object 88
-    {0, 5}, // map 38, object 89
-    {0, 5}, // map 38, object 86
-    {1, 0}, // map 38, object 178
-    {1, 1}, // map 38, object 341
-    {1, 1}, // map 38, object 340
-    {0, 0}, // map 38, object 151
-    {4, 1}, // map 38, object 338
-    {3, 1}, // map 38, object 258
-    {0, 0}, // map 38, object 148
-    {2, 0}, // map 38, object 437
-    {2, 0}, // map 38, object 433
-    {3, 1}, // map 38, object 359
-    {0, 0}, // map 38, object 129
-    {0, 0}, // map 38, object 47
-    {0, 0}, // map 38, object 55
-    {1, 0}, // map 38, object 78
-    {1, 0}, // map 38, object 79
-    {1, 0}, // map 38, object 241
-    {0, 1}, // map 38, object 284
-    {0, 1}, // map 38, object 285
-    {0, 1}, // map 38, object 286
-    {0, 5}, // map 38, object 97
-    {4, 0}, // map 38, object 117
-    {4, 0}, // map 38, object 118
-    {4, 0}, // map 38, object 136
-    {4, 0}, // map 38, object 137
-    {0, 1}, // map 38, object 139
-    {0, 1}, // map 38, object 140
-    {0, 1}, // map 38, object 276
-    {0, 1}, // map 38, object 300
-    {0, 5}, // map 38, object 309
-    {0, 5}, // map 38, object 306
-    {0, 5}, // map 38, object 314
-    {0, 0}, // map 38, object 116
-    {0, 0}, // map 38, object 155
-    {0, 0}, // map 38, object 319
-    {4, 1}, // map 38, object 48
-    {3, 1}, // map 38, object 262
-    {3, 1}, // map 38, object 263
-    {3, 1}, // map 38, object 264
-    {1, 1}, // map 38, object 265
-    {1, 1}, // map 38, object 273
-    {1, 1}, // map 38, object 274
-    {1, 1}, // map 38, object 275
-    {1, 1}, // map 38, object 342
-    {1, 5}, // map 38, object 347
-    {1, 5}, // map 38, object 343
-    {1, 5}, // map 38, object 344
-    {1, 5}, // map 38, object 345
-    {1, 5}, // map 38, object 346
-    {1, 0}, // map 38, object 356
-    {1, 0}, // map 38, object 350
-    {1, 0}, // map 38, object 355
-    {1, 0}, // map 38, object 348
-    {3, 1}, // map 38, object 121
-    {3, 1}, // map 38, object 360
-    {3, 1}, // map 38, object 361
-    {3, 1}, // map 38, object 362
-    {3, 1}, // map 38, object 363
-    {3, 5}, // map 38, object 364
-    {3, 5}, // map 38, object 365
-    {3, 5}, // map 38, object 366
-    {3, 5}, // map 38, object 367
-    {3, 5}, // map 38, object 368
-    {3, 5}, // map 38, object 369
-    {4, 0}, // map 38, object 525
-    {2, 1}, // map 38, object 307
-    {2, 1}, // map 38, object 371
-    {2, 1}, // map 38, object 372
-    {2, 1}, // map 38, object 373
-    {2, 1}, // map 38, object 374
-    {2, 0}, // map 38, object 436
-    {3, 0}, // map 38, object 375
-    {3, 0}, // map 38, object 376
-    {2, 5}, // map 38, object 384
-    {2, 5}, // map 38, object 385
-    {2, 5}, // map 38, object 386
-    {2, 5}, // map 38, object 387
-    {2, 5}, // map 38, object 388
-    {2, 5}, // map 38, object 389
-    {2, 0}, // map 38, object 390
-    {2, 0}, // map 38, object 391
-    {3, 0}, // map 38, object 439
-    {4, 1}, // map 38, object 393
-    {4, 1}, // map 38, object 394
-    {4, 1}, // map 38, object 395
-    {4, 1}, // map 38, object 396
-    {4, 1}, // map 38, object 397
-    {4, 1}, // map 38, object 398
-    {4, 1}, // map 38, object 399
-    {4, 1}, // map 38, object 400
-    {4, 1}, // map 38, object 401
-    {4, 1}, // map 38, object 402
-    {4, 5}, // map 38, object 403
-    {4, 5}, // map 38, object 404
-    {4, 5}, // map 38, object 405
-    {4, 5}, // map 38, object 406
-    {4, 0}, // map 38, object 407
-    {4, 0}, // map 38, object 408
-    {4, 1}, // map 38, object 409
-    {4, 1}, // map 38, object 410
-    {4, 1}, // map 38, object 411
-    {4, 1}, // map 38, object 412
-    {4, 1}, // map 38, object 413
-    {4, 1}, // map 38, object 414
-    {4, 0}, // map 38, object 524
-    {3, 0}, // map 38, object 440
-    {3, 0}, // map 38, object 370
-    {2, 0}, // map 38, object 518
-    {2, 0}, // map 38, object 434
-    {3, 0}, // map 38, object 438
-    {2, 0}, // map 38, object 238
-    {2, 0}, // map 38, object 296
-    {2, 0}, // map 38, object 326
-    {3, 0}, // map 38, object 377
-    {3, 0}, // map 38, object 441
-    {3, 0}, // map 38, object 442
-    {3, 0}, // map 38, object 443
-    {3, 0}, // map 38, object 444
-    {3, 0}, // map 38, object 445
-    {4, 0}, // map 38, object 446
-    {4, 0}, // map 38, object 447
-    {4, 0}, // map 38, object 448
-    {4, 0}, // map 38, object 449
-    {0, 0}, // map 38, object 450
-    {0, 0}, // map 38, object 451
-    {0, 0}, // map 38, object 452
+    {16, 1, 1}, // object 75
+    {16, 1, 1}, // object 76
+    {16, 1, 1}, // object 77
+    {16, 1, 1}, // object 47
+    {16, 2, 1}, // object 51
+    {16, 2, 1}, // object 52
+    {16, 2, 1}, // object 53
+    {16, 2, 1}, // object 54
+    {16, 2, 1}, // object 55
+    {16, 2, 1}, // object 56
+    {16, 2, 1}, // object 57
+    {16, 2, 1}, // object 58
+    {16, 1, 0}, // object 59
+    {16, 3, 0}, // object 507
+    {16, 1, 1}, // object 84
+    {16, 3, 0}, // object 505
+    {16, 4, 0}, // object 504
+    {16, 2, 5}, // object 116
+    {16, 2, 0}, // object 66
+    {16, 2, 0}, // object 501
+    {16, 1, 1}, // object 73
+    {16, 1, 1}, // object 71
+    {16, 1, 1}, // object 74
+    {16, 1, 5}, // object 35
+    {16, 1, 5}, // object 33
+    {16, 1, 5}, // object 34
+    {16, 1, 1}, // object 85
+    {16, 1, 1}, // object 83
+    {16, 3, 0}, // object 506
+    {16, 3, 1}, // object 82
+    {16, 3, 1}, // object 86
+    {16, 3, 1}, // object 87
+    {16, 3, 1}, // object 88
+    {16, 3, 1}, // object 89
+    {16, 2, 1}, // object 68
+    {16, 4, 1}, // object 69
+    {16, 4, 1}, // object 70
+    {16, 4, 1}, // object 115
+    {16, 4, 5}, // object 121
+    {16, 4, 5}, // object 118
+    {16, 4, 5}, // object 119
+    {16, 4, 5}, // object 120
+    {16, 4, 5}, // object 122
+    {16, 4, 1}, // object 123
+    {16, 2, 0}, // object 500
+    {16, 4, 0}, // object 502
+    {16, 4, 0}, // object 503
+    {16, 3, 0}, // object 508
+    {16, 1, 0}, // object 509
+    {16, 1, 0}, // object 510
+    {16, 1, 0}, // object 511
+    {16, 1, 0}, // object 512
+    {16, 1, 0}, // object 513
+    {19, 0, 0}, // object 29
+    {19, 0, 0}, // object 30
+    {20, 0, 1}, // object 46
+    {20, 0, 0}, // object 23
+    {20, 0, 1}, // object 50
+    {20, 0, 0}, // object 103
+    {20, 0, 1}, // object 54
+    {20, 0, 1}, // object 55
+    {20, 0, 1}, // object 56
+    {20, 0, 1}, // object 57
+    {20, 0, 1}, // object 58
+    {20, 0, 1}, // object 59
+    {20, 0, 1}, // object 60
+    {20, 0, 1}, // object 61
+    {20, 0, 1}, // object 62
+    {20, 0, 1}, // object 63
+    {20, 0, 1}, // object 64
+    {20, 0, 1}, // object 65
+    {20, 0, 0}, // object 47
+    {20, 0, 0}, // object 44
+    {20, 0, 0}, // object 45
+    {20, 0, 1}, // object 49
+    {20, 3, 1}, // object 73
+    {20, 3, 1}, // object 74
+    {20, 3, 1}, // object 75
+    {20, 3, 1}, // object 76
+    {20, 3, 1}, // object 118
+    {20, 3, 5}, // object 120
+    {20, 3, 5}, // object 121
+    {20, 2, 5}, // object 124
+    {20, 3, 0}, // object 13
+    {20, 3, 0}, // object 131
+    {20, 3, 0}, // object 132
+    {20, 2, 1}, // object 134
+    {20, 2, 1}, // object 135
+    {20, 2, 1}, // object 136
+    {20, 2, 1}, // object 137
+    {20, 2, 1}, // object 138
+    {20, 2, 1}, // object 139
+    {20, 2, 0}, // object 141
+    {20, 2, 0}, // object 142
+    {20, 2, 5}, // object 130
+    {21, 1, 0}, // object 13
+    {21, 1, 0}, // object 14
+    {22, 3, 0}, // object 7
+    {22, 3, 0}, // object 8
+    {22, 3, 0}, // object 9
+    {24, 4, 0}, // object 26
+    {24, 4, 0}, // object 31
+    {24, 4, 0}, // object 33
+    {24, 4, 0}, // object 34
+    {38, 2, 0}, // object 392
+    {38, 3, 5}, // object 63
+    {38, 2, 0}, // object 435
+    {38, 0, 5}, // object 315
+    {38, 1, 0}, // object 81
+    {38, 1, 1}, // object 270
+    {38, 3, 1}, // object 256
+    {38, 1, 5}, // object 96
+    {38, 1, 1}, // object 253
+    {38, 1, 1}, // object 254
+    {38, 1, 1}, // object 255
+    {38, 0, 1}, // object 93
+    {38, 0, 1}, // object 94
+    {38, 0, 1}, // object 95
+    {38, 1, 1}, // object 271
+    {38, 4, 1}, // object 56
+    {38, 1, 1}, // object 269
+    {38, 3, 1}, // object 261
+    {38, 3, 1}, // object 259
+    {38, 3, 1}, // object 257
+    {38, 4, 1}, // object 337
+    {38, 1, 1}, // object 252
+    {38, 4, 1}, // object 49
+    {38, 3, 1}, // object 260
+    {38, 1, 1}, // object 339
+    {38, 2, 1}, // object 54
+    {38, 2, 1}, // object 53
+    {38, 2, 1}, // object 52
+    {38, 2, 1}, // object 51
+    {38, 2, 1}, // object 50
+    {38, 0, 5}, // object 318
+    {38, 0, 5}, // object 88
+    {38, 0, 5}, // object 89
+    {38, 0, 5}, // object 86
+    {38, 1, 0}, // object 178
+    {38, 1, 1}, // object 341
+    {38, 1, 1}, // object 340
+    {38, 0, 0}, // object 151
+    {38, 4, 1}, // object 338
+    {38, 3, 1}, // object 258
+    {38, 0, 0}, // object 148
+    {38, 2, 0}, // object 437
+    {38, 2, 0}, // object 433
+    {38, 3, 1}, // object 359
+    {38, 0, 0}, // object 129
+    {38, 0, 0}, // object 47
+    {38, 0, 0}, // object 55
+    {38, 1, 0}, // object 78
+    {38, 1, 0}, // object 79
+    {38, 1, 0}, // object 241
+    {38, 0, 1}, // object 284
+    {38, 0, 1}, // object 285
+    {38, 0, 1}, // object 286
+    {38, 0, 5}, // object 97
+    {38, 4, 0}, // object 117
+    {38, 4, 0}, // object 118
+    {38, 4, 0}, // object 136
+    {38, 4, 0}, // object 137
+    {38, 0, 1}, // object 139
+    {38, 0, 1}, // object 140
+    {38, 0, 1}, // object 276
+    {38, 0, 1}, // object 300
+    {38, 0, 5}, // object 309
+    {38, 0, 5}, // object 306
+    {38, 0, 5}, // object 314
+    {38, 0, 0}, // object 116
+    {38, 0, 0}, // object 155
+    {38, 0, 0}, // object 319
+    {38, 4, 1}, // object 48
+    {38, 3, 1}, // object 262
+    {38, 3, 1}, // object 263
+    {38, 3, 1}, // object 264
+    {38, 1, 1}, // object 265
+    {38, 1, 1}, // object 273
+    {38, 1, 1}, // object 274
+    {38, 1, 1}, // object 275
+    {38, 1, 1}, // object 342
+    {38, 1, 5}, // object 347
+    {38, 1, 5}, // object 343
+    {38, 1, 5}, // object 344
+    {38, 1, 5}, // object 345
+    {38, 1, 5}, // object 346
+    {38, 1, 0}, // object 356
+    {38, 1, 0}, // object 350
+    {38, 1, 0}, // object 355
+    {38, 1, 0}, // object 348
+    {38, 3, 1}, // object 121
+    {38, 3, 1}, // object 360
+    {38, 3, 1}, // object 361
+    {38, 3, 1}, // object 362
+    {38, 3, 1}, // object 363
+    {38, 3, 5}, // object 364
+    {38, 3, 5}, // object 365
+    {38, 3, 5}, // object 366
+    {38, 3, 5}, // object 367
+    {38, 3, 5}, // object 368
+    {38, 3, 5}, // object 369
+    {38, 4, 0}, // object 525
+    {38, 2, 1}, // object 307
+    {38, 2, 1}, // object 371
+    {38, 2, 1}, // object 372
+    {38, 2, 1}, // object 373
+    {38, 2, 1}, // object 374
+    {38, 2, 0}, // object 436
+    {38, 3, 0}, // object 375
+    {38, 3, 0}, // object 376
+    {38, 2, 5}, // object 384
+    {38, 2, 5}, // object 385
+    {38, 2, 5}, // object 386
+    {38, 2, 5}, // object 387
+    {38, 2, 5}, // object 388
+    {38, 2, 5}, // object 389
+    {38, 2, 0}, // object 390
+    {38, 2, 0}, // object 391
+    {38, 3, 0}, // object 439
+    {38, 4, 1}, // object 393
+    {38, 4, 1}, // object 394
+    {38, 4, 1}, // object 395
+    {38, 4, 1}, // object 396
+    {38, 4, 1}, // object 397
+    {38, 4, 1}, // object 398
+    {38, 4, 1}, // object 399
+    {38, 4, 1}, // object 400
+    {38, 4, 1}, // object 401
+    {38, 4, 1}, // object 402
+    {38, 4, 5}, // object 403
+    {38, 4, 5}, // object 404
+    {38, 4, 5}, // object 405
+    {38, 4, 5}, // object 406
+    {38, 4, 0}, // object 407
+    {38, 4, 0}, // object 408
+    {38, 4, 1}, // object 409
+    {38, 4, 1}, // object 410
+    {38, 4, 1}, // object 411
+    {38, 4, 1}, // object 412
+    {38, 4, 1}, // object 413
+    {38, 4, 1}, // object 414
+    {38, 4, 0}, // object 524
+    {38, 3, 0}, // object 440
+    {38, 3, 0}, // object 370
+    {38, 2, 0}, // object 518
+    {38, 2, 0}, // object 434
+    {38, 3, 0}, // object 438
+    {38, 2, 0}, // object 238
+    {38, 2, 0}, // object 296
+    {38, 2, 0}, // object 326
+    {38, 3, 0}, // object 377
+    {38, 3, 0}, // object 441
+    {38, 3, 0}, // object 442
+    {38, 3, 0}, // object 443
+    {38, 3, 0}, // object 444
+    {38, 3, 0}, // object 445
+    {38, 4, 0}, // object 446
+    {38, 4, 0}, // object 447
+    {38, 4, 0}, // object 448
+    {38, 4, 0}, // object 449
+    {38, 0, 0}, // object 450
+    {38, 0, 0}, // object 451
+    {38, 0, 0}, // object 452
     // Level 2, setup order within ascending map IDs.
-    {0, 1}, // map 26, object 150
-    {1, 0}, // map 26, object 463
-    {4, 0}, // map 26, object 433
-    {4, 5}, // map 26, object 445
-    {0, 0}, // map 26, object 199
-    {0, 0}, // map 26, object 197
-    {0, 0}, // map 26, object 201
-    {0, 0}, // map 26, object 200
-    {0, 0}, // map 26, object 202
-    {4, 5}, // map 26, object 444
-    {4, 5}, // map 26, object 432
-    {4, 5}, // map 26, object 431
-    {0, 1}, // map 26, object 180
-    {0, 1}, // map 26, object 152
-    {0, 1}, // map 26, object 149
-    {0, 1}, // map 26, object 148
-    {0, 1}, // map 26, object 151
-    {0, 1}, // map 26, object 89
-    {0, 1}, // map 26, object 183
-    {0, 1}, // map 26, object 182
-    {0, 1}, // map 26, object 167
-    {0, 1}, // map 26, object 193
-    {0, 1}, // map 26, object 194
-    {1, 1}, // map 26, object 226
-    {1, 1}, // map 26, object 232
-    {1, 1}, // map 26, object 233
-    {1, 1}, // map 26, object 234
-    {1, 1}, // map 26, object 235
-    {1, 1}, // map 26, object 229
-    {0, 1}, // map 26, object 160
-    {0, 1}, // map 26, object 153
-    {0, 1}, // map 26, object 154
-    {1, 1}, // map 26, object 228
-    {1, 1}, // map 26, object 230
-    {1, 1}, // map 26, object 231
-    {4, 0}, // map 26, object 204
-    {4, 0}, // map 26, object 203
-    {0, 1}, // map 26, object 181
-    {0, 0}, // map 26, object 198
-    {0, 1}, // map 26, object 159
-    {0, 1}, // map 26, object 161
-    {4, 0}, // map 26, object 166
-    {0, 1}, // map 26, object 186
-    {0, 1}, // map 26, object 185
-    {4, 0}, // map 26, object 195
-    {1, 1}, // map 26, object 247
-    {0, 0}, // map 26, object 207
-    {0, 0}, // map 26, object 208
-    {0, 0}, // map 26, object 220
-    {1, 1}, // map 26, object 221
-    {1, 1}, // map 26, object 222
-    {1, 1}, // map 26, object 223
-    {1, 1}, // map 26, object 224
-    {1, 1}, // map 26, object 225
-    {1, 1}, // map 26, object 227
-    {1, 1}, // map 26, object 239
-    {1, 1}, // map 26, object 243
-    {1, 1}, // map 26, object 244
-    {1, 1}, // map 26, object 246
-    {1, 5}, // map 26, object 206
-    {1, 5}, // map 26, object 248
-    {1, 5}, // map 26, object 249
-    {1, 5}, // map 26, object 250
-    {1, 5}, // map 26, object 251
-    {1, 5}, // map 26, object 252
-    {1, 5}, // map 26, object 253
-    {1, 5}, // map 26, object 255
-    {1, 5}, // map 26, object 254
-    {1, 5}, // map 26, object 256
-    {1, 0}, // map 26, object 257
-    {1, 0}, // map 26, object 258
-    {1, 0}, // map 26, object 259
-    {4, 0}, // map 26, object 468
-    {3, 0}, // map 26, object 260
-    {3, 0}, // map 26, object 266
-    {2, 1}, // map 26, object 363
-    {3, 0}, // map 26, object 272
-    {2, 1}, // map 26, object 361
-    {3, 0}, // map 26, object 271
-    {3, 0}, // map 26, object 269
-    {3, 0}, // map 26, object 274
-    {1, 0}, // map 26, object 276
-    {1, 0}, // map 26, object 277
-    {2, 1}, // map 26, object 362
-    {3, 1}, // map 26, object 289
-    {3, 1}, // map 26, object 290
-    {3, 1}, // map 26, object 291
-    {3, 1}, // map 26, object 292
-    {3, 1}, // map 26, object 293
-    {3, 1}, // map 26, object 294
-    {3, 1}, // map 26, object 295
-    {3, 1}, // map 26, object 296
-    {3, 1}, // map 26, object 297
-    {3, 1}, // map 26, object 298
-    {3, 1}, // map 26, object 299
-    {3, 1}, // map 26, object 300
-    {3, 1}, // map 26, object 301
-    {3, 1}, // map 26, object 302
-    {3, 1}, // map 26, object 303
-    {3, 1}, // map 26, object 304
-    {3, 1}, // map 26, object 305
-    {3, 1}, // map 26, object 306
-    {3, 1}, // map 26, object 307
-    {3, 1}, // map 26, object 327
-    {3, 5}, // map 26, object 328
-    {3, 5}, // map 26, object 334
-    {3, 5}, // map 26, object 330
-    {3, 5}, // map 26, object 331
-    {3, 5}, // map 26, object 332
-    {3, 5}, // map 26, object 333
-    {3, 5}, // map 26, object 329
-    {3, 5}, // map 26, object 335
-    {3, 5}, // map 26, object 337
-    {3, 5}, // map 26, object 338
-    {3, 0}, // map 26, object 270
-    {3, 0}, // map 26, object 288
-    {2, 1}, // map 26, object 359
-    {2, 1}, // map 26, object 360
-    {3, 0}, // map 26, object 273
-    {1, 0}, // map 26, object 341
-    {1, 0}, // map 26, object 342
-    {1, 0}, // map 26, object 340
-    {1, 0}, // map 26, object 343
-    {1, 0}, // map 26, object 339
-    {3, 0}, // map 26, object 349
-    {3, 0}, // map 26, object 350
-    {3, 0}, // map 26, object 351
-    {3, 0}, // map 26, object 352
-    {3, 0}, // map 26, object 353
-    {2, 1}, // map 26, object 354
-    {2, 1}, // map 26, object 355
-    {2, 1}, // map 26, object 356
-    {2, 1}, // map 26, object 357
-    {2, 1}, // map 26, object 358
-    {1, 0}, // map 26, object 345
-    {3, 0}, // map 26, object 275
-    {1, 0}, // map 26, object 344
-    {1, 0}, // map 26, object 346
-    {1, 0}, // map 26, object 347
-    {2, 0}, // map 26, object 364
-    {2, 0}, // map 26, object 365
-    {2, 0}, // map 26, object 366
-    {2, 0}, // map 26, object 367
-    {2, 0}, // map 26, object 368
-    {2, 1}, // map 26, object 369
-    {2, 1}, // map 26, object 370
-    {2, 1}, // map 26, object 371
-    {2, 1}, // map 26, object 372
-    {2, 1}, // map 26, object 373
-    {2, 1}, // map 26, object 374
-    {2, 1}, // map 26, object 375
-    {2, 1}, // map 26, object 376
-    {2, 1}, // map 26, object 377
-    {2, 1}, // map 26, object 378
-    {2, 5}, // map 26, object 379
-    {2, 5}, // map 26, object 380
-    {2, 5}, // map 26, object 381
-    {2, 5}, // map 26, object 382
-    {2, 5}, // map 26, object 383
-    {2, 5}, // map 26, object 384
-    {2, 5}, // map 26, object 385
-    {2, 5}, // map 26, object 386
-    {2, 5}, // map 26, object 387
-    {2, 5}, // map 26, object 388
-    {2, 0}, // map 26, object 389
-    {2, 0}, // map 26, object 390
-    {2, 0}, // map 26, object 391
-    {2, 0}, // map 26, object 392
-    {2, 0}, // map 26, object 393
-    {2, 0}, // map 26, object 394
-    {2, 0}, // map 26, object 395
-    {4, 1}, // map 26, object 407
-    {4, 1}, // map 26, object 413
-    {4, 1}, // map 26, object 411
-    {4, 1}, // map 26, object 409
-    {4, 1}, // map 26, object 408
-    {4, 1}, // map 26, object 406
-    {4, 1}, // map 26, object 410
-    {4, 1}, // map 26, object 412
-    {4, 1}, // map 26, object 414
-    {4, 1}, // map 26, object 415
-    {4, 1}, // map 26, object 396
-    {4, 1}, // map 26, object 398
-    {4, 1}, // map 26, object 397
-    {4, 1}, // map 26, object 399
-    {4, 1}, // map 26, object 400
-    {4, 1}, // map 26, object 401
-    {4, 1}, // map 26, object 402
-    {4, 1}, // map 26, object 403
-    {4, 1}, // map 26, object 404
-    {4, 1}, // map 26, object 405
-    {4, 0}, // map 26, object 424
-    {4, 0}, // map 26, object 425
-    {4, 0}, // map 26, object 426
-    {4, 0}, // map 26, object 427
-    {4, 5}, // map 26, object 428
-    {4, 5}, // map 26, object 429
-    {4, 5}, // map 26, object 430
-    {4, 0}, // map 26, object 448
-    {4, 0}, // map 26, object 447
-    {4, 5}, // map 26, object 446
-    {4, 0}, // map 26, object 434
-    {4, 0}, // map 26, object 435
-    {4, 0}, // map 26, object 436
-    {4, 0}, // map 26, object 437
-    {4, 0}, // map 26, object 438
-    {4, 0}, // map 26, object 439
-    {4, 0}, // map 26, object 440
-    {4, 0}, // map 26, object 441
-    {4, 5}, // map 26, object 442
-    {4, 5}, // map 26, object 443
-    {4, 0}, // map 26, object 196
-    {0, 0}, // map 26, object 210
-    {0, 0}, // map 26, object 211
-    {0, 0}, // map 26, object 451
-    {4, 0}, // map 26, object 452
-    {4, 0}, // map 26, object 453
-    {4, 0}, // map 26, object 454
-    {2, 0}, // map 26, object 455
-    {2, 0}, // map 26, object 456
-    {2, 0}, // map 26, object 457
-    {3, 0}, // map 26, object 458
-    {3, 0}, // map 26, object 459
-    {3, 0}, // map 26, object 460
-    {1, 0}, // map 26, object 461
-    {1, 0}, // map 26, object 462
-    {4, 0}, // map 26, object 464
-    {4, 0}, // map 26, object 465
-    {4, 0}, // map 26, object 466
-    {4, 0}, // map 26, object 467
-    {1, 0}, // map 26, object 348
-    {0, 5}, // map 29, object 3
-    {0, 5}, // map 29, object 4
-    {0, 5}, // map 29, object 5
-    {0, 0}, // map 29, object 6
-    {0, 5}, // map 36, object 9
-    {0, 5}, // map 36, object 10
-    {0, 5}, // map 36, object 11
-    {2, 0}, // map 36, object 12
-    {2, 0}, // map 36, object 13
-    {2, 0}, // map 36, object 15
-    {0, 5}, // map 110, object 7
-    {0, 5}, // map 110, object 5
-    {0, 5}, // map 110, object 4
-    {0, 5}, // map 110, object 2
+    {26, 0, 1}, // object 150
+    {26, 1, 0}, // object 463
+    {26, 4, 0}, // object 433
+    {26, 4, 5}, // object 445
+    {26, 0, 0}, // object 199
+    {26, 0, 0}, // object 197
+    {26, 0, 0}, // object 201
+    {26, 0, 0}, // object 200
+    {26, 0, 0}, // object 202
+    {26, 4, 5}, // object 444
+    {26, 4, 5}, // object 432
+    {26, 4, 5}, // object 431
+    {26, 0, 1}, // object 180
+    {26, 0, 1}, // object 152
+    {26, 0, 1}, // object 149
+    {26, 0, 1}, // object 148
+    {26, 0, 1}, // object 151
+    {26, 0, 1}, // object 89
+    {26, 0, 1}, // object 183
+    {26, 0, 1}, // object 182
+    {26, 0, 1}, // object 167
+    {26, 0, 1}, // object 193
+    {26, 0, 1}, // object 194
+    {26, 1, 1}, // object 226
+    {26, 1, 1}, // object 232
+    {26, 1, 1}, // object 233
+    {26, 1, 1}, // object 234
+    {26, 1, 1}, // object 235
+    {26, 1, 1}, // object 229
+    {26, 0, 1}, // object 160
+    {26, 0, 1}, // object 153
+    {26, 0, 1}, // object 154
+    {26, 1, 1}, // object 228
+    {26, 1, 1}, // object 230
+    {26, 1, 1}, // object 231
+    {26, 4, 0}, // object 204
+    {26, 4, 0}, // object 203
+    {26, 0, 1}, // object 181
+    {26, 0, 0}, // object 198
+    {26, 0, 1}, // object 159
+    {26, 0, 1}, // object 161
+    {26, 4, 0}, // object 166
+    {26, 0, 1}, // object 186
+    {26, 0, 1}, // object 185
+    {26, 4, 0}, // object 195
+    {26, 1, 1}, // object 247
+    {26, 0, 0}, // object 207
+    {26, 0, 0}, // object 208
+    {26, 0, 0}, // object 220
+    {26, 1, 1}, // object 221
+    {26, 1, 1}, // object 222
+    {26, 1, 1}, // object 223
+    {26, 1, 1}, // object 224
+    {26, 1, 1}, // object 225
+    {26, 1, 1}, // object 227
+    {26, 1, 1}, // object 239
+    {26, 1, 1}, // object 243
+    {26, 1, 1}, // object 244
+    {26, 1, 1}, // object 246
+    {26, 1, 5}, // object 206
+    {26, 1, 5}, // object 248
+    {26, 1, 5}, // object 249
+    {26, 1, 5}, // object 250
+    {26, 1, 5}, // object 251
+    {26, 1, 5}, // object 252
+    {26, 1, 5}, // object 253
+    {26, 1, 5}, // object 255
+    {26, 1, 5}, // object 254
+    {26, 1, 5}, // object 256
+    {26, 1, 0}, // object 257
+    {26, 1, 0}, // object 258
+    {26, 1, 0}, // object 259
+    {26, 4, 0}, // object 468
+    {26, 3, 0}, // object 260
+    {26, 3, 0}, // object 266
+    {26, 2, 1}, // object 363
+    {26, 3, 0}, // object 272
+    {26, 2, 1}, // object 361
+    {26, 3, 0}, // object 271
+    {26, 3, 0}, // object 269
+    {26, 3, 0}, // object 274
+    {26, 1, 0}, // object 276
+    {26, 1, 0}, // object 277
+    {26, 2, 1}, // object 362
+    {26, 3, 1}, // object 289
+    {26, 3, 1}, // object 290
+    {26, 3, 1}, // object 291
+    {26, 3, 1}, // object 292
+    {26, 3, 1}, // object 293
+    {26, 3, 1}, // object 294
+    {26, 3, 1}, // object 295
+    {26, 3, 1}, // object 296
+    {26, 3, 1}, // object 297
+    {26, 3, 1}, // object 298
+    {26, 3, 1}, // object 299
+    {26, 3, 1}, // object 300
+    {26, 3, 1}, // object 301
+    {26, 3, 1}, // object 302
+    {26, 3, 1}, // object 303
+    {26, 3, 1}, // object 304
+    {26, 3, 1}, // object 305
+    {26, 3, 1}, // object 306
+    {26, 3, 1}, // object 307
+    {26, 3, 1}, // object 327
+    {26, 3, 5}, // object 328
+    {26, 3, 5}, // object 334
+    {26, 3, 5}, // object 330
+    {26, 3, 5}, // object 331
+    {26, 3, 5}, // object 332
+    {26, 3, 5}, // object 333
+    {26, 3, 5}, // object 329
+    {26, 3, 5}, // object 335
+    {26, 3, 5}, // object 337
+    {26, 3, 5}, // object 338
+    {26, 3, 0}, // object 270
+    {26, 3, 0}, // object 288
+    {26, 2, 1}, // object 359
+    {26, 2, 1}, // object 360
+    {26, 3, 0}, // object 273
+    {26, 1, 0}, // object 341
+    {26, 1, 0}, // object 342
+    {26, 1, 0}, // object 340
+    {26, 1, 0}, // object 343
+    {26, 1, 0}, // object 339
+    {26, 3, 0}, // object 349
+    {26, 3, 0}, // object 350
+    {26, 3, 0}, // object 351
+    {26, 3, 0}, // object 352
+    {26, 3, 0}, // object 353
+    {26, 2, 1}, // object 354
+    {26, 2, 1}, // object 355
+    {26, 2, 1}, // object 356
+    {26, 2, 1}, // object 357
+    {26, 2, 1}, // object 358
+    {26, 1, 0}, // object 345
+    {26, 3, 0}, // object 275
+    {26, 1, 0}, // object 344
+    {26, 1, 0}, // object 346
+    {26, 1, 0}, // object 347
+    {26, 2, 0}, // object 364
+    {26, 2, 0}, // object 365
+    {26, 2, 0}, // object 366
+    {26, 2, 0}, // object 367
+    {26, 2, 0}, // object 368
+    {26, 2, 1}, // object 369
+    {26, 2, 1}, // object 370
+    {26, 2, 1}, // object 371
+    {26, 2, 1}, // object 372
+    {26, 2, 1}, // object 373
+    {26, 2, 1}, // object 374
+    {26, 2, 1}, // object 375
+    {26, 2, 1}, // object 376
+    {26, 2, 1}, // object 377
+    {26, 2, 1}, // object 378
+    {26, 2, 5}, // object 379
+    {26, 2, 5}, // object 380
+    {26, 2, 5}, // object 381
+    {26, 2, 5}, // object 382
+    {26, 2, 5}, // object 383
+    {26, 2, 5}, // object 384
+    {26, 2, 5}, // object 385
+    {26, 2, 5}, // object 386
+    {26, 2, 5}, // object 387
+    {26, 2, 5}, // object 388
+    {26, 2, 0}, // object 389
+    {26, 2, 0}, // object 390
+    {26, 2, 0}, // object 391
+    {26, 2, 0}, // object 392
+    {26, 2, 0}, // object 393
+    {26, 2, 0}, // object 394
+    {26, 2, 0}, // object 395
+    {26, 4, 1}, // object 407
+    {26, 4, 1}, // object 413
+    {26, 4, 1}, // object 411
+    {26, 4, 1}, // object 409
+    {26, 4, 1}, // object 408
+    {26, 4, 1}, // object 406
+    {26, 4, 1}, // object 410
+    {26, 4, 1}, // object 412
+    {26, 4, 1}, // object 414
+    {26, 4, 1}, // object 415
+    {26, 4, 1}, // object 396
+    {26, 4, 1}, // object 398
+    {26, 4, 1}, // object 397
+    {26, 4, 1}, // object 399
+    {26, 4, 1}, // object 400
+    {26, 4, 1}, // object 401
+    {26, 4, 1}, // object 402
+    {26, 4, 1}, // object 403
+    {26, 4, 1}, // object 404
+    {26, 4, 1}, // object 405
+    {26, 4, 0}, // object 424
+    {26, 4, 0}, // object 425
+    {26, 4, 0}, // object 426
+    {26, 4, 0}, // object 427
+    {26, 4, 5}, // object 428
+    {26, 4, 5}, // object 429
+    {26, 4, 5}, // object 430
+    {26, 4, 0}, // object 448
+    {26, 4, 0}, // object 447
+    {26, 4, 5}, // object 446
+    {26, 4, 0}, // object 434
+    {26, 4, 0}, // object 435
+    {26, 4, 0}, // object 436
+    {26, 4, 0}, // object 437
+    {26, 4, 0}, // object 438
+    {26, 4, 0}, // object 439
+    {26, 4, 0}, // object 440
+    {26, 4, 0}, // object 441
+    {26, 4, 5}, // object 442
+    {26, 4, 5}, // object 443
+    {26, 4, 0}, // object 196
+    {26, 0, 0}, // object 210
+    {26, 0, 0}, // object 211
+    {26, 0, 0}, // object 451
+    {26, 4, 0}, // object 452
+    {26, 4, 0}, // object 453
+    {26, 4, 0}, // object 454
+    {26, 2, 0}, // object 455
+    {26, 2, 0}, // object 456
+    {26, 2, 0}, // object 457
+    {26, 3, 0}, // object 458
+    {26, 3, 0}, // object 459
+    {26, 3, 0}, // object 460
+    {26, 1, 0}, // object 461
+    {26, 1, 0}, // object 462
+    {26, 4, 0}, // object 464
+    {26, 4, 0}, // object 465
+    {26, 4, 0}, // object 466
+    {26, 4, 0}, // object 467
+    {26, 1, 0}, // object 348
+    {29, 0, 5}, // object 3
+    {29, 0, 5}, // object 4
+    {29, 0, 5}, // object 5
+    {29, 0, 0}, // object 6
+    {36, 0, 5}, // object 9
+    {36, 0, 5}, // object 10
+    {36, 0, 5}, // object 11
+    {36, 2, 0}, // object 12
+    {36, 2, 0}, // object 13
+    {36, 2, 0}, // object 15
+    {110, 0, 5}, // object 7
+    {110, 0, 5}, // object 5
+    {110, 0, 5}, // object 4
+    {110, 0, 5}, // object 2
     // Level 3, setup order within ascending map IDs.
-    {4, 0}, // map 30, object 429
-    {1, 0}, // map 30, object 434
-    {3, 0}, // map 30, object 210
-    {3, 0}, // map 30, object 213
-    {2, 0}, // map 30, object 317
-    {3, 0}, // map 30, object 208
-    {4, 0}, // map 30, object 431
-    {4, 0}, // map 30, object 430
-    {0, 0}, // map 30, object 142
-    {0, 1}, // map 30, object 112
-    {0, 1}, // map 30, object 113
-    {0, 1}, // map 30, object 114
-    {0, 1}, // map 30, object 115
-    {0, 1}, // map 30, object 116
-    {0, 1}, // map 30, object 445
-    {0, 1}, // map 30, object 444
-    {0, 1}, // map 30, object 446
-    {3, 0}, // map 30, object 211
-    {1, 0}, // map 30, object 123
-    {1, 0}, // map 30, object 126
-    {1, 0}, // map 30, object 127
-    {1, 0}, // map 30, object 124
-    {1, 0}, // map 30, object 433
-    {0, 5}, // map 30, object 133
-    {0, 5}, // map 30, object 134
-    {0, 5}, // map 30, object 135
-    {4, 0}, // map 30, object 138
-    {4, 0}, // map 30, object 136
-    {1, 0}, // map 30, object 125
-    {0, 0}, // map 30, object 139
-    {0, 0}, // map 30, object 140
-    {0, 0}, // map 30, object 141
-    {1, 1}, // map 30, object 164
-    {1, 1}, // map 30, object 165
-    {1, 5}, // map 30, object 101
-    {1, 5}, // map 30, object 144
-    {1, 1}, // map 30, object 150
-    {1, 1}, // map 30, object 151
-    {1, 1}, // map 30, object 152
-    {1, 1}, // map 30, object 153
-    {1, 1}, // map 30, object 154
-    {1, 1}, // map 30, object 155
-    {1, 1}, // map 30, object 156
-    {1, 1}, // map 30, object 157
-    {1, 1}, // map 30, object 158
-    {1, 1}, // map 30, object 159
-    {1, 1}, // map 30, object 160
-    {1, 1}, // map 30, object 161
-    {1, 1}, // map 30, object 162
-    {1, 1}, // map 30, object 163
-    {1, 5}, // map 30, object 166
-    {1, 5}, // map 30, object 167
-    {1, 5}, // map 30, object 168
-    {1, 5}, // map 30, object 169
-    {1, 5}, // map 30, object 170
-    {1, 5}, // map 30, object 171
-    {1, 0}, // map 30, object 176
-    {1, 0}, // map 30, object 177
-    {1, 0}, // map 30, object 178
-    {1, 0}, // map 30, object 179
-    {1, 0}, // map 30, object 193
-    {1, 0}, // map 30, object 191
-    {1, 0}, // map 30, object 192
-    {3, 0}, // map 30, object 209
-    {2, 0}, // map 30, object 316
-    {4, 1}, // map 30, object 219
-    {4, 1}, // map 30, object 253
-    {4, 1}, // map 30, object 254
-    {4, 1}, // map 30, object 255
-    {4, 1}, // map 30, object 256
-    {4, 1}, // map 30, object 257
-    {4, 1}, // map 30, object 258
-    {4, 1}, // map 30, object 259
-    {4, 1}, // map 30, object 260
-    {4, 1}, // map 30, object 261
-    {4, 1}, // map 30, object 262
-    {4, 1}, // map 30, object 263
-    {4, 1}, // map 30, object 264
-    {4, 1}, // map 30, object 265
-    {4, 1}, // map 30, object 266
-    {4, 1}, // map 30, object 267
-    {4, 1}, // map 30, object 268
-    {4, 1}, // map 30, object 269
-    {4, 1}, // map 30, object 270
-    {4, 1}, // map 30, object 271
-    {4, 5}, // map 30, object 275
-    {4, 5}, // map 30, object 276
-    {4, 5}, // map 30, object 277
-    {4, 5}, // map 30, object 278
-    {4, 5}, // map 30, object 279
-    {4, 0}, // map 30, object 280
-    {4, 0}, // map 30, object 281
-    {4, 0}, // map 30, object 282
-    {4, 0}, // map 30, object 283
-    {4, 0}, // map 30, object 284
-    {4, 0}, // map 30, object 285
-    {2, 1}, // map 30, object 295
-    {2, 1}, // map 30, object 296
-    {2, 1}, // map 30, object 297
-    {2, 1}, // map 30, object 298
-    {2, 1}, // map 30, object 299
-    {2, 1}, // map 30, object 300
-    {2, 1}, // map 30, object 301
-    {2, 1}, // map 30, object 302
-    {2, 1}, // map 30, object 308
-    {2, 1}, // map 30, object 309
-    {2, 1}, // map 30, object 303
-    {2, 1}, // map 30, object 304
-    {2, 1}, // map 30, object 305
-    {2, 1}, // map 30, object 306
-    {2, 1}, // map 30, object 307
-    {2, 5}, // map 30, object 312
-    {2, 5}, // map 30, object 313
-    {2, 0}, // map 30, object 314
-    {2, 0}, // map 30, object 315
-    {3, 1}, // map 30, object 320
-    {3, 1}, // map 30, object 321
-    {3, 1}, // map 30, object 322
-    {3, 1}, // map 30, object 323
-    {3, 1}, // map 30, object 324
-    {3, 1}, // map 30, object 325
-    {3, 1}, // map 30, object 326
-    {3, 1}, // map 30, object 327
-    {3, 1}, // map 30, object 328
-    {3, 1}, // map 30, object 329
-    {3, 1}, // map 30, object 330
-    {3, 1}, // map 30, object 331
-    {3, 5}, // map 30, object 332
-    {3, 5}, // map 30, object 333
-    {3, 5}, // map 30, object 342
-    {3, 5}, // map 30, object 343
-    {3, 5}, // map 30, object 344
-    {3, 5}, // map 30, object 345
-    {3, 0}, // map 30, object 346
-    {3, 0}, // map 30, object 347
-    {3, 0}, // map 30, object 348
-    {2, 5}, // map 30, object 416
-    {2, 5}, // map 30, object 417
-    {2, 5}, // map 30, object 418
-    {2, 5}, // map 30, object 419
-    {3, 0}, // map 30, object 420
-    {3, 0}, // map 30, object 421
-    {3, 0}, // map 30, object 422
-    {0, 0}, // map 30, object 423
-    {0, 0}, // map 30, object 424
-    {0, 0}, // map 30, object 425
-    {2, 0}, // map 30, object 426
-    {2, 0}, // map 30, object 427
-    {2, 0}, // map 30, object 428
-    {1, 0}, // map 30, object 432
-    {4, 0}, // map 30, object 103
-    {4, 0}, // map 30, object 129
-    {4, 0}, // map 30, object 414
-    {4, 0}, // map 30, object 415
-    {4, 0}, // map 30, object 435
-    {4, 0}, // map 30, object 436
-    {4, 0}, // map 30, object 437
-    {4, 0}, // map 30, object 438
-    {4, 0}, // map 30, object 439
-    {4, 0}, // map 30, object 440
-    {4, 0}, // map 30, object 137
-    {0, 1}, // map 30, object 442
-    {0, 1}, // map 30, object 443
-    {2, 0}, // map 30, object 120
-    {2, 0}, // map 30, object 121
-    {4, 0}, // map 30, object 122
-    {4, 0}, // map 30, object 447
-    {4, 0}, // map 30, object 448
-    {4, 5}, // map 31, object 7
-    {4, 5}, // map 31, object 8
-    {4, 5}, // map 31, object 9
-    {4, 5}, // map 31, object 10
-    {4, 5}, // map 31, object 11
-    {4, 0}, // map 31, object 12
-    {4, 0}, // map 31, object 14
-    {4, 0}, // map 31, object 13
-    {2, 0}, // map 43, object 35
-    {1, 1}, // map 43, object 15
-    {1, 1}, // map 43, object 16
-    {1, 1}, // map 43, object 17
-    {1, 1}, // map 43, object 18
-    {1, 5}, // map 43, object 19
-    {1, 5}, // map 43, object 20
-    {4, 0}, // map 43, object 24
-    {4, 0}, // map 43, object 25
-    {4, 0}, // map 43, object 26
-    {2, 5}, // map 43, object 27
-    {2, 5}, // map 43, object 28
-    {2, 5}, // map 43, object 29
-    {2, 0}, // map 43, object 33
-    {2, 0}, // map 43, object 34
-    {3, 0}, // map 44, object 5
-    {3, 0}, // map 44, object 6
-    {3, 0}, // map 44, object 7
-    {3, 0}, // map 44, object 8
-    {3, 0}, // map 45, object 0
-    {3, 0}, // map 45, object 1
-    {3, 0}, // map 45, object 2
-    {3, 5}, // map 46, object 75
-    {3, 0}, // map 46, object 73
-    {3, 0}, // map 46, object 72
-    {3, 1}, // map 46, object 5
-    {3, 1}, // map 46, object 71
-    {3, 1}, // map 46, object 70
-    {3, 1}, // map 46, object 69
-    {0, 0}, // map 46, object 66
-    {0, 0}, // map 46, object 67
-    {0, 0}, // map 46, object 68
-    {0, 1}, // map 46, object 64
-    {0, 1}, // map 46, object 65
-    {3, 5}, // map 46, object 74
-    {0, 1}, // map 46, object 21
-    {0, 1}, // map 46, object 25
-    {0, 1}, // map 46, object 26
-    {0, 1}, // map 46, object 27
-    {0, 1}, // map 46, object 28
-    {0, 1}, // map 46, object 29
-    {0, 1}, // map 46, object 62
-    {0, 1}, // map 46, object 63
-    {3, 1}, // map 46, object 38
-    {3, 1}, // map 46, object 39
-    {3, 1}, // map 46, object 40
-    {3, 1}, // map 46, object 41
-    {3, 1}, // map 46, object 42
-    {3, 5}, // map 47, object 30
-    {2, 1}, // map 47, object 7
-    {2, 1}, // map 47, object 8
-    {2, 1}, // map 47, object 9
-    {2, 1}, // map 47, object 10
-    {2, 1}, // map 47, object 11
-    {3, 5}, // map 47, object 31
-    {2, 5}, // map 47, object 17
-    {2, 0}, // map 47, object 18
-    {2, 0}, // map 47, object 16
-    {2, 0}, // map 47, object 6
-    {2, 0}, // map 47, object 19
-    {0, 5}, // map 49, object 21
-    {0, 5}, // map 49, object 22
-    {0, 5}, // map 49, object 20
-    {0, 5}, // map 49, object 23
-    {0, 5}, // map 54, object 1
-    {0, 5}, // map 54, object 2
-    {0, 5}, // map 54, object 5
-    {0, 0}, // map 54, object 4
-    {0, 0}, // map 54, object 3
+    {30, 4, 0}, // object 429
+    {30, 1, 0}, // object 434
+    {30, 3, 0}, // object 210
+    {30, 3, 0}, // object 213
+    {30, 2, 0}, // object 317
+    {30, 3, 0}, // object 208
+    {30, 4, 0}, // object 431
+    {30, 4, 0}, // object 430
+    {30, 0, 0}, // object 142
+    {30, 0, 1}, // object 112
+    {30, 0, 1}, // object 113
+    {30, 0, 1}, // object 114
+    {30, 0, 1}, // object 115
+    {30, 0, 1}, // object 116
+    {30, 0, 1}, // object 445
+    {30, 0, 1}, // object 444
+    {30, 0, 1}, // object 446
+    {30, 3, 0}, // object 211
+    {30, 1, 0}, // object 123
+    {30, 1, 0}, // object 126
+    {30, 1, 0}, // object 127
+    {30, 1, 0}, // object 124
+    {30, 1, 0}, // object 433
+    {30, 0, 5}, // object 133
+    {30, 0, 5}, // object 134
+    {30, 0, 5}, // object 135
+    {30, 4, 0}, // object 138
+    {30, 4, 0}, // object 136
+    {30, 1, 0}, // object 125
+    {30, 0, 0}, // object 139
+    {30, 0, 0}, // object 140
+    {30, 0, 0}, // object 141
+    {30, 1, 1}, // object 164
+    {30, 1, 1}, // object 165
+    {30, 1, 5}, // object 101
+    {30, 1, 5}, // object 144
+    {30, 1, 1}, // object 150
+    {30, 1, 1}, // object 151
+    {30, 1, 1}, // object 152
+    {30, 1, 1}, // object 153
+    {30, 1, 1}, // object 154
+    {30, 1, 1}, // object 155
+    {30, 1, 1}, // object 156
+    {30, 1, 1}, // object 157
+    {30, 1, 1}, // object 158
+    {30, 1, 1}, // object 159
+    {30, 1, 1}, // object 160
+    {30, 1, 1}, // object 161
+    {30, 1, 1}, // object 162
+    {30, 1, 1}, // object 163
+    {30, 1, 5}, // object 166
+    {30, 1, 5}, // object 167
+    {30, 1, 5}, // object 168
+    {30, 1, 5}, // object 169
+    {30, 1, 5}, // object 170
+    {30, 1, 5}, // object 171
+    {30, 1, 0}, // object 176
+    {30, 1, 0}, // object 177
+    {30, 1, 0}, // object 178
+    {30, 1, 0}, // object 179
+    {30, 1, 0}, // object 193
+    {30, 1, 0}, // object 191
+    {30, 1, 0}, // object 192
+    {30, 3, 0}, // object 209
+    {30, 2, 0}, // object 316
+    {30, 4, 1}, // object 219
+    {30, 4, 1}, // object 253
+    {30, 4, 1}, // object 254
+    {30, 4, 1}, // object 255
+    {30, 4, 1}, // object 256
+    {30, 4, 1}, // object 257
+    {30, 4, 1}, // object 258
+    {30, 4, 1}, // object 259
+    {30, 4, 1}, // object 260
+    {30, 4, 1}, // object 261
+    {30, 4, 1}, // object 262
+    {30, 4, 1}, // object 263
+    {30, 4, 1}, // object 264
+    {30, 4, 1}, // object 265
+    {30, 4, 1}, // object 266
+    {30, 4, 1}, // object 267
+    {30, 4, 1}, // object 268
+    {30, 4, 1}, // object 269
+    {30, 4, 1}, // object 270
+    {30, 4, 1}, // object 271
+    {30, 4, 5}, // object 275
+    {30, 4, 5}, // object 276
+    {30, 4, 5}, // object 277
+    {30, 4, 5}, // object 278
+    {30, 4, 5}, // object 279
+    {30, 4, 0}, // object 280
+    {30, 4, 0}, // object 281
+    {30, 4, 0}, // object 282
+    {30, 4, 0}, // object 283
+    {30, 4, 0}, // object 284
+    {30, 4, 0}, // object 285
+    {30, 2, 1}, // object 295
+    {30, 2, 1}, // object 296
+    {30, 2, 1}, // object 297
+    {30, 2, 1}, // object 298
+    {30, 2, 1}, // object 299
+    {30, 2, 1}, // object 300
+    {30, 2, 1}, // object 301
+    {30, 2, 1}, // object 302
+    {30, 2, 1}, // object 308
+    {30, 2, 1}, // object 309
+    {30, 2, 1}, // object 303
+    {30, 2, 1}, // object 304
+    {30, 2, 1}, // object 305
+    {30, 2, 1}, // object 306
+    {30, 2, 1}, // object 307
+    {30, 2, 5}, // object 312
+    {30, 2, 5}, // object 313
+    {30, 2, 0}, // object 314
+    {30, 2, 0}, // object 315
+    {30, 3, 1}, // object 320
+    {30, 3, 1}, // object 321
+    {30, 3, 1}, // object 322
+    {30, 3, 1}, // object 323
+    {30, 3, 1}, // object 324
+    {30, 3, 1}, // object 325
+    {30, 3, 1}, // object 326
+    {30, 3, 1}, // object 327
+    {30, 3, 1}, // object 328
+    {30, 3, 1}, // object 329
+    {30, 3, 1}, // object 330
+    {30, 3, 1}, // object 331
+    {30, 3, 5}, // object 332
+    {30, 3, 5}, // object 333
+    {30, 3, 5}, // object 342
+    {30, 3, 5}, // object 343
+    {30, 3, 5}, // object 344
+    {30, 3, 5}, // object 345
+    {30, 3, 0}, // object 346
+    {30, 3, 0}, // object 347
+    {30, 3, 0}, // object 348
+    {30, 2, 5}, // object 416
+    {30, 2, 5}, // object 417
+    {30, 2, 5}, // object 418
+    {30, 2, 5}, // object 419
+    {30, 3, 0}, // object 420
+    {30, 3, 0}, // object 421
+    {30, 3, 0}, // object 422
+    {30, 0, 0}, // object 423
+    {30, 0, 0}, // object 424
+    {30, 0, 0}, // object 425
+    {30, 2, 0}, // object 426
+    {30, 2, 0}, // object 427
+    {30, 2, 0}, // object 428
+    {30, 1, 0}, // object 432
+    {30, 4, 0}, // object 103
+    {30, 4, 0}, // object 129
+    {30, 4, 0}, // object 414
+    {30, 4, 0}, // object 415
+    {30, 4, 0}, // object 435
+    {30, 4, 0}, // object 436
+    {30, 4, 0}, // object 437
+    {30, 4, 0}, // object 438
+    {30, 4, 0}, // object 439
+    {30, 4, 0}, // object 440
+    {30, 4, 0}, // object 137
+    {30, 0, 1}, // object 442
+    {30, 0, 1}, // object 443
+    {30, 2, 0}, // object 120
+    {30, 2, 0}, // object 121
+    {30, 4, 0}, // object 122
+    {30, 4, 0}, // object 447
+    {30, 4, 0}, // object 448
+    {31, 4, 5}, // object 7
+    {31, 4, 5}, // object 8
+    {31, 4, 5}, // object 9
+    {31, 4, 5}, // object 10
+    {31, 4, 5}, // object 11
+    {31, 4, 0}, // object 12
+    {31, 4, 0}, // object 14
+    {31, 4, 0}, // object 13
+    {43, 2, 0}, // object 35
+    {43, 1, 1}, // object 15
+    {43, 1, 1}, // object 16
+    {43, 1, 1}, // object 17
+    {43, 1, 1}, // object 18
+    {43, 1, 5}, // object 19
+    {43, 1, 5}, // object 20
+    {43, 4, 0}, // object 24
+    {43, 4, 0}, // object 25
+    {43, 4, 0}, // object 26
+    {43, 2, 5}, // object 27
+    {43, 2, 5}, // object 28
+    {43, 2, 5}, // object 29
+    {43, 2, 0}, // object 33
+    {43, 2, 0}, // object 34
+    {44, 3, 0}, // object 5
+    {44, 3, 0}, // object 6
+    {44, 3, 0}, // object 7
+    {44, 3, 0}, // object 8
+    {45, 3, 0}, // object 0
+    {45, 3, 0}, // object 1
+    {45, 3, 0}, // object 2
+    {46, 3, 5}, // object 75
+    {46, 3, 0}, // object 73
+    {46, 3, 0}, // object 72
+    {46, 3, 1}, // object 5
+    {46, 3, 1}, // object 71
+    {46, 3, 1}, // object 70
+    {46, 3, 1}, // object 69
+    {46, 0, 0}, // object 66
+    {46, 0, 0}, // object 67
+    {46, 0, 0}, // object 68
+    {46, 0, 1}, // object 64
+    {46, 0, 1}, // object 65
+    {46, 3, 5}, // object 74
+    {46, 0, 1}, // object 21
+    {46, 0, 1}, // object 25
+    {46, 0, 1}, // object 26
+    {46, 0, 1}, // object 27
+    {46, 0, 1}, // object 28
+    {46, 0, 1}, // object 29
+    {46, 0, 1}, // object 62
+    {46, 0, 1}, // object 63
+    {46, 3, 1}, // object 38
+    {46, 3, 1}, // object 39
+    {46, 3, 1}, // object 40
+    {46, 3, 1}, // object 41
+    {46, 3, 1}, // object 42
+    {47, 3, 5}, // object 30
+    {47, 2, 1}, // object 7
+    {47, 2, 1}, // object 8
+    {47, 2, 1}, // object 9
+    {47, 2, 1}, // object 10
+    {47, 2, 1}, // object 11
+    {47, 3, 5}, // object 31
+    {47, 2, 5}, // object 17
+    {47, 2, 0}, // object 18
+    {47, 2, 0}, // object 16
+    {47, 2, 0}, // object 6
+    {47, 2, 0}, // object 19
+    {49, 0, 5}, // object 21
+    {49, 0, 5}, // object 22
+    {49, 0, 5}, // object 20
+    {49, 0, 5}, // object 23
+    {54, 0, 5}, // object 1
+    {54, 0, 5}, // object 2
+    {54, 0, 5}, // object 5
+    {54, 0, 0}, // object 4
+    {54, 0, 0}, // object 3
     // Level 4, setup order within ascending map IDs.
-    {0, 1}, // map 48, object 115
-    {0, 1}, // map 48, object 131
-    {0, 1}, // map 48, object 132
-    {0, 1}, // map 48, object 136
-    {0, 1}, // map 48, object 140
-    {0, 1}, // map 48, object 141
-    {0, 1}, // map 48, object 142
-    {0, 1}, // map 48, object 143
-    {0, 1}, // map 48, object 144
-    {0, 1}, // map 48, object 145
-    {0, 1}, // map 48, object 146
-    {0, 1}, // map 48, object 147
-    {0, 1}, // map 48, object 148
-    {0, 1}, // map 48, object 149
-    {0, 1}, // map 48, object 150
-    {0, 1}, // map 48, object 151
-    {0, 1}, // map 48, object 152
-    {0, 1}, // map 48, object 153
-    {0, 1}, // map 48, object 154
-    {0, 1}, // map 48, object 155
-    {0, 1}, // map 48, object 156
-    {0, 1}, // map 48, object 157
-    {0, 1}, // map 48, object 158
-    {0, 1}, // map 48, object 159
-    {0, 1}, // map 48, object 160
-    {0, 1}, // map 48, object 161
-    {0, 1}, // map 48, object 162
-    {0, 1}, // map 48, object 163
-    {0, 1}, // map 48, object 164
-    {0, 1}, // map 48, object 165
-    {0, 5}, // map 48, object 166
-    {0, 5}, // map 48, object 167
-    {0, 5}, // map 48, object 168
-    {0, 0}, // map 48, object 169
-    {0, 0}, // map 48, object 170
-    {0, 0}, // map 48, object 171
-    {0, 0}, // map 48, object 178
-    {0, 0}, // map 48, object 179
-    {0, 0}, // map 48, object 180
-    {0, 0}, // map 48, object 181
-    {0, 0}, // map 48, object 182
-    {0, 0}, // map 48, object 183
-    {1, 1}, // map 48, object 184
-    {1, 1}, // map 48, object 185
-    {1, 1}, // map 48, object 186
-    {1, 1}, // map 48, object 187
-    {1, 1}, // map 48, object 188
-    {1, 1}, // map 48, object 189
-    {1, 1}, // map 48, object 190
-    {1, 1}, // map 48, object 191
-    {1, 1}, // map 48, object 192
-    {1, 1}, // map 48, object 193
-    {1, 1}, // map 48, object 194
-    {1, 1}, // map 48, object 195
-    {1, 1}, // map 48, object 196
-    {1, 1}, // map 48, object 197
-    {1, 1}, // map 48, object 198
-    {1, 1}, // map 48, object 199
-    {1, 1}, // map 48, object 200
-    {1, 1}, // map 48, object 201
-    {1, 1}, // map 48, object 202
-    {1, 1}, // map 48, object 203
-    {2, 1}, // map 48, object 263
-    {2, 1}, // map 48, object 204
-    {2, 1}, // map 48, object 205
-    {1, 5}, // map 48, object 207
-    {1, 5}, // map 48, object 208
-    {1, 5}, // map 48, object 209
-    {1, 5}, // map 48, object 210
-    {1, 5}, // map 48, object 211
-    {1, 5}, // map 48, object 212
-    {1, 5}, // map 48, object 213
-    {1, 5}, // map 48, object 214
-    {1, 0}, // map 48, object 215
-    {1, 0}, // map 48, object 216
-    {1, 0}, // map 48, object 217
-    {1, 0}, // map 48, object 218
-    {1, 0}, // map 48, object 219
-    {1, 0}, // map 48, object 220
-    {3, 0}, // map 48, object 326
-    {3, 0}, // map 48, object 330
-    {3, 0}, // map 48, object 496
-    {3, 0}, // map 48, object 495
-    {2, 1}, // map 48, object 237
-    {2, 1}, // map 48, object 238
-    {2, 1}, // map 48, object 239
-    {2, 1}, // map 48, object 240
-    {2, 1}, // map 48, object 241
-    {2, 1}, // map 48, object 242
-    {2, 1}, // map 48, object 243
-    {2, 1}, // map 48, object 244
-    {2, 1}, // map 48, object 245
-    {2, 1}, // map 48, object 246
-    {2, 1}, // map 48, object 247
-    {2, 1}, // map 48, object 248
-    {2, 1}, // map 48, object 249
-    {2, 1}, // map 48, object 250
-    {2, 1}, // map 48, object 251
-    {2, 1}, // map 48, object 252
-    {2, 1}, // map 48, object 253
-    {2, 1}, // map 48, object 254
-    {2, 1}, // map 48, object 255
-    {2, 1}, // map 48, object 256
-    {2, 1}, // map 48, object 257
-    {2, 1}, // map 48, object 258
-    {2, 1}, // map 48, object 259
-    {2, 1}, // map 48, object 260
-    {2, 1}, // map 48, object 261
-    {2, 1}, // map 48, object 262
-    {2, 1}, // map 48, object 206
-    {1, 1}, // map 48, object 264
-    {1, 1}, // map 48, object 265
-    {1, 1}, // map 48, object 266
-    {2, 5}, // map 48, object 267
-    {2, 5}, // map 48, object 268
-    {2, 5}, // map 48, object 269
-    {2, 5}, // map 48, object 270
-    {2, 5}, // map 48, object 271
-    {2, 0}, // map 48, object 272
-    {2, 0}, // map 48, object 273
-    {2, 0}, // map 48, object 274
-    {2, 0}, // map 48, object 275
-    {2, 0}, // map 48, object 276
-    {2, 0}, // map 48, object 277
-    {2, 0}, // map 48, object 278
-    {2, 0}, // map 48, object 279
-    {2, 0}, // map 48, object 280
-    {2, 0}, // map 48, object 281
-    {2, 0}, // map 48, object 282
-    {2, 0}, // map 48, object 283
-    {3, 1}, // map 48, object 284
-    {3, 1}, // map 48, object 285
-    {3, 1}, // map 48, object 286
-    {3, 1}, // map 48, object 287
-    {3, 1}, // map 48, object 288
-    {3, 1}, // map 48, object 289
-    {3, 1}, // map 48, object 290
-    {3, 1}, // map 48, object 291
-    {3, 1}, // map 48, object 292
-    {3, 1}, // map 48, object 293
-    {3, 1}, // map 48, object 294
-    {3, 1}, // map 48, object 295
-    {3, 1}, // map 48, object 296
-    {3, 1}, // map 48, object 297
-    {3, 1}, // map 48, object 298
-    {3, 1}, // map 48, object 299
-    {3, 1}, // map 48, object 300
-    {3, 1}, // map 48, object 301
-    {3, 1}, // map 48, object 302
-    {3, 1}, // map 48, object 303
-    {3, 1}, // map 48, object 304
-    {3, 1}, // map 48, object 305
-    {3, 1}, // map 48, object 306
-    {3, 1}, // map 48, object 307
-    {3, 1}, // map 48, object 308
-    {3, 1}, // map 48, object 309
-    {3, 1}, // map 48, object 310
-    {3, 1}, // map 48, object 311
-    {3, 1}, // map 48, object 312
-    {3, 1}, // map 48, object 313
-    {3, 5}, // map 48, object 327
-    {3, 5}, // map 48, object 315
-    {3, 5}, // map 48, object 316
-    {3, 5}, // map 48, object 320
-    {3, 5}, // map 48, object 321
-    {3, 0}, // map 48, object 322
-    {3, 0}, // map 48, object 323
-    {3, 0}, // map 48, object 324
-    {1, 0}, // map 48, object 233
-    {1, 0}, // map 48, object 232
-    {3, 0}, // map 48, object 331
-    {3, 0}, // map 48, object 332
-    {3, 0}, // map 48, object 333
-    {4, 1}, // map 48, object 334
-    {4, 1}, // map 48, object 335
-    {4, 1}, // map 48, object 336
-    {4, 1}, // map 48, object 337
-    {4, 1}, // map 48, object 338
-    {4, 1}, // map 48, object 339
-    {4, 1}, // map 48, object 340
-    {2, 5}, // map 48, object 314
-    {4, 1}, // map 48, object 342
-    {4, 1}, // map 48, object 343
-    {4, 5}, // map 48, object 344
-    {4, 5}, // map 48, object 345
-    {4, 5}, // map 48, object 346
-    {4, 0}, // map 48, object 348
-    {4, 0}, // map 48, object 349
-    {4, 0}, // map 48, object 350
-    {4, 0}, // map 48, object 352
-    {4, 0}, // map 48, object 353
-    {4, 0}, // map 48, object 354
-    {4, 0}, // map 48, object 355
-    {4, 0}, // map 48, object 356
-    {4, 0}, // map 48, object 357
-    {4, 0}, // map 48, object 358
-    {4, 0}, // map 48, object 359
-    {4, 0}, // map 48, object 360
-    {1, 0}, // map 48, object 234
-    {3, 0}, // map 48, object 325
-    {1, 0}, // map 48, object 231
-    {1, 5}, // map 56, object 2
-    {1, 5}, // map 56, object 4
-    {1, 0}, // map 57, object 4
-    {1, 0}, // map 57, object 5
-    {1, 0}, // map 58, object 8
-    {1, 0}, // map 58, object 7
-    {1, 0}, // map 58, object 6
-    {2, 5}, // map 58, object 3
-    {0, 5}, // map 59, object 3
-    {0, 0}, // map 59, object 4
-    {0, 0}, // map 59, object 5
-    {0, 0}, // map 59, object 6
-    {3, 5}, // map 60, object 6
-    {0, 5}, // map 61, object 15
-    {2, 0}, // map 61, object 16
-    {2, 0}, // map 61, object 17
-    {2, 0}, // map 61, object 18
-    {3, 0}, // map 61, object 22
-    {3, 0}, // map 61, object 23
-    {3, 0}, // map 61, object 24
-    {3, 5}, // map 62, object 5
-    {3, 5}, // map 62, object 6
-    {3, 5}, // map 62, object 7
-    {4, 5}, // map 62, object 8
-    {4, 0}, // map 62, object 9
-    {4, 0}, // map 62, object 10
-    {4, 0}, // map 62, object 11
-    {2, 5}, // map 63, object 7
-    {0, 5}, // map 64, object 2
-    {0, 5}, // map 64, object 30
-    {0, 5}, // map 64, object 31
-    {1, 1}, // map 64, object 32
-    {1, 1}, // map 64, object 33
-    {1, 1}, // map 64, object 34
-    {1, 1}, // map 64, object 35
-    {1, 1}, // map 64, object 36
-    {1, 1}, // map 64, object 37
-    {1, 1}, // map 64, object 38
-    {3, 5}, // map 64, object 39
-    {4, 1}, // map 64, object 40
-    {4, 1}, // map 64, object 41
-    {4, 1}, // map 64, object 42
-    {4, 1}, // map 64, object 43
-    {4, 1}, // map 64, object 44
-    {4, 1}, // map 64, object 45
-    {4, 1}, // map 64, object 46
-    {4, 1}, // map 64, object 47
-    {4, 1}, // map 64, object 48
-    {4, 1}, // map 64, object 49
-    {4, 1}, // map 64, object 50
-    {4, 1}, // map 64, object 51
-    {4, 1}, // map 64, object 52
-    {4, 1}, // map 64, object 53
-    {4, 1}, // map 64, object 54
-    {4, 1}, // map 64, object 55
-    {4, 1}, // map 64, object 56
-    {4, 1}, // map 64, object 57
-    {4, 1}, // map 64, object 58
-    {4, 1}, // map 64, object 59
-    {4, 1}, // map 64, object 60
-    {4, 5}, // map 64, object 61
-    {4, 5}, // map 64, object 65
-    {4, 5}, // map 64, object 63
-    {4, 5}, // map 64, object 62
-    {4, 5}, // map 64, object 64
-    {2, 5}, // map 70, object 6
-    {2, 5}, // map 70, object 1
-    {4, 5}, // map 71, object 3
-    {0, 5}, // map 188, object 1
-    {0, 5}, // map 188, object 0
+    {48, 0, 1}, // object 115
+    {48, 0, 1}, // object 131
+    {48, 0, 1}, // object 132
+    {48, 0, 1}, // object 136
+    {48, 0, 1}, // object 140
+    {48, 0, 1}, // object 141
+    {48, 0, 1}, // object 142
+    {48, 0, 1}, // object 143
+    {48, 0, 1}, // object 144
+    {48, 0, 1}, // object 145
+    {48, 0, 1}, // object 146
+    {48, 0, 1}, // object 147
+    {48, 0, 1}, // object 148
+    {48, 0, 1}, // object 149
+    {48, 0, 1}, // object 150
+    {48, 0, 1}, // object 151
+    {48, 0, 1}, // object 152
+    {48, 0, 1}, // object 153
+    {48, 0, 1}, // object 154
+    {48, 0, 1}, // object 155
+    {48, 0, 1}, // object 156
+    {48, 0, 1}, // object 157
+    {48, 0, 1}, // object 158
+    {48, 0, 1}, // object 159
+    {48, 0, 1}, // object 160
+    {48, 0, 1}, // object 161
+    {48, 0, 1}, // object 162
+    {48, 0, 1}, // object 163
+    {48, 0, 1}, // object 164
+    {48, 0, 1}, // object 165
+    {48, 0, 5}, // object 166
+    {48, 0, 5}, // object 167
+    {48, 0, 5}, // object 168
+    {48, 0, 0}, // object 169
+    {48, 0, 0}, // object 170
+    {48, 0, 0}, // object 171
+    {48, 0, 0}, // object 178
+    {48, 0, 0}, // object 179
+    {48, 0, 0}, // object 180
+    {48, 0, 0}, // object 181
+    {48, 0, 0}, // object 182
+    {48, 0, 0}, // object 183
+    {48, 1, 1}, // object 184
+    {48, 1, 1}, // object 185
+    {48, 1, 1}, // object 186
+    {48, 1, 1}, // object 187
+    {48, 1, 1}, // object 188
+    {48, 1, 1}, // object 189
+    {48, 1, 1}, // object 190
+    {48, 1, 1}, // object 191
+    {48, 1, 1}, // object 192
+    {48, 1, 1}, // object 193
+    {48, 1, 1}, // object 194
+    {48, 1, 1}, // object 195
+    {48, 1, 1}, // object 196
+    {48, 1, 1}, // object 197
+    {48, 1, 1}, // object 198
+    {48, 1, 1}, // object 199
+    {48, 1, 1}, // object 200
+    {48, 1, 1}, // object 201
+    {48, 1, 1}, // object 202
+    {48, 1, 1}, // object 203
+    {48, 2, 1}, // object 263
+    {48, 2, 1}, // object 204
+    {48, 2, 1}, // object 205
+    {48, 1, 5}, // object 207
+    {48, 1, 5}, // object 208
+    {48, 1, 5}, // object 209
+    {48, 1, 5}, // object 210
+    {48, 1, 5}, // object 211
+    {48, 1, 5}, // object 212
+    {48, 1, 5}, // object 213
+    {48, 1, 5}, // object 214
+    {48, 1, 0}, // object 215
+    {48, 1, 0}, // object 216
+    {48, 1, 0}, // object 217
+    {48, 1, 0}, // object 218
+    {48, 1, 0}, // object 219
+    {48, 1, 0}, // object 220
+    {48, 3, 0}, // object 326
+    {48, 3, 0}, // object 330
+    {48, 3, 0}, // object 496
+    {48, 3, 0}, // object 495
+    {48, 2, 1}, // object 237
+    {48, 2, 1}, // object 238
+    {48, 2, 1}, // object 239
+    {48, 2, 1}, // object 240
+    {48, 2, 1}, // object 241
+    {48, 2, 1}, // object 242
+    {48, 2, 1}, // object 243
+    {48, 2, 1}, // object 244
+    {48, 2, 1}, // object 245
+    {48, 2, 1}, // object 246
+    {48, 2, 1}, // object 247
+    {48, 2, 1}, // object 248
+    {48, 2, 1}, // object 249
+    {48, 2, 1}, // object 250
+    {48, 2, 1}, // object 251
+    {48, 2, 1}, // object 252
+    {48, 2, 1}, // object 253
+    {48, 2, 1}, // object 254
+    {48, 2, 1}, // object 255
+    {48, 2, 1}, // object 256
+    {48, 2, 1}, // object 257
+    {48, 2, 1}, // object 258
+    {48, 2, 1}, // object 259
+    {48, 2, 1}, // object 260
+    {48, 2, 1}, // object 261
+    {48, 2, 1}, // object 262
+    {48, 2, 1}, // object 206
+    {48, 1, 1}, // object 264
+    {48, 1, 1}, // object 265
+    {48, 1, 1}, // object 266
+    {48, 2, 5}, // object 267
+    {48, 2, 5}, // object 268
+    {48, 2, 5}, // object 269
+    {48, 2, 5}, // object 270
+    {48, 2, 5}, // object 271
+    {48, 2, 0}, // object 272
+    {48, 2, 0}, // object 273
+    {48, 2, 0}, // object 274
+    {48, 2, 0}, // object 275
+    {48, 2, 0}, // object 276
+    {48, 2, 0}, // object 277
+    {48, 2, 0}, // object 278
+    {48, 2, 0}, // object 279
+    {48, 2, 0}, // object 280
+    {48, 2, 0}, // object 281
+    {48, 2, 0}, // object 282
+    {48, 2, 0}, // object 283
+    {48, 3, 1}, // object 284
+    {48, 3, 1}, // object 285
+    {48, 3, 1}, // object 286
+    {48, 3, 1}, // object 287
+    {48, 3, 1}, // object 288
+    {48, 3, 1}, // object 289
+    {48, 3, 1}, // object 290
+    {48, 3, 1}, // object 291
+    {48, 3, 1}, // object 292
+    {48, 3, 1}, // object 293
+    {48, 3, 1}, // object 294
+    {48, 3, 1}, // object 295
+    {48, 3, 1}, // object 296
+    {48, 3, 1}, // object 297
+    {48, 3, 1}, // object 298
+    {48, 3, 1}, // object 299
+    {48, 3, 1}, // object 300
+    {48, 3, 1}, // object 301
+    {48, 3, 1}, // object 302
+    {48, 3, 1}, // object 303
+    {48, 3, 1}, // object 304
+    {48, 3, 1}, // object 305
+    {48, 3, 1}, // object 306
+    {48, 3, 1}, // object 307
+    {48, 3, 1}, // object 308
+    {48, 3, 1}, // object 309
+    {48, 3, 1}, // object 310
+    {48, 3, 1}, // object 311
+    {48, 3, 1}, // object 312
+    {48, 3, 1}, // object 313
+    {48, 3, 5}, // object 327
+    {48, 3, 5}, // object 315
+    {48, 3, 5}, // object 316
+    {48, 3, 5}, // object 320
+    {48, 3, 5}, // object 321
+    {48, 3, 0}, // object 322
+    {48, 3, 0}, // object 323
+    {48, 3, 0}, // object 324
+    {48, 1, 0}, // object 233
+    {48, 1, 0}, // object 232
+    {48, 3, 0}, // object 331
+    {48, 3, 0}, // object 332
+    {48, 3, 0}, // object 333
+    {48, 4, 1}, // object 334
+    {48, 4, 1}, // object 335
+    {48, 4, 1}, // object 336
+    {48, 4, 1}, // object 337
+    {48, 4, 1}, // object 338
+    {48, 4, 1}, // object 339
+    {48, 4, 1}, // object 340
+    {48, 2, 5}, // object 314
+    {48, 4, 1}, // object 342
+    {48, 4, 1}, // object 343
+    {48, 4, 5}, // object 344
+    {48, 4, 5}, // object 345
+    {48, 4, 5}, // object 346
+    {48, 4, 0}, // object 348
+    {48, 4, 0}, // object 349
+    {48, 4, 0}, // object 350
+    {48, 4, 0}, // object 352
+    {48, 4, 0}, // object 353
+    {48, 4, 0}, // object 354
+    {48, 4, 0}, // object 355
+    {48, 4, 0}, // object 356
+    {48, 4, 0}, // object 357
+    {48, 4, 0}, // object 358
+    {48, 4, 0}, // object 359
+    {48, 4, 0}, // object 360
+    {48, 1, 0}, // object 234
+    {48, 3, 0}, // object 325
+    {48, 1, 0}, // object 231
+    {56, 1, 5}, // object 2
+    {56, 1, 5}, // object 4
+    {57, 1, 0}, // object 4
+    {57, 1, 0}, // object 5
+    {58, 1, 0}, // object 8
+    {58, 1, 0}, // object 7
+    {58, 1, 0}, // object 6
+    {58, 2, 5}, // object 3
+    {59, 0, 5}, // object 3
+    {59, 0, 0}, // object 4
+    {59, 0, 0}, // object 5
+    {59, 0, 0}, // object 6
+    {60, 3, 5}, // object 6
+    {61, 0, 5}, // object 15
+    {61, 2, 0}, // object 16
+    {61, 2, 0}, // object 17
+    {61, 2, 0}, // object 18
+    {61, 3, 0}, // object 22
+    {61, 3, 0}, // object 23
+    {61, 3, 0}, // object 24
+    {62, 3, 5}, // object 5
+    {62, 3, 5}, // object 6
+    {62, 3, 5}, // object 7
+    {62, 4, 5}, // object 8
+    {62, 4, 0}, // object 9
+    {62, 4, 0}, // object 10
+    {62, 4, 0}, // object 11
+    {63, 2, 5}, // object 7
+    {64, 0, 5}, // object 2
+    {64, 0, 5}, // object 30
+    {64, 0, 5}, // object 31
+    {64, 1, 1}, // object 32
+    {64, 1, 1}, // object 33
+    {64, 1, 1}, // object 34
+    {64, 1, 1}, // object 35
+    {64, 1, 1}, // object 36
+    {64, 1, 1}, // object 37
+    {64, 1, 1}, // object 38
+    {64, 3, 5}, // object 39
+    {64, 4, 1}, // object 40
+    {64, 4, 1}, // object 41
+    {64, 4, 1}, // object 42
+    {64, 4, 1}, // object 43
+    {64, 4, 1}, // object 44
+    {64, 4, 1}, // object 45
+    {64, 4, 1}, // object 46
+    {64, 4, 1}, // object 47
+    {64, 4, 1}, // object 48
+    {64, 4, 1}, // object 49
+    {64, 4, 1}, // object 50
+    {64, 4, 1}, // object 51
+    {64, 4, 1}, // object 52
+    {64, 4, 1}, // object 53
+    {64, 4, 1}, // object 54
+    {64, 4, 1}, // object 55
+    {64, 4, 1}, // object 56
+    {64, 4, 1}, // object 57
+    {64, 4, 1}, // object 58
+    {64, 4, 1}, // object 59
+    {64, 4, 1}, // object 60
+    {64, 4, 5}, // object 61
+    {64, 4, 5}, // object 65
+    {64, 4, 5}, // object 63
+    {64, 4, 5}, // object 62
+    {64, 4, 5}, // object 64
+    {70, 2, 5}, // object 6
+    {70, 2, 5}, // object 1
+    {71, 4, 5}, // object 3
+    {188, 0, 5}, // object 1
+    {188, 0, 5}, // object 0
     // Level 5, setup order within ascending map IDs.
-    {1, 5}, // map 72, object 108
-    {4, 0}, // map 72, object 348
-    {1, 5}, // map 72, object 109
-    {4, 5}, // map 72, object 145
-    {4, 5}, // map 72, object 146
-    {4, 1}, // map 72, object 144
-    {0, 1}, // map 72, object 66
-    {0, 1}, // map 72, object 67
-    {0, 1}, // map 72, object 68
-    {0, 1}, // map 72, object 69
-    {0, 1}, // map 72, object 70
-    {0, 1}, // map 72, object 71
-    {0, 1}, // map 72, object 72
-    {0, 1}, // map 72, object 73
-    {0, 1}, // map 72, object 74
-    {0, 1}, // map 72, object 75
-    {0, 5}, // map 72, object 76
-    {0, 5}, // map 72, object 77
-    {0, 5}, // map 72, object 78
-    {0, 0}, // map 72, object 79
-    {0, 0}, // map 72, object 80
-    {0, 0}, // map 72, object 81
-    {0, 0}, // map 72, object 91
-    {0, 0}, // map 72, object 90
-    {0, 0}, // map 72, object 89
-    {1, 5}, // map 72, object 182
-    {2, 5}, // map 72, object 178
-    {2, 5}, // map 72, object 180
-    {2, 5}, // map 72, object 179
-    {3, 0}, // map 72, object 203
-    {2, 1}, // map 72, object 88
-    {2, 1}, // map 72, object 97
-    {2, 1}, // map 72, object 101
-    {2, 1}, // map 72, object 99
-    {1, 1}, // map 72, object 102
-    {1, 1}, // map 72, object 103
-    {1, 1}, // map 72, object 104
-    {1, 1}, // map 72, object 105
-    {3, 0}, // map 72, object 206
-    {1, 5}, // map 72, object 111
-    {1, 5}, // map 72, object 112
-    {1, 5}, // map 72, object 113
-    {1, 5}, // map 72, object 114
-    {4, 0}, // map 72, object 154
-    {4, 0}, // map 72, object 155
-    {4, 0}, // map 72, object 156
-    {1, 0}, // map 72, object 118
-    {1, 0}, // map 72, object 119
-    {1, 0}, // map 72, object 120
-    {1, 0}, // map 72, object 121
-    {2, 1}, // map 72, object 98
-    {1, 1}, // map 72, object 160
-    {4, 1}, // map 72, object 125
-    {4, 1}, // map 72, object 126
-    {4, 1}, // map 72, object 127
-    {4, 1}, // map 72, object 141
-    {4, 1}, // map 72, object 140
-    {4, 1}, // map 72, object 139
-    {4, 1}, // map 72, object 131
-    {4, 1}, // map 72, object 132
-    {4, 1}, // map 72, object 133
-    {4, 1}, // map 72, object 134
-    {4, 1}, // map 72, object 135
-    {4, 1}, // map 72, object 136
-    {4, 1}, // map 72, object 137
-    {4, 1}, // map 72, object 138
-    {4, 1}, // map 72, object 128
-    {4, 1}, // map 72, object 129
-    {4, 1}, // map 72, object 130
-    {4, 1}, // map 72, object 142
-    {4, 1}, // map 72, object 143
-    {0, 1}, // map 72, object 63
-    {0, 1}, // map 72, object 64
-    {0, 1}, // map 72, object 65
-    {4, 5}, // map 72, object 147
-    {4, 5}, // map 72, object 148
-    {4, 5}, // map 72, object 149
-    {3, 5}, // map 72, object 208
-    {4, 0}, // map 72, object 151
-    {4, 0}, // map 72, object 152
-    {4, 0}, // map 72, object 153
-    {4, 0}, // map 72, object 115
-    {4, 0}, // map 72, object 116
-    {4, 0}, // map 72, object 117
-    {4, 0}, // map 72, object 157
-    {4, 0}, // map 72, object 158
-    {4, 0}, // map 72, object 159
-    {1, 1}, // map 72, object 161
-    {1, 1}, // map 72, object 162
-    {1, 1}, // map 72, object 164
-    {1, 1}, // map 72, object 100
-    {1, 1}, // map 72, object 163
-    {2, 1}, // map 72, object 174
-    {2, 1}, // map 72, object 166
-    {2, 1}, // map 72, object 167
-    {2, 1}, // map 72, object 168
-    {2, 1}, // map 72, object 169
-    {2, 1}, // map 72, object 170
-    {2, 1}, // map 72, object 171
-    {2, 1}, // map 72, object 172
-    {2, 1}, // map 72, object 173
-    {2, 1}, // map 72, object 165
-    {2, 5}, // map 72, object 176
-    {2, 5}, // map 72, object 177
-    {2, 5}, // map 72, object 92
-    {2, 5}, // map 72, object 93
-    {2, 5}, // map 72, object 94
-    {2, 5}, // map 72, object 95
-    {2, 0}, // map 72, object 183
-    {2, 0}, // map 72, object 184
-    {2, 0}, // map 72, object 185
-    {2, 0}, // map 72, object 186
-    {2, 0}, // map 72, object 187
-    {2, 0}, // map 72, object 188
-    {2, 0}, // map 72, object 189
-    {2, 0}, // map 72, object 190
-    {2, 0}, // map 72, object 191
-    {3, 1}, // map 72, object 192
-    {3, 1}, // map 72, object 196
-    {3, 1}, // map 72, object 194
-    {3, 1}, // map 72, object 195
-    {3, 1}, // map 72, object 193
-    {3, 1}, // map 72, object 201
-    {3, 1}, // map 72, object 198
-    {3, 1}, // map 72, object 200
-    {3, 1}, // map 72, object 197
-    {3, 1}, // map 72, object 199
-    {3, 5}, // map 72, object 205
-    {4, 0}, // map 72, object 212
-    {3, 5}, // map 72, object 207
-    {4, 5}, // map 72, object 150
-    {4, 0}, // map 72, object 213
-    {4, 0}, // map 72, object 85
-    {4, 0}, // map 72, object 211
-    {3, 0}, // map 72, object 204
-    {3, 0}, // map 72, object 214
-    {3, 0}, // map 72, object 215
-    {3, 0}, // map 72, object 216
-    {3, 0}, // map 72, object 217
-    {3, 0}, // map 72, object 218
-    {3, 0}, // map 72, object 219
-    {3, 0}, // map 72, object 220
-    {3, 0}, // map 72, object 221
-    {3, 5}, // map 72, object 122
-    {3, 5}, // map 72, object 123
-    {3, 5}, // map 72, object 124
-    {3, 5}, // map 72, object 202
-    {3, 5}, // map 84, object 3
-    {2, 1}, // map 85, object 4
-    {2, 1}, // map 85, object 5
-    {2, 1}, // map 85, object 6
-    {2, 1}, // map 85, object 7
-    {2, 1}, // map 85, object 8
-    {0, 1}, // map 86, object 2
-    {0, 1}, // map 86, object 3
-    {0, 1}, // map 86, object 4
-    {0, 1}, // map 86, object 5
-    {0, 1}, // map 86, object 6
-    {0, 1}, // map 86, object 7
-    {0, 1}, // map 86, object 8
-    {0, 5}, // map 86, object 9
-    {0, 5}, // map 89, object 2
-    {4, 5}, // map 90, object 8
-    {4, 5}, // map 90, object 9
-    {4, 5}, // map 90, object 10
-    {4, 5}, // map 90, object 11
-    {0, 5}, // map 91, object 9
-    {0, 0}, // map 91, object 16
-    {0, 0}, // map 91, object 11
-    {1, 1}, // map 92, object 2
-    {1, 1}, // map 92, object 3
-    {1, 1}, // map 92, object 4
-    {1, 1}, // map 92, object 5
-    {1, 1}, // map 92, object 6
-    {1, 5}, // map 92, object 7
-    {1, 0}, // map 92, object 8
-    {1, 0}, // map 92, object 9
-    {1, 0}, // map 92, object 10
-    {1, 0}, // map 92, object 11
-    {3, 5}, // map 93, object 3
-    {3, 5}, // map 93, object 1
-    {2, 5}, // map 94, object 0
-    {2, 0}, // map 98, object 17
-    {2, 0}, // map 98, object 18
-    {0, 5}, // map 186, object 2
-    {0, 0}, // map 186, object 3
-    {0, 5}, // map 186, object 4
-    {0, 0}, // map 186, object 5
-    {0, 5}, // map 186, object 6
-    {0, 0}, // map 186, object 7
-    {0, 5}, // map 186, object 1
-    {1, 5}, // map 200, object 0
-    {1, 5}, // map 200, object 1
-    {1, 5}, // map 200, object 2
+    {72, 1, 5}, // object 108
+    {72, 4, 0}, // object 348
+    {72, 1, 5}, // object 109
+    {72, 4, 5}, // object 145
+    {72, 4, 5}, // object 146
+    {72, 4, 1}, // object 144
+    {72, 0, 1}, // object 66
+    {72, 0, 1}, // object 67
+    {72, 0, 1}, // object 68
+    {72, 0, 1}, // object 69
+    {72, 0, 1}, // object 70
+    {72, 0, 1}, // object 71
+    {72, 0, 1}, // object 72
+    {72, 0, 1}, // object 73
+    {72, 0, 1}, // object 74
+    {72, 0, 1}, // object 75
+    {72, 0, 5}, // object 76
+    {72, 0, 5}, // object 77
+    {72, 0, 5}, // object 78
+    {72, 0, 0}, // object 79
+    {72, 0, 0}, // object 80
+    {72, 0, 0}, // object 81
+    {72, 0, 0}, // object 91
+    {72, 0, 0}, // object 90
+    {72, 0, 0}, // object 89
+    {72, 1, 5}, // object 182
+    {72, 2, 5}, // object 178
+    {72, 2, 5}, // object 180
+    {72, 2, 5}, // object 179
+    {72, 3, 0}, // object 203
+    {72, 2, 1}, // object 88
+    {72, 2, 1}, // object 97
+    {72, 2, 1}, // object 101
+    {72, 2, 1}, // object 99
+    {72, 1, 1}, // object 102
+    {72, 1, 1}, // object 103
+    {72, 1, 1}, // object 104
+    {72, 1, 1}, // object 105
+    {72, 3, 0}, // object 206
+    {72, 1, 5}, // object 111
+    {72, 1, 5}, // object 112
+    {72, 1, 5}, // object 113
+    {72, 1, 5}, // object 114
+    {72, 4, 0}, // object 154
+    {72, 4, 0}, // object 155
+    {72, 4, 0}, // object 156
+    {72, 1, 0}, // object 118
+    {72, 1, 0}, // object 119
+    {72, 1, 0}, // object 120
+    {72, 1, 0}, // object 121
+    {72, 2, 1}, // object 98
+    {72, 1, 1}, // object 160
+    {72, 4, 1}, // object 125
+    {72, 4, 1}, // object 126
+    {72, 4, 1}, // object 127
+    {72, 4, 1}, // object 141
+    {72, 4, 1}, // object 140
+    {72, 4, 1}, // object 139
+    {72, 4, 1}, // object 131
+    {72, 4, 1}, // object 132
+    {72, 4, 1}, // object 133
+    {72, 4, 1}, // object 134
+    {72, 4, 1}, // object 135
+    {72, 4, 1}, // object 136
+    {72, 4, 1}, // object 137
+    {72, 4, 1}, // object 138
+    {72, 4, 1}, // object 128
+    {72, 4, 1}, // object 129
+    {72, 4, 1}, // object 130
+    {72, 4, 1}, // object 142
+    {72, 4, 1}, // object 143
+    {72, 0, 1}, // object 63
+    {72, 0, 1}, // object 64
+    {72, 0, 1}, // object 65
+    {72, 4, 5}, // object 147
+    {72, 4, 5}, // object 148
+    {72, 4, 5}, // object 149
+    {72, 3, 5}, // object 208
+    {72, 4, 0}, // object 151
+    {72, 4, 0}, // object 152
+    {72, 4, 0}, // object 153
+    {72, 4, 0}, // object 115
+    {72, 4, 0}, // object 116
+    {72, 4, 0}, // object 117
+    {72, 4, 0}, // object 157
+    {72, 4, 0}, // object 158
+    {72, 4, 0}, // object 159
+    {72, 1, 1}, // object 161
+    {72, 1, 1}, // object 162
+    {72, 1, 1}, // object 164
+    {72, 1, 1}, // object 100
+    {72, 1, 1}, // object 163
+    {72, 2, 1}, // object 174
+    {72, 2, 1}, // object 166
+    {72, 2, 1}, // object 167
+    {72, 2, 1}, // object 168
+    {72, 2, 1}, // object 169
+    {72, 2, 1}, // object 170
+    {72, 2, 1}, // object 171
+    {72, 2, 1}, // object 172
+    {72, 2, 1}, // object 173
+    {72, 2, 1}, // object 165
+    {72, 2, 5}, // object 176
+    {72, 2, 5}, // object 177
+    {72, 2, 5}, // object 92
+    {72, 2, 5}, // object 93
+    {72, 2, 5}, // object 94
+    {72, 2, 5}, // object 95
+    {72, 2, 0}, // object 183
+    {72, 2, 0}, // object 184
+    {72, 2, 0}, // object 185
+    {72, 2, 0}, // object 186
+    {72, 2, 0}, // object 187
+    {72, 2, 0}, // object 188
+    {72, 2, 0}, // object 189
+    {72, 2, 0}, // object 190
+    {72, 2, 0}, // object 191
+    {72, 3, 1}, // object 192
+    {72, 3, 1}, // object 196
+    {72, 3, 1}, // object 194
+    {72, 3, 1}, // object 195
+    {72, 3, 1}, // object 193
+    {72, 3, 1}, // object 201
+    {72, 3, 1}, // object 198
+    {72, 3, 1}, // object 200
+    {72, 3, 1}, // object 197
+    {72, 3, 1}, // object 199
+    {72, 3, 5}, // object 205
+    {72, 4, 0}, // object 212
+    {72, 3, 5}, // object 207
+    {72, 4, 5}, // object 150
+    {72, 4, 0}, // object 213
+    {72, 4, 0}, // object 85
+    {72, 4, 0}, // object 211
+    {72, 3, 0}, // object 204
+    {72, 3, 0}, // object 214
+    {72, 3, 0}, // object 215
+    {72, 3, 0}, // object 216
+    {72, 3, 0}, // object 217
+    {72, 3, 0}, // object 218
+    {72, 3, 0}, // object 219
+    {72, 3, 0}, // object 220
+    {72, 3, 0}, // object 221
+    {72, 3, 5}, // object 122
+    {72, 3, 5}, // object 123
+    {72, 3, 5}, // object 124
+    {72, 3, 5}, // object 202
+    {84, 3, 5}, // object 3
+    {85, 2, 1}, // object 4
+    {85, 2, 1}, // object 5
+    {85, 2, 1}, // object 6
+    {85, 2, 1}, // object 7
+    {85, 2, 1}, // object 8
+    {86, 0, 1}, // object 2
+    {86, 0, 1}, // object 3
+    {86, 0, 1}, // object 4
+    {86, 0, 1}, // object 5
+    {86, 0, 1}, // object 6
+    {86, 0, 1}, // object 7
+    {86, 0, 1}, // object 8
+    {86, 0, 5}, // object 9
+    {89, 0, 5}, // object 2
+    {90, 4, 5}, // object 8
+    {90, 4, 5}, // object 9
+    {90, 4, 5}, // object 10
+    {90, 4, 5}, // object 11
+    {91, 0, 5}, // object 9
+    {91, 0, 0}, // object 16
+    {91, 0, 0}, // object 11
+    {92, 1, 1}, // object 2
+    {92, 1, 1}, // object 3
+    {92, 1, 1}, // object 4
+    {92, 1, 1}, // object 5
+    {92, 1, 1}, // object 6
+    {92, 1, 5}, // object 7
+    {92, 1, 0}, // object 8
+    {92, 1, 0}, // object 9
+    {92, 1, 0}, // object 10
+    {92, 1, 0}, // object 11
+    {93, 3, 5}, // object 3
+    {93, 3, 5}, // object 1
+    {94, 2, 5}, // object 0
+    {98, 2, 0}, // object 17
+    {98, 2, 0}, // object 18
+    {186, 0, 5}, // object 2
+    {186, 0, 0}, // object 3
+    {186, 0, 5}, // object 4
+    {186, 0, 0}, // object 5
+    {186, 0, 5}, // object 6
+    {186, 0, 0}, // object 7
+    {186, 0, 5}, // object 1
+    {200, 1, 5}, // object 0
+    {200, 1, 5}, // object 1
+    {200, 1, 5}, // object 2
     // Level 6, setup order within ascending map IDs.
-    {0, 1}, // map 87, object 46
-    {0, 1}, // map 87, object 52
-    {0, 1}, // map 87, object 53
-    {0, 1}, // map 87, object 54
-    {0, 1}, // map 87, object 55
-    {0, 1}, // map 87, object 72
-    {0, 1}, // map 87, object 73
-    {0, 1}, // map 87, object 74
-    {0, 1}, // map 87, object 75
-    {0, 1}, // map 87, object 76
-    {0, 1}, // map 87, object 77
-    {0, 1}, // map 87, object 97
-    {0, 1}, // map 87, object 79
-    {0, 1}, // map 87, object 96
-    {0, 1}, // map 87, object 95
-    {0, 1}, // map 87, object 90
-    {0, 1}, // map 87, object 91
-    {0, 1}, // map 87, object 92
-    {0, 1}, // map 87, object 93
-    {0, 1}, // map 87, object 94
-    {0, 1}, // map 87, object 78
-    {0, 1}, // map 87, object 99
-    {0, 1}, // map 87, object 81
-    {0, 1}, // map 87, object 98
-    {0, 1}, // map 87, object 80
-    {0, 1}, // map 87, object 100
-    {0, 1}, // map 87, object 101
-    {0, 1}, // map 87, object 102
-    {0, 1}, // map 87, object 103
-    {0, 1}, // map 87, object 104
-    {0, 1}, // map 87, object 105
-    {0, 1}, // map 87, object 106
-    {0, 1}, // map 87, object 107
-    {0, 1}, // map 87, object 108
-    {0, 1}, // map 87, object 109
-    {0, 1}, // map 87, object 110
-    {0, 1}, // map 87, object 111
-    {0, 1}, // map 87, object 112
-    {0, 1}, // map 87, object 113
-    {0, 1}, // map 87, object 114
-    {0, 1}, // map 87, object 115
-    {0, 1}, // map 87, object 116
-    {0, 1}, // map 87, object 117
-    {0, 1}, // map 87, object 118
-    {0, 1}, // map 87, object 119
-    {0, 1}, // map 87, object 120
-    {0, 1}, // map 87, object 121
-    {0, 1}, // map 87, object 122
-    {0, 1}, // map 87, object 123
-    {0, 1}, // map 87, object 124
-    {3, 1}, // map 87, object 125
-    {3, 1}, // map 87, object 126
-    {3, 1}, // map 87, object 127
-    {3, 1}, // map 87, object 128
-    {3, 1}, // map 87, object 129
-    {3, 1}, // map 87, object 130
-    {3, 1}, // map 87, object 131
-    {3, 1}, // map 87, object 132
-    {3, 1}, // map 87, object 133
-    {3, 1}, // map 87, object 134
-    {3, 1}, // map 87, object 135
-    {3, 1}, // map 87, object 136
-    {3, 1}, // map 87, object 137
-    {3, 1}, // map 87, object 138
-    {3, 1}, // map 87, object 139
-    {3, 1}, // map 87, object 140
-    {3, 1}, // map 87, object 141
-    {3, 1}, // map 87, object 142
-    {3, 1}, // map 87, object 143
-    {3, 1}, // map 87, object 144
-    {3, 1}, // map 87, object 145
-    {3, 1}, // map 87, object 146
-    {3, 1}, // map 87, object 147
-    {3, 1}, // map 87, object 148
-    {3, 1}, // map 87, object 149
-    {3, 1}, // map 87, object 150
-    {3, 1}, // map 87, object 151
-    {3, 1}, // map 87, object 152
-    {3, 1}, // map 87, object 153
-    {3, 1}, // map 87, object 154
-    {3, 1}, // map 87, object 155
-    {3, 1}, // map 87, object 156
-    {3, 1}, // map 87, object 157
-    {3, 1}, // map 87, object 158
-    {3, 1}, // map 87, object 159
-    {3, 1}, // map 87, object 160
-    {3, 1}, // map 87, object 161
-    {3, 1}, // map 87, object 162
-    {3, 1}, // map 87, object 163
-    {3, 1}, // map 87, object 164
-    {3, 1}, // map 87, object 165
-    {3, 1}, // map 87, object 166
-    {3, 1}, // map 87, object 167
-    {3, 1}, // map 87, object 168
-    {3, 1}, // map 87, object 169
-    {3, 5}, // map 87, object 170
-    {0, 0}, // map 87, object 173
-    {0, 0}, // map 87, object 174
-    {0, 0}, // map 87, object 175
-    {0, 0}, // map 87, object 176
-    {0, 0}, // map 87, object 177
-    {0, 0}, // map 87, object 178
-    {3, 0}, // map 87, object 179
-    {3, 0}, // map 87, object 180
-    {3, 0}, // map 87, object 181
-    {3, 0}, // map 87, object 182
-    {3, 0}, // map 87, object 183
-    {4, 0}, // map 87, object 187
-    {4, 0}, // map 87, object 188
-    {4, 0}, // map 87, object 189
-    {4, 0}, // map 87, object 190
-    {4, 0}, // map 87, object 191
-    {4, 0}, // map 87, object 192
-    {2, 0}, // map 87, object 196
-    {2, 0}, // map 87, object 197
-    {1, 0}, // map 87, object 209
-    {1, 5}, // map 87, object 194
-    {1, 0}, // map 87, object 206
-    {1, 0}, // map 87, object 207
-    {1, 0}, // map 87, object 208
-    {1, 5}, // map 87, object 210
-    {1, 0}, // map 87, object 200
-    {1, 0}, // map 87, object 201
-    {3, 5}, // map 88, object 6
-    {3, 0}, // map 88, object 7
-    {3, 0}, // map 88, object 8
-    {3, 0}, // map 88, object 9
-    {1, 5}, // map 88, object 13
-    {1, 5}, // map 88, object 11
-    {1, 5}, // map 88, object 12
-    {3, 5}, // map 108, object 18
-    {3, 0}, // map 108, object 19
-    {3, 0}, // map 108, object 20
-    {2, 0}, // map 108, object 36
-    {2, 0}, // map 108, object 37
-    {2, 0}, // map 108, object 38
-    {0, 5}, // map 112, object 38
-    {4, 5}, // map 112, object 42
-    {4, 5}, // map 112, object 43
-    {4, 0}, // map 112, object 44
-    {4, 0}, // map 112, object 45
-    {4, 0}, // map 112, object 46
-    {1, 5}, // map 112, object 48
-    {1, 0}, // map 112, object 49
-    {1, 0}, // map 112, object 50
-    {1, 0}, // map 112, object 51
-    {3, 5}, // map 113, object 11
-    {3, 5}, // map 113, object 12
-    {3, 5}, // map 113, object 13
-    {4, 5}, // map 113, object 20
-    {4, 0}, // map 113, object 21
-    {4, 0}, // map 113, object 22
-    {4, 0}, // map 113, object 23
-    {0, 5}, // map 114, object 7
-    {0, 5}, // map 114, object 8
-    {0, 5}, // map 114, object 9
-    {3, 0}, // map 151, object 6
-    {3, 0}, // map 151, object 7
-    {3, 0}, // map 151, object 8
-    {4, 1}, // map 151, object 9
-    {4, 1}, // map 151, object 10
-    {4, 1}, // map 151, object 11
-    {4, 1}, // map 151, object 12
-    {4, 1}, // map 151, object 13
-    {4, 1}, // map 151, object 14
-    {4, 1}, // map 151, object 15
-    {4, 1}, // map 151, object 16
-    {4, 1}, // map 151, object 17
-    {4, 1}, // map 151, object 18
-    {4, 1}, // map 151, object 19
-    {4, 1}, // map 151, object 20
-    {4, 1}, // map 151, object 21
-    {4, 1}, // map 151, object 22
-    {4, 1}, // map 151, object 23
-    {4, 1}, // map 151, object 24
-    {4, 1}, // map 151, object 25
-    {4, 1}, // map 151, object 26
-    {4, 1}, // map 151, object 27
-    {4, 1}, // map 151, object 28
-    {4, 1}, // map 151, object 29
-    {4, 1}, // map 151, object 30
-    {4, 1}, // map 151, object 31
-    {4, 1}, // map 151, object 32
-    {4, 1}, // map 151, object 33
-    {4, 1}, // map 151, object 34
-    {4, 1}, // map 151, object 35
-    {4, 1}, // map 151, object 36
-    {4, 1}, // map 151, object 37
-    {4, 1}, // map 151, object 38
-    {4, 0}, // map 151, object 46
-    {4, 0}, // map 151, object 47
-    {4, 0}, // map 151, object 48
-    {1, 0}, // map 151, object 49
-    {1, 0}, // map 151, object 50
-    {1, 0}, // map 151, object 51
-    {0, 5}, // map 163, object 16
-    {0, 0}, // map 163, object 17
-    {0, 0}, // map 163, object 18
-    {0, 0}, // map 163, object 19
-    {0, 0}, // map 163, object 20
-    {4, 0}, // map 163, object 23
-    {4, 0}, // map 163, object 24
-    {4, 0}, // map 163, object 25
-    {2, 0}, // map 163, object 27
-    {2, 0}, // map 163, object 28
-    {2, 0}, // map 163, object 29
-    {1, 5}, // map 163, object 30
-    {1, 5}, // map 163, object 31
-    {1, 5}, // map 163, object 32
-    {1, 5}, // map 163, object 33
-    {4, 0}, // map 164, object 39
-    {4, 0}, // map 164, object 40
-    {4, 0}, // map 164, object 38
-    {0, 5}, // map 164, object 30
-    {4, 5}, // map 164, object 37
-    {4, 0}, // map 166, object 7
-    {4, 0}, // map 166, object 8
-    {4, 0}, // map 166, object 9
-    {4, 0}, // map 166, object 10
-    {3, 5}, // map 167, object 0
-    {3, 0}, // map 167, object 6
-    {3, 0}, // map 167, object 7
-    {2, 5}, // map 168, object 3
-    {2, 5}, // map 168, object 4
-    {2, 5}, // map 168, object 5
-    {2, 5}, // map 168, object 6
-    {2, 5}, // map 168, object 7
-    {2, 5}, // map 168, object 8
-    {2, 0}, // map 168, object 16
-    {2, 0}, // map 168, object 17
-    {2, 0}, // map 168, object 18
-    {2, 1}, // map 183, object 24
-    {2, 1}, // map 183, object 16
-    {2, 5}, // map 183, object 15
-    {2, 1}, // map 183, object 18
-    {2, 5}, // map 183, object 17
-    {2, 1}, // map 183, object 20
-    {2, 5}, // map 183, object 19
-    {2, 1}, // map 183, object 22
-    {2, 5}, // map 183, object 21
-    {2, 5}, // map 183, object 23
-    {2, 0}, // map 183, object 25
-    {2, 0}, // map 183, object 26
-    {2, 0}, // map 183, object 27
-    {2, 0}, // map 183, object 28
-    {1, 0}, // map 183, object 32
-    {1, 0}, // map 183, object 33
-    {1, 0}, // map 183, object 34
-    {0, 0}, // map 187, object 5
-    {0, 0}, // map 187, object 6
-    {0, 0}, // map 187, object 7
-    {0, 0}, // map 187, object 8
-    {0, 0}, // map 187, object 9
+    {87, 0, 1}, // object 46
+    {87, 0, 1}, // object 52
+    {87, 0, 1}, // object 53
+    {87, 0, 1}, // object 54
+    {87, 0, 1}, // object 55
+    {87, 0, 1}, // object 72
+    {87, 0, 1}, // object 73
+    {87, 0, 1}, // object 74
+    {87, 0, 1}, // object 75
+    {87, 0, 1}, // object 76
+    {87, 0, 1}, // object 77
+    {87, 0, 1}, // object 97
+    {87, 0, 1}, // object 79
+    {87, 0, 1}, // object 96
+    {87, 0, 1}, // object 95
+    {87, 0, 1}, // object 90
+    {87, 0, 1}, // object 91
+    {87, 0, 1}, // object 92
+    {87, 0, 1}, // object 93
+    {87, 0, 1}, // object 94
+    {87, 0, 1}, // object 78
+    {87, 0, 1}, // object 99
+    {87, 0, 1}, // object 81
+    {87, 0, 1}, // object 98
+    {87, 0, 1}, // object 80
+    {87, 0, 1}, // object 100
+    {87, 0, 1}, // object 101
+    {87, 0, 1}, // object 102
+    {87, 0, 1}, // object 103
+    {87, 0, 1}, // object 104
+    {87, 0, 1}, // object 105
+    {87, 0, 1}, // object 106
+    {87, 0, 1}, // object 107
+    {87, 0, 1}, // object 108
+    {87, 0, 1}, // object 109
+    {87, 0, 1}, // object 110
+    {87, 0, 1}, // object 111
+    {87, 0, 1}, // object 112
+    {87, 0, 1}, // object 113
+    {87, 0, 1}, // object 114
+    {87, 0, 1}, // object 115
+    {87, 0, 1}, // object 116
+    {87, 0, 1}, // object 117
+    {87, 0, 1}, // object 118
+    {87, 0, 1}, // object 119
+    {87, 0, 1}, // object 120
+    {87, 0, 1}, // object 121
+    {87, 0, 1}, // object 122
+    {87, 0, 1}, // object 123
+    {87, 0, 1}, // object 124
+    {87, 3, 1}, // object 125
+    {87, 3, 1}, // object 126
+    {87, 3, 1}, // object 127
+    {87, 3, 1}, // object 128
+    {87, 3, 1}, // object 129
+    {87, 3, 1}, // object 130
+    {87, 3, 1}, // object 131
+    {87, 3, 1}, // object 132
+    {87, 3, 1}, // object 133
+    {87, 3, 1}, // object 134
+    {87, 3, 1}, // object 135
+    {87, 3, 1}, // object 136
+    {87, 3, 1}, // object 137
+    {87, 3, 1}, // object 138
+    {87, 3, 1}, // object 139
+    {87, 3, 1}, // object 140
+    {87, 3, 1}, // object 141
+    {87, 3, 1}, // object 142
+    {87, 3, 1}, // object 143
+    {87, 3, 1}, // object 144
+    {87, 3, 1}, // object 145
+    {87, 3, 1}, // object 146
+    {87, 3, 1}, // object 147
+    {87, 3, 1}, // object 148
+    {87, 3, 1}, // object 149
+    {87, 3, 1}, // object 150
+    {87, 3, 1}, // object 151
+    {87, 3, 1}, // object 152
+    {87, 3, 1}, // object 153
+    {87, 3, 1}, // object 154
+    {87, 3, 1}, // object 155
+    {87, 3, 1}, // object 156
+    {87, 3, 1}, // object 157
+    {87, 3, 1}, // object 158
+    {87, 3, 1}, // object 159
+    {87, 3, 1}, // object 160
+    {87, 3, 1}, // object 161
+    {87, 3, 1}, // object 162
+    {87, 3, 1}, // object 163
+    {87, 3, 1}, // object 164
+    {87, 3, 1}, // object 165
+    {87, 3, 1}, // object 166
+    {87, 3, 1}, // object 167
+    {87, 3, 1}, // object 168
+    {87, 3, 1}, // object 169
+    {87, 3, 5}, // object 170
+    {87, 0, 0}, // object 173
+    {87, 0, 0}, // object 174
+    {87, 0, 0}, // object 175
+    {87, 0, 0}, // object 176
+    {87, 0, 0}, // object 177
+    {87, 0, 0}, // object 178
+    {87, 3, 0}, // object 179
+    {87, 3, 0}, // object 180
+    {87, 3, 0}, // object 181
+    {87, 3, 0}, // object 182
+    {87, 3, 0}, // object 183
+    {87, 4, 0}, // object 187
+    {87, 4, 0}, // object 188
+    {87, 4, 0}, // object 189
+    {87, 4, 0}, // object 190
+    {87, 4, 0}, // object 191
+    {87, 4, 0}, // object 192
+    {87, 2, 0}, // object 196
+    {87, 2, 0}, // object 197
+    {87, 1, 0}, // object 209
+    {87, 1, 5}, // object 194
+    {87, 1, 0}, // object 206
+    {87, 1, 0}, // object 207
+    {87, 1, 0}, // object 208
+    {87, 1, 5}, // object 210
+    {87, 1, 0}, // object 200
+    {87, 1, 0}, // object 201
+    {88, 3, 5}, // object 6
+    {88, 3, 0}, // object 7
+    {88, 3, 0}, // object 8
+    {88, 3, 0}, // object 9
+    {88, 1, 5}, // object 13
+    {88, 1, 5}, // object 11
+    {88, 1, 5}, // object 12
+    {108, 3, 5}, // object 18
+    {108, 3, 0}, // object 19
+    {108, 3, 0}, // object 20
+    {108, 2, 0}, // object 36
+    {108, 2, 0}, // object 37
+    {108, 2, 0}, // object 38
+    {112, 0, 5}, // object 38
+    {112, 4, 5}, // object 42
+    {112, 4, 5}, // object 43
+    {112, 4, 0}, // object 44
+    {112, 4, 0}, // object 45
+    {112, 4, 0}, // object 46
+    {112, 1, 5}, // object 48
+    {112, 1, 0}, // object 49
+    {112, 1, 0}, // object 50
+    {112, 1, 0}, // object 51
+    {113, 3, 5}, // object 11
+    {113, 3, 5}, // object 12
+    {113, 3, 5}, // object 13
+    {113, 4, 5}, // object 20
+    {113, 4, 0}, // object 21
+    {113, 4, 0}, // object 22
+    {113, 4, 0}, // object 23
+    {114, 0, 5}, // object 7
+    {114, 0, 5}, // object 8
+    {114, 0, 5}, // object 9
+    {151, 3, 0}, // object 6
+    {151, 3, 0}, // object 7
+    {151, 3, 0}, // object 8
+    {151, 4, 1}, // object 9
+    {151, 4, 1}, // object 10
+    {151, 4, 1}, // object 11
+    {151, 4, 1}, // object 12
+    {151, 4, 1}, // object 13
+    {151, 4, 1}, // object 14
+    {151, 4, 1}, // object 15
+    {151, 4, 1}, // object 16
+    {151, 4, 1}, // object 17
+    {151, 4, 1}, // object 18
+    {151, 4, 1}, // object 19
+    {151, 4, 1}, // object 20
+    {151, 4, 1}, // object 21
+    {151, 4, 1}, // object 22
+    {151, 4, 1}, // object 23
+    {151, 4, 1}, // object 24
+    {151, 4, 1}, // object 25
+    {151, 4, 1}, // object 26
+    {151, 4, 1}, // object 27
+    {151, 4, 1}, // object 28
+    {151, 4, 1}, // object 29
+    {151, 4, 1}, // object 30
+    {151, 4, 1}, // object 31
+    {151, 4, 1}, // object 32
+    {151, 4, 1}, // object 33
+    {151, 4, 1}, // object 34
+    {151, 4, 1}, // object 35
+    {151, 4, 1}, // object 36
+    {151, 4, 1}, // object 37
+    {151, 4, 1}, // object 38
+    {151, 4, 0}, // object 46
+    {151, 4, 0}, // object 47
+    {151, 4, 0}, // object 48
+    {151, 1, 0}, // object 49
+    {151, 1, 0}, // object 50
+    {151, 1, 0}, // object 51
+    {163, 0, 5}, // object 16
+    {163, 0, 0}, // object 17
+    {163, 0, 0}, // object 18
+    {163, 0, 0}, // object 19
+    {163, 0, 0}, // object 20
+    {163, 4, 0}, // object 23
+    {163, 4, 0}, // object 24
+    {163, 4, 0}, // object 25
+    {163, 2, 0}, // object 27
+    {163, 2, 0}, // object 28
+    {163, 2, 0}, // object 29
+    {163, 1, 5}, // object 30
+    {163, 1, 5}, // object 31
+    {163, 1, 5}, // object 32
+    {163, 1, 5}, // object 33
+    {164, 4, 0}, // object 39
+    {164, 4, 0}, // object 40
+    {164, 4, 0}, // object 38
+    {164, 0, 5}, // object 30
+    {164, 4, 5}, // object 37
+    {166, 4, 0}, // object 7
+    {166, 4, 0}, // object 8
+    {166, 4, 0}, // object 9
+    {166, 4, 0}, // object 10
+    {167, 3, 5}, // object 0
+    {167, 3, 0}, // object 6
+    {167, 3, 0}, // object 7
+    {168, 2, 5}, // object 3
+    {168, 2, 5}, // object 4
+    {168, 2, 5}, // object 5
+    {168, 2, 5}, // object 6
+    {168, 2, 5}, // object 7
+    {168, 2, 5}, // object 8
+    {168, 2, 0}, // object 16
+    {168, 2, 0}, // object 17
+    {168, 2, 0}, // object 18
+    {183, 2, 1}, // object 24
+    {183, 2, 1}, // object 16
+    {183, 2, 5}, // object 15
+    {183, 2, 1}, // object 18
+    {183, 2, 5}, // object 17
+    {183, 2, 1}, // object 20
+    {183, 2, 5}, // object 19
+    {183, 2, 1}, // object 22
+    {183, 2, 5}, // object 21
+    {183, 2, 5}, // object 23
+    {183, 2, 0}, // object 25
+    {183, 2, 0}, // object 26
+    {183, 2, 0}, // object 27
+    {183, 2, 0}, // object 28
+    {183, 1, 0}, // object 32
+    {183, 1, 0}, // object 33
+    {183, 1, 0}, // object 34
+    {187, 0, 0}, // object 5
+    {187, 0, 0}, // object 6
+    {187, 0, 0}, // object 7
+    {187, 0, 0}, // object 8
+    {187, 0, 0}, // object 9
     // Level 7, setup order within ascending map IDs.
-    {0, 0}, // map 176, object 20
-    {0, 0}, // map 176, object 19
-    {0, 0}, // map 176, object 18
+    {176, 0, 0}, // object 20
+    {176, 0, 0}, // object 19
+    {176, 0, 0}, // object 18
 };
-typedef struct { unsigned short flag; unsigned char level, kong, amount; } CoopActorPickup;
+typedef struct { unsigned short flag; unsigned char map, level, kong, amount; } CoopActorPickup;
 // amount 10 = balloon; amount 0 = rainbow coin (+5 to every Kong).
 static const CoopActorPickup coop_actor_pickups[120] = {
-    {0x26C, 0, 1, 10},
-    {0x26D, 0, 0, 0},
-    {0x26E, 0, 1, 10},
-    {0x26F, 0, 0, 10},
-    {0x270, 0, 4, 10},
-    {0x271, 0, 2, 10},
-    {0x272, 0, 1, 10},
-    {0x273, 0, 0, 10},
-    {0x274, 0, 0, 10},
-    {0x275, 0, 3, 10},
-    {0x276, 0, 3, 10},
-    {0x277, 0, 4, 10},
-    {0x278, 0, 4, 10},
-    {0x279, 0, 2, 10},
-    {0x27A, 0, 3, 10},
-    {0x27B, 0, 2, 10},
-    {0x27C, 1, 3, 10},
-    {0x27D, 1, 3, 10},
-    {0x27E, 1, 4, 10},
-    {0x27F, 1, 3, 10},
-    {0x280, 1, 2, 10},
-    {0x281, 1, 2, 10},
-    {0x282, 1, 1, 10},
-    {0x283, 1, 2, 10},
-    {0x284, 1, 4, 10},
-    {0x285, 1, 4, 10},
-    {0x286, 1, 0, 0},
-    {0x287, 2, 4, 10},
-    {0x288, 2, 4, 10},
-    {0x289, 2, 2, 10},
-    {0x28A, 2, 3, 10},
-    {0x28B, 2, 1, 10},
-    {0x28C, 2, 1, 10},
-    {0x28D, 2, 0, 10},
-    {0x28E, 2, 0, 10},
-    {0x28F, 2, 0, 10},
-    {0x290, 2, 1, 10},
-    {0x291, 2, 3, 10},
-    {0x292, 2, 3, 10},
-    {0x293, 2, 2, 10},
-    {0x294, 2, 4, 10},
-    {0x295, 2, 0, 0},
-    {0x296, 3, 1, 10},
-    {0x297, 3, 3, 10},
-    {0x298, 3, 2, 10},
-    {0x299, 3, 2, 10},
-    {0x29A, 3, 4, 10},
-    {0x29B, 3, 1, 10},
-    {0x29C, 3, 0, 10},
-    {0x29D, 3, 0, 10},
-    {0x29E, 3, 1, 10},
-    {0x29F, 3, 4, 10},
-    {0x2A0, 3, 4, 10},
-    {0x2A1, 3, 2, 10},
-    {0x2A2, 3, 3, 10},
-    {0x2A3, 3, 3, 10},
-    {0x2A4, 7, 0, 0},
-    {0x2A5, 7, 0, 0},
-    {0x2A6, 7, 0, 0},
-    {0x2A7, 2, 2, 10},
-    {0x2A8, 1, 0, 10},
-    {0x2A9, 1, 1, 10},
-    {0x2AA, 1, 0, 10},
-    {0x2AB, 1, 0, 10},
-    {0x2AC, 1, 1, 10},
-    {0x2AD, 1, 0, 0},
-    {0x2AE, 4, 1, 10},
-    {0x2AF, 4, 0, 0},
-    {0x2B0, 4, 3, 10},
-    {0x2B1, 4, 0, 10},
-    {0x2B2, 4, 0, 0},
-    {0x2B3, 4, 4, 10},
-    {0x2B4, 4, 3, 10},
-    {0x2B5, 3, 0, 10},
-    {0x2B6, 3, 0, 0},
-    {0x2B7, 4, 1, 10},
-    {0x2B8, 4, 0, 10},
-    {0x2B9, 4, 2, 10},
-    {0x2BA, 4, 2, 10},
-    {0x2BB, 4, 4, 10},
-    {0x2BC, 5, 1, 10},
-    {0x2BD, 5, 4, 10},
-    {0x2BE, 5, 3, 10},
-    {0x2BF, 5, 0, 0},
-    {0x2C0, 5, 2, 10},
-    {0x2C1, 5, 0, 10},
-    {0x2C2, 5, 1, 10},
-    {0x2C3, 5, 4, 10},
-    {0x2C4, 5, 3, 10},
-    {0x2C5, 5, 0, 10},
-    {0x2C6, 5, 3, 10},
-    {0x2C7, 5, 2, 10},
-    {0x2C8, 5, 0, 10},
-    {0x2C9, 6, 0, 0},
-    {0x2CA, 6, 1, 10},
-    {0x2CB, 6, 1, 10},
-    {0x2CC, 5, 3, 10},
-    {0x2CD, 5, 4, 10},
-    {0x2CE, 7, 0, 0},
-    {0x2CF, 5, 2, 10},
-    {0x2D0, 5, 1, 10},
-    {0x2D1, 6, 2, 10},
-    {0x2D2, 6, 2, 10},
-    {0x2D3, 6, 1, 10},
-    {0x2D4, 6, 0, 10},
-    {0x2D5, 6, 3, 10},
-    {0x2D6, 6, 4, 10},
-    {0x2D7, 6, 1, 10},
-    {0x2D8, 6, 2, 10},
-    {0x2D9, 6, 4, 10},
-    {0x2DA, 6, 2, 10},
-    {0x2DB, 6, 4, 10},
-    {0x2DC, 6, 0, 10},
-    {0x2DD, 6, 4, 10},
-    {0x2DE, 6, 4, 10},
-    {0x2DF, 7, 0, 0},
-    {0x2E0, 7, 0, 0},
-    {0x2E1, 6, 1, 10},
-    {0x2E2, 6, 3, 10},
-    {0x2E3, 7, 0, 0},
+    {0x26C, 4, 0, 1, 10},
+    {0x26D, 7, 0, 0, 0},
+    {0x26E, 7, 0, 1, 10},
+    {0x26F, 7, 0, 0, 10},
+    {0x270, 7, 0, 4, 10},
+    {0x271, 7, 0, 2, 10},
+    {0x272, 7, 0, 1, 10},
+    {0x273, 7, 0, 0, 10},
+    {0x274, 7, 0, 0, 10},
+    {0x275, 7, 0, 3, 10},
+    {0x276, 7, 0, 3, 10},
+    {0x277, 7, 0, 4, 10},
+    {0x278, 7, 0, 4, 10},
+    {0x279, 7, 0, 2, 10},
+    {0x27A, 12, 0, 3, 10},
+    {0x27B, 13, 0, 2, 10},
+    {0x27C, 16, 1, 3, 10},
+    {0x27D, 16, 1, 3, 10},
+    {0x27E, 16, 1, 4, 10},
+    {0x27F, 20, 1, 3, 10},
+    {0x280, 20, 1, 2, 10},
+    {0x281, 20, 1, 2, 10},
+    {0x282, 21, 1, 1, 10},
+    {0x283, 23, 1, 2, 10},
+    {0x284, 24, 1, 4, 10},
+    {0x285, 24, 1, 4, 10},
+    {0x286, 24, 1, 0, 0},
+    {0x287, 26, 2, 4, 10},
+    {0x288, 26, 2, 4, 10},
+    {0x289, 26, 2, 2, 10},
+    {0x28A, 26, 2, 3, 10},
+    {0x28B, 26, 2, 1, 10},
+    {0x28C, 26, 2, 1, 10},
+    {0x28D, 26, 2, 0, 10},
+    {0x28E, 26, 2, 0, 10},
+    {0x28F, 26, 2, 0, 10},
+    {0x290, 26, 2, 1, 10},
+    {0x291, 26, 2, 3, 10},
+    {0x292, 26, 2, 3, 10},
+    {0x293, 26, 2, 2, 10},
+    {0x294, 26, 2, 4, 10},
+    {0x295, 26, 2, 0, 0},
+    {0x296, 30, 3, 1, 10},
+    {0x297, 30, 3, 3, 10},
+    {0x298, 30, 3, 2, 10},
+    {0x299, 30, 3, 2, 10},
+    {0x29A, 30, 3, 4, 10},
+    {0x29B, 30, 3, 1, 10},
+    {0x29C, 30, 3, 0, 10},
+    {0x29D, 30, 3, 0, 10},
+    {0x29E, 30, 3, 1, 10},
+    {0x29F, 30, 3, 4, 10},
+    {0x2A0, 30, 3, 4, 10},
+    {0x2A1, 30, 3, 2, 10},
+    {0x2A2, 30, 3, 3, 10},
+    {0x2A3, 30, 3, 3, 10},
+    {0x2A4, 34, 7, 0, 0},
+    {0x2A5, 34, 7, 0, 0},
+    {0x2A6, 34, 7, 0, 0},
+    {0x2A7, 36, 2, 2, 10},
+    {0x2A8, 38, 1, 0, 10},
+    {0x2A9, 38, 1, 1, 10},
+    {0x2AA, 38, 1, 0, 10},
+    {0x2AB, 38, 1, 0, 10},
+    {0x2AC, 38, 1, 1, 10},
+    {0x2AD, 38, 1, 0, 0},
+    {0x2AE, 48, 4, 1, 10},
+    {0x2AF, 48, 4, 0, 0},
+    {0x2B0, 48, 4, 3, 10},
+    {0x2B1, 48, 4, 0, 10},
+    {0x2B2, 48, 4, 0, 0},
+    {0x2B3, 48, 4, 4, 10},
+    {0x2B4, 48, 4, 3, 10},
+    {0x2B5, 49, 3, 0, 10},
+    {0x2B6, 49, 3, 0, 0},
+    {0x2B7, 57, 4, 1, 10},
+    {0x2B8, 61, 4, 0, 10},
+    {0x2B9, 64, 4, 2, 10},
+    {0x2BA, 64, 4, 2, 10},
+    {0x2BB, 71, 4, 4, 10},
+    {0x2BC, 72, 5, 1, 10},
+    {0x2BD, 72, 5, 4, 10},
+    {0x2BE, 72, 5, 3, 10},
+    {0x2BF, 72, 5, 0, 0},
+    {0x2C0, 72, 5, 2, 10},
+    {0x2C1, 72, 5, 0, 10},
+    {0x2C2, 72, 5, 1, 10},
+    {0x2C3, 72, 5, 4, 10},
+    {0x2C4, 72, 5, 3, 10},
+    {0x2C5, 72, 5, 0, 10},
+    {0x2C6, 84, 5, 3, 10},
+    {0x2C7, 85, 5, 2, 10},
+    {0x2C8, 86, 5, 0, 10},
+    {0x2C9, 87, 6, 0, 0},
+    {0x2CA, 87, 6, 1, 10},
+    {0x2CB, 88, 6, 1, 10},
+    {0x2CC, 93, 5, 3, 10},
+    {0x2CD, 95, 5, 4, 10},
+    {0x2CE, 97, 7, 0, 0},
+    {0x2CF, 98, 5, 2, 10},
+    {0x2D0, 100, 5, 1, 10},
+    {0x2D1, 105, 6, 2, 10},
+    {0x2D2, 108, 6, 2, 10},
+    {0x2D3, 112, 6, 1, 10},
+    {0x2D4, 112, 6, 0, 10},
+    {0x2D5, 113, 6, 3, 10},
+    {0x2D6, 113, 6, 4, 10},
+    {0x2D7, 163, 6, 1, 10},
+    {0x2D8, 163, 6, 2, 10},
+    {0x2D9, 163, 6, 4, 10},
+    {0x2DA, 163, 6, 2, 10},
+    {0x2DB, 163, 6, 4, 10},
+    {0x2DC, 164, 6, 0, 10},
+    {0x2DD, 164, 6, 4, 10},
+    {0x2DE, 166, 6, 4, 10},
+    {0x2DF, 176, 7, 0, 0},
+    {0x2E0, 176, 7, 0, 0},
+    {0x2E1, 183, 6, 1, 10},
+    {0x2E2, 183, 6, 3, 10},
+    {0x2E3, 193, 7, 0, 0},
 };
 #endif

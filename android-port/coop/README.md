@@ -430,22 +430,19 @@ no account, matchmaking, relay, router setup or firewall modification.
 Both players may establish and refresh item/progression snapshots in regular
 gameplay in DK's treehouse, Isles, the seven main levels, and the reviewed
 ordinary gameplay maps, including their ordinary interiors, all seven lobbies
-and Hideout Helm. Interior/lobby/Helm snapshots are publish-only: received writes
-and saves still wait until that device reaches DK's treehouse, Isles or a main
-level. Shops, unreviewed interiors, training grounds/barrels, boss arenas,
+and Hideout Helm. Those reviewed maps can also receive and save inventory,
+progression and numeric reward writes. Training Grounds retains its narrower
+training-only transaction. Shops, unreviewed interiors, boss arenas,
 minigames, cutscenes and pending reward queues retain the last verified snapshot;
-local gains are picked up when the player returns to a reviewed map. Numeric
-GB/banana/coin rewards still require main-world/Isles play; the treehouse is for
-unlocks and progression. Presence/combat use their own rules.
+local gains are picked up when the player returns to a reviewed map.
 
-**Leave the reward's level to receive incoming numeric credits.** For example,
-a Japes reward applies when the recipient is playing in Isles or another main
-level. Interiors and lobbies count as their owning level (lobbies are Isles).
-Snide rewards are the exception: leave HQ and resume main-world play. Shops,
-minigames, cutscenes and pending collectible animations do not receive numeric
-grants. This prevents a reward being credited while its old collectible or
-reward script is still loaded locally. The next level load reads the updated
-collection bit. If both players collect the same location first, neither gets a
+Numeric credits no longer require leaving their owning level. Every generated
+GB, ordinary pickup, balloon and rainbow coin records its exact vanilla source
+map. A recipient can receive it in any other reviewed map, including another
+interior in the same level, a lobby, Helm or DK's treehouse. Only the exact
+source map waits while its old collectible or reward controller is loaded.
+Shops, minigames, cutscenes and pending collectible animations still do not
+receive grants. If both players collect the same location first, neither gets a
 second credit when network confirmation arrives.
 
 ## How upgrades and unlocks synchronize
@@ -617,8 +614,8 @@ unless the change is one of the reviewed live rows and automatic refresh is on.
 The same safe snapshot maps still apply. Interior-only lobby, training-exit and
 Fairy Island changes may arrive in any safe map, including DK's treehouse,
 because their scripts are unloaded there. Item pages continue exchanging through
-unsafe interiors after each device has one safe snapshot, but received writes wait
-for a later safe frame. Isles overworld changes wait outside Isles. Nothing
+unsafe overlays after each device has one reviewed snapshot, but received writes
+wait for a later reviewed frame. Isles overworld changes wait outside Isles. Nothing
 teleports players or patches loaded actors/scripts.
 
 Requirements are checked both in complete network ownership and against local
@@ -957,7 +954,7 @@ use the tablet as host in this environment. No firewall setting was changed.
 Before relying on a save:
 
 1. Test a GB, single banana, bunch, ordinary coin, balloon and rainbow coin in
-   both directions. Leave the reward's level on the recipient and check the
+   both directions. Move off the exact source map on the recipient and check the
    correct Kong/level counters, including all five balances for a rainbow coin.
 2. Collect the same location on both devices before leaving. It should count
    once per save. Re-enter: the already-collected object must not reappear.

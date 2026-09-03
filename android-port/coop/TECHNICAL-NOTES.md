@@ -454,8 +454,10 @@ grants so these cannot echo as local events. Bound requests survive temporary
 waiting; new sessions/scopes and conflicts clear binding. Unbound/pre-existing
 guest items absent from the host cause conflict rather than import.
 
-Capture waits through cutscenes/loading and requires a main-world/Isles map or DK's house;
-boss/minigame overlays can temporarily replace upgrades or melon capacity. Capture/application also wait while
+Capture waits through cutscenes/loading and requires one of the reviewed normal
+adventure maps: DK's house, a main world, ordinary audited interiors, lobbies or
+Helm. Boss/minigame overlays can temporarily replace upgrades or melon capacity.
+Capture/application also wait while
 D807FD730 has pending collectible credits: ordinary
 pickup save bits can precede inventory increments. GB counts must exactly match
 all their allowlisted flags; Snide also requires its blueprint. Ordinary setup
@@ -470,13 +472,14 @@ not credit or acknowledge. A counter changed unexpectedly by another mod latches
 COUNTER CONFLICT instead of adding another reward. GB layout is pinned to
 CharacterProgress stride 0x5E/GB offset 0x42, PlayerProgress stride 0x306.
 
-Incoming numeric rewards apply only in ordinary main-world/Isles play, with a
-loaded HUD, **outside the reward's level**. Snide remains safe in main-world play
-outside HQ because its menu checks each reward flag before incrementing. Other
-rewards wait to avoid a loaded old prop, balloon, dirt patch or race script
-awarding again. This avoids live prop deletion or engine hooks. On re-entry the
-normal spawner/setup code checks the updated collection bit. Race/script and
-world refresh behavior still require real-game testing.
+Incoming numeric rewards apply in any reviewed writable map with a loaded HUD,
+an empty reward queue and valid counters. Generated GB, ordinary-pickup,
+balloon and rainbow rows include the vanilla source map. Only that exact map is
+guarded, avoiding a loaded old prop, balloon, dirt patch or reward controller;
+another reviewed map in the same level is safe. Snide HQ and minigame overlays
+are outside the writable set. On later entry the normal spawner/setup code
+checks the updated collection bit. Race/script behavior still requires real-game
+testing.
 
 Ordinary pickup bits use `saveFile.c::func_8060E3B0`/`func_8060E430` with a validated
 per-level ordinal; they are not permanent flag indices. A new coin credits its
@@ -2599,22 +2602,20 @@ state-11 typed triggers also use vanilla ready state 10. Packets cannot arm an
 unavailable box, replay completion, select a reward, or enter intermediate
 states 1 through 9.
 
-## Reviewed same-level Golden Banana delivery (0.62.0)
+## Source-map numeric reward delivery
 
-Numeric item grants still require a stable main-world or Isles save context, a
-loaded HUD, an empty reward queue and valid item counters. Version 0.62.0
-relaxes only the owning-level exclusion for 29 exact `(main map, reward flag)`
-pairs. Their reward actors and scripts live in an unloaded race, minecart,
-bonus-barrel interior or lobby, so applying the permanent flag and incrementing
-the saved Golden Banana counter cannot collide with the source controller.
+The original 0.62.0 implementation admitted 29 manually reviewed GBs on their
+owning main maps. The current adapter replaces that narrow table and the former
+whole-level delay with source-map metadata for all 161 GBs, 1700 ordinary
+pickups, 104 balloons and 16 rainbow coins. Prop and actor maps come directly
+from the verified decompressed ROM; bonus-barrel and scripted reward parent maps
+are pinned and cross-checked with the vanilla location tables.
 
-The table is an allowlist, not a map-class rule. Same-map reward spawners,
-Galleon's Seal Race, Fungi and Caves Baboon Blast, rabbit and owl races,
-ordinary pickups, balloons, rainbow coins and the Japes boulder retain the
-existing whole-level delay. Flag write, counter increment, HUD update and save
-remain one retryable operation; a failed flag write does not advance the
-counter. Protocol and packet sizes are unchanged. Protocol 62, compatibility
-`0x0001023E`, v62 exports and manifest 0.62.0 reject older peers and companions.
+A stable reviewed destination map may apply the reward even when it belongs to
+that same level. The exact source map remains guarded while its old controller
+is loaded. Flag/write readback, counter increment, HUD update and save remain one
+retryable operation; a failed flag write does not advance the counter. The
+metadata is local static policy, so protocol and packet sizes are unchanged.
 
 ## Kremling Kosh shared success (0.63.0)
 
