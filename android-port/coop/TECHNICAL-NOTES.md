@@ -3105,3 +3105,19 @@ All six exact states now publish the same bounded trigger activation. A receiver
 still enters only at reviewed state `2` from local ready state `1`, so its own
 script owns every linked object, timer and presentation step. Unrelated states
 remain ready observations and cannot be selected by a packet.
+
+## One-shot temporary passage latches (post-0.77 development)
+
+Eighteen reviewed temporary passage switches retain a fired observation for the
+current room epoch after their local timer closes: Japes' feather/grape doors
+and Rambi window, Llama Temple's grape gate, four Aztec exterior gates, and the
+reviewed Castle crypt, basement and tree door/platform switches. Either peer's
+accepted activation sets the same local latch. A receiver executes only the
+existing exact trigger entry, at most once per room epoch; entering the room in
+a later epoch permits one fresh local opening.
+
+This records no timer, linked object, animation state, reward or cutscene. The
+allowlist deliberately excludes reward controllers and every generic script.
+Once both clients observe the latch their ordinary trigger snapshots agree, so
+the event channel returns to `SYNCED` instead of repeatedly applying a closed
+door's historical activation.

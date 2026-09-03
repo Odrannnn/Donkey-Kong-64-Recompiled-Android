@@ -6,6 +6,45 @@ typedef struct {
     unsigned char kind, activation;
 } CoopTransientObject;
 
+typedef struct { unsigned short map, object; } CoopTransientPassage;
+
+// These reviewed switches open temporary physical routes and then return to a
+// ready state. Remember one activation for the lifetime of each local room
+// epoch so a peer that arrives after the original timer can run its own vanilla
+// opening sequence once. Reward/cutscene controllers are intentionally absent.
+static const CoopTransientPassage coop_transient_passages[] = {
+    {7, 0x1F}, {7, 0x20}, {7, 0x123},
+    {20, 0x6B},
+    {38, 0x02}, {38, 0x03}, {38, 0x04}, {38, 0x05},
+    {108, 0x00}, {108, 0x04},
+    {112, 0x0D}, {112, 0x0E}, {112, 0x0F},
+    {163, 0x04}, {163, 0x05}, {163, 0x06},
+    {164, 0x01}, {164, 0x09},
+};
+static unsigned coop_transient_passage_map, coop_transient_passage_epoch;
+static unsigned coop_transient_passage_bits;
+
+static unsigned coop_transient_passage_index(unsigned map, unsigned object) {
+    for (unsigned i = 0; i < sizeof(coop_transient_passages) / sizeof(coop_transient_passages[0]); ++i)
+        if (coop_transient_passages[i].map == map
+                && coop_transient_passages[i].object == object) return i + 1;
+    return 0;
+}
+
+static unsigned coop_transient_passage_latched(unsigned map, unsigned object,
+        unsigned observe) {
+    unsigned index = coop_transient_passage_index(map, object);
+    if (!index) return 0;
+    if (coop_transient_passage_map != map || coop_transient_passage_epoch != epoch) {
+        coop_transient_passage_map = map;
+        coop_transient_passage_epoch = epoch;
+        coop_transient_passage_bits = 0;
+    }
+    unsigned bit = 1u << (index - 1);
+    if (observe) coop_transient_passage_bits |= bit;
+    return (coop_transient_passage_bits & bit) != 0;
+}
+
 // Character-spawner private data is not part of common_structs.h. Giant Clam
 // uses only the signed word at pinned offset 0x2C for its 90-frame countdown.
 typedef struct { unsigned char pad[0x2C]; int timer; } CoopClamData;
@@ -1127,7 +1166,9 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
     } else if (kind == COOP_TRANSIENT_TRIGGER) {
         value = coop_transient_object_activation(current_map, object);
         if (!value) return;
-        state = coop_transient_trigger_fired(current_map, object, state, value) ? 2 : 1;
+        unsigned fired = coop_transient_trigger_fired(current_map, object, state, value);
+        if (fired) coop_transient_passage_latched(current_map, object, 1);
+        state = fired || coop_transient_passage_latched(current_map, object, 0) ? 2 : 1;
     } else if (kind == COOP_TRANSIENT_SEQUENCE) {
         if ((unsigned)current_map == 26 && object == 0x14)
             state = coop_piano_progress(state);
@@ -1451,6 +1492,9 @@ static void coop_transient_apply(void) {
             // action. The only remote command is the reviewed vanilla entry.
             unsigned activation = coop_transient_object_activation(current_map, record.key);
             unsigned lobby_pad = coop_lobby_instrument_pad(current_map, record.key);
+            unsigned passage = coop_transient_passage_index(current_map, record.key);
+            if (passage && coop_transient_passage_latched(current_map, record.key, 0))
+                continue;
             if (lobby_pad && coop_lobby_pad_applied_epoch == epoch
                     && coop_lobby_pad_applied_map == (unsigned)current_map
                     && coop_lobby_pad_applied_object == record.key) continue;
@@ -1477,6 +1521,8 @@ static void coop_transient_apply(void) {
                     coop_live_world_set_object(linked, 10);
                 }
                 coop_live_world_set_object(record.key, activation);
+                if (passage)
+                    coop_transient_passage_latched(current_map, record.key, 1);
                 if (lobby_pad) {
                     coop_lobby_pad_applied_epoch = epoch;
                     coop_lobby_pad_applied_map = current_map;

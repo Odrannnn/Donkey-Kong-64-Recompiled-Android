@@ -456,6 +456,8 @@ static void reset() {
     std::fill(std::begin(D_global_asm_807FB930), std::end(D_global_asm_807FB930), ActorListEntry{});
     std::fill(std::begin(D_global_asm_807FC8C0), std::end(D_global_asm_807FC8C0), static_cast<s8>(-1));
     role = ROLE_HOST; current_file = 0; current_map = 7; epoch = 9;
+    coop_transient_passage_map = coop_transient_passage_epoch = 0;
+    coop_transient_passage_bits = 0;
     transient_enabled = 1; transient_revision = 1; transient_page = 0;
     transient_file = transient_file_changed = 0;
     coop_transient_applied_timer_epoch = 0;
@@ -736,6 +738,22 @@ static void capture_checks() {
         saw_peanut |= contains_value(COOP_TRANSIENT_TRIGGER, 0x58, 2, 2);
     }
     CHECK(saw_feather && saw_grape && saw_peanut);
+    // Reviewed temporary passages retain one fired observation for this room
+    // epoch after their vanilla timer closes. Ordinary reward switches do not.
+    scripts[0x20].unk48[0] = 1; scripts[0x58].unk48[0] = 1; transient_page = 0;
+    bool saw_latched_grape = false, saw_ready_peanut = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_latched_grape |= contains_value(COOP_TRANSIENT_TRIGGER, 0x20, 2, 11);
+        saw_ready_peanut |= contains_value(COOP_TRANSIENT_TRIGGER, 0x58, 1, 2);
+    }
+    CHECK(saw_latched_grape && saw_ready_peanut);
+    ++epoch; transient_page = 0; bool saw_rearmed_grape = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_rearmed_grape |= contains_value(COOP_TRANSIENT_TRIGGER, 0x20, 1, 11);
+    }
+    CHECK(saw_rearmed_grape);
 
     reset(); current_map = 38; load(0, 0x0D, 2); load(1, 0x0E, 6); load(2, 0x0F, 10);
     load(3, 0x44, 3); load(4, 0x9D, 1); load(5, 0x9E, 2);
@@ -1272,8 +1290,10 @@ static void object_apply_checks() {
         {{COOP_TRANSIENT_TRIGGER, 0x1F, 2, 11}}};
     coop_transient_apply();
     CHECK(script_calls == 1 && last_object == 0x1F && last_state == 11);
-    scripts[0x1F].unk48[0] = 10; coop_transient_apply();
-    CHECK(script_calls == 1); // Intermediate states cannot satisfy exact readiness.
+    scripts[0x1F].unk48[0] = 1; coop_transient_apply();
+    CHECK(script_calls == 1); // The same room epoch consumes the latch once.
+    ++epoch; transient_result.epoch = epoch; coop_transient_apply();
+    CHECK(script_calls == 2 && last_state == 11); // A later room visit gets one chance.
 
     reset(); role = ROLE_JOIN; current_map = 7; load(0, 0x58, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 7, 9, 1,
