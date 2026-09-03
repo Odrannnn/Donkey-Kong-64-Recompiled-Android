@@ -690,7 +690,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 147);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 155);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -744,6 +744,12 @@ static void world_refresh_checks() {
     D_global_asm_807F6240[2] = 0x27; D_global_asm_807F6240[3] = 0x51;
     live_raw[0x27] = 10;
     CHECK(!coop_live_world_refresh(0x09C) && live_calls == 0);
+
+    // Interior-only structures do not reload an unrelated main map.
+    reset_engine(); current_map = 38;
+    CHECK(coop_live_world_refresh(0x045) && live_calls == 0);
+    reset_engine(); current_map = 87;
+    CHECK(coop_live_world_refresh(0x15C) && live_calls == 0);
 
     // A reviewed ordinary interior may accept only its exact loaded world
     // unit. The flag, replay and isolated save complete without a map reload.

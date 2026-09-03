@@ -20,7 +20,7 @@ enum {
     COOP_LIVE_WORLD_NOOP = 4,
     COOP_LIVE_WORLD_GUARD_ZERO = 5,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 147
+    COOP_LIVE_WORLD_STATE_COUNT = 155
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20}, { 7, 0x000, 0x01B, 20},
@@ -147,6 +147,18 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 48, 0x0D5, 0x025, 50, COOP_LIVE_WORLD_PERMANENT},
     { 48, 0x0D5, 0x027,  0, COOP_LIVE_WORLD_REPLAY},
     { 48, 0x0DC, 0x02B, 20, COOP_LIVE_WORLD_PERMANENT},
+
+    // These completions are consumed only inside their submaps. Receiving one
+    // in the corresponding main world needs a save, but no loaded script or
+    // map rebuild; the target room initializes from the flag on entry.
+    { 38, 0x045, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 87, 0x138, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 87, 0x157, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 87, 0x158, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 87, 0x159, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 87, 0x15A, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 87, 0x15B, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+    { 87, 0x15C, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
 };
 
 // Portal rows exist only to apply an accepted permanent flag. Their ordinary
