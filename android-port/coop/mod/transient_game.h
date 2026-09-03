@@ -199,6 +199,12 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     {17, 0x2C, COOP_TRANSIENT_TRIGGER, 2}, {17, 0x2D, COOP_TRANSIENT_TRIGGER, 12},
     {17, 0x2E, COOP_TRANSIENT_TRIGGER, 12}, {17, 0x2F, COOP_TRANSIENT_TRIGGER, 12},
     {17, 0x30, COOP_TRANSIENT_TRIGGER, 12},
+    // Those pad edges last only two script ticks. Their linked controllers
+    // retain the exact external state-10 command, providing a durable derived
+    // activation without copying any controller's unrelated raw states.
+    {17, 0x5D, COOP_TRANSIENT_TRIGGER, 10}, {17, 0x5A, COOP_TRANSIENT_TRIGGER, 10},
+    {17, 0x58, COOP_TRANSIENT_TRIGGER, 10}, {17, 0x61, COOP_TRANSIENT_TRIGGER, 10},
+    {17, 0x60, COOP_TRANSIENT_TRIGGER, 10},
     // Isles level-lobby feather switches. State 2 starts the local panel/door
     // presentation in the Aztec and Fungi lobbies respectively.
     {173, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {178, 0x05, COOP_TRANSIENT_TRIGGER, 2},
@@ -1095,6 +1101,9 @@ static unsigned coop_transient_trigger_fired(unsigned map, unsigned object,
     if (map == 16 && object == 0x04)
         return raw == 2 || raw == 40 || raw == 20 || raw == 30
             || raw == 3 || raw == 4;
+    if (map == 17 && (object == 0x5D || object == 0x5A || object == 0x58
+            || object == 0x61 || object == 0x60))
+        return activation == 10 && raw == 10;
     if (map == 38 && object >= 0x0D && object <= 0x0F)
         return raw >= 2 && raw <= 6;
     return raw >= activation && raw < 20;
@@ -1126,6 +1135,9 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         return activation == 13 && raw == 12;
     if (map == 17 && object >= 0x2D && object <= 0x30)
         return activation == 12 && raw == 11;
+    if (map == 17 && (object == 0x5D || object == 0x5A || object == 0x58
+            || object == 0x61 || object == 0x60))
+        return activation == 10 && raw == 1;
     if (map == 164 && object == 0x09)
         return activation == 5 && raw == 1;
     if (map == 7 && (object == 0x1F || object == 0x20))

@@ -3121,3 +3121,17 @@ allowlist deliberately excludes reward controllers and every generic script.
 Once both clients observe the latch their ordinary trigger snapshots agree, so
 the event channel returns to `SYNCED` instead of repeatedly applying a closed
 door's historical activation.
+
+## Helm durable instrument commands (post-0.77 development)
+
+Helm's five instrument-pad edges last only two local script ticks. Their exact
+linked controllers now expose a derived typed trigger after the pad has issued
+its durable external state-`10` command: pad/controller pairs are `0x2C/0x5D`,
+`0x2D/0x5A`, `0x2E/0x58`, `0x2F/0x61` and `0x30/0x60`. A receiver accepts that
+command only when the matching loaded controller is in ready state `1`, then
+uses the stock object-state setter to enter state `10` and wake it.
+
+No arbitrary controller state is copied. States `0`, `2`, `20` and every other
+local reward, reset or permanent-flag path are rejected. The durable controller
+record therefore covers missed 20 Hz samples and late arrival without replaying
+instrument input or selecting Helm's timer, barrel rooms, final lever or ending.

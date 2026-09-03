@@ -884,6 +884,20 @@ static void capture_checks() {
     }
     CHECK(saw_helm_2c && saw_helm_2d && saw_helm_2e && saw_helm_2f && saw_helm_30);
 
+    reset(); current_map = 17;
+    load(0, 0x5D, 10); load(1, 0x5A, 10); load(2, 0x58, 10);
+    load(3, 0x61, 10); load(4, 0x60, 10);
+    bool saw_5d = false, saw_5a = false, saw_58 = false, saw_61 = false, saw_60 = false;
+    for (unsigned page = 0; page < 8; ++page) {
+        coop_transient_capture(1);
+        saw_5d |= contains_value(COOP_TRANSIENT_TRIGGER, 0x5D, 2, 10);
+        saw_5a |= contains_value(COOP_TRANSIENT_TRIGGER, 0x5A, 2, 10);
+        saw_58 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x58, 2, 10);
+        saw_61 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x61, 2, 10);
+        saw_60 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x60, 2, 10);
+    }
+    CHECK(saw_5d && saw_5a && saw_58 && saw_61 && saw_60);
+
     reset(); current_map = 173; load(0, 0x10, 2);
     coop_transient_capture(1);
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x10, 2, 2));
@@ -1518,6 +1532,17 @@ static void object_apply_checks() {
     CHECK(script_calls == 1 && last_object == 0x2F && last_state == 12);
     scripts[0x2F].unk48[0] = 10; coop_transient_apply();
     CHECK(script_calls == 1); // Local Helm pad setup must reach state 11.
+    reset(); role = ROLE_JOIN; current_map = 17; load(0, 0x5D, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 17, 9, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x5D, 2, 10}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x5D && last_state == 10);
+    for (unsigned raw : {0u, 2u, 20u}) {
+        reset(); role = ROLE_JOIN; current_map = 17; load(0, 0x5D, raw);
+        transient_result = {COOP_TRANSIENT_APPLYING, 17, 9, 1,
+            {{COOP_TRANSIENT_TRIGGER, 0x5D, 2, 10}}};
+        coop_transient_apply(); CHECK(!script_calls);
+    }
     reset(); role = ROLE_JOIN; current_map = 58; load(0, 0x00, 1);
     transient_result = {COOP_TRANSIENT_APPLYING, 58, 9, 1,
         {{COOP_TRANSIENT_TRIGGER, 0x00, 2, 2}}};
