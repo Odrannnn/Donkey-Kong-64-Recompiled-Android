@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 185
+    COOP_LIVE_WORLD_STATE_COUNT = 187
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -218,6 +218,13 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // reward, camera or permanent-flag write sequence.
     {173, 0x190, 0x004,  0, COOP_LIVE_WORLD_REPLAY},
     {173, 0x190, 0x011,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Fungi lobby's gun-order controller and wooden panel each provide a
+    // flag-positive state-0 initializer. These paths hide the controller and
+    // settle the panel without replaying the five-hit order, timer, camera,
+    // linked switch call or permanent-flag write.
+    {178, 0x195, 0x009,  0, COOP_LIVE_WORLD_REPLAY},
+    {178, 0x195, 0x004,  0, COOP_LIVE_WORLD_REPLAY},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
