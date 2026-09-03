@@ -49,17 +49,17 @@ static inline void coop_world_apply(CoopWorld* w, CoopItems* g, unsigned playing
         if (!(w->result.apply & bit) || (refresh && !g->refresh_enabled)) continue;
         unsigned desired = (w->result.desired & bit) != 0;
         if ((isFlagSet(coop_world_flags[i], 0) != 0) == desired) continue;
+        // Keep the saved flag and loaded switch atomic. A setup that is still
+        // loading, temporarily absent, or replaced by another setup remains a
+        // pending network request; leaving the area applies it safely without
+        // touching a loaded controller.
+        if (refresh && !coop_live_reversible_ready(i, desired)) continue;
         setFlag(coop_world_flags[i], desired, 0);
         if ((isFlagSet(coop_world_flags[i], 0) != 0) == desired) {
             w->previous = (w->previous & ~bit) | (w->result.desired & bit);
             g->save_pending = 1; // Use the existing isolated-save request path.
             if (lobby_live) g->world_save_pending = 1;
-            if (refresh) {
-                if (!coop_live_reversible_refresh(i, desired)) {
-                    g->refresh_pending = 1;
-                    g->refresh_map = current_map;
-                }
-            }
+            if (refresh) coop_live_reversible_refresh(i, desired);
         }
     }
 }

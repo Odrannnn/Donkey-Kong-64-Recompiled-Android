@@ -414,10 +414,21 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
     return expected != 0;
 }
 
+static inline unsigned coop_live_reversible_ready(unsigned toggle, unsigned desired) {
+    if (toggle == 0 && (unsigned)current_map == 30) // Galleon up/down switches 0/1.
+        return coop_live_world_find_object(desired ? 0 : 1, 0);
+    if (toggle == 1 && (unsigned)current_map == 48) // Fungi night/day switches 4/5.
+        return coop_live_world_find_object(desired ? 4 : 5, 0);
+    if (toggle == 2 && (unsigned)current_map == 194) // Caves lobby pressure switch.
+        return coop_live_world_find_object(6, 0);
+    return 0;
+}
+
 // Start the exact loaded vanilla switch sequence for the reversible world
 // modifiers. State 10 is the interaction's post-press sequence: it updates the
 // water/lighting, collision, exits and paired switch presentation without
-// synthesizing a player interaction. Missing scripts fail into the map rebuild.
+// synthesizing a player interaction. The caller preflights the selected script
+// and defers the flag while it is absent.
 static inline unsigned coop_live_reversible_refresh(unsigned toggle, unsigned desired) {
     if (toggle == 0 && (unsigned)current_map == 30) // Galleon: up/down switches 0/1.
         return coop_live_world_set_object(desired ? 0 : 1, 10);

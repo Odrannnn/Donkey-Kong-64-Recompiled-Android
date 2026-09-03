@@ -1146,13 +1146,17 @@ static void world_refresh_checks() {
     CHECK(flags[0xA0] && writes == 1 && g.save_pending && live_calls == 1
         && live_slot == 12 && live_state == 10 && !g.refresh_pending);
 
-    // If the chosen paired script is absent, preserve the reviewed reload path.
+    // If the chosen paired script is absent, leave both flag and save pending
+    // on the wire. The next stable frame retries without rebuilding the map.
     reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = 1;
     w = {}; w.input.ready = 1; w.result.scope = 1; w.result.status = 2;
     w.result.apply = 2; current_map = 48; mock_level = 4;
     flags[0xCE] = 1; // Remote asks this night-time peer to return to day.
     g.refresh_enabled = 1; coop_world_apply(&w, &g, 1);
-    CHECK(writes == 1 && g.save_pending && !live_calls && g.refresh_pending && g.refresh_map == 48);
+    CHECK(flags[0xCE] && !writes && !g.save_pending && !live_calls && !g.refresh_pending);
+    D_global_asm_807F6240[7] = 5; coop_world_apply(&w, &g, 1);
+    CHECK(!flags[0xCE] && writes == 1 && g.save_pending && live_calls == 1
+        && live_slot == 7 && live_state == 10 && !g.refresh_pending);
 
     // Fungi day/night selects the night or day switch from the desired bit.
     reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = 1;
@@ -1201,13 +1205,17 @@ static void world_refresh_checks() {
     coop_world_apply(&w, &g, 1);
     CHECK(!flags[0x19D] && live_calls == 1 && live_state == 6 && !g.refresh_pending);
 
-    // Missing switch object keeps the verified flag/save and falls back to the
-    // existing same-map vanilla rebuild instead of claiming partial live success.
+    // A missing lobby switch likewise defers both the reversible flag and save,
+    // then applies the same pending request when object 6 becomes available.
     reset_engine(); g = {}; current_game = &g; g.input.ready = g.bound = g.live_snapshot = 1;
     g.refresh_enabled = 1; w = {}; w.input.ready = 1; w.result.scope = 1; w.result.status = 2;
     w.result.apply = w.result.desired = 4; current_map = 194; mock_level = 7;
     coop_world_apply(&w, &g, 1);
-    CHECK(flags[0x19D] && !live_calls && g.refresh_pending && g.refresh_map == 194
+    CHECK(!flags[0x19D] && !writes && !live_calls && !g.refresh_pending
+        && !g.save_pending && !g.world_save_pending);
+    D_global_asm_807F6240[8] = 6; coop_world_apply(&w, &g, 1);
+    CHECK(flags[0x19D] && writes == 1 && live_calls == 1 && live_slot == 8
+        && live_state == 2 && !g.refresh_pending && g.save_pending
         && g.world_save_pending);
 
     // The reviewed lobby frame is live for reversible capture even though item
