@@ -966,6 +966,25 @@ static void world_refresh_checks() {
     live_raw[0x27] = 10; live_raw[0x51] = 15;
     CHECK(!coop_live_world_refresh(0x09C) && live_calls == 0);
 
+    // The network path keeps an unreviewed active state pending instead of
+    // writing the flag or rebuilding the map. It converges once both vanilla
+    // controllers return to a reviewed state.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 30; mock_level = 3;
+    D_global_asm_807F6240[2] = 0x27; D_global_asm_807F6240[3] = 0x51;
+    live_raw[0x27] = 9;
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready);
+    r = {}; r.status = 2; r.scope = 1; r.session_lo = 908;
+    unsigned galleon_opening = (unsigned)coop_item_id(0x09C);
+    CHECK(galleon_opening < COOP_ITEMS);
+    r.apply[galleon_opening / 32] = bit(galleon_opening);
+    coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
+    CHECK(!flags[0x09C] && !writes && !saves && !live_calls
+        && g.wait_reason == COOP_TRACE_WAIT_PROGRESSION_CONTEXT);
+    live_raw[0x27] = 0; coop_items_apply(&g, 1);
+    CHECK(flags[0x09C] && writes == 1 && saves == 1 && live_calls == 2
+        && live_state == 0 && !g.refresh_pending);
+
     // Each remote pearl removes only its matching treasure-chest prop through
     // that prop's saved-complete initializer.
     for (unsigned pearl = 0; pearl < 5; ++pearl) {
@@ -1121,7 +1140,7 @@ static void world_refresh_checks() {
     CHECK(flags[0x198] && writes == 1 && saves == 1 && live_calls == 1
         && live_state == 0 && !g.refresh_pending);
 
-    // A partially loaded portal must still request the full reload fallback.
+    // A partially loaded portal rejects the whole unit for deferred retry.
     reset_engine(); current_map = 38;
     for (unsigned i = 0; i < portals[1].count - 1; ++i)
         D_global_asm_807F6240[20 + i] = (short)portals[1].object[i];
