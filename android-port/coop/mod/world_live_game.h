@@ -19,8 +19,9 @@ enum {
     COOP_LIVE_WORLD_REQUIRE = 3,
     COOP_LIVE_WORLD_NOOP = 4,
     COOP_LIVE_WORLD_GUARD_ZERO = 5,
+    COOP_LIVE_WORLD_REVEAL = 6,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 155
+    COOP_LIVE_WORLD_STATE_COUNT = 158
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -148,6 +149,13 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 48, 0x0D5, 0x027,  0, COOP_LIVE_WORLD_REPLAY},
     { 48, 0x0DC, 0x02B, 20, COOP_LIVE_WORLD_PERMANENT},
 
+    // Isles boulder. The two controllers expose exact saved-complete states.
+    // Object 0x56 only has an incomplete visibility initializer, so REVEAL
+    // applies its audited inverse target without replaying the boulder event.
+    { 34, 0x1AE, 0x03C, 40, COOP_LIVE_WORLD_PERMANENT},
+    { 34, 0x1AE, 0x000,100, COOP_LIVE_WORLD_PERMANENT},
+    { 34, 0x1AE, 0x056,  0, COOP_LIVE_WORLD_REVEAL},
+
     // These completions are consumed only inside their submaps. Receiving one
     // in the corresponding main world needs a save, but no loaded script or
     // map rebuild; the target room initializes from the flag on entry.
@@ -206,6 +214,10 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
             unsigned raw = 0;
             if (!coop_live_world_object_raw_state(state->object, &raw) || raw != 0) return 0;
         }
+        if (state->mode == COOP_LIVE_WORLD_REVEAL) {
+            unsigned raw = 0;
+            if (!coop_live_world_object_raw_state(state->object, &raw)) return 0;
+        }
     }
     return expected != 0;
 }
@@ -233,6 +245,10 @@ static inline unsigned coop_live_world_refresh(unsigned flag) {
         if (state->map != (unsigned)current_map || state->flag != flag
                 || state->mode == COOP_LIVE_WORLD_NOOP
                 || state->mode == COOP_LIVE_WORLD_REQUIRE) continue;
+        if (state->mode == COOP_LIVE_WORLD_REVEAL) {
+            if (!coop_live_world_reveal_object(state->object)) return 0;
+            continue;
+        }
         // REPLAY deliberately selects state 0. func_global_asm_8063DA40 also
         // wakes a paused script, so vanilla evaluates the newly written flag.
         if (!coop_live_world_set_object(state->object, state->state)) return 0;

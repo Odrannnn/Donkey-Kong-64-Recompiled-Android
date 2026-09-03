@@ -31,6 +31,7 @@ static void* D_global_asm_80754280 = &hud_object;
 static unsigned current_map = 7, mock_level = 7, mock_layout_error = 0;
 static short D_global_asm_807F6240[600]{};
 static unsigned live_calls = 0, live_slot = 0, live_state = 0;
+static unsigned live_reveals = 0, live_reveal_object = 0;
 static unsigned char live_raw[0x200]{};
 static void func_global_asm_8063DA40(short slot, short state) {
     ++live_calls; live_slot = (unsigned short)slot; live_state = (unsigned short)state;
@@ -44,6 +45,11 @@ static unsigned coop_live_world_object_raw_state(unsigned object, unsigned* raw)
             *raw = live_raw[object]; return 1;
         }
     return 0;
+}
+static unsigned coop_live_world_reveal_object(unsigned object) {
+    unsigned raw = 0;
+    if (!coop_live_world_object_raw_state(object, &raw)) return 0;
+    ++live_reveals; live_reveal_object = object; return 1;
 }
 static void* D_global_asm_807FD730 = nullptr;
 static unsigned pickups[1700]{};
@@ -217,6 +223,7 @@ static void reset_engine() {
     for (auto& object : D_global_asm_807F6240) object = -1;
     std::memset(live_raw, 0, sizeof(live_raw));
     writes = saves = hud_updates = block_write = mutate_counter = live_calls = live_slot = live_state = 0;
+    live_reveals = live_reveal_object = 0;
     D_global_asm_80754280 = &hud_object;
 }
 static unsigned main_map_for_level(unsigned level) {
@@ -690,7 +697,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 155);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 158);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -734,6 +741,17 @@ static void world_refresh_checks() {
         D_global_asm_807F6240[object + 1] = (short)object;
     CHECK(coop_live_world_refresh(0x06F) && live_calls == 2 && live_state == 0);
     CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[122]));
+
+    // The Isles boulder applies both exact terminal controller states and the
+    // inverse of object 0x56's visibility gate as one reviewed loaded unit.
+    reset_engine(); current_map = 34;
+    D_global_asm_807F6240[1] = 0x3C; D_global_asm_807F6240[2] = 0x00;
+    D_global_asm_807F6240[3] = 0x56;
+    CHECK(coop_live_world_refresh(0x1AE) && live_calls == 2 && live_state == 100);
+    CHECK(live_reveals == 1 && live_reveal_object == 0x56);
+    reset_engine(); current_map = 34;
+    D_global_asm_807F6240[1] = 0x3C; D_global_asm_807F6240[2] = 0x00;
+    CHECK(!coop_live_world_refresh(0x1AE) && live_calls == 0 && live_reveals == 0);
 
     // Galleon's paired controllers may restart only from their paused raw
     // state 0; an active local activation sequence fails closed to reload.

@@ -334,6 +334,11 @@ static unsigned coop_live_world_object_raw_state(unsigned object, unsigned* raw)
     *raw = D_global_asm_807F6000[prop].unk7C->unk48[0];
     return 1;
 }
+static unsigned coop_live_world_reveal_object(unsigned object) {
+    s16 prop = func_global_asm_80659470((s32)object);
+    if (prop < 0 || !D_global_asm_807F6000[prop].unk7C) return 0;
+    return 1;
+}
 static void func_global_asm_8063DA40(s16 slot, s16 state) {
     CHECK(slot >= 0 && slot < 600);
     unsigned object = static_cast<unsigned short>(D_global_asm_807F6240[slot]);
