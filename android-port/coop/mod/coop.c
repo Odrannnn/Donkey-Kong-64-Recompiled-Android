@@ -376,6 +376,50 @@ static unsigned coop_live_world_llama_water_refresh(void) {
     return 1;
 }
 
+static unsigned coop_live_world_is_seal(const Actor* actor) {
+    return actor && (actor->unk58 == ACTOR_SEAL || actor->unk58 == ACTOR_SEAL_0)
+        && (actor->object_properties_bitfield & 0x10);
+}
+
+static unsigned coop_live_world_seal_at_cage(const Actor* actor) {
+    f32 cage_x = actor->x_position - 3328.0f;
+    f32 cage_z = actor->z_position - 179.0f;
+    f32 race_x = actor->x_position - 2193.0f;
+    f32 race_z = actor->z_position - 4087.0f;
+    return cage_x * cage_x + cage_z * cage_z < race_x * race_x + race_z * race_z;
+}
+
+// Galleon owns two copies of the seal actor. Before rescue, the cage copy is
+// idle in state 40 and the race-entrance copy in state 0; completed-map setup
+// selects state 28 and 40 respectively. Dialogue or the local swim-away
+// sequence remains authoritative and delays the remote flag.
+static unsigned coop_live_world_seal_ready(void) {
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (!coop_live_world_is_seal(actor)) continue;
+        if (actor->control_state == 0) continue;
+        if (actor->control_state == 40 && actor->control_state_progress == 0) continue;
+        return 0;
+    }
+    return 1;
+}
+
+static unsigned coop_live_world_seal_refresh(void) {
+    if (!coop_live_world_seal_ready()) return 0;
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (!coop_live_world_is_seal(actor)) continue;
+        if (actor->control_state == 0) {
+            actor->control_state = 40;
+            actor->control_state_progress = 0;
+        } else if (coop_live_world_seal_at_cage(actor)) {
+            actor->control_state = 0x28;
+            actor->control_state_progress = 0;
+        }
+    }
+    return 1;
+}
+
 // The Mermaid is an actor rather than an instance-script prop. Her vanilla
 // initializer selects state 30 (no pearls), 31 (partial set), 39 (all five),
 // or 32 (reward already owned). Re-selecting one of those entry states after a

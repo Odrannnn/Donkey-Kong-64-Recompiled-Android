@@ -24,8 +24,9 @@ enum {
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_LLAMA_FREE = 9,
     COOP_LIVE_WORLD_LLAMA_WATER = 10,
+    COOP_LIVE_WORLD_SEAL = 11,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 248
+    COOP_LIVE_WORLD_STATE_COUNT = 251
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -353,6 +354,14 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 20, 0x04C, 0xFFFF, 0, COOP_LIVE_WORLD_LLAMA_WATER},
     { 38, 0x04C, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
 
+    // Galleon's object 0x38 has an isolated flag-positive entrance branch.
+    // The actor adapter moves the loaded cage/race copies to the same states
+    // chosen by their completed initializers; the race map already implies
+    // that the seal was freed and therefore needs no loaded mutation.
+    { 30, 0x09E, 0x038,  0, COOP_LIVE_WORLD_REPLAY},
+    { 30, 0x09E, 0xFFFF, 0, COOP_LIVE_WORLD_SEAL},
+    { 39, 0x09E, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+
     // These completions are consumed only inside their submaps. Receiving one
     // in the corresponding main world needs a save, but no loaded script or
     // map rebuild; the target room initializes from the flag on entry.
@@ -418,6 +427,7 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
                 && state->mode != COOP_LIVE_WORLD_MERMAID
                 && state->mode != COOP_LIVE_WORLD_LLAMA_FREE
                 && state->mode != COOP_LIVE_WORLD_LLAMA_WATER
+                && state->mode != COOP_LIVE_WORLD_SEAL
                 && !coop_live_world_find_object(state->object, 0)) return 0;
         if (state->mode == COOP_LIVE_WORLD_MERMAID
                 && !coop_live_world_mermaid_ready()) return 0;
@@ -427,6 +437,8 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
                 && !coop_live_world_llama_free_ready()) return 0;
         if (state->mode == COOP_LIVE_WORLD_LLAMA_WATER
                 && !coop_live_world_llama_water_ready()) return 0;
+        if (state->mode == COOP_LIVE_WORLD_SEAL
+                && !coop_live_world_seal_ready()) return 0;
         if (state->mode == COOP_LIVE_WORLD_CONTINUE_GALLEON) {
             unsigned raw = 0;
             if (!coop_live_world_object_raw_state(state->object, &raw)
@@ -488,6 +500,10 @@ static inline unsigned coop_live_world_refresh(unsigned flag) {
         }
         if (state->mode == COOP_LIVE_WORLD_LLAMA_WATER) {
             if (!coop_live_world_llama_water_refresh()) return 0;
+            continue;
+        }
+        if (state->mode == COOP_LIVE_WORLD_SEAL) {
+            if (!coop_live_world_seal_refresh()) return 0;
             continue;
         }
         if (state->mode == COOP_LIVE_WORLD_REVEAL) {

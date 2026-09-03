@@ -37,6 +37,8 @@ static unsigned live_mermaid_progress = 0, live_mermaid_refreshes = 0;
 static unsigned live_trombone_notifications = 0, live_trombone_mode = 0;
 static unsigned live_llama_available = 0, live_llama_state = 0;
 static unsigned live_llama_progress = 0, live_llama_deleted = 0;
+static unsigned live_seal_cage_available = 0, live_seal_cage_state = 0, live_seal_cage_progress = 0;
+static unsigned live_seal_race_available = 0, live_seal_race_state = 0, live_seal_race_progress = 0;
 static unsigned char live_raw[0x200]{};
 static void func_global_asm_8063DA40(short slot, short state) {
     ++live_calls; live_slot = (unsigned short)slot; live_state = (unsigned short)state;
@@ -98,6 +100,25 @@ static unsigned coop_live_world_llama_water_refresh(void) {
     if (!coop_live_world_llama_water_ready()) return 0;
     if (live_llama_available && live_llama_state == 0) {
         live_llama_state = 39; live_llama_progress = 4;
+    }
+    return 1;
+}
+static unsigned coop_live_world_seal_ready(void) {
+    if (live_seal_cage_available && live_seal_cage_state != 0
+            && !(live_seal_cage_state == 40 && live_seal_cage_progress == 0)) return 0;
+    if (live_seal_race_available && live_seal_race_state != 0
+            && !(live_seal_race_state == 40 && live_seal_race_progress == 0)) return 0;
+    return 1;
+}
+static unsigned coop_live_world_seal_refresh(void) {
+    if (!coop_live_world_seal_ready()) return 0;
+    if (live_seal_cage_available) {
+        live_seal_cage_state = live_seal_cage_state == 0 ? 40 : 0x28;
+        live_seal_cage_progress = 0;
+    }
+    if (live_seal_race_available) {
+        if (live_seal_race_state == 0) live_seal_race_state = 40;
+        live_seal_race_progress = 0;
     }
     return 1;
 }
@@ -278,6 +299,8 @@ static void reset_engine() {
     live_mermaid_state = 30; live_mermaid_progress = 0;
     live_trombone_notifications = live_trombone_mode = 0;
     live_llama_available = live_llama_state = live_llama_progress = live_llama_deleted = 0;
+    live_seal_cage_available = live_seal_cage_state = live_seal_cage_progress = 0;
+    live_seal_race_available = live_seal_race_state = live_seal_race_progress = 0;
     D_global_asm_80754280 = &hud_object;
 }
 static unsigned main_map_for_level(unsigned level) {
@@ -763,7 +786,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 248);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 251);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -800,6 +823,21 @@ static void world_refresh_checks() {
     D_global_asm_807F6240[2] = 0x16; D_global_asm_807F6240[3] = 0x18;
     CHECK(coop_live_world_refresh(0x04C) && live_calls == 2
         && live_llama_state == 39 && live_llama_progress == 2);
+
+    // The two loaded Galleon seal copies converge atomically with object 0x38.
+    // Dialogue progress and the local release sequence block the incoming flag.
+    reset_engine(); current_map = 30;
+    live_seal_cage_available = live_seal_race_available = 1;
+    live_seal_cage_state = 40; live_seal_race_state = 0;
+    CHECK(!coop_live_world_refresh(0x09E) && live_calls == 0
+        && live_seal_cage_state == 40 && live_seal_race_state == 0);
+    D_global_asm_807F6240[7] = 0x38;
+    CHECK(coop_live_world_refresh(0x09E) && live_calls == 1 && live_state == 0
+        && live_seal_cage_state == 0x28 && live_seal_race_state == 40);
+    reset_engine(); current_map = 30; D_global_asm_807F6240[7] = 0x38;
+    live_seal_cage_available = 1; live_seal_cage_state = 40; live_seal_cage_progress = 1;
+    CHECK(!coop_live_world_refresh(0x09E) && live_calls == 0
+        && live_seal_cage_state == 40 && live_seal_cage_progress == 1);
 
     // Factory storage's three box scripts replay as one atomic completion.
     reset_engine(); current_map = 26;
