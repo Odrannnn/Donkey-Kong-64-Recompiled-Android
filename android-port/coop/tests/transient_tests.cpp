@@ -88,6 +88,15 @@ int main() {
     bad.records[5].state = 1; bad.records[5].value = 1; CHECK(!valid_transient(bad));
     bad.records[5] = {COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}; bad.count = 7;
     bad.records[6] = bad.records[5]; CHECK(!valid_transient(bad));
+    bad = decoded; bad.count = 6;
+    bad.records[5] = {COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0}; CHECK(valid_transient(bad));
+    bad.records[5].key = 0; CHECK(!valid_transient(bad));
+    bad.records[5].key = 2; CHECK(!valid_transient(bad));
+    bad.records[5].key = 1; bad.records[5].state = 0; CHECK(!valid_transient(bad));
+    bad.records[5].state = 2; CHECK(!valid_transient(bad));
+    bad.records[5].state = 1; bad.records[5].value = 1; CHECK(!valid_transient(bad));
+    bad.records[5] = {COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0}; bad.count = 7;
+    bad.records[6] = bad.records[5]; CHECK(!valid_transient(bad));
 
     State hs{7, 10, 0, active}, gs{7, 20, 1, active};
     auto guest_input = frame(7, 20, 8);
@@ -216,6 +225,31 @@ int main() {
     CHECK(guest.result().records[0].kind == COOP_TRANSIENT_BATTY_SUCCESS
         && guest.result().records[0].key == 3);
 
+    // Owl Race success is the same bounded bidirectional exception. Ordinary
+    // guest records remain filtered by host authority.
+    guest_input = frame(48, 20, 19); guest_input.count = 2;
+    guest_input.records[0] = {COOP_TRANSIENT_SCRIPT, 0x34, 1, 0};
+    guest_input.records[1] = {COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0};
+    for (unsigned i = 2; i < COOP_TRANSIENT_RECORDS; ++i) guest_input.records[i] = {};
+    gs.map = hs.map = 48;
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    host_input = frame(48, 10, 20);
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    CHECK(host.result().status == COOP_TRANSIENT_APPLYING && host.result().count == 1);
+    CHECK(host.result().records[0].kind == COOP_TRANSIENT_OWL_SUCCESS
+        && host.result().records[0].key == 1);
+
+    host_input.count = 1;
+    host_input.records[0] = {COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0};
+    for (unsigned i = 1; i < COOP_TRANSIENT_RECORDS; ++i) host_input.records[i] = {};
+    host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);
+    guest_input.count = 0;
+    for (auto& record : guest_input.records) record = {};
+    guest.update(false, gs, guest_input, hs, host.wire(), true, true, 55);
+    CHECK(guest.result().status == COOP_TRANSIENT_APPLYING && guest.result().count == 1);
+    CHECK(guest.result().records[0].kind == COOP_TRANSIENT_OWL_SUCCESS
+        && guest.result().records[0].key == 1);
+
     // Lobby pads are edge-triggered. A repeated fired snapshot is consumed
     // once, and only an observed return to ready rearms the exact key.
     TransientSync pad_guest;
@@ -242,6 +276,7 @@ int main() {
     pad_guest.update(false, pad_local, pad_input, pad_peer, pad_remote, true, true, 55);
     CHECK(pad_guest.result().status == COOP_TRANSIENT_APPLYING && pad_guest.result().count == 1);
 
+    hs.map = gs.map = 7;
     host_input = frame(7, 10, 4);
     guest_input = host_input; guest_input.epoch = 20;
     host.update(true, hs, host_input, gs, guest.wire(), true, true, 55);

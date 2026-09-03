@@ -1,7 +1,10 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.67.0** shares successful completion of the three exact vanilla
+Version **0.68.0** shares successful completion of Fungi Forest's vanilla
+Diddy Owl Race while both players are in the active race. Either player may
+win; each local Owl owns its rings, flight, dialogue, cutscene, permanent flag
+and Golden Banana reward. Version 0.67.0 shares successful completion of the three exact vanilla
 Batty Barrel Bandit instances while both players are in the same instance.
 Either player may win; each local controller keeps its own reels, countdown,
 success presentation, exit, permanent flag and Golden Banana reward. The hard
@@ -56,7 +59,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 67 requires a matching peer and native
+address as a direct fallback. Protocol 68 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -209,8 +212,8 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.67.0 adds
-bidirectional Batty Barrel Bandit success and keeps Rabbit Race and Minecart Mayhem success,
+**This is experimental, not complete campaign co-op. Version 0.68.0 adds
+bidirectional Fungi Owl Race success and keeps Batty Barrel Bandit, Rabbit Race and Minecart Mayhem success,
 the lobby instrument-pad loops,
 bidirectional Kosh success, the reviewed same-level reward allowlist,
 retained cutscene target,
@@ -231,7 +234,7 @@ below; every unrelated incoming item or world event remains deferred.
 
 ## Read-only LAN trace
 
-While the native companion is loaded, `tools/query_trace.py` discovers v0.67
+While the native companion is loaded, `tools/query_trace.py` discovers v0.68
 clients on the local `/24` network and queries trace UDP ports 6465 through
 6472. Use `python tools/query_trace.py`; if broadcast discovery is unavailable,
 pass the current address explicitly, for example `--ip 192.168.68.61`. The
@@ -245,7 +248,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.67.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.68.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -802,7 +805,7 @@ mismatch is left alone rather than being overwritten later.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v67 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v68 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
@@ -819,7 +822,7 @@ mismatch is left alone rather than being overwritten later.
   matching local boss clip to the host's normalized frame. Other boss state remains local.
 - Bidirectional completion for the four exact Kremling Kosh instances, three
   Minecart Mayhem instances, both Fungi Rabbit Race rounds and three reviewed
-  Batty Barrel Bandit instances. Each receiver
+  Batty Barrel Bandit instances and Fungi's Diddy Owl Race. Each receiver
   must already be running the matching local controller; vanilla owns failure,
   presentation, reward and cleanup.
 - The first Japes gate is part of ordinary item/world sharing. The former

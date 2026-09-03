@@ -1,4 +1,4 @@
-> Current source: 0.67.0, protocol/native ABI v67. Focused Linux ASan/UBSan
+> Current source: 0.68.0, protocol/native ABI v68. Focused Linux ASan/UBSan
 > transient suites, native ABI/trace tests and the maintained MIPS compile pass.
 > Gameplay and device validation remain pending.
 
@@ -2766,3 +2766,40 @@ or reward crosses the wire. The local controller owns presentation and exit;
 the item channel remains the only Golden Banana authority. Packet and bridge
 sizes remain unchanged. Protocol 67, compatibility `0x00010243`, v67 exports
 and manifest 0.67.0 reject older peers and companions.
+
+## Fungi Owl Race shared success (0.68.0)
+
+Fungi Forest's vanilla Diddy Owl Race uses actor 250 and behavior
+`func_global_asm_806C55E0` in map 48. Randomizer campaign metadata identifies
+the same reward by actor 250, Diddy and permanent flag `0xFA`. The adapter
+installs a wrapper only while the actor-table slot still contains that exact
+stock handler, and refuses a completed `0xFA` reward.
+
+The wrapper always runs the original Owl first. Vanilla's common hoop evaluator
+accepts active states 2 and `0x26`; a correct final ring leaves zero of sixteen
+rings and enters state `0x2A`, progress zero with animation `0x35B`, text 3 and
+cutscene `0x14`. A wrong ring or wrong Kong enters the same state and progress
+with animation `0x35A`, text 2 and cutscene `0x16`. Only the former edge is
+published. Every other transition, including the shared failure state, clears
+a pending remote success.
+
+A receiver consumes key 1, state 1, value zero only after the original handler
+remains in the same active state. It then reproduces the exact stock terminal
+sequence: relocate the Owl to its spawner, load text file `0x15` entry 3, play
+animation `0x35B`, set state `0x2A` and progress zero, and start cutscene `0x14`
+mode 1. The following ordinary Owl calls own fade, dialogue, reward and cleanup.
+
+Application requires Diddy in Owl-flight action `0x63`, both active race bits,
+an initialized live actor with the same generation, animation and both private
+data pointers, a generation-stable player with matching extra-player data, the
+same nonnull race/enemy/spawner globals, enemy flags `0x24`, zero through sixteen
+remaining rings, hoop indices no greater than sixteen and a private spawn timer
+from zero through 120. Actor, player, private pointers, globals, handler, map,
+epoch and reward ownership are rechecked after the original call. Loading, file
+changes, unload/reuse, pointer replacement, malformed records and handler
+conflicts fail closed. Repeated packets are idempotent.
+
+No ring encounter, hoop spawn, position, input, fuel, timer, flag or reward
+crosses the wire. Packet and bridge sizes remain unchanged. Protocol 68,
+compatibility `0x00010244`, v68 exports and manifest 0.68.0 reject older peers
+and companions.

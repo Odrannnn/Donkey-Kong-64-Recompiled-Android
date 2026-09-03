@@ -16,6 +16,9 @@ struct Prop_ScriptData { s16 unk44[2]{}; u8 unk48[2]{}; };
 struct Prop { Prop_ScriptData* unk7C{}; };
 struct CoopClamTestData { u8 pad[0x2C]{}; s32 timer{}; };
 struct AnimationState { u8 pad[0x64]{}; u16 unk64{}; };
+#define DKCOOP_OWL_PRIVATE_TYPES_DEFINED
+struct CoopOwlRaceData { u8 pad0[0x2C]{}; s16 rings{}; };
+struct CoopOwlEnemyData { u8 pad0[0x46]{}; u16 flags{}; };
 struct Actor {
     u32 object_properties_bitfield{};
     u32 unk54{}, unk58{};
@@ -25,6 +28,7 @@ struct Actor {
     u8 control_state{}, control_state_progress{};
     void* additional_actor_data{};
     void* unk178{};
+    void* unk180{};
     Actor* unk11C{};
     AnimationState* animation_state{};
 };
@@ -45,7 +49,8 @@ enum { MAP_JAPES_SHELL = 12, MAP_BATTY_BARREL_BANDIT_EASY = 32, MAP_CAVES_ICE_CA
     MAP_BATTY_BARREL_BANDIT_HARD = 123,
     MAP_FUNGI = 48,
     ACTOR_TOMATO_ICE = 164, ACTOR_TIMER = 176, ACTOR_TIMER_CONTROLLER = 177, ACTOR_CLAM = 286,
-    ACTOR_MINECART_BONUS = 87, ACTOR_RABBIT_RACE = 252, ACTOR_MINIGAME_CONTROLLER = 256,
+    ACTOR_MINECART_BONUS = 87, ACTOR_OWL = 250, ACTOR_RABBIT_RACE = 252,
+    ACTOR_MINIGAME_CONTROLLER = 256,
     ACTOR_BANDIT_HANDLE = 218, ACTOR_BANDIT_SLOT = 219,
     PERMFLAG_PROGRESS_RABBIT_RACE_1_COMPLETE = 0xF8,
     PERMFLAG_ITEM_GB_FUNGI_RABBIT_RACE = 0xF9,
@@ -91,6 +96,10 @@ static unsigned animation_calls, motion_calls, last_animation;
 static unsigned tile_activation_calls;
 static CharacterSpawner character_spawners[2];
 static CharacterSpawner* D_global_asm_807FDC9C = character_spawners;
+static CoopOwlRaceData owl_race, owl_race_replacement;
+static CoopOwlRaceData* D_global_asm_807FDC90 = &owl_race;
+static CoopOwlEnemyData owl_enemy, owl_enemy_replacement;
+static CoopOwlEnemyData* D_global_asm_807FDC98 = &owl_enemy;
 static Actor* gCurrentActorPointer;
 static Actor* gPlayerPointer;
 static ExtraPlayerInfo rabbit_player_info;
@@ -133,6 +142,24 @@ static s16 batty_cutscene_index;
 static u8 batty_cutscene_mode;
 static char batty_order[16];
 static unsigned batty_order_count;
+struct OwlTimerTestData { s16 timer{}; };
+static s16 owl_a178;
+static OwlTimerTestData owl_timer, owl_timer_replacement;
+static AnimationState owl_animation;
+static std::array<u8, 32> owl_player_data;
+static bool owl_reward_owned;
+static unsigned owl_original_calls, owl_original_mode, owl_relocate_calls;
+static unsigned owl_text_calls, owl_text_file, owl_text_index;
+static unsigned owl_animation_calls, owl_animation_id;
+static unsigned owl_cutscene_calls, owl_cutscene_id, owl_cutscene_mode;
+static char owl_order[16];
+static unsigned owl_order_count;
+
+static void owl_log(char step) {
+    CHECK(owl_order_count + 1 < sizeof(owl_order));
+    owl_order[owl_order_count++] = step;
+    owl_order[owl_order_count] = 0;
+}
 
 static void minecart_log(char step) {
     CHECK(minecart_order_count + 1 < sizeof(minecart_order));
@@ -242,6 +269,11 @@ static void func_global_asm_806BE8BC(void) {
     }
 }
 static s32 playCutscene(Actor* actor, s16 cutscene, u8 mode) {
+    if (actor && actor->unk58 == ACTOR_OWL) {
+        ++owl_cutscene_calls; owl_cutscene_id = static_cast<unsigned short>(cutscene);
+        owl_cutscene_mode = mode; owl_log('C');
+        return 0;
+    }
     ++batty_cutscene_calls; batty_cutscene_actor = actor;
     batty_cutscene_index = cutscene; batty_cutscene_mode = mode;
     batty_order[batty_order_count++] = 'C'; batty_order[batty_order_count] = 0;
@@ -316,11 +348,72 @@ static u8 isFlagSet(s16 flag, u8 type) {
         return rabbit_first_complete;
     if (flag == PERMFLAG_ITEM_GB_FUNGI_RABBIT_RACE && type == FLAG_TYPE_PERMANENT)
         return rabbit_gb_owned;
+    if (flag == 0xFA && type == FLAG_TYPE_PERMANENT) return owl_reward_owned;
     CHECK(flag == TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE && type == FLAG_TYPE_TEMPORARY);
     return tomato_board_active;
 }
-static void playActorAnimation(Actor*, s32 animation) {
+static void playActorAnimation(Actor* actor, s32 animation) {
     ++animation_calls; last_animation = static_cast<unsigned>(animation);
+    if (actor && actor->animation_state) actor->animation_state->unk64 = static_cast<u16>(animation);
+    if (actor && actor->unk58 == ACTOR_OWL) {
+        ++owl_animation_calls; owl_animation_id = static_cast<unsigned>(animation); owl_log('A');
+    }
+}
+static void func_global_asm_807266E8(Actor* actor, CharacterSpawner* spawner) {
+    CHECK(actor && actor->unk58 == ACTOR_OWL && spawner == character_spawners);
+    ++owl_relocate_calls; owl_log('R');
+}
+static void loadText(Actor* actor, u16 file, u8 text) {
+    CHECK(actor && actor->unk58 == ACTOR_OWL);
+    ++owl_text_calls; owl_text_file = file; owl_text_index = text; owl_log('T');
+}
+static void func_global_asm_806C55E0(void) {
+    ++owl_original_calls; owl_log('O');
+    if (!gCurrentActorPointer) return;
+    Actor* actor = gCurrentActorPointer;
+    extra_player_info_pointer->unk1F4 &= ~0x40u;
+    if (actor->control_state == 2 || actor->control_state == 0x26) {
+        extra_player_info_pointer->unk1F4 |= 0x40u;
+        actor->unk15F = static_cast<u8>((0x10 - D_global_asm_807FDC90->rings) + 1);
+    }
+    if (owl_original_mode == 1 && (actor->control_state == 2 || actor->control_state == 0x26)) {
+        D_global_asm_807FDC90->rings = 0;
+        func_global_asm_807266E8(actor, D_global_asm_807FDC9C);
+        loadText(actor, 0x15, 3);
+        playActorAnimation(actor, 0x35B);
+        actor->control_state = 0x2A; actor->control_state_progress = 0;
+        playCutscene(actor, 0x14, 1);
+    } else if (owl_original_mode == 2 && (actor->control_state == 2 || actor->control_state == 0x26)) {
+        func_global_asm_807266E8(actor, D_global_asm_807FDC9C);
+        loadText(actor, 0x15, 2);
+        playActorAnimation(actor, 0x35A);
+        actor->control_state = 0x2A; actor->control_state_progress = 0;
+        playCutscene(actor, 0x16, 1);
+    } else if (owl_original_mode == 3) {
+        D_global_asm_807FB930[0].actor = nullptr;
+    } else if (owl_original_mode == 4) {
+        ++actor->unk54;
+    } else if (owl_original_mode == 5) {
+        ++gPlayerPointer->unk54;
+    } else if (owl_original_mode == 6) {
+        gPlayerPointer = &actors[7];
+    } else if (owl_original_mode == 7) {
+        actor->unk178 = &actors[7];
+    } else if (owl_original_mode == 8) {
+        actor->unk180 = &owl_timer_replacement;
+    } else if (owl_original_mode == 9) {
+        D_global_asm_807FDC90 = &owl_race_replacement;
+    } else if (owl_original_mode == 10) {
+        gCurrentActorPointer = &actors[1];
+    } else if (owl_original_mode == 11) {
+        extra_player_info_pointer->unk1F0 = 0;
+    } else if (owl_original_mode == 12) {
+        current_map = 49;
+    } else if (owl_original_mode == 13) {
+        D_global_asm_8074C0A0[ACTOR_OWL] = func_global_asm_806C55E0;
+    } else if (owl_original_mode == 14) {
+        owl_reward_owned = true;
+    }
 }
 static void func_global_asm_80614D00(Actor*, f32, f32) { ++motion_calls; }
 
@@ -352,11 +445,14 @@ static void reset() {
     tile_activation_calls = 0;
     std::fill(std::begin(character_spawners), std::end(character_spawners), CharacterSpawner{});
     D_global_asm_807FDC9C = character_spawners;
+    owl_race = {}; owl_race_replacement = {}; D_global_asm_807FDC90 = &owl_race;
+    owl_enemy = {}; owl_enemy_replacement = {}; D_global_asm_807FDC98 = &owl_enemy;
     gCurrentActorPointer = gPlayerPointer = nullptr;
     std::fill(std::begin(D_global_asm_8074C0A0), std::end(D_global_asm_8074C0A0), nullptr);
     D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
     D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
     D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] = func_global_asm_806BE8BC;
+    D_global_asm_8074C0A0[ACTOR_OWL] = func_global_asm_806C55E0;
     D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] = func_bonus_8002570C;
     D_global_asm_8074C0A0[ACTOR_TIMER] = func_global_asm_806A2E30;
     D_global_asm_8074C0A0[ACTOR_BANDIT_SLOT] = func_bonus_800261B8;
@@ -394,6 +490,17 @@ static void reset() {
     coop_batty_pending_epoch = coop_batty_pending_key = 0;
     coop_batty_applied_epoch = coop_batty_applied_key = 0;
     coop_batty_success_epoch = coop_batty_success_key = 0;
+    owl_a178 = 0; owl_timer = {}; owl_timer_replacement = {};
+    owl_animation = {}; owl_player_data = {}; owl_reward_owned = false;
+    owl_original_calls = owl_original_mode = owl_relocate_calls = 0;
+    owl_text_calls = owl_text_file = owl_text_index = 0;
+    owl_animation_calls = owl_animation_id = 0;
+    owl_cutscene_calls = owl_cutscene_id = owl_cutscene_mode = 0;
+    owl_order_count = 0; owl_order[0] = 0;
+    coop_owl_original = nullptr; coop_owl_hook = 0;
+    coop_owl_pending_epoch = coop_owl_pending_key = 0;
+    coop_owl_applied_epoch = coop_owl_applied_key = 0;
+    coop_owl_success_epoch = coop_owl_success_key = 0;
     coop_transient_init();
 }
 static void load(unsigned slot, unsigned object, unsigned state, unsigned timer = 0) {
@@ -475,6 +582,24 @@ static void load_rabbit(unsigned key) {
     D_global_asm_807FB930[0].actor = &actors[0]; D_global_asm_807FBB34 = 1;
     load(0x1F, 0x1F, 3);
     if (key == 2) load(0x57, 0x57, 0);
+}
+static void load_owl(unsigned state = 2) {
+    current_map = MAP_FUNGI; current_character_index[0] = 1;
+    actors[0].object_properties_bitfield = 0x10;
+    actors[0].unk54 = 127; actors[0].unk58 = ACTOR_OWL;
+    actors[0].animation_state = &owl_animation;
+    actors[0].control_state = static_cast<u8>(state);
+    actors[0].control_state_progress = 2;
+    actors[0].unk168 = 0; actors[0].unk15F = 1;
+    actors[0].unk178 = &owl_a178; actors[0].unk180 = &owl_timer;
+    owl_animation.unk64 = 0x357; owl_timer.timer = 0x78;
+    actors[2].unk54 = 128; actors[2].control_state = 0x63;
+    actors[2].additional_actor_data = &rabbit_player_info;
+    gCurrentActorPointer = &actors[0]; gPlayerPointer = &actors[2];
+    extra_player_info_pointer = &rabbit_player_info;
+    rabbit_player_info.unk1F0 = 0x100000; rabbit_player_info.unk1F4 = 0x40;
+    owl_race.rings = 0x10; owl_enemy.flags = 0x24;
+    D_global_asm_807FB930[0].actor = &actors[0]; D_global_asm_807FBB34 = 1;
 }
 static void load_batty(unsigned key) {
     CHECK(key >= 1 && key <= 3);
@@ -2389,8 +2514,141 @@ static void batty_checks() {
         && D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] == func_bonus_8002570C);
 }
 
+static void owl_checks() {
+    // Both stock active states expose the same exact natural-success edge.
+    for (unsigned state : {2u, 0x26u}) {
+        reset(); load_owl(state); owl_original_mode = 1;
+        D_global_asm_8074C0A0[ACTOR_OWL]();
+        CHECK(owl_original_calls == 1 && actors[0].control_state == 0x2A
+            && actors[0].control_state_progress == 0 && owl_race.rings == 0
+            && owl_animation.unk64 == 0x35B && !coop_owl_pending_key);
+        CHECK(owl_order_count == 5 && owl_order[0] == 'O' && owl_order[1] == 'R'
+            && owl_order[2] == 'T' && owl_order[3] == 'A' && owl_order[4] == 'C');
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0));
+    }
+
+    // Host and Join apply only after the stock handler remains in the same
+    // active state. The injected block is the exact vanilla terminal sequence.
+    for (unsigned receiver_role : {ROLE_HOST, ROLE_JOIN}) for (unsigned state : {2u, 0x26u}) {
+        reset(); load_owl(state); role = receiver_role;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_owl_pending_key == 1);
+        D_global_asm_8074C0A0[ACTOR_OWL]();
+        CHECK(owl_original_calls == 1 && owl_relocate_calls == 1 && owl_text_calls == 1
+            && owl_text_file == 0x15 && owl_text_index == 3
+            && owl_animation_calls == 1 && owl_animation_id == 0x35B
+            && owl_cutscene_calls == 1 && owl_cutscene_id == 0x14 && owl_cutscene_mode == 1);
+        CHECK(owl_order_count == 5 && owl_order[0] == 'O' && owl_order[1] == 'R'
+            && owl_order[2] == 'T' && owl_order[3] == 'A' && owl_order[4] == 'C');
+        CHECK(actors[0].control_state == 0x2A && actors[0].control_state_progress == 0
+            && !coop_owl_pending_key);
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0));
+        coop_transient_apply(); coop_owl_behavior();
+        CHECK(owl_relocate_calls == 1 && owl_text_calls == 1 && owl_cutscene_calls == 1);
+    }
+
+    // The shared terminal state is insufficient: the stock failure animation,
+    // text and cutscene clear a queued win and never publish success.
+    reset(); load_owl(); role = ROLE_JOIN;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); owl_original_mode = 2; coop_owl_behavior();
+    CHECK(actors[0].control_state == 0x2A && owl_animation.unk64 == 0x35A
+        && owl_text_index == 2 && owl_cutscene_id == 0x16 && !coop_owl_pending_key);
+    coop_transient_capture(1); CHECK(!contains(COOP_TRANSIENT_OWL_SUCCESS, 1, 1));
+
+    // Malformed, stale, wrong-map and already-owned records never queue.
+    for (unsigned scenario = 0; scenario < 8; ++scenario) {
+        reset(); load_owl(); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0}}};
+        if (scenario == 0) transient_result.records[0].key = 0;
+        if (scenario == 1) transient_result.records[0].key = 2;
+        if (scenario == 2) transient_result.records[0].state = 2;
+        if (scenario == 3) transient_result.records[0].value = 1;
+        if (scenario == 4) transient_result.epoch--;
+        if (scenario == 5) transient_result.map++;
+        if (scenario == 6) loading_zone_transition_speed = 1.0f;
+        if (scenario == 7) owl_reward_owned = true;
+        coop_transient_apply(); CHECK(!coop_owl_pending_key);
+    }
+
+    // Every immutable actor, player and race identity predicate fails closed.
+    for (unsigned scenario = 0; scenario < 25; ++scenario) {
+        reset(); load_owl();
+        if (scenario == 0) current_map = 49;
+        if (scenario == 1) current_character_index[0] = 2;
+        if (scenario == 2) actors[0].unk58 = ACTOR_RABBIT_RACE;
+        if (scenario == 3) actors[0].object_properties_bitfield = 0;
+        if (scenario == 4) actors[0].animation_state = nullptr;
+        if (scenario == 5) actors[0].unk178 = nullptr;
+        if (scenario == 6) actors[0].unk180 = nullptr;
+        if (scenario == 7) gPlayerPointer = nullptr;
+        if (scenario == 8) actors[2].additional_actor_data = nullptr;
+        if (scenario == 9) extra_player_info_pointer = nullptr;
+        if (scenario == 10) actors[2].additional_actor_data = &owl_player_data;
+        if (scenario == 11) actors[2].control_state = 0x62;
+        if (scenario == 12) rabbit_player_info.unk1F0 = 0;
+        if (scenario == 13) rabbit_player_info.unk1F4 = 0;
+        if (scenario == 14) owl_enemy.flags = 0x20;
+        if (scenario == 15) owl_race.rings = -1;
+        if (scenario == 16) owl_race.rings = 17;
+        if (scenario == 17) actors[0].unk168 = 17;
+        if (scenario == 18) actors[0].unk15F = 0;
+        if (scenario == 19) actors[0].unk15F = 17;
+        if (scenario == 20) owl_timer.timer = -1;
+        if (scenario == 21) owl_timer.timer = 0x79;
+        if (scenario == 22) owl_reward_owned = true;
+        if (scenario == 23) D_global_asm_8074C0A0[ACTOR_OWL] = func_global_asm_806C55E0;
+        if (scenario == 24) D_global_asm_807FB930[0].actor = nullptr;
+        CHECK(!coop_owl_identity(&actors[0]));
+    }
+
+    // Unload, generation/pointer replacement and campaign changes made by
+    // the stock call are revalidated before any terminal helper is invoked.
+    for (unsigned mode = 3; mode <= 14; ++mode) {
+        reset(); load_owl(); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); owl_original_mode = mode; coop_owl_behavior();
+        CHECK(owl_original_calls == 1 && !owl_relocate_calls && !owl_text_calls
+            && !owl_animation_calls && !owl_cutscene_calls && !coop_owl_pending_key);
+    }
+
+    // Intro/outcome/cleanup states and stale lifecycle boundaries cannot consume.
+    for (unsigned state : {0u, 0x1Eu, 0x27u, 0x28u, 0x29u, 0x2Au, 0x30u, 0x3Cu, 0x40u}) {
+        reset(); load_owl(state); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); coop_owl_behavior();
+        CHECK(owl_original_calls == 1 && !owl_relocate_calls && !coop_owl_pending_key);
+    }
+    for (unsigned scenario = 0; scenario < 4; ++scenario) {
+        reset(); load_owl(); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply();
+        if (scenario == 0) loading_zone_transition_speed = 1.0f;
+        if (scenario == 1) transient_file_changed = 1;
+        if (scenario == 2) gPlayerPointer = nullptr;
+        if (scenario == 3) ++epoch;
+        coop_owl_behavior(); CHECK(!owl_relocate_calls && !coop_owl_pending_key);
+    }
+
+    // A handler conflict disables Owl alone; global Off installs no Owl hook.
+    reset(); D_global_asm_8074C0A0[ACTOR_OWL] = nullptr;
+    coop_owl_hook = 0; coop_transient_init(); CHECK(!coop_owl_hook);
+    reset(); transient_enabled = 0; coop_owl_hook = 0;
+    D_global_asm_8074C0A0[ACTOR_OWL] = func_global_asm_806C55E0;
+    coop_transient_init(); CHECK(!coop_owl_hook
+        && D_global_asm_8074C0A0[ACTOR_OWL] == func_global_asm_806C55E0);
+}
+
 int main() {
     capture_checks(); object_apply_checks(); cutscene_checks(); lobby_instrument_pad_checks();
-    kosh_checks(); minecart_checks(); rabbit_checks(); batty_checks();
+    kosh_checks(); minecart_checks(); rabbit_checks(); batty_checks(); owl_checks();
     std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }

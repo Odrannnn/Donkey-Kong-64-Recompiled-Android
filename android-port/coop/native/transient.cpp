@@ -51,6 +51,8 @@ bool valid_record(const CoopTransientRecord& record) {
         case COOP_TRANSIENT_BATTY_SUCCESS:
             return record.key >= 1u && record.key <= 3u
                 && record.state == 1u && !record.value;
+        case COOP_TRANSIENT_OWL_SUCCESS:
+            return record.key == 1u && record.state == 1u && !record.value;
     }
     return false;
 }
@@ -157,7 +159,8 @@ void TransientSync::update(bool host, const State& local, const CoopTransientInp
         if (host && wanted.kind != COOP_TRANSIENT_MINIGAME_SUCCESS
                 && wanted.kind != COOP_TRANSIENT_MINECART_SUCCESS
                 && wanted.kind != COOP_TRANSIENT_RABBIT_SUCCESS
-                && wanted.kind != COOP_TRANSIENT_BATTY_SUCCESS) continue;
+                && wanted.kind != COOP_TRANSIENT_BATTY_SUCCESS
+                && wanted.kind != COOP_TRANSIENT_OWL_SUCCESS) continue;
         const CoopTransientRecord* current = nullptr;
         for (unsigned j = 0; j < input.count; ++j)
             if (input.records[j].kind == wanted.kind && input.records[j].key == wanted.key) {

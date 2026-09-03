@@ -331,7 +331,32 @@ static unsigned coop_batty_hook, coop_batty_pending_epoch, coop_batty_pending_ke
 static unsigned coop_batty_applied_epoch, coop_batty_applied_key;
 static unsigned coop_batty_success_epoch, coop_batty_success_key;
 
+// Fungi's Owl owns one Diddy-only main-map race. Its active states share the
+// common hoop evaluator, but success is uniquely identified by animation
+// 0x35B, zero remaining rings and the stock state-0x2A terminal block.
+typedef struct { short timer; } CoopOwlTimerData;
+// These two globals are present in the pinned game image and decomp, but their
+// private types are not exported by the port's common headers.  Keep the local
+// views no wider than the fields this hook validates.
+#ifndef DKCOOP_OWL_PRIVATE_TYPES_DEFINED
+typedef struct { unsigned char pad0[0x2C]; short rings; } CoopOwlRaceData;
+typedef struct { unsigned char pad0[0x46]; unsigned short flags; } CoopOwlEnemyData;
+#endif
+#ifdef MIPS
+_Static_assert(__builtin_offsetof(CoopOwlRaceData, rings) == 0x2C
+    && __builtin_offsetof(CoopOwlEnemyData, flags) == 0x46,
+    "Pinned Owl race-private field offsets");
+#endif
+#define COOP_OWL_REWARD_FLAG 0xFA
+static void coop_owl_behavior(void);
+static void (*coop_owl_original)(void);
+static unsigned coop_owl_hook, coop_owl_pending_epoch, coop_owl_pending_key;
+static unsigned coop_owl_applied_epoch, coop_owl_applied_key;
+static unsigned coop_owl_success_epoch, coop_owl_success_key;
+
 extern CharacterSpawner* D_global_asm_807FDC9C;
+extern CoopOwlRaceData* D_global_asm_807FDC90;
+extern CoopOwlEnemyData* D_global_asm_807FDC98;
 extern s32 func_global_asm_805FF800(Maps* map, s32* exit);
 extern void func_bonus_80024158(void);
 extern void func_bonus_800264E0(u8 success, u8 text);
@@ -344,6 +369,9 @@ extern void func_bonus_800261B8(void);
 extern void func_global_asm_806FDAB8(s16 element, f32 rotation);
 extern void func_global_asm_80715908(void* sprite);
 extern void func_global_asm_80726EE0(u8 state);
+extern void func_global_asm_806C55E0(void);
+extern void func_global_asm_807266E8(Actor* actor, CharacterSpawner* spawner);
+extern void loadText(Actor* actor, u16 file, u8 text);
 
 static unsigned coop_kosh_actor_live(Actor* actor, unsigned generation) {
     if (!actor || D_global_asm_807FBB34 > 64) return 0;
@@ -696,6 +724,94 @@ static void coop_batty_behavior(void) {
     coop_batty_pending_key = 0;
 }
 
+static unsigned coop_owl_identity(Actor* actor) {
+    if (!coop_owl_hook || !actor || actor != gCurrentActorPointer
+            || (unsigned)current_map != MAP_FUNGI || current_character_index[0] != 1
+            || actor->unk58 != ACTOR_OWL
+            || !(actor->object_properties_bitfield & 0x10)
+            || !actor->animation_state || !actor->unk178 || !actor->unk180
+            || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer || !gPlayerPointer->additional_actor_data
+            || !extra_player_info_pointer
+            || gPlayerPointer->additional_actor_data != extra_player_info_pointer
+            || gPlayerPointer->control_state != 0x63
+            || !(extra_player_info_pointer->unk1F0 & 0x100000)
+            || !(extra_player_info_pointer->unk1F4 & 0x40)
+            || !D_global_asm_807FDC90 || !D_global_asm_807FDC98
+            || !D_global_asm_807FDC9C
+            || (D_global_asm_807FDC98->flags & 0x24) != 0x24
+            || D_global_asm_807FDC90->rings < 0
+            || D_global_asm_807FDC90->rings > 0x10
+            || actor->unk168 > 0x10 || actor->unk15F < 1 || actor->unk15F > 0x10
+            || ((CoopOwlTimerData*)actor->unk180)->timer < 0
+            || ((CoopOwlTimerData*)actor->unk180)->timer > 0x78
+            || isFlagSet(COOP_OWL_REWARD_FLAG, FLAG_TYPE_PERMANENT)
+            || D_global_asm_8074C0A0[ACTOR_OWL] != coop_owl_behavior
+            || !coop_kosh_actor_live(actor, actor->unk54)) return 0;
+    return 1;
+}
+
+static void coop_owl_latch_success(void) {
+    coop_owl_success_epoch = epoch;
+    coop_owl_success_key = 1;
+    coop_owl_applied_epoch = epoch;
+    coop_owl_applied_key = 1;
+    coop_owl_pending_key = 0;
+}
+
+static void coop_owl_behavior(void) {
+    Actor* actor = gCurrentActorPointer;
+    unsigned generation = actor ? actor->unk54 : 0;
+    unsigned key = coop_owl_identity(actor);
+    Actor* player = key ? gPlayerPointer : 0;
+    unsigned player_generation = player ? player->unk54 : 0;
+    void* player_data = player ? player->additional_actor_data : 0;
+    void* a178 = key ? actor->unk178 : 0;
+    void* a180 = key ? actor->unk180 : 0;
+    CoopOwlRaceData* race = key ? D_global_asm_807FDC90 : 0;
+    CoopOwlEnemyData* enemy = key ? D_global_asm_807FDC98 : 0;
+    CharacterSpawner* spawner = key ? D_global_asm_807FDC9C : 0;
+    unsigned before = key ? actor->control_state : 0;
+    if (coop_owl_pending_key && (coop_owl_pending_epoch != epoch
+            || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer)) coop_owl_pending_key = 0;
+    if (coop_owl_original) coop_owl_original();
+    if (!key || !coop_kosh_actor_live(actor, generation)
+            || gCurrentActorPointer != actor || actor->unk178 != a178 || actor->unk180 != a180
+            || gPlayerPointer != player || player->unk54 != player_generation
+            || player->additional_actor_data != player_data
+            || D_global_asm_807FDC90 != race || D_global_asm_807FDC98 != enemy
+            || D_global_asm_807FDC9C != spawner || coop_owl_identity(actor) != key) {
+        coop_owl_pending_key = 0;
+        return;
+    }
+    unsigned active_before = before == 2 || before == 0x26;
+    if (active_before && actor->control_state == 0x2A) {
+        if (actor->control_state_progress == 0
+                && actor->animation_state->unk64 == 0x35B && race->rings == 0)
+            coop_owl_latch_success();
+        else
+            coop_owl_pending_key = 0;
+        return;
+    }
+    if (!active_before || actor->control_state != before
+            || actor->animation_state->unk64 != 0x357 || race->rings < 1) {
+        coop_owl_pending_key = 0;
+        return;
+    }
+    if (coop_owl_pending_epoch == epoch && coop_owl_pending_key == 1
+            && !(coop_owl_applied_epoch == epoch && coop_owl_applied_key == 1)) {
+        coop_owl_pending_key = 0;
+        func_global_asm_807266E8(actor, spawner);
+        loadText(actor, 0x15, 3);
+        playActorAnimation(actor, 0x35B);
+        actor->control_state = 0x2A;
+        actor->control_state_progress = 0;
+        playCutscene(actor, 0x14, 1);
+        coop_owl_latch_success();
+    }
+}
+
 static void coop_transient_init(void) {
     if (!transient_enabled) return;
     coop_kosh_original = D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER];
@@ -731,6 +847,15 @@ static void coop_transient_init(void) {
     } else {
         D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] = coop_batty_behavior;
         coop_batty_hook = 1;
+    }
+    coop_owl_original = D_global_asm_8074C0A0[ACTOR_OWL];
+    if (coop_owl_original != func_global_asm_806C55E0) {
+        recomp_printf("[dk64-coop] Owl Race actor modified by another mod; shared Owl success disabled.\n");
+        coop_owl_original = 0;
+        coop_owl_hook = 0;
+    } else {
+        D_global_asm_8074C0A0[ACTOR_OWL] = coop_owl_behavior;
+        coop_owl_hook = 1;
     }
 }
 
@@ -805,6 +930,23 @@ static void coop_transient_apply_batty(CoopTransientRecord record) {
                 && coop_batty_applied_key == record.key)) return;
     coop_batty_pending_epoch = epoch;
     coop_batty_pending_key = record.key;
+}
+
+static void coop_transient_add_owl(CoopTransientInput* input) {
+    if (coop_owl_success_epoch != epoch || coop_owl_success_key != 1
+            || input->count >= COOP_TRANSIENT_RECORDS
+            || (unsigned)current_map != MAP_FUNGI) return;
+    input->records[input->count++] = (CoopTransientRecord){
+        COOP_TRANSIENT_OWL_SUCCESS, 1, 1, 0};
+}
+
+static void coop_transient_apply_owl(CoopTransientRecord record) {
+    if (!coop_owl_hook || record.key != 1 || record.state != 1 || record.value
+            || (unsigned)current_map != MAP_FUNGI
+            || isFlagSet(COOP_OWL_REWARD_FLAG, FLAG_TYPE_PERMANENT)
+            || (coop_owl_applied_epoch == epoch && coop_owl_applied_key == 1)) return;
+    coop_owl_pending_epoch = epoch;
+    coop_owl_pending_key = 1;
 }
 
 static unsigned coop_transient_timer_sample_is_new(CoopTransientRecord record) {
@@ -1204,6 +1346,7 @@ static void coop_transient_capture(unsigned present) {
     coop_transient_add_minecart(&transient_input);
     coop_transient_add_rabbit(&transient_input);
     coop_transient_add_batty(&transient_input);
+    coop_transient_add_owl(&transient_input);
     // Retain the last same-epoch target briefly after the host finishes so a
     // lagging copy can consume missed phases. Apply still requires the Join to
     // be running the exact same cutscene and flags, so this cannot launch one.
@@ -1256,6 +1399,10 @@ static void coop_transient_apply(void) {
         }
         if (record.kind == COOP_TRANSIENT_BATTY_SUCCESS) {
             coop_transient_apply_batty(record);
+            continue;
+        }
+        if (record.kind == COOP_TRANSIENT_OWL_SUCCESS) {
+            coop_transient_apply_owl(record);
             continue;
         }
         if (role != ROLE_JOIN) continue;

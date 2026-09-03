@@ -42,7 +42,10 @@ enum {
     // One of three exact vanilla Batty Barrel Bandit controllers completed.
     // Reels, lives, timer, presentation, destination and reward remain local.
     COOP_TRANSIENT_BATTY_SUCCESS,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_BATTY_SUCCESS
+    // Fungi Forest's vanilla Diddy Owl Race completed. Rings, flight,
+    // presentation and the actor-owned reward sequence remain local.
+    COOP_TRANSIENT_OWL_SUCCESS,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_OWL_SUCCESS
 };
 enum {
     COOP_TRANSIENT_OFF,
