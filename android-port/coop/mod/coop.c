@@ -323,6 +323,59 @@ static unsigned coop_live_world_isles_trombone_refresh(void) {
     return 0;
 }
 
+// The exterior llama spawner is absent on a flag-complete map. If it is
+// currently active, only the stock caged idle state is safe to remove; a local
+// rescue sequence keeps ownership until it finishes. An unloaded spawner needs
+// no patch because its next eligibility check reads the new permanent flag.
+static unsigned coop_live_world_llama_free_ready(void) {
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (actor && actor->unk58 == ACTOR_LLAMA
+                && (actor->object_properties_bitfield & 0x10)
+                && actor->control_state != 5) return 0;
+    }
+    return 1;
+}
+
+static unsigned coop_live_world_llama_free_refresh(void) {
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (!actor || actor->unk58 != ACTOR_LLAMA
+                || !(actor->object_properties_bitfield & 0x10)) continue;
+        if (actor->control_state != 5) return 0;
+        deleteActor(actor);
+        return 1;
+    }
+    return 1;
+}
+
+// Cooling selects this exact state/progress pair when the temple llama is
+// initialized from a completed save. State 39 already owns the local cooling
+// animation, so it is allowed to finish without being fast-forwarded.
+static unsigned coop_live_world_llama_water_ready(void) {
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (actor && actor->unk58 == ACTOR_LLAMA
+                && (actor->object_properties_bitfield & 0x10)
+                && actor->control_state != 0 && actor->control_state != 39) return 0;
+    }
+    return 1;
+}
+
+static unsigned coop_live_world_llama_water_refresh(void) {
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (!actor || actor->unk58 != ACTOR_LLAMA
+                || !(actor->object_properties_bitfield & 0x10)) continue;
+        if (actor->control_state == 39) return 1;
+        if (actor->control_state != 0) return 0;
+        actor->control_state = 39;
+        actor->control_state_progress = 4;
+        return 1;
+    }
+    return 1;
+}
+
 // The Mermaid is an actor rather than an instance-script prop. Her vanilla
 // initializer selects state 30 (no pearls), 31 (partial set), 39 (all five),
 // or 32 (reward already owned). Re-selecting one of those entry states after a

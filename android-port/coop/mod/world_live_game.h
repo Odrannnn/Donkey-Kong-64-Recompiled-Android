@@ -22,8 +22,10 @@ enum {
     COOP_LIVE_WORLD_REVEAL = 6,
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
+    COOP_LIVE_WORLD_LLAMA_FREE = 9,
+    COOP_LIVE_WORLD_LLAMA_WATER = 10,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 239
+    COOP_LIVE_WORLD_STATE_COUNT = 248
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -333,6 +335,24 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 17, 0x305, 0x059,  0, COOP_LIVE_WORLD_REPLAY},
     { 17, 0x306, 0x058,  0, COOP_LIVE_WORLD_REPLAY},
 
+    // Freeing the exterior llama activates all three gun switches through
+    // their isolated saved-complete initializers, then removes the caged actor
+    // exactly as the character-spawner flag filter does on map load. Inside
+    // the temple, waking object 0x16 applies the newly eligible llama route.
+    { 38, 0x032, 0x00D,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x032, 0x00E,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x032, 0x00F,  0, COOP_LIVE_WORLD_REPLAY},
+    { 38, 0x032, 0xFFFF, 0, COOP_LIVE_WORLD_LLAMA_FREE},
+    { 20, 0x032, 0x016,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Temple water cooling has two flag-positive state-0 consumers. The llama
+    // actor uses state 39/progress 4 for a save that entered already cooled;
+    // the exterior has no loaded consumer and may accept the flag immediately.
+    { 20, 0x04C, 0x016,  0, COOP_LIVE_WORLD_REPLAY},
+    { 20, 0x04C, 0x018,  0, COOP_LIVE_WORLD_REPLAY},
+    { 20, 0x04C, 0xFFFF, 0, COOP_LIVE_WORLD_LLAMA_WATER},
+    { 38, 0x04C, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+
     // These completions are consumed only inside their submaps. Receiving one
     // in the corresponding main world needs a save, but no loaded script or
     // map rebuild; the target room initializes from the flag on entry.
@@ -396,11 +416,17 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
         ++expected;
         if (state->mode != COOP_LIVE_WORLD_NOOP
                 && state->mode != COOP_LIVE_WORLD_MERMAID
+                && state->mode != COOP_LIVE_WORLD_LLAMA_FREE
+                && state->mode != COOP_LIVE_WORLD_LLAMA_WATER
                 && !coop_live_world_find_object(state->object, 0)) return 0;
         if (state->mode == COOP_LIVE_WORLD_MERMAID
                 && !coop_live_world_mermaid_ready()) return 0;
         if (state->mode == COOP_LIVE_WORLD_ISLES_TROMBONE
                 && !coop_live_world_isles_trombone_ready()) return 0;
+        if (state->mode == COOP_LIVE_WORLD_LLAMA_FREE
+                && !coop_live_world_llama_free_ready()) return 0;
+        if (state->mode == COOP_LIVE_WORLD_LLAMA_WATER
+                && !coop_live_world_llama_water_ready()) return 0;
         if (state->mode == COOP_LIVE_WORLD_CONTINUE_GALLEON) {
             unsigned raw = 0;
             if (!coop_live_world_object_raw_state(state->object, &raw)
@@ -454,6 +480,14 @@ static inline unsigned coop_live_world_refresh(unsigned flag) {
         }
         if (state->mode == COOP_LIVE_WORLD_ISLES_TROMBONE) {
             if (!coop_live_world_isles_trombone_refresh()) return 0;
+            continue;
+        }
+        if (state->mode == COOP_LIVE_WORLD_LLAMA_FREE) {
+            if (!coop_live_world_llama_free_refresh()) return 0;
+            continue;
+        }
+        if (state->mode == COOP_LIVE_WORLD_LLAMA_WATER) {
+            if (!coop_live_world_llama_water_refresh()) return 0;
             continue;
         }
         if (state->mode == COOP_LIVE_WORLD_REVEAL) {

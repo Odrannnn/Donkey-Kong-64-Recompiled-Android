@@ -35,6 +35,8 @@ static unsigned live_reveals = 0, live_reveal_object = 0;
 static unsigned live_mermaid_available = 0, live_mermaid_state = 30;
 static unsigned live_mermaid_progress = 0, live_mermaid_refreshes = 0;
 static unsigned live_trombone_notifications = 0, live_trombone_mode = 0;
+static unsigned live_llama_available = 0, live_llama_state = 0;
+static unsigned live_llama_progress = 0, live_llama_deleted = 0;
 static unsigned char live_raw[0x200]{};
 static void func_global_asm_8063DA40(short slot, short state) {
     ++live_calls; live_slot = (unsigned short)slot; live_state = (unsigned short)state;
@@ -79,6 +81,24 @@ static unsigned coop_live_world_isles_trombone_refresh(void) {
     ++live_trombone_notifications;
     live_trombone_mode = 2;
     live_raw[0x31] = 6;
+    return 1;
+}
+static unsigned coop_live_world_llama_free_ready(void) {
+    return !live_llama_available || live_llama_state == 5;
+}
+static unsigned coop_live_world_llama_free_refresh(void) {
+    if (!coop_live_world_llama_free_ready()) return 0;
+    if (live_llama_available) { live_llama_available = 0; ++live_llama_deleted; }
+    return 1;
+}
+static unsigned coop_live_world_llama_water_ready(void) {
+    return !live_llama_available || live_llama_state == 0 || live_llama_state == 39;
+}
+static unsigned coop_live_world_llama_water_refresh(void) {
+    if (!coop_live_world_llama_water_ready()) return 0;
+    if (live_llama_available && live_llama_state == 0) {
+        live_llama_state = 39; live_llama_progress = 4;
+    }
     return 1;
 }
 static void* D_global_asm_807FD730 = nullptr;
@@ -257,6 +277,7 @@ static void reset_engine() {
     live_mermaid_available = live_mermaid_refreshes = 0;
     live_mermaid_state = 30; live_mermaid_progress = 0;
     live_trombone_notifications = live_trombone_mode = 0;
+    live_llama_available = live_llama_state = live_llama_progress = live_llama_deleted = 0;
     D_global_asm_80754280 = &hud_object;
 }
 static unsigned main_map_for_level(unsigned level) {
@@ -678,13 +699,18 @@ static void world_refresh_checks() {
     coop_items_receive(&g, r); coop_items_apply(&g, 1);
     CHECK(!flags[0x32] && !writes && !saves && !g.refresh_pending);
 
-    // Opting in does not force a rebuild for an older world row that has no
-    // audited loaded consumer. It remains pending until the player leaves.
+    // Opting in now waits for the complete audited exterior llama unit rather
+    // than requiring the player to leave Aztec. Once the third switch script
+    // is loaded, the flag, scripts, actor and isolated save converge together.
     g.refresh_enabled = 1; coop_items_apply(&g, 1);
     CHECK(!flags[0x32] && !writes && !saves && !g.refresh_pending
-        && g.wait_reason == COOP_TRACE_WAIT_LOCAL_AREA);
-    current_map = 7; mock_level = 0; coop_items_apply(&g, 1);
-    CHECK(flags[0x32] && writes == 1 && saves == 1 && !g.refresh_pending);
+        && g.wait_reason == COOP_TRACE_WAIT_PROGRESSION_CONTEXT);
+    D_global_asm_807F6240[4] = 0x0D; D_global_asm_807F6240[5] = 0x0E;
+    D_global_asm_807F6240[6] = 0x0F;
+    live_llama_available = 1; live_llama_state = 5;
+    coop_items_apply(&g, 1);
+    CHECK(flags[0x32] && writes == 1 && saves == 1 && live_calls == 3
+        && live_llama_deleted == 1 && !g.refresh_pending);
 
     // Reviewed simple gates enter their pinned vanilla completed state live,
     // avoiding a map reload only when every affected object is loaded.
@@ -737,7 +763,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 239);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 248);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -753,6 +779,27 @@ static void world_refresh_checks() {
     reset_engine(); current_map = 72; D_global_asm_807F6240[2] = 0x1F;
     CHECK(coop_live_world_refresh(0x109) && live_calls == 1 && live_state == 0);
     CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[85]));
+
+    // Aztec's exterior rescue is one atomic unit: all three saved-active
+    // switch initializers must exist before the caged llama can disappear.
+    reset_engine(); current_map = 38; live_llama_available = 1; live_llama_state = 5;
+    D_global_asm_807F6240[4] = 0x0D; D_global_asm_807F6240[5] = 0x0E;
+    CHECK(!coop_live_world_refresh(0x032) && live_calls == 0 && !live_llama_deleted);
+    D_global_asm_807F6240[6] = 0x0F;
+    CHECK(coop_live_world_refresh(0x032) && live_calls == 3
+        && live_state == 0 && live_llama_deleted == 1 && !live_llama_available);
+
+    // Cooling replays both temple consumers and selects the exact completed
+    // llama entry state. An in-progress local cooling state remains untouched.
+    reset_engine(); current_map = 20; live_llama_available = 1;
+    D_global_asm_807F6240[2] = 0x16; D_global_asm_807F6240[3] = 0x18;
+    CHECK(coop_live_world_refresh(0x04C) && live_calls == 2
+        && live_llama_state == 39 && live_llama_progress == 4);
+    reset_engine(); current_map = 20; live_llama_available = 1;
+    live_llama_state = 39; live_llama_progress = 2;
+    D_global_asm_807F6240[2] = 0x16; D_global_asm_807F6240[3] = 0x18;
+    CHECK(coop_live_world_refresh(0x04C) && live_calls == 2
+        && live_llama_state == 39 && live_llama_progress == 2);
 
     // Factory storage's three box scripts replay as one atomic completion.
     reset_engine(); current_map = 26;
