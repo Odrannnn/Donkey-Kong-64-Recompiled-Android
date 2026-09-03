@@ -1,4 +1,4 @@
-> Current source: 0.78.1, protocol/native ABI v78. The complete Linux
+> Current source: 0.78.2, protocol/native ABI v78. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -3175,7 +3175,7 @@ local, remote and apply-result transient records needed to diagnose a concrete
 same-area compatibility failure. Packet layout, bridge ABI, protocol 78 and
 v78 exports remain unchanged.
 
-## Optional status overlay
+## Optional status overlay (0.78.2)
 
 The `status_overlay` enum defaults to `Show`. The every-frame callback reads it
 before registering the text-overlay renderer, so selecting `Hide` removes all
