@@ -23,7 +23,7 @@ enum {
     COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_ISLES_TROMBONE = 8,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 188
+    COOP_LIVE_WORLD_STATE_COUNT = 194
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -230,6 +230,17 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     // branch. It selects the normal active interaction state without replaying
     // the local encounter completion, flag write, sound or camera sequence.
     { 85, 0x118, 0x000,  0, COOP_LIVE_WORLD_REPLAY},
+
+    // Caves' five igloo instrument pads and DK-star reveal controller form one
+    // permanent unit. Every state-0 flag branch selects the normal revealed
+    // pad setup or hides the spent controller; none enters the five-pad input,
+    // timer, camera, sound, linked-object or flag-write path.
+    { 72, 0x128, 0x000,  0, COOP_LIVE_WORLD_REPLAY},
+    { 72, 0x128, 0x001,  0, COOP_LIVE_WORLD_REPLAY},
+    { 72, 0x128, 0x002,  0, COOP_LIVE_WORLD_REPLAY},
+    { 72, 0x128, 0x003,  0, COOP_LIVE_WORLD_REPLAY},
+    { 72, 0x128, 0x004,  0, COOP_LIVE_WORLD_REPLAY},
+    { 72, 0x128, 0x038,  0, COOP_LIVE_WORLD_REPLAY},
 
     // Helm and its lobby use the same two Bananaport scripts. Their sole
     // flag-positive state-0 operation selects the vanilla tagged visibility
