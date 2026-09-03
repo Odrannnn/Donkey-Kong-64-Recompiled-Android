@@ -192,12 +192,23 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                 if (!progression_safe) {
                     coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, id); continue;
                 }
-                unsigned refresh = exact_live_world || (id >= COOP_WORLD_FIRST
-                    && here == coop_world_unlocks[id - COOP_WORLD_FIRST].level);
+                unsigned loaded_world = id >= COOP_WORLD_FIRST
+                    && here == coop_world_unlocks[id - COOP_WORLD_FIRST].level;
+                unsigned refresh = exact_live_world || loaded_world;
                 if (training_ground && id == COOP_WORLD_TRAINING_EXIT) refresh = 1;
-                if (live_only && exact_live_world && !coop_live_world_ready(
+                // Do not write a permanent flag until its complete loaded unit
+                // can converge atomically. Missing scripts and active/unknown
+                // states are retried on later stable frames; leaving the area
+                // falls back to normal save-first initialization on next entry.
+                if (exact_live_world && !coop_live_world_ready(
                         coop_world_unlocks[id - COOP_WORLD_FIRST].flag)) {
                     coop_items_wait(g, COOP_TRACE_WAIT_PROGRESSION_CONTEXT, id); continue;
+                }
+                // The original ten world rows have no audited loaded consumer.
+                // Preserve their outside-level rule instead of interrupting the
+                // player with a same-map rebuild.
+                if (loaded_world && g->refresh_enabled && !exact_live_world) {
+                    coop_items_wait(g, COOP_TRACE_WAIT_LOCAL_AREA, id); continue;
                 }
                 if (coop_progression_apply(id, progression_safe, here,
                         g->refresh_enabled)) {
@@ -207,10 +218,9 @@ static inline void coop_items_apply(CoopItems* g, unsigned safe_to_save) {
                     unsigned live = refresh && coop_live_world_refresh(
                         coop_world_unlocks[id - COOP_WORLD_FIRST].flag);
                     if (exact_live_world && live) live_world_applied = 1;
-                    if (refresh && !live && !training_ground) {
-                        g->refresh_pending = 1;
-                        g->refresh_map = current_map;
-                    }
+                    // A reviewed live refresh was preflighted above. Any
+                    // unsupported loaded-level row was deferred before write,
+                    // so permanent-world delivery never needs a forced reload.
                     if (training_ground && id == COOP_TRAINING_COMPLETE
                             && g->peer_same_map) g->training_scene_pending = 1;
                     // A tier also owns every lower tier; record all newly owned

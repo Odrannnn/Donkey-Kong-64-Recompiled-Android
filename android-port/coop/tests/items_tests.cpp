@@ -678,11 +678,13 @@ static void world_refresh_checks() {
     coop_items_receive(&g, r); coop_items_apply(&g, 1);
     CHECK(!flags[0x32] && !writes && !saves && !g.refresh_pending);
 
-    // Opting in writes and saves all verified flags first, then queues exactly
-    // one vanilla same-map rebuild for the frame adapter to initiate.
+    // Opting in does not force a rebuild for an older world row that has no
+    // audited loaded consumer. It remains pending until the player leaves.
     g.refresh_enabled = 1; coop_items_apply(&g, 1);
-    CHECK(flags[0x32] && writes == 1 && saves == 1 && g.refresh_pending && g.refresh_map == 38);
-    coop_items_apply(&g, 1); CHECK(writes == 1 && saves == 1 && g.refresh_pending);
+    CHECK(!flags[0x32] && !writes && !saves && !g.refresh_pending
+        && g.wait_reason == COOP_TRACE_WAIT_LOCAL_AREA);
+    current_map = 7; mock_level = 0; coop_items_apply(&g, 1);
+    CHECK(flags[0x32] && writes == 1 && saves == 1 && !g.refresh_pending);
 
     // Reviewed simple gates enter their pinned vanilla completed state live,
     // avoiding a map reload only when every affected object is loaded.
@@ -696,12 +698,17 @@ static void world_refresh_checks() {
     CHECK(flags[0] && writes == 1 && saves == 1 && live_calls == 2 && live_slot == 9
         && live_state == 20 && !g.refresh_pending);
 
-    // A missing reviewed object fails closed into the existing reload fallback.
+    // A missing reviewed object defers the flag and retries atomically. Once
+    // the second script appears, the same pending network result applies live.
     reset_engine(); g = {}; current_game = &g; g.join = 1;
     current_map = 7; mock_level = 0; D_global_asm_807F6240[4] = 0x1A;
     coop_items_capture(&g, 1, 1, 0); coop_items_receive(&g, r);
     g.refresh_enabled = 1; coop_items_apply(&g, 1);
-    CHECK(flags[0] && live_calls == 0 && g.refresh_pending && g.refresh_map == 7);
+    CHECK(!flags[0] && !writes && !saves && live_calls == 0 && !g.refresh_pending
+        && g.wait_reason == COOP_TRACE_WAIT_PROGRESSION_CONTEXT);
+    D_global_asm_807F6240[9] = 0x1B; coop_items_apply(&g, 1);
+    CHECK(flags[0] && writes == 1 && saves == 1 && live_calls == 2
+        && live_state == 20 && !g.refresh_pending);
 
     // The full Japes shell gate and each hut's switch plus door use the exact
     // flag-positive initializer states audited from the pinned US scripts.
