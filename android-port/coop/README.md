@@ -328,6 +328,9 @@ result, static candidate list, safety exclusions and acceptance rule.
    (default 6464) and six-digit room code (default 123456). Leave **Transition
    behavior** at its default **Independent exploration**, or choose **Follow
    host** on the joining device for coordinated travel.
+   **On-screen LAN status** defaults to **Show**. Change it to **Hide** at any
+   time to remove the connection, item, world and event text without stopping
+   synchronization; show it again when diagnosing a connection or save conflict.
 4. Select the same **Co-op campaign save** (1–8) on both devices. Enable **Shared
    collectibles and upgrades -> Unique collectibles** on both. Optional combat
    can run alongside it. Item sharing owns the first Japes gate; its older

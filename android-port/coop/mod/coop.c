@@ -897,7 +897,8 @@ RECOMP_CALLBACK("*", dk64recomp_every_frame) void coop_frame(void) {
     if (role == ROLE_OFF || !avatar_available) return;
     if (!actor_is_alive(remote_actor, remote_generation)) remote_actor = NULL;
     if (!actor_is_alive(retiring_actor, retiring_generation)) retiring_actor = NULL;
-    addActorToTextOverlayRenderArray(draw_coop_status, NULL, 5);
+    if (recomp_get_config_u32("status_overlay") == 0)
+        addActorToTextOverlayRenderArray(draw_coop_status, NULL, 5);
     if (coop_map_lifecycle_changed(&map_lifecycle, current_map, map_load_serial))
         coop_reset_loaded_map();
     local_state[STATE_MAP] = current_map;

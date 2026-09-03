@@ -3174,3 +3174,11 @@ Trace schema 2 accompanies this audit with decoded transition tickets and the
 local, remote and apply-result transient records needed to diagnose a concrete
 same-area compatibility failure. Packet layout, bridge ABI, protocol 78 and
 v78 exports remain unchanged.
+
+## Optional status overlay
+
+The `status_overlay` enum defaults to `Show`. The every-frame callback reads it
+before registering the text-overlay renderer, so selecting `Hide` removes all
+connection, item, world and same-area status lines immediately without restarting
+the network session. Capture, apply, recovery, trace reporting and remote-player
+rendering continue unchanged. The setting is local and need not match the peer.

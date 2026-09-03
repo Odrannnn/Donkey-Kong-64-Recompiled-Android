@@ -87,6 +87,14 @@ precision = 0
 default = 123456
 
 [[manifest.config_options]]
+id = "status_overlay"
+name = "On-screen LAN status"
+description = "Show displays the connection, item, world and same-area event status lines during play. Hide removes those text lines while leaving networking, synchronization, recovery and the remote player unchanged. Change this at any time; temporarily show it again when diagnosing a connection or save conflict."
+type = "Enum"
+options = ["Show", "Hide"]
+default = "Show"
+
+[[manifest.config_options]]
 id = "follow_host_transitions"
 name = "Transition behavior (restart)"
 description = "Join-side behavior only. Independent exploration ignores host transition tickets, so both players can use different maps while collectible and progression synchronization continues. Follow host makes the joining player follow the host through 169 reviewed ordinary Isles, lobby, level-portal, tunnel and interior routes when both are still in the same source map. Combat and the remote player model remain active only while both players share a map. The host setting is ignored; matching settings are not required."
