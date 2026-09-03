@@ -1,4 +1,4 @@
-> Current source: 0.66.0, protocol/native ABI v66. Focused Linux ASan/UBSan
+> Current source: 0.67.0, protocol/native ABI v67. Focused Linux ASan/UBSan
 > transient suites, native ABI/trace tests and the maintained MIPS compile pass.
 > Gameplay and device validation remain pending.
 
@@ -2722,3 +2722,47 @@ cutscene, flag or reward crosses the wire. Existing Kosh, Minecart and all
 host-authoritative transient records retain their prior semantics. Packet and
 bridge sizes remain unchanged. Protocol 66, compatibility `0x00010242`, v66
 exports and manifest 0.66.0 reject older peers and companions.
+
+## Batty Barrel Bandit shared success (0.67.0)
+
+The adapter wraps actor 218's stock `func_bonus_8002570C` handler for only
+three vanilla identities: map 32 / parent 43 / exit 0 / Chunky, map 121 /
+parent 26 / exit 0 / Lanky, and map 122 / parent 195 / exit 0 / Diddy. Their
+private timing triples are pinned as `2D/20/20`, `2D/20/34` and `28/2A/34`.
+Map 123 and every other parent, exit, Kong or timing combination are rejected.
+The wrapper installs only when the actor-table slot still contains the exact
+stock handler.
+
+Natural success is observed only across the stock state 7 to state 8 edge with
+the exact terminal normalization: player action `0x44` and progress 1, zero
+remaining lives, zero result counters, stopped timer, controller progress zero
+and reel index 4, and a removed result HUD. Local timeout state 9 takes priority
+and clears a pending remote win. Host and Join can each publish and consume the
+bounded key 1 through 3, state 1, value zero record.
+
+A receiver always runs the original controller first and consumes only if both
+pre- and post-call states are the stable state 2. It additionally requires
+controller progress 1/index 0, player action `0x49`, one through three lives,
+a live countdown in state 1, 2 or 4, and four stopped reels in state 0. Intro
+state 0 and active states 3 through 7 retain the pending event. A stock 3 to 2
+or failed 7 to 3 transition cannot consume in that same callback. The remote
+terminal block hides `HIT`, zeros remaining lives, invokes the stock success
+helper, normalizes state 8/progress 0/index 4, resets the result counters, plays
+cutscene 0 in mode `0x11`, and removes the local HUD object that the skipped
+stock postlude would otherwise own.
+
+Every application requires live initialized, generation-stable main, timer and
+four pairwise-distinct reel actors. The timer must be actor 176 with stock
+`func_global_asm_806A2E30`, marker 6 and a duration matching the controller.
+Each reel must be actor 219 with stock `func_bonus_800261B8`, a state no greater
+than 5 and private owner pointer back to the controller. The player's private
+data must identify the same controller and timer. Actor-list membership is
+proved before reading child fields, and all pointers/generations are rechecked
+after the original call. Unload, reuse, replacement, hook conflicts, malformed
+records, loading, file or epoch changes fail closed.
+
+No reel face, speed, spin state, countdown value, destination, permanent flag
+or reward crosses the wire. The local controller owns presentation and exit;
+the item channel remains the only Golden Banana authority. Packet and bridge
+sizes remain unchanged. Protocol 67, compatibility `0x00010243`, v67 exports
+and manifest 0.67.0 reject older peers and companions.

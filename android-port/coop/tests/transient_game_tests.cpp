@@ -20,6 +20,8 @@ struct Actor {
     u32 object_properties_bitfield{};
     u32 unk54{}, unk58{};
     s16 unk132{};
+    u8 unk15F{};
+    u32 unk168{};
     u8 control_state{}, control_state_progress{};
     void* additional_actor_data{};
     void* unk178{};
@@ -32,11 +34,19 @@ struct CharacterSpawner {
     union { u8 unkA_u8[2]; u16 unkA_u16; s16 unkA_s16; };
     u8 unkC{}, unkD{}, unkE{}, unkF{}, unk10{}, unk11{}, unk12{}, unk13{};
 };
-struct ExtraPlayerInfo { u32 unk1F0{}, unk1F4{}; };
-enum { MAP_JAPES_SHELL = 12, MAP_CAVES_ICE_CASTLE = 98,
+struct ExtraPlayerInfo {
+    Actor* vehicle_actor_pointer{};
+    Actor* unk1A8{};
+    u32 unk1F0{}, unk1F4{};
+};
+#define MATH_PI_F 3.1415927f
+enum { MAP_JAPES_SHELL = 12, MAP_BATTY_BARREL_BANDIT_EASY = 32, MAP_CAVES_ICE_CASTLE = 98,
+    MAP_BATTY_BARREL_BANDIT_EASY_2 = 121, MAP_BATTY_BARREL_BANDIT_NORMAL = 122,
+    MAP_BATTY_BARREL_BANDIT_HARD = 123,
     MAP_FUNGI = 48,
-    ACTOR_TOMATO_ICE = 164, ACTOR_TIMER_CONTROLLER = 177, ACTOR_CLAM = 286,
+    ACTOR_TOMATO_ICE = 164, ACTOR_TIMER = 176, ACTOR_TIMER_CONTROLLER = 177, ACTOR_CLAM = 286,
     ACTOR_MINECART_BONUS = 87, ACTOR_RABBIT_RACE = 252, ACTOR_MINIGAME_CONTROLLER = 256,
+    ACTOR_BANDIT_HANDLE = 218, ACTOR_BANDIT_SLOT = 219,
     PERMFLAG_PROGRESS_RABBIT_RACE_1_COMPLETE = 0xF8,
     PERMFLAG_ITEM_GB_FUNGI_RABBIT_RACE = 0xF9,
     TEMPFLAG_ICE_TOMATO_BOARD_ACTIVE = 0x30,
@@ -59,8 +69,8 @@ static std::array<Prop, 512> props;
 static std::array<Prop_ScriptData, 512> scripts;
 static Prop* D_global_asm_807F6000 = props.data();
 static std::array<EnemySpawner, 4> enemy_spawners;
-static std::array<Actor, 4> actors;
-static std::array<CoopClamTestData, 4> actor_data;
+static std::array<Actor, 8> actors;
+static std::array<CoopClamTestData, 8> actor_data;
 static std::array<u8, 0x3A> tomato_data;
 struct CoopCountdownTestData {
     unsigned long long started{};
@@ -72,7 +82,7 @@ static CoopCountdownTestData tomato_clock_data;
 static s8 D_global_asm_807FC8C0[16];
 static bool tomato_board_active, caves_pad_available;
 struct ActorListEntry { Actor* actor{}; u32 metadata{}; };
-static ActorListEntry D_global_asm_807FB930[4];
+static ActorListEntry D_global_asm_807FB930[8];
 static u16 D_global_asm_807FBB34;
 #define DKCOOP_ENEMY_SPAWNER_TABLE_DEFINED
 typedef struct { s16 count, padding; EnemySpawner* first; } CoopEnemySpawnerTable;
@@ -101,6 +111,28 @@ static unsigned minecart_order_count;
 static AnimationState rabbit_animation;
 static bool rabbit_first_complete, rabbit_gb_owned;
 static unsigned rabbit_original_calls, rabbit_original_mode, rabbit_outcome_calls;
+struct BattyTestData {
+    Actor* reels[4]{};
+    s16 unk10{}, unk12{}, unk14{}, unk16{};
+    s8 unk18{}; u8 unk19{}, unk1A{}; s8 unk1B{};
+    u8 unk1C{}, unk1D{}, unk1E{}; s8 unk1F{};
+    void* unk20{};
+};
+struct BattyReelTestData { Actor* owner{}; s16 speed{}; };
+static BattyTestData batty_data;
+static std::array<BattyReelTestData, 4> batty_reel_data;
+static std::array<u8, 32> batty_timer_data, batty_player_data;
+static unsigned batty_original_calls, batty_original_mode, batty_success_calls;
+static unsigned batty_success_arg, batty_success_text, batty_cutscene_calls;
+static unsigned batty_hide_calls, batty_hide_element;
+static f32 batty_hide_rotation;
+static unsigned batty_hud_remove_calls;
+static void* batty_removed_hud;
+static Actor* batty_cutscene_actor;
+static s16 batty_cutscene_index;
+static u8 batty_cutscene_mode;
+static char batty_order[16];
+static unsigned batty_order_count;
 
 static void minecart_log(char step) {
     CHECK(minecart_order_count + 1 < sizeof(minecart_order));
@@ -118,12 +150,28 @@ static void func_bonus_80024158(void) {
         ++gCurrentActorPointer->control_state;
 }
 static void func_bonus_800264E0(u8 success, u8 text) {
-    ++kosh_success_calls; kosh_success_arg = success; kosh_success_text = text;
+    if (gCurrentActorPointer && gCurrentActorPointer->unk58 == ACTOR_BANDIT_HANDLE) {
+        ++batty_success_calls; batty_success_arg = success; batty_success_text = text;
+        batty_order[batty_order_count++] = 'S'; batty_order[batty_order_count] = 0;
+    } else {
+        ++kosh_success_calls; kosh_success_arg = success; kosh_success_text = text;
+    }
     if (gCurrentActorPointer) {
         if (gCurrentActorPointer->unk11C) gCurrentActorPointer->unk11C->control_state = 0;
         ++gCurrentActorPointer->control_state;
     }
     if (gPlayerPointer) gPlayerPointer->control_state = 0x44;
+}
+static void func_global_asm_806A2E30(void) {}
+static void func_bonus_800261B8(void) {}
+static void func_global_asm_806FDAB8(s16 element, f32 rotation) {
+    ++batty_hide_calls; batty_hide_element = static_cast<unsigned short>(element);
+    batty_hide_rotation = rotation;
+    batty_order[batty_order_count++] = 'H'; batty_order[batty_order_count] = 0;
+}
+static void func_global_asm_80715908(void* sprite) {
+    ++batty_hud_remove_calls; batty_removed_hud = sprite;
+    batty_order[batty_order_count++] = 'D'; batty_order[batty_order_count] = 0;
 }
 static void func_global_asm_80726EE0(u8 state) {
     CHECK(state == 0); ++minecart_cleanup_calls; minecart_log('C');
@@ -193,6 +241,56 @@ static void func_global_asm_806BE8BC(void) {
         gCurrentActorPointer->control_state_progress = 0;
     }
 }
+static s32 playCutscene(Actor* actor, s16 cutscene, u8 mode) {
+    ++batty_cutscene_calls; batty_cutscene_actor = actor;
+    batty_cutscene_index = cutscene; batty_cutscene_mode = mode;
+    batty_order[batty_order_count++] = 'C'; batty_order[batty_order_count] = 0;
+    return 0;
+}
+static void func_bonus_8002570C(void) {
+    ++batty_original_calls;
+    batty_order[batty_order_count++] = 'O'; batty_order[batty_order_count] = 0;
+    if (!gCurrentActorPointer) return;
+    auto* data = static_cast<BattyTestData*>(gCurrentActorPointer->additional_actor_data);
+    if (batty_original_mode == 1 && gCurrentActorPointer->control_state == 7) {
+        func_global_asm_806FDAB8(data->unk19, MATH_PI_F);
+        --data->unk16;
+        gPlayerPointer->control_state_progress = 1;
+        func_bonus_800264E0(0, 0);
+        gCurrentActorPointer->control_state = 8;
+        gCurrentActorPointer->control_state_progress = 0;
+        gCurrentActorPointer->unk168 = 4;
+        data->unk10 = 0; data->unk1A = 0;
+        playCutscene(nullptr, 0, 0x11);
+        if (data->unk20) {
+            func_global_asm_80715908(data->unk20);
+            data->unk20 = nullptr;
+        }
+    } else if (batty_original_mode == 2) {
+        gPlayerPointer->control_state = 0x43;
+        gCurrentActorPointer->control_state = 9;
+    } else if (batty_original_mode == 3 && gCurrentActorPointer->control_state == 3) {
+        gCurrentActorPointer->control_state = 2;
+    } else if (batty_original_mode == 4 && gCurrentActorPointer->control_state == 7) {
+        gCurrentActorPointer->control_state = 3;
+    } else if (batty_original_mode == 5) {
+        D_global_asm_807FB930[0].actor = nullptr;
+    } else if (batty_original_mode == 6) {
+        ++gCurrentActorPointer->unk54;
+    } else if (batty_original_mode == 7) {
+        D_global_asm_807FB930[1].actor = nullptr;
+    } else if (batty_original_mode == 8) {
+        ++gCurrentActorPointer->unk11C->unk54;
+    } else if (batty_original_mode == 9) {
+        D_global_asm_807FB930[2].actor = nullptr;
+    } else if (batty_original_mode == 10) {
+        ++data->reels[0]->unk54;
+    } else if (batty_original_mode == 11) {
+        data->reels[0] = &actors[7];
+    } else if (batty_original_mode == 12) {
+        gCurrentActorPointer->unk11C = &actors[7];
+    }
+}
 static void recomp_printf(const char*, ...) {}
 
 static s16 func_global_asm_80659470(s32 object) {
@@ -259,6 +357,9 @@ static void reset() {
     D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER] = func_bonus_80024158;
     D_global_asm_8074C0A0[ACTOR_MINECART_BONUS] = func_minecart_80024FD0;
     D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] = func_global_asm_806BE8BC;
+    D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] = func_bonus_8002570C;
+    D_global_asm_8074C0A0[ACTOR_TIMER] = func_global_asm_806A2E30;
+    D_global_asm_8074C0A0[ACTOR_BANDIT_SLOT] = func_bonus_800261B8;
     kosh_parent = 0; kosh_exit = 0; kosh_parent_valid = false;
     kosh_original_calls = kosh_success_calls = kosh_success_arg = kosh_success_text = 0;
     coop_kosh_original = nullptr; coop_kosh_hook = 0;
@@ -282,6 +383,17 @@ static void reset() {
     coop_rabbit_pending_epoch = coop_rabbit_pending_key = 0;
     coop_rabbit_applied_epoch = coop_rabbit_applied_key = 0;
     coop_rabbit_success_epoch = coop_rabbit_success_key = 0;
+    batty_data = {}; batty_reel_data = {}; batty_timer_data = {}; batty_player_data = {};
+    batty_original_calls = batty_original_mode = batty_success_calls = 0;
+    batty_success_arg = batty_success_text = batty_cutscene_calls = 0;
+    batty_hide_calls = batty_hide_element = 0; batty_hide_rotation = 0;
+    batty_hud_remove_calls = 0; batty_removed_hud = nullptr;
+    batty_cutscene_actor = nullptr; batty_cutscene_index = 0; batty_cutscene_mode = 0;
+    batty_order_count = 0; batty_order[0] = 0;
+    coop_batty_original = nullptr; coop_batty_hook = 0;
+    coop_batty_pending_epoch = coop_batty_pending_key = 0;
+    coop_batty_applied_epoch = coop_batty_applied_key = 0;
+    coop_batty_success_epoch = coop_batty_success_key = 0;
     coop_transient_init();
 }
 static void load(unsigned slot, unsigned object, unsigned state, unsigned timer = 0) {
@@ -363,6 +475,42 @@ static void load_rabbit(unsigned key) {
     D_global_asm_807FB930[0].actor = &actors[0]; D_global_asm_807FBB34 = 1;
     load(0x1F, 0x1F, 3);
     if (key == 2) load(0x57, 0x57, 0);
+}
+static void load_batty(unsigned key) {
+    CHECK(key >= 1 && key <= 3);
+    const auto& row = coop_batty_identities[key - 1];
+    current_map = row.map; kosh_parent = row.parent; kosh_exit = 0; kosh_parent_valid = true;
+    current_character_index[0] = row.kong;
+    actors[0].object_properties_bitfield = 0x10;
+    actors[0].unk54 = 131; actors[0].unk58 = ACTOR_BANDIT_HANDLE;
+    actors[0].control_state = 2; actors[0].control_state_progress = 1;
+    actors[0].unk168 = 0; actors[0].additional_actor_data = &batty_data;
+    actors[0].unk11C = &actors[1];
+    actors[1].object_properties_bitfield = 0x10;
+    actors[1].unk54 = 132; actors[1].unk58 = ACTOR_TIMER;
+    actors[1].control_state = 2; actors[1].unk15F = 6;
+    actors[1].additional_actor_data = batty_timer_data.data();
+    batty_data.unk10 = 17; batty_data.unk14 = 3; batty_data.unk16 = 3;
+    batty_data.unk1A = 1; batty_data.unk1C = row.unk1C;
+    batty_data.unk1D = row.unk1D; batty_data.unk1E = row.unk1E;
+    *reinterpret_cast<s32*>(batty_timer_data.data() + 0xC) = row.unk1C;
+    for (unsigned i = 0; i < 4; ++i) {
+        Actor& reel = actors[i + 2];
+        reel.object_properties_bitfield = 0x10; reel.unk54 = 140 + i;
+        reel.unk58 = ACTOR_BANDIT_SLOT; reel.control_state = 0; reel.unk15F = i;
+        reel.additional_actor_data = &batty_reel_data[i];
+        batty_reel_data[i].owner = &actors[0]; batty_reel_data[i].speed = 10 + i;
+        batty_data.reels[i] = &reel;
+    }
+    actors[6].additional_actor_data = batty_player_data.data();
+    actors[6].control_state = 0x49;
+    gCurrentActorPointer = &actors[0]; gPlayerPointer = &actors[6];
+    rabbit_player_info.vehicle_actor_pointer = &actors[0];
+    rabbit_player_info.unk1A8 = &actors[1];
+    actors[6].additional_actor_data = &rabbit_player_info;
+    extra_player_info_pointer = &rabbit_player_info;
+    for (unsigned i = 0; i < 6; ++i) D_global_asm_807FB930[i].actor = &actors[i];
+    D_global_asm_807FBB34 = 6;
 }
 static bool contains(unsigned kind, unsigned key, unsigned state) {
     for (unsigned i = 0; i < transient_input.count; ++i) {
@@ -1998,8 +2146,251 @@ static void rabbit_checks() {
     CHECK(!coop_kosh_hook && !coop_minecart_hook && !coop_rabbit_hook);
 }
 
+static void batty_checks() {
+    // All three reviewed vanilla identities publish only their exact natural
+    // terminal-success edge. The stock helper/postlude runs once.
+    for (unsigned key = 1; key <= 3; ++key) {
+        reset(); load_batty(key); actors[0].control_state = 7;
+        actors[0].control_state_progress = 0; actors[0].unk168 = 4;
+        batty_data.unk16 = 1; batty_data.unk20 = &batty_data;
+        batty_original_mode = 1;
+        D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE]();
+        CHECK(batty_original_calls == 1 && batty_success_calls == 1
+            && batty_hide_calls == 1 && batty_cutscene_calls == 1
+            && batty_hud_remove_calls == 1 && !batty_data.unk20);
+        CHECK(actors[0].control_state == 8 && actors[0].control_state_progress == 0
+            && actors[0].unk168 == 4 && actors[1].control_state == 0
+            && actors[6].control_state == 0x44 && actors[6].control_state_progress == 1
+            && batty_data.unk16 == 0 && batty_data.unk10 == 0 && batty_data.unk1A == 0);
+        CHECK(batty_order_count == 5 && batty_order[0] == 'O' && batty_order[1] == 'H'
+            && batty_order[2] == 'S' && batty_order[3] == 'C' && batty_order[4] == 'D');
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_BATTY_SUCCESS, key, 1, 0));
+    }
+
+    // Either peer can consume each identity from the single stable state and
+    // each legitimate live countdown state. Original behavior always runs first.
+    for (unsigned receiver_role : {ROLE_HOST, ROLE_JOIN}) for (unsigned key = 1; key <= 3; ++key)
+            for (unsigned timer_state : {1u, 2u, 4u}) {
+        reset(); load_batty(key); role = receiver_role;
+        actors[1].control_state = static_cast<u8>(timer_state);
+        batty_data.unk19 = 23; batty_data.unk20 = &batty_data;
+        std::array<u8, 4> reel_states{}, reel_faces{};
+        std::array<s16, 4> reel_speeds{};
+        for (unsigned i = 0; i < 4; ++i) {
+            reel_states[i] = actors[i + 2].control_state;
+            reel_faces[i] = actors[i + 2].unk15F;
+            reel_speeds[i] = batty_reel_data[i].speed;
+        }
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_BATTY_SUCCESS, key, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_batty_pending_key == key && !batty_original_calls);
+        D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE]();
+        CHECK(batty_original_calls == 1 && batty_success_calls == 1
+            && batty_success_arg == 0 && batty_success_text == 0
+            && batty_hide_calls == 1 && batty_hide_element == 23
+            && batty_hide_rotation == MATH_PI_F && batty_cutscene_calls == 1
+            && !batty_cutscene_actor && batty_cutscene_index == 0
+            && batty_cutscene_mode == 0x11 && batty_hud_remove_calls == 1
+            && batty_removed_hud == &batty_data);
+        CHECK(batty_order_count == 5 && batty_order[0] == 'O' && batty_order[1] == 'H'
+            && batty_order[2] == 'S' && batty_order[3] == 'C' && batty_order[4] == 'D');
+        CHECK(actors[0].control_state == 8 && actors[0].control_state_progress == 0
+            && actors[0].unk168 == 4 && actors[1].control_state == 0
+            && actors[6].control_state == 0x44 && actors[6].control_state_progress == 1
+            && batty_data.unk16 == 0 && batty_data.unk10 == 0 && batty_data.unk1A == 0
+            && !batty_data.unk20 && !coop_batty_pending_key);
+        for (unsigned i = 0; i < 4; ++i)
+            CHECK(actors[i + 2].control_state == reel_states[i]
+                && actors[i + 2].unk15F == reel_faces[i]
+                && batty_reel_data[i].speed == reel_speeds[i]
+                && batty_reel_data[i].owner == &actors[0]);
+        coop_transient_apply(); coop_batty_behavior();
+        CHECK(batty_success_calls == 1 && batty_cutscene_calls == 1);
+        coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_BATTY_SUCCESS, key, 1, 0));
+    }
+
+    // Malformed, stale, wrong-map and cross-identity packets never queue.
+    for (unsigned scenario = 0; scenario < 8; ++scenario) {
+        reset(); load_batty(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+        if (scenario == 0) transient_result.records[0].key = 0;
+        if (scenario == 1) transient_result.records[0].key = 2;
+        if (scenario == 2) transient_result.records[0].key = 4;
+        if (scenario == 3) transient_result.records[0].state = 2;
+        if (scenario == 4) transient_result.records[0].value = 1;
+        if (scenario == 5) transient_result.epoch--;
+        if (scenario == 6) transient_result.map++;
+        if (scenario == 7) loading_zone_transition_speed = 1.0f;
+        coop_transient_apply(); CHECK(!coop_batty_pending_key);
+    }
+
+    // Intro and active spin/result states retain a queued success. A stock
+    // 3->2 or failed 7->3 edge cannot consume until a later stable callback.
+    for (unsigned state : {0u, 3u, 4u, 5u, 6u, 7u}) {
+        reset(); load_batty(1); role = ROLE_JOIN;
+        actors[0].control_state = static_cast<u8>(state);
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); coop_batty_behavior();
+        CHECK(batty_original_calls == 1 && !batty_success_calls
+            && coop_batty_pending_key == 1);
+    }
+    reset(); load_batty(1); role = ROLE_JOIN; actors[0].control_state = 3;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); batty_original_mode = 3; coop_batty_behavior();
+    CHECK(actors[0].control_state == 2 && coop_batty_pending_key == 1 && !batty_success_calls);
+    batty_original_mode = 0; coop_batty_behavior(); CHECK(batty_success_calls == 1);
+    reset(); load_batty(1); role = ROLE_JOIN; actors[0].control_state = 7;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); batty_original_mode = 4; coop_batty_behavior();
+    CHECK(actors[0].control_state == 3 && coop_batty_pending_key == 1 && !batty_success_calls);
+
+    // Stable-state normalization gates wait while a reel is moving, but
+    // expired or terminal attempts clear. Local timeout/natural success wins.
+    reset(); load_batty(1); role = ROLE_JOIN; actors[2].control_state = 5;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); coop_batty_behavior();
+    CHECK(coop_batty_pending_key == 1 && !batty_success_calls);
+    actors[2].control_state = 0; coop_batty_behavior(); CHECK(batty_success_calls == 1);
+    reset(); load_batty(1); role = ROLE_JOIN; actors[1].control_state = 5;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); coop_batty_behavior();
+    CHECK(!coop_batty_pending_key && !batty_success_calls);
+    for (unsigned state : {1u, 8u, 9u}) {
+        reset(); load_batty(1); role = ROLE_JOIN; actors[0].control_state = state;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); coop_batty_behavior();
+        CHECK(!coop_batty_pending_key && !batty_success_calls);
+    }
+    reset(); load_batty(1); role = ROLE_JOIN;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+    coop_transient_apply(); batty_original_mode = 2; coop_batty_behavior();
+    CHECK(actors[0].control_state == 9 && actors[6].control_state == 0x43
+        && !coop_batty_pending_key && !batty_success_calls);
+    reset(); load_batty(2); role = ROLE_JOIN; actors[0].control_state = 7;
+    actors[0].control_state_progress = 0; actors[0].unk168 = 4;
+    batty_data.unk16 = 1; batty_data.unk20 = &batty_data;
+    transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+        {{COOP_TRANSIENT_BATTY_SUCCESS, 2, 1, 0}}};
+    coop_transient_apply(); batty_original_mode = 1; coop_batty_behavior();
+    CHECK(batty_success_calls == 1 && batty_cutscene_calls == 1 && !coop_batty_pending_key);
+    coop_transient_capture(1); CHECK(contains_value(COOP_TRANSIENT_BATTY_SUCCESS, 2, 1, 0));
+
+    // General identity, stable-only gates, child ownership and post-original
+    // generation/removal/replacement all fail closed without stale dereference.
+    for (unsigned scenario = 0; scenario < 38; ++scenario) {
+        reset(); load_batty(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); CHECK(coop_batty_pending_key == 1);
+        if (scenario == 0) current_map = MAP_BATTY_BARREL_BANDIT_HARD;
+        if (scenario == 1) ++kosh_parent;
+        if (scenario == 2) kosh_exit = 1;
+        if (scenario == 3) ++current_character_index[0];
+        if (scenario == 4) actors[0].unk58 = ACTOR_MINIGAME_CONTROLLER;
+        if (scenario == 5) actors[0].object_properties_bitfield = 0;
+        if (scenario == 6) actors[0].additional_actor_data = nullptr;
+        if (scenario == 7) actors[0].unk11C = nullptr;
+        if (scenario == 8) actors[6].additional_actor_data = nullptr;
+        if (scenario == 9) extra_player_info_pointer = nullptr;
+        if (scenario == 10) rabbit_player_info.vehicle_actor_pointer = &actors[7];
+        if (scenario == 11) rabbit_player_info.unk1A8 = &actors[7];
+        if (scenario == 12) D_global_asm_807FB930[0].actor = nullptr;
+        if (scenario == 13) D_global_asm_807FBB34 = 65;
+        if (scenario == 14) actors[1].unk58 = ACTOR_TIMER_CONTROLLER;
+        if (scenario == 15) actors[1].object_properties_bitfield = 0;
+        if (scenario == 16) actors[1].additional_actor_data = nullptr;
+        if (scenario == 17) actors[1].unk15F = 5;
+        if (scenario == 18) ++*reinterpret_cast<s32*>(batty_timer_data.data() + 0xC);
+        if (scenario == 19) D_global_asm_8074C0A0[ACTOR_TIMER] = nullptr;
+        if (scenario == 20) batty_data.unk14 = 2;
+        if (scenario == 21) batty_data.unk16 = 4;
+        if (scenario == 22) batty_data.unk1A = 2;
+        if (scenario == 23) ++batty_data.unk1C;
+        if (scenario == 24) batty_data.reels[0] = reinterpret_cast<Actor*>(1);
+        if (scenario == 25) actors[2].unk58 = ACTOR_BANDIT_HANDLE;
+        if (scenario == 26) actors[2].object_properties_bitfield = 0;
+        if (scenario == 27) actors[2].additional_actor_data = nullptr;
+        if (scenario == 28) actors[2].control_state = 6;
+        if (scenario == 29) batty_reel_data[0].owner = &actors[7];
+        if (scenario == 30) batty_data.reels[1] = batty_data.reels[0];
+        if (scenario == 31) D_global_asm_8074C0A0[ACTOR_BANDIT_SLOT] = nullptr;
+        if (scenario == 32) batty_original_mode = 5;
+        if (scenario == 33) batty_original_mode = 6;
+        if (scenario == 34) batty_original_mode = 7;
+        if (scenario == 35) batty_original_mode = 8;
+        if (scenario == 36) batty_original_mode = 9;
+        if (scenario == 37) actors[0].unk11C = reinterpret_cast<Actor*>(1);
+        coop_batty_behavior();
+        CHECK(batty_original_calls == 1 && !batty_success_calls && !coop_batty_pending_key);
+    }
+    for (unsigned mode : {10u, 11u, 12u}) {
+        reset(); load_batty(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply(); batty_original_mode = mode; coop_batty_behavior();
+        CHECK(batty_original_calls == 1 && !batty_success_calls && !coop_batty_pending_key);
+    }
+
+    // The fourth, hard Batty map has a distinct vanilla contract and remains local.
+    reset(); load_batty(1); current_map = MAP_BATTY_BARREL_BANDIT_HARD;
+    kosh_parent = 43; current_character_index[0] = 4;
+    actors[0].control_state = 7; actors[0].control_state_progress = 0;
+    actors[0].unk168 = 4; batty_data.unk16 = 1; batty_data.unk20 = &batty_data;
+    batty_original_mode = 1; coop_batty_behavior(); coop_transient_capture(1);
+    CHECK(batty_success_calls == 1 && !contains(COOP_TRANSIENT_BATTY_SUCCESS, 1, 1));
+    for (unsigned scenario = 0; scenario < 4; ++scenario) {
+        reset(); load_batty(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply();
+        if (scenario == 0) loading_zone_transition_speed = 1.0f;
+        if (scenario == 1) transient_file_changed = 1;
+        if (scenario == 2) gPlayerPointer = nullptr;
+        if (scenario == 3) ++epoch;
+        coop_batty_behavior();
+        CHECK(batty_original_calls == 1 && !batty_success_calls && !coop_batty_pending_key);
+    }
+
+    // Receiver-only stable predicates cannot force terminal success.
+    for (unsigned scenario = 0; scenario < 7; ++scenario) {
+        reset(); load_batty(1); role = ROLE_JOIN;
+        transient_result = {COOP_TRANSIENT_APPLYING, current_map, epoch, 1,
+            {{COOP_TRANSIENT_BATTY_SUCCESS, 1, 1, 0}}};
+        coop_transient_apply();
+        if (scenario == 0) actors[0].control_state_progress = 0;
+        if (scenario == 1) actors[0].unk168 = 1;
+        if (scenario == 2) actors[6].control_state = 0x44;
+        if (scenario == 3) batty_data.unk16 = 0;
+        if (scenario == 4) actors[1].control_state = 0;
+        if (scenario == 5) actors[1].control_state = 3;
+        if (scenario == 6) actors[1].control_state = 5;
+        coop_batty_behavior();
+        CHECK(!batty_success_calls);
+        if (scenario == 6) CHECK(!coop_batty_pending_key);
+        else CHECK(coop_batty_pending_key == 1);
+    }
+
+    // A controller hook conflict disables Batty alone. Global Off installs no hook.
+    reset(); D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] = nullptr;
+    coop_batty_hook = 0; coop_transient_init(); CHECK(!coop_batty_hook);
+    reset(); transient_enabled = 0; coop_batty_hook = 0;
+    D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] = func_bonus_8002570C;
+    coop_transient_init(); CHECK(!coop_batty_hook
+        && D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] == func_bonus_8002570C);
+}
+
 int main() {
     capture_checks(); object_apply_checks(); cutscene_checks(); lobby_instrument_pad_checks();
-    kosh_checks(); minecart_checks(); rabbit_checks();
+    kosh_checks(); minecart_checks(); rabbit_checks(); batty_checks();
     std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }

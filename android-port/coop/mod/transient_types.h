@@ -39,7 +39,10 @@ enum {
     // One of Fungi Forest's two vanilla Rabbit Race rounds completed. The
     // stock Rabbit owns both presentations, the first-round refill and GB.
     COOP_TRANSIENT_RABBIT_SUCCESS,
-    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_RABBIT_SUCCESS
+    // One of three exact vanilla Batty Barrel Bandit controllers completed.
+    // Reels, lives, timer, presentation, destination and reward remain local.
+    COOP_TRANSIENT_BATTY_SUCCESS,
+    COOP_TRANSIENT_KIND_COUNT = COOP_TRANSIENT_BATTY_SUCCESS
 };
 enum {
     COOP_TRANSIENT_OFF,

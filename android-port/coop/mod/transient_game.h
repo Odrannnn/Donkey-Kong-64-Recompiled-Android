@@ -296,6 +296,41 @@ static unsigned coop_rabbit_hook, coop_rabbit_pending_epoch, coop_rabbit_pending
 static unsigned coop_rabbit_applied_epoch, coop_rabbit_applied_key;
 static unsigned coop_rabbit_success_epoch, coop_rabbit_success_key;
 
+typedef struct {
+    Actor* reels[4];
+    short unk10, unk12, unk14, unk16;
+    signed char unk18;
+    unsigned char unk19, unk1A;
+    signed char unk1B;
+    unsigned char unk1C, unk1D, unk1E;
+    signed char unk1F;
+    void* unk20;
+} CoopBattyData;
+typedef struct { Actor* owner; short speed; } CoopBattyReelData;
+typedef struct {
+    unsigned char map, parent, kong, unk1C, unk1D, unk1E;
+} CoopBattyIdentity;
+static const CoopBattyIdentity coop_batty_identities[3] = {
+    {32, 43, 4, 0x2D, 0x20, 0x20},
+    {121, 26, 2, 0x2D, 0x20, 0x34},
+    {122, 195, 1, 0x28, 0x2A, 0x34},
+};
+#ifdef MIPS
+_Static_assert(sizeof(CoopBattyData) == 0x24
+    && __builtin_offsetof(CoopBattyData, unk10) == 0x10
+    && __builtin_offsetof(CoopBattyData, unk14) == 0x14
+    && __builtin_offsetof(CoopBattyData, unk16) == 0x16
+    && __builtin_offsetof(CoopBattyData, unk19) == 0x19
+    && __builtin_offsetof(CoopBattyData, unk1A) == 0x1A
+    && __builtin_offsetof(CoopBattyData, unk20) == 0x20,
+    "Pinned Batty controller private-data layout");
+#endif
+static void coop_batty_behavior(void);
+static void (*coop_batty_original)(void);
+static unsigned coop_batty_hook, coop_batty_pending_epoch, coop_batty_pending_key;
+static unsigned coop_batty_applied_epoch, coop_batty_applied_key;
+static unsigned coop_batty_success_epoch, coop_batty_success_key;
+
 extern CharacterSpawner* D_global_asm_807FDC9C;
 extern s32 func_global_asm_805FF800(Maps* map, s32* exit);
 extern void func_bonus_80024158(void);
@@ -303,12 +338,26 @@ extern void func_bonus_800264E0(u8 success, u8 text);
 extern void func_minecart_80024FD0(void);
 extern void func_minecart_80024000(u8 success, u8 text);
 extern void func_global_asm_806BE8BC(void);
+extern void func_bonus_8002570C(void);
+extern void func_global_asm_806A2E30(void);
+extern void func_bonus_800261B8(void);
+extern void func_global_asm_806FDAB8(s16 element, f32 rotation);
+extern void func_global_asm_80715908(void* sprite);
 extern void func_global_asm_80726EE0(u8 state);
 
 static unsigned coop_kosh_actor_live(Actor* actor, unsigned generation) {
     if (!actor || D_global_asm_807FBB34 > 64) return 0;
     for (unsigned i = 0; i < D_global_asm_807FBB34; ++i)
         if (D_global_asm_807FB930[i].actor == actor) return actor->unk54 == generation;
+    return 0;
+}
+
+// Prove list membership before reading a child pointer supplied by another
+// actor's private data.  The controller may have unloaded/reused that child.
+static unsigned coop_batty_actor_listed(Actor* actor) {
+    if (!actor || D_global_asm_807FBB34 > 64) return 0;
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i)
+        if (D_global_asm_807FB930[i].actor == actor) return 1;
     return 0;
 }
 
@@ -508,6 +557,145 @@ static void coop_rabbit_behavior(void) {
     }
 }
 
+static unsigned coop_batty_identity(Actor* actor) {
+    if (!coop_batty_hook || !actor || actor != gCurrentActorPointer
+            || !coop_batty_actor_listed(actor)
+            || actor->unk58 != ACTOR_BANDIT_HANDLE
+            || !(actor->object_properties_bitfield & 0x10)
+            || !actor->additional_actor_data || !actor->unk11C
+            || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer || !gPlayerPointer->additional_actor_data
+            || !extra_player_info_pointer
+            || gPlayerPointer->additional_actor_data != extra_player_info_pointer
+            || extra_player_info_pointer->vehicle_actor_pointer != actor
+            || extra_player_info_pointer->unk1A8 != actor->unk11C
+            || D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] != coop_batty_behavior) return 0;
+    Actor* timer = actor->unk11C;
+    if (!coop_batty_actor_listed(timer)
+            || timer->unk58 != ACTOR_TIMER
+            || !(timer->object_properties_bitfield & 0x10)
+            || !timer->additional_actor_data
+            || timer->unk15F != 6 || timer->control_state > 5
+            || D_global_asm_8074C0A0[ACTOR_TIMER] != func_global_asm_806A2E30) return 0;
+    Maps parent = current_map;
+    s32 exit = -1;
+    if (!func_global_asm_805FF800(&parent, &exit) || exit != 0) return 0;
+    CoopBattyData* data = (CoopBattyData*)actor->additional_actor_data;
+    if (data->unk14 != 3 || data->unk16 < 0 || data->unk16 > 3 || data->unk1A > 1) return 0;
+    if (*(s32*)((u8*)timer->additional_actor_data + 0xC) != data->unk1C) return 0;
+    unsigned key = 0;
+    for (unsigned i = 0; i < 3; ++i) {
+        const CoopBattyIdentity* row = &coop_batty_identities[i];
+        if (row->map == (unsigned)current_map && row->parent == (unsigned)parent
+                && row->kong == current_character_index[0]
+                && row->unk1C == data->unk1C && row->unk1D == data->unk1D
+                && row->unk1E == data->unk1E) {
+            key = i + 1;
+            break;
+        }
+    }
+    if (!key) return 0;
+    for (unsigned i = 0; i < 4; ++i) {
+        Actor* reel = data->reels[i];
+        if (!coop_batty_actor_listed(reel) || reel->unk58 != ACTOR_BANDIT_SLOT
+                || !(reel->object_properties_bitfield & 0x10)
+                || !reel->additional_actor_data || reel->control_state > 5
+                || D_global_asm_8074C0A0[ACTOR_BANDIT_SLOT] != func_bonus_800261B8
+                || ((CoopBattyReelData*)reel->additional_actor_data)->owner != actor) return 0;
+        for (unsigned j = 0; j < i; ++j) if (data->reels[j] == reel) return 0;
+    }
+    return key;
+}
+
+static void coop_batty_latch_success(unsigned key) {
+    coop_batty_success_epoch = epoch;
+    coop_batty_success_key = key;
+    coop_batty_applied_epoch = epoch;
+    coop_batty_applied_key = key;
+    coop_batty_pending_key = 0;
+}
+
+static void coop_batty_behavior(void) {
+    Actor* actor = gCurrentActorPointer;
+    unsigned generation = actor ? actor->unk54 : 0;
+    unsigned key = coop_batty_identity(actor);
+    CoopBattyData* data = key ? (CoopBattyData*)actor->additional_actor_data : 0;
+    Actor* timer = key ? actor->unk11C : 0;
+    unsigned timer_generation = timer ? timer->unk54 : 0;
+    Actor* reels[4] = {0};
+    unsigned reel_generations[4] = {0};
+    if (key) for (unsigned i = 0; i < 4; ++i) {
+        reels[i] = data->reels[i];
+        reel_generations[i] = reels[i]->unk54;
+    }
+    unsigned before = key ? actor->control_state : 0;
+    if (coop_batty_pending_key && (coop_batty_pending_epoch != epoch
+            || transient_file_changed || loading_zone_transition_speed != 0.0f
+            || !gPlayerPointer)) coop_batty_pending_key = 0;
+    if (coop_batty_original) coop_batty_original();
+    unsigned valid = key && !transient_file_changed
+        && loading_zone_transition_speed == 0.0f && gPlayerPointer
+        && coop_kosh_actor_live(actor, generation)
+        && actor->additional_actor_data == data && actor->unk11C == timer
+        && coop_kosh_actor_live(timer, timer_generation);
+    for (unsigned i = 0; valid && i < 4; ++i)
+        valid = data->reels[i] == reels[i]
+            && coop_kosh_actor_live(reels[i], reel_generations[i]);
+    if (!valid || coop_batty_identity(actor) != key) {
+        coop_batty_pending_key = 0;
+        return;
+    }
+    if (before == 7 && actor->control_state == 8
+            && gPlayerPointer->control_state == 0x44
+            && gPlayerPointer->control_state_progress == 1
+            && data->unk16 == 0 && data->unk10 == 0 && data->unk1A == 0
+            && timer->control_state == 0 && actor->control_state_progress == 0
+            && actor->unk168 == 4 && !data->unk20) {
+        coop_batty_latch_success(key);
+        return;
+    }
+    if (actor->control_state == 9) {
+        coop_batty_pending_key = 0;
+        return;
+    }
+    if (before == 2 && actor->control_state == 2
+            && timer->control_state == 5) {
+        coop_batty_pending_key = 0;
+        return;
+    }
+    if (before == 2 && actor->control_state == 2
+            && actor->control_state_progress == 1 && actor->unk168 == 0
+            && gPlayerPointer->control_state == 0x49
+            && data->unk16 >= 1 && data->unk16 <= 3
+            && (timer->control_state == 1 || timer->control_state == 2
+                || timer->control_state == 4)
+            && coop_batty_pending_epoch == epoch && coop_batty_pending_key == key
+            && !(coop_batty_applied_epoch == epoch && coop_batty_applied_key == key)) {
+        unsigned stopped = 1;
+        for (unsigned i = 0; i < 4; ++i) stopped &= reels[i]->control_state == 0;
+        if (stopped) {
+            func_global_asm_806FDAB8(data->unk19, MATH_PI_F);
+            data->unk16 = 0;
+            gPlayerPointer->control_state_progress = 1;
+            func_bonus_800264E0(0, 0);
+            actor->control_state = 8;
+            actor->control_state_progress = 0;
+            actor->unk168 = 4;
+            data->unk10 = 0;
+            data->unk1A = 0;
+            playCutscene(0, 0, 0x11);
+            if (data->unk20) {
+                func_global_asm_80715908(data->unk20);
+                data->unk20 = 0;
+            }
+            coop_batty_latch_success(key);
+        }
+        return;
+    }
+    if (before == 0 || (before >= 2 && before <= 7)) return;
+    coop_batty_pending_key = 0;
+}
+
 static void coop_transient_init(void) {
     if (!transient_enabled) return;
     coop_kosh_original = D_global_asm_8074C0A0[ACTOR_MINIGAME_CONTROLLER];
@@ -534,6 +722,15 @@ static void coop_transient_init(void) {
     } else {
         D_global_asm_8074C0A0[ACTOR_RABBIT_RACE] = coop_rabbit_behavior;
         coop_rabbit_hook = 1;
+    }
+    coop_batty_original = D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE];
+    if (coop_batty_original != func_bonus_8002570C) {
+        recomp_printf("[dk64-coop] Batty controller modified by another mod; shared Batty success disabled.\n");
+        coop_batty_original = 0;
+        coop_batty_hook = 0;
+    } else {
+        D_global_asm_8074C0A0[ACTOR_BANDIT_HANDLE] = coop_batty_behavior;
+        coop_batty_hook = 1;
     }
 }
 
@@ -589,6 +786,25 @@ static void coop_transient_apply_rabbit(CoopTransientRecord record) {
                 && coop_rabbit_applied_key == record.key)) return;
     coop_rabbit_pending_epoch = epoch;
     coop_rabbit_pending_key = record.key;
+}
+
+static void coop_transient_add_batty(CoopTransientInput* input) {
+    if (coop_batty_success_epoch != epoch || !coop_batty_success_key
+            || coop_batty_success_key > 3 || input->count >= COOP_TRANSIENT_RECORDS
+            || coop_batty_identities[coop_batty_success_key - 1].map
+                != (unsigned)current_map) return;
+    input->records[input->count++] = (CoopTransientRecord){
+        COOP_TRANSIENT_BATTY_SUCCESS, coop_batty_success_key, 1, 0};
+}
+
+static void coop_transient_apply_batty(CoopTransientRecord record) {
+    if (!coop_batty_hook || record.key < 1 || record.key > 3
+            || record.state != 1 || record.value
+            || coop_batty_identities[record.key - 1].map != (unsigned)current_map
+            || (coop_batty_applied_epoch == epoch
+                && coop_batty_applied_key == record.key)) return;
+    coop_batty_pending_epoch = epoch;
+    coop_batty_pending_key = record.key;
 }
 
 static unsigned coop_transient_timer_sample_is_new(CoopTransientRecord record) {
@@ -987,6 +1203,7 @@ static void coop_transient_capture(unsigned present) {
     coop_transient_add_kosh(&transient_input);
     coop_transient_add_minecart(&transient_input);
     coop_transient_add_rabbit(&transient_input);
+    coop_transient_add_batty(&transient_input);
     // Retain the last same-epoch target briefly after the host finishes so a
     // lagging copy can consume missed phases. Apply still requires the Join to
     // be running the exact same cutscene and flags, so this cannot launch one.
@@ -1035,6 +1252,10 @@ static void coop_transient_apply(void) {
         }
         if (record.kind == COOP_TRANSIENT_RABBIT_SUCCESS) {
             coop_transient_apply_rabbit(record);
+            continue;
+        }
+        if (record.kind == COOP_TRANSIENT_BATTY_SUCCESS) {
+            coop_transient_apply_batty(record);
             continue;
         }
         if (role != ROLE_JOIN) continue;
