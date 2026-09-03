@@ -1,4 +1,4 @@
-> Current source: 0.71.0, protocol/native ABI v71. The complete Linux
+> Current source: 0.72.0, protocol/native ABI v72. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
@@ -2912,3 +2912,26 @@ through the isolated item-save path. Main maps retain the reload fallback when
 a reviewed component is unexpectedly missing. Packet and bridge sizes remain
 unchanged. Protocol 71, compatibility `0x00010247`, v71 exports and manifest
 0.71.0 reject older peers and companions.
+
+
+## Isles boulder and Galleon opening continuity (0.72.0)
+
+The Isles boulder flag `0x1AE` now applies as one preflighted live unit in
+DK Isles map 34. Controller `0x3C` enters its exact saved-complete state 40,
+controller `0x00` enters state 100, and object `0x56` receives the inverse of
+its flag-unset visibility initializer. The inverse uses the same instance-script
+visibility fields as opcode 69, targeting 255 at speed 255; it does not replay
+the boulder interaction, reward, cutscene or flag write. If any of the three
+loaded scripts is missing, the existing safe reload path remains in force.
+
+Galleon's ship and lighthouse flag `0x09C` no longer requires both controllers
+to remain at raw state 0. A waiting controller still runs its flag-positive
+state-0 initializer. Ship states 10-17 and 26-28, and lighthouse states 10-14,
+are recognized as vanilla activation or steady interaction ranges and continue
+untouched. Unknown states fail before either controller changes. This lets an
+already-running local opening sequence retain its timer, sounds, linked object
+operations and cutscene while the permanent flag is accepted.
+
+The live table now contains 63 unique permanent flags and 158 object rows.
+Packet and bridge sizes remain unchanged. Protocol 72, compatibility
+`0x00010248`, v72 exports and manifest 0.72.0 reject older peers and companions.

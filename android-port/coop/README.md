@@ -1,13 +1,14 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
-Version **0.71.0** expands live permanent-world application to 62 audited flags
-and 155 loaded-object rows. Breakable walls and grates, chests and boxes, linked
-reveal/setup controllers, and Factory/Galleon/Fungi machines now select exact
-completed states or replay their vanilla saved-complete initializer. Reviewed
-interiors admit only their exact loaded world unit; every component is preflighted
-before an interior flag write, and these permanent replays are excluded from
-temporary script ownership. Main maps with no consumer no longer reload.
+Version **0.72.0** expands live permanent-world application to 63 audited flags
+and 158 loaded-object rows. The Isles boulder now applies its two exact terminal
+controller states plus the inverse vanilla visibility gate as one atomic unit.
+Galleon's ship and lighthouse opening may continue through their audited active
+states when the permanent flag arrives; the sync initializes only a controller
+that is still waiting, without restarting a cutscene or timer. Version **0.71.0**
+added the reviewed breakable walls and grates, chests and boxes, linked reveal
+controllers, and Factory/Galleon/Fungi machine completion paths.
 Version **0.70.0** applies the saved boss-portal closure live in all seven main
 levels. After the existing boss-key prerequisite succeeds, every loaded portal
 component enters its terminal vanilla state without a map reload. A missing
@@ -76,7 +77,7 @@ authority in a checksummed sidecar beside the isolated campaign save. A normal
 Join/Automatic configuration restores that promoted guest as Host after a full
 process restart; an explicit save-copy choice overrides recovery. Version 0.51.0's
 room-code discovery still follows DHCP address changes while retaining the numeric
-address as a direct fallback. Protocol 68 requires a matching peer and native
+address as a direct fallback. Protocol 72 requires a matching peer and native
 companion. It retains 0.50.0's upstream map-load and
 EEPROM-load lifecycle boundaries and the
 0.49.0 typed same-area activation for the four Frantic Factory
@@ -193,9 +194,9 @@ Independent exploration remains the default. Players may use
 different maps while collectible and progression synchronization continues;
 the remote model and combat pause until they share a map again. A join-side
 **Follow host** option restores coordinated travel through 169 reviewed ordinary routes.
-Live application now covers 25 permanent flags:
-73 affected loaded objects enter their flag-positive vanilla script state without
-a room reload, while complex changes keep the reload fallback. Galleon water and
+Live application now covers 63 permanent flags:
+158 affected loaded objects enter their reviewed completion path without a room
+reload, while complex changes keep the reload fallback. Galleon water and
 Fungi day/night now use their loaded vanilla switch scripts too. This version
 shares bounded damage phases for Army Dillo, Dogadon, Mad Jack, Pufftoss, King
 Kut Out, all five K. Rool rounds, and Tiny's shoe/toe sequence. It also retains
@@ -229,8 +230,9 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.71.0 applies the
-reviewed breakable, container and machine completions live, keeps all seven
+**This is experimental, not complete campaign co-op. Version 0.72.0 applies the
+Isles boulder live, preserves active Galleon opening sequences, retains the
+reviewed breakable, container and machine completions, keeps all seven
 boss-portal closures live, and keeps the five direct Baboon Blast finish
 routes, bidirectional Fungi Owl Race,
 Batty Barrel Bandit, Rabbit Race and Minecart Mayhem success,
@@ -268,7 +270,7 @@ worker never accesses game memory itself.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.71.0** ZIP on each device;
+1. Close both games. Install the complete matching **0.72.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -846,7 +848,7 @@ result is written by the transition channel.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v71 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v72 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned
