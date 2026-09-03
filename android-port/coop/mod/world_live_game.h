@@ -18,8 +18,9 @@ enum {
     COOP_LIVE_WORLD_PERMANENT = 2,
     COOP_LIVE_WORLD_REQUIRE = 3,
     COOP_LIVE_WORLD_NOOP = 4,
+    COOP_LIVE_WORLD_GUARD_ZERO = 5,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 122
+    COOP_LIVE_WORLD_STATE_COUNT = 147
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20}, { 7, 0x000, 0x01B, 20},
@@ -115,6 +116,37 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 48, 0x0E5, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
     {166, 0x141, 0x005,  0, COOP_LIVE_WORLD_REPLAY},
     { 87, 0x141, 0xFFFF, 0, COOP_LIVE_WORLD_NOOP},
+
+    // Machine and platform controllers. Permanent rows select bounded completed
+    // states; replay rows run the saved-complete initializer. REQUIRE rows make
+    // Factory production atomic without scheduling the child scripts directly.
+    { 26, 0x06D, 0x017, 20, COOP_LIVE_WORLD_PERMANENT},
+    { 26, 0x06D, 0x01D, 20, COOP_LIVE_WORLD_PERMANENT},
+    { 26, 0x06D, 0x010, 10, COOP_LIVE_WORLD_PERMANENT},
+    { 26, 0x06F, 0x000, 10, COOP_LIVE_WORLD_PERMANENT},
+    { 26, 0x06F, 0x107,  0, COOP_LIVE_WORLD_REPLAY},
+    { 26, 0x06F, 0x001,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x002,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x003,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x004,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x005,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x006,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x007,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x008,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x009,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x00A,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x00B,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x00C,  0, COOP_LIVE_WORLD_REQUIRE},
+    { 26, 0x06F, 0x00D,  0, COOP_LIVE_WORLD_REQUIRE},
+    // State 0 bypasses activation states 10-12 and runs the completed setup,
+    // but only if neither controller has begun a local activation sequence.
+    { 30, 0x09C, 0x027,  0, COOP_LIVE_WORLD_GUARD_ZERO},
+    { 30, 0x09C, 0x051,  0, COOP_LIVE_WORLD_GUARD_ZERO},
+    { 48, 0x0D4, 0x025, 50, COOP_LIVE_WORLD_PERMANENT},
+    { 48, 0x0D4, 0x027, 12, COOP_LIVE_WORLD_PERMANENT},
+    { 48, 0x0D5, 0x025, 50, COOP_LIVE_WORLD_PERMANENT},
+    { 48, 0x0D5, 0x027,  0, COOP_LIVE_WORLD_REPLAY},
+    { 48, 0x0DC, 0x02B, 20, COOP_LIVE_WORLD_PERMANENT},
 };
 
 // Portal rows exist only to apply an accepted permanent flag. Their ordinary
@@ -158,6 +190,10 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
         ++expected;
         if (state->mode != COOP_LIVE_WORLD_NOOP
                 && !coop_live_world_find_object(state->object, 0)) return 0;
+        if (state->mode == COOP_LIVE_WORLD_GUARD_ZERO) {
+            unsigned raw = 0;
+            if (!coop_live_world_object_raw_state(state->object, &raw) || raw != 0) return 0;
+        }
     }
     return expected != 0;
 }

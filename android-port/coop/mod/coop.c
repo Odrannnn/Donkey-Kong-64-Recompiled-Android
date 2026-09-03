@@ -263,6 +263,17 @@ static Gfx* draw_coop_status(Gfx* dl, Actor* unused);
 static u32 float_bits(f32 value) { union { f32 f; u32 u; } bits; bits.f = value; return bits.u; }
 static f32 bits_float(u32 value) { union { f32 f; u32 u; } bits; bits.u = value; return bits.f; }
 
+static unsigned coop_live_world_object_raw_state(unsigned object, unsigned* raw) {
+    for (unsigned slot = 0; slot < 600; ++slot) {
+        if ((unsigned short)D_global_asm_807F6240[slot] != object) continue;
+        s16 prop = func_global_asm_80659470(D_global_asm_807F6240[slot]);
+        if (prop < 0 || !D_global_asm_807F6000 || !D_global_asm_807F6000[prop].unk7C) return 0;
+        *raw = D_global_asm_807F6000[prop].unk7C->unk48[0];
+        return 1;
+    }
+    return 0;
+}
+
 #include "world_live_game.h"
 #include "items_game.h"
 #include "world_game.h"

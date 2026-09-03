@@ -31,8 +31,19 @@ static void* D_global_asm_80754280 = &hud_object;
 static unsigned current_map = 7, mock_level = 7, mock_layout_error = 0;
 static short D_global_asm_807F6240[600]{};
 static unsigned live_calls = 0, live_slot = 0, live_state = 0;
+static unsigned char live_raw[0x200]{};
 static void func_global_asm_8063DA40(short slot, short state) {
     ++live_calls; live_slot = (unsigned short)slot; live_state = (unsigned short)state;
+    unsigned object = (unsigned short)D_global_asm_807F6240[live_slot];
+    if (object < sizeof(live_raw)) live_raw[object] = (unsigned char)state;
+}
+static unsigned coop_live_world_object_raw_state(unsigned object, unsigned* raw) {
+    for (unsigned slot = 0; slot < 600; ++slot)
+        if ((unsigned short)D_global_asm_807F6240[slot] == object) {
+            if (object >= sizeof(live_raw)) return 0;
+            *raw = live_raw[object]; return 1;
+        }
+    return 0;
 }
 static void* D_global_asm_807FD730 = nullptr;
 static unsigned pickups[1700]{};
@@ -204,6 +215,7 @@ static void reset_engine() {
     D_global_asm_807FC950[0].melons = 1;
     current_map = 7;
     for (auto& object : D_global_asm_807F6240) object = -1;
+    std::memset(live_raw, 0, sizeof(live_raw));
     writes = saves = hud_updates = block_write = mutate_counter = live_calls = live_slot = live_state = 0;
     D_global_asm_80754280 = &hud_object;
 }
@@ -678,7 +690,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 122);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 147);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -713,6 +725,25 @@ static void world_refresh_checks() {
     // no-op, avoiding a reload that cannot affect any loaded script.
     reset_engine(); current_map = 48;
     CHECK(coop_live_world_refresh(0x0DA) && live_calls == 0);
+
+    // Factory production validates all thirteen child scripts before waking
+    // only the two audited controllers.
+    reset_engine(); current_map = 26;
+    D_global_asm_807F6240[0] = 0x000; D_global_asm_807F6240[1] = 0x107;
+    for (unsigned object = 1; object <= 0x0D; ++object)
+        D_global_asm_807F6240[object + 1] = (short)object;
+    CHECK(coop_live_world_refresh(0x06F) && live_calls == 2 && live_state == 0);
+    CHECK(!coop_live_world_transient_eligible(&coop_live_world_states[122]));
+
+    // Galleon's paired controllers may restart only from their paused raw
+    // state 0; an active local activation sequence fails closed to reload.
+    reset_engine(); current_map = 30;
+    D_global_asm_807F6240[2] = 0x27; D_global_asm_807F6240[3] = 0x51;
+    CHECK(coop_live_world_refresh(0x09C) && live_calls == 2 && live_state == 0);
+    reset_engine(); current_map = 30;
+    D_global_asm_807F6240[2] = 0x27; D_global_asm_807F6240[3] = 0x51;
+    live_raw[0x27] = 10;
+    CHECK(!coop_live_world_refresh(0x09C) && live_calls == 0);
 
     // A reviewed ordinary interior may accept only its exact loaded world
     // unit. The flag, replay and isolated save complete without a map reload.
