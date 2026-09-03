@@ -420,6 +420,48 @@ static unsigned coop_live_world_seal_refresh(void) {
     return 1;
 }
 
+static unsigned coop_live_world_mushroom_switch_ready(unsigned object) {
+    unsigned switch_state = 0;
+    unsigned board_state = 0;
+    if (!coop_live_world_object_raw_state(object, &switch_state)
+            || !coop_live_world_object_raw_state(0x0B, &board_state)) return 0;
+    unsigned switch_safe = switch_state <= 1 || (switch_state >= 20 && switch_state <= 22);
+    unsigned board_safe = board_state <= 4 || board_state == 7;
+    return switch_safe && board_safe;
+}
+
+// Each gun switch has a saved-complete state-0 branch. The shared board's
+// custom opcode normally recomputes the number of set flags after a local hit;
+// selecting that same count wakes a board that had paused before the network
+// flag arrived. Count five deliberately enters the stock reveal sequence.
+static unsigned coop_live_world_mushroom_switch_refresh(unsigned object) {
+    if (!coop_live_world_mushroom_switch_ready(object)) return 0;
+    unsigned switch_slot = 0;
+    unsigned board_slot = 0;
+    unsigned board_state = 0;
+    unsigned found_switch = 0;
+    unsigned found_board = 0;
+    for (unsigned slot = 0; slot < 600; ++slot) {
+        if ((unsigned short)D_global_asm_807F6240[slot] == object) {
+            switch_slot = slot; found_switch = 1;
+        }
+        if ((unsigned short)D_global_asm_807F6240[slot] == 0x0B) {
+            board_slot = slot; found_board = 1;
+        }
+    }
+    if (!found_switch || !found_board
+            || !coop_live_world_object_raw_state(0x0B, &board_state)) return 0;
+    func_global_asm_8063DA40((short)switch_slot, 0);
+    if (board_state != 7) {
+        unsigned count = 0;
+        for (s16 flag = PERMFLAG_PROGRESS_CANNON_COCONUT_SWITCH;
+                flag <= PERMFLAG_PROGRESS_CANNON_PINEAPPLE_SWITCH; ++flag)
+            count += isFlagSet(flag, FLAG_TYPE_PERMANENT) != 0;
+        if (count > board_state) func_global_asm_8063DA40((short)board_slot, (short)count);
+    }
+    return 1;
+}
+
 // The Mermaid is an actor rather than an instance-script prop. Her vanilla
 // initializer selects state 30 (no pearls), 31 (partial set), 39 (all five),
 // or 32 (reward already owned). Re-selecting one of those entry states after a

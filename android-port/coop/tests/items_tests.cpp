@@ -122,6 +122,29 @@ static unsigned coop_live_world_seal_refresh(void) {
     }
     return 1;
 }
+static unsigned coop_live_world_mushroom_switch_ready(unsigned object) {
+    unsigned switch_state = 0, board_state = 0;
+    if (!coop_live_world_object_raw_state(object, &switch_state)
+            || !coop_live_world_object_raw_state(0x0B, &board_state)) return 0;
+    return (switch_state <= 1 || (switch_state >= 20 && switch_state <= 22))
+        && (board_state <= 4 || board_state == 7);
+}
+static unsigned coop_live_world_mushroom_switch_refresh(unsigned object) {
+    if (!coop_live_world_mushroom_switch_ready(object)) return 0;
+    unsigned switch_slot = 0, board_slot = 0, board_state = 0;
+    for (unsigned slot = 0; slot < 600; ++slot) {
+        if ((unsigned short)D_global_asm_807F6240[slot] == object) switch_slot = slot;
+        if ((unsigned short)D_global_asm_807F6240[slot] == 0x0B) board_slot = slot;
+    }
+    coop_live_world_object_raw_state(0x0B, &board_state);
+    func_global_asm_8063DA40((short)switch_slot, 0);
+    if (board_state != 7) {
+        unsigned count = 0;
+        for (unsigned flag = 0xE6; flag <= 0xEA; ++flag) count += flags[flag] != 0;
+        if (count > board_state) func_global_asm_8063DA40((short)board_slot, (short)count);
+    }
+    return 1;
+}
 static void* D_global_asm_807FD730 = nullptr;
 static unsigned pickups[1700]{};
 static unsigned getLevelIndex(unsigned, unsigned) { return mock_level; }
@@ -786,7 +809,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 251);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 261);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -838,6 +861,28 @@ static void world_refresh_checks() {
     live_seal_cage_available = 1; live_seal_cage_state = 40; live_seal_cage_progress = 1;
     CHECK(!coop_live_world_refresh(0x09E) && live_calls == 0
         && live_seal_cage_state == 40 && live_seal_cage_progress == 1);
+
+    // Each Giant Mushroom switch replays only its flag-positive initializer,
+    // then advances the shared board to the exact permanent-flag count.
+    reset_engine(); current_map = 64;
+    const unsigned mushroom_flags[] = {0xE6, 0xE7, 0xE8, 0xE9, 0xEA};
+    const unsigned mushroom_objects[] = {0x0D, 0x0E, 0x0F, 0x10, 0x0C};
+    D_global_asm_807F6240[1] = 0x0B;
+    for (unsigned i = 0; i < 5; ++i) D_global_asm_807F6240[2 + i] = (short)mushroom_objects[i];
+    for (unsigned i = 0; i < 5; ++i) {
+        flags[mushroom_flags[i]] = 1; live_calls = 0;
+        CHECK(coop_live_world_refresh(mushroom_flags[i]) && live_calls == 2
+            && live_slot == 1 && live_state == i + 1 && live_raw[0x0B] == i + 1
+            && live_raw[mushroom_objects[i]] == 0);
+    }
+    // Missing/active components reject the complete unit before any mutation.
+    reset_engine(); current_map = 64; D_global_asm_807F6240[2] = 0x0D;
+    flags[0xE6] = 1;
+    CHECK(!coop_live_world_refresh(0x0E6) && live_calls == 0);
+    D_global_asm_807F6240[1] = 0x0B; live_raw[0x0D] = 2;
+    CHECK(!coop_live_world_refresh(0x0E6) && live_calls == 0);
+    reset_engine(); current_map = 48;
+    CHECK(coop_live_world_refresh(0x0EA) && live_calls == 0);
 
     // Factory storage's three box scripts replay as one atomic completion.
     reset_engine(); current_map = 26;
