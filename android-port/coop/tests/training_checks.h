@@ -22,8 +22,9 @@ static void training_checks() {
         coop_items_capture(&g, 1, 1, 0); coop_items_apply(&g, 1);
         CHECK(g.input.ready && !any(g.input.request) && saves == 1 && writes == 2);
     }
-    // Reviewed ordinary maps may publish a complete first snapshot. The
-    // narrower main-world/treehouse set may apply every progression grant.
+    // Reviewed ordinary maps and the two pearl-sequence rooms may publish a
+    // complete first snapshot. The narrower main-world/treehouse set may apply
+    // every progression grant.
     // Grounds (176) additionally admits only its reviewed training/exit IDs;
     // this loop uses camera to prove unrelated writes remain deferred there.
     // Barrels, Fairy Island (189), Cranky (5), shops and boss overlays remain
@@ -33,7 +34,8 @@ static void training_checks() {
         bool apply_allowed = map == 7 || map == 26 || map == 30 || map == 34 || map == 38
             || map == 48 || map == 72 || map == 87 || map == 171;
         bool snapshot_allowed = apply_allowed || map == 176 || coop_combat_map(map)
-            || map == 174 || map == 178 || map == 187 || map == 194;
+            || map == 174 || map == 178 || map == 187 || map == 194
+            || map == 44 || map == 45;
         coop_items_capture(&g, 1, 1, 0);
         CHECK(bool(g.input.ready) == snapshot_allowed && bool(g.deferred) == (snapshot_allowed && !apply_allowed)
             && !g.counter_error);

@@ -20,8 +20,9 @@ enum {
     COOP_LIVE_WORLD_NOOP = 4,
     COOP_LIVE_WORLD_CONTINUE_GALLEON = 5,
     COOP_LIVE_WORLD_REVEAL = 6,
+    COOP_LIVE_WORLD_MERMAID = 7,
     COOP_LIVE_WORLD_SCRIPT_SLOTS = 600,
-    COOP_LIVE_WORLD_STATE_COUNT = 158
+    COOP_LIVE_WORLD_STATE_COUNT = 168
 };
 static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COUNT] = {
     { 7, 0x000, 0x01A, 20, COOP_LIVE_WORLD_DIRECT}, { 7, 0x000, 0x01B, 20, COOP_LIVE_WORLD_DIRECT},
@@ -157,6 +158,20 @@ static const CoopLiveWorldState coop_live_world_states[COOP_LIVE_WORLD_STATE_COU
     { 34, 0x1AE, 0x000,100, COOP_LIVE_WORLD_PERMANENT},
     { 34, 0x1AE, 0x056,  0, COOP_LIVE_WORLD_REVEAL},
 
+    // The five pearl props each expose a flag-positive state-0 initializer in
+    // the treasure chest. The Mermaid room has no instance-script consumer;
+    // its actor recomputes the same vanilla partial/final state instead.
+    { 44, 0x0BA, 0x000,  0, COOP_LIVE_WORLD_REPLAY},
+    { 44, 0x0BB, 0x001,  0, COOP_LIVE_WORLD_REPLAY},
+    { 44, 0x0BC, 0x002,  0, COOP_LIVE_WORLD_REPLAY},
+    { 44, 0x0BD, 0x003,  0, COOP_LIVE_WORLD_REPLAY},
+    { 44, 0x0BE, 0x004,  0, COOP_LIVE_WORLD_REPLAY},
+    { 45, 0x0BA, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
+    { 45, 0x0BB, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
+    { 45, 0x0BC, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
+    { 45, 0x0BD, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
+    { 45, 0x0BE, 0xFFFF, 0, COOP_LIVE_WORLD_MERMAID},
+
     // These completions are consumed only inside their submaps. Receiving one
     // in the corresponding main world needs a save, but no loaded script or
     // map rebuild; the target room initializes from the flag on entry.
@@ -219,7 +234,10 @@ static inline unsigned coop_live_world_ready(unsigned flag) {
         if (state->map != (unsigned)current_map || state->flag != flag) continue;
         ++expected;
         if (state->mode != COOP_LIVE_WORLD_NOOP
+                && state->mode != COOP_LIVE_WORLD_MERMAID
                 && !coop_live_world_find_object(state->object, 0)) return 0;
+        if (state->mode == COOP_LIVE_WORLD_MERMAID
+                && !coop_live_world_mermaid_ready()) return 0;
         if (state->mode == COOP_LIVE_WORLD_CONTINUE_GALLEON) {
             unsigned raw = 0;
             if (!coop_live_world_object_raw_state(state->object, &raw)
@@ -256,6 +274,10 @@ static inline unsigned coop_live_world_refresh(unsigned flag) {
         if (state->map != (unsigned)current_map || state->flag != flag
                 || state->mode == COOP_LIVE_WORLD_NOOP
                 || state->mode == COOP_LIVE_WORLD_REQUIRE) continue;
+        if (state->mode == COOP_LIVE_WORLD_MERMAID) {
+            if (!coop_live_world_mermaid_refresh()) return 0;
+            continue;
+        }
         if (state->mode == COOP_LIVE_WORLD_REVEAL) {
             if (!coop_live_world_reveal_object(state->object)) return 0;
             continue;

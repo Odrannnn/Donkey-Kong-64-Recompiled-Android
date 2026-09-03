@@ -32,6 +32,8 @@ static unsigned current_map = 7, mock_level = 7, mock_layout_error = 0;
 static short D_global_asm_807F6240[600]{};
 static unsigned live_calls = 0, live_slot = 0, live_state = 0;
 static unsigned live_reveals = 0, live_reveal_object = 0;
+static unsigned live_mermaid_available = 0, live_mermaid_state = 30;
+static unsigned live_mermaid_progress = 0, live_mermaid_refreshes = 0;
 static unsigned char live_raw[0x200]{};
 static void func_global_asm_8063DA40(short slot, short state) {
     ++live_calls; live_slot = (unsigned short)slot; live_state = (unsigned short)state;
@@ -50,6 +52,20 @@ static unsigned coop_live_world_reveal_object(unsigned object) {
     unsigned raw = 0;
     if (!coop_live_world_object_raw_state(object, &raw)) return 0;
     ++live_reveals; live_reveal_object = object; return 1;
+}
+static unsigned coop_live_world_mermaid_ready(void) {
+    return live_mermaid_available && (live_mermaid_state == 30 || live_mermaid_state == 31
+        || live_mermaid_state == 32 || live_mermaid_state == 39);
+}
+static unsigned coop_live_world_mermaid_refresh(void) {
+    if (!coop_live_world_mermaid_ready()) return 0;
+    if (live_mermaid_state == 39 || live_mermaid_state == 32) return 1;
+    unsigned pearls = 0;
+    for (unsigned flag = 0xBA; flag <= 0xBE; ++flag) pearls += flags[flag] != 0;
+    live_mermaid_state = flags[0xBF] ? 32 : (pearls == 5 ? 39 : (pearls ? 31 : 30));
+    live_mermaid_progress = 0;
+    ++live_mermaid_refreshes;
+    return 1;
 }
 static void* D_global_asm_807FD730 = nullptr;
 static unsigned pickups[1700]{};
@@ -224,6 +240,8 @@ static void reset_engine() {
     std::memset(live_raw, 0, sizeof(live_raw));
     writes = saves = hud_updates = block_write = mutate_counter = live_calls = live_slot = live_state = 0;
     live_reveals = live_reveal_object = 0;
+    live_mermaid_available = live_mermaid_refreshes = 0;
+    live_mermaid_state = 30; live_mermaid_progress = 0;
     D_global_asm_80754280 = &hud_object;
 }
 static unsigned main_map_for_level(unsigned level) {
@@ -697,7 +715,7 @@ static void world_refresh_checks() {
         {72, 0x12E, 4, {0x023, 0x024, 0x025, 0x026}},
         {87, 0x160, 3, {0x00B, 0x00C, 0x00D}},
     };
-    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 158);
+    CHECK(COOP_LIVE_WORLD_STATE_COUNT == 168);
     CHECK(coop_live_world_transient_eligible(&coop_live_world_states[0]));
     for (const auto& portal : portals) {
         reset_engine(); current_map = portal.map;
@@ -774,6 +792,52 @@ static void world_refresh_checks() {
     CHECK(!coop_live_world_refresh(0x09C) && live_calls == 0);
     live_raw[0x27] = 10; live_raw[0x51] = 15;
     CHECK(!coop_live_world_refresh(0x09C) && live_calls == 0);
+
+    // Each remote pearl removes only its matching treasure-chest prop through
+    // that prop's saved-complete initializer.
+    for (unsigned pearl = 0; pearl < 5; ++pearl) {
+        reset_engine(); current_map = 44;
+        unsigned flag = 0xBA + pearl;
+        flags[flag] = 1;
+        D_global_asm_807F6240[10 + pearl] = (short)pearl;
+        CHECK(coop_live_world_refresh(flag) && live_calls == 1
+            && live_slot == 10 + pearl && live_state == 0);
+    }
+    reset_engine(); current_map = 44; flags[0xBC] = 1;
+    CHECK(!coop_live_world_refresh(0xBC) && live_calls == 0);
+
+    // The Mermaid actor follows its vanilla partial and all-five entry states.
+    // Active final-reward and completed states are accepted without rewinding.
+    reset_engine(); current_map = 45; live_mermaid_available = 1;
+    live_mermaid_progress = 7; flags[0xBA] = 1;
+    CHECK(coop_live_world_refresh(0xBA) && live_mermaid_state == 31
+        && live_mermaid_progress == 0 && live_mermaid_refreshes == 1);
+    flags[0xBB] = flags[0xBC] = flags[0xBD] = flags[0xBE] = 1;
+    CHECK(coop_live_world_refresh(0xBE) && live_mermaid_state == 39
+        && live_mermaid_refreshes == 2);
+    live_mermaid_progress = 9;
+    CHECK(coop_live_world_refresh(0xBD) && live_mermaid_state == 39
+        && live_mermaid_progress == 9 && live_mermaid_refreshes == 2);
+    live_mermaid_state = 32; live_mermaid_progress = 4;
+    CHECK(coop_live_world_refresh(0xBC) && live_mermaid_state == 32
+        && live_mermaid_progress == 4 && live_mermaid_refreshes == 2);
+    live_mermaid_state = 33;
+    CHECK(!coop_live_world_refresh(0xBB));
+    live_mermaid_state = 30; live_mermaid_available = 0;
+    CHECK(!coop_live_world_refresh(0xBB));
+
+    // Applying the network item writes the pearl first, then refreshes the
+    // loaded Mermaid on the same safe frame without scheduling a reload.
+    reset_engine(); g = {}; current_game = &g; g.join = 1;
+    current_map = 45; mock_level = 3; live_mermaid_available = 1;
+    coop_items_capture(&g, 1, 1, 0); CHECK(g.input.ready && g.deferred);
+    r = {}; r.status = 2; r.scope = 1; r.session_lo = 905;
+    unsigned pearl_one = (unsigned)coop_item_id(0xBA);
+    CHECK(pearl_one < COOP_ITEMS);
+    r.apply[pearl_one / 32] = bit(pearl_one);
+    coop_items_receive(&g, r); g.refresh_enabled = 1; coop_items_apply(&g, 1);
+    CHECK(flags[0xBA] && writes == 1 && saves == 1 && live_mermaid_state == 31
+        && live_mermaid_refreshes == 1 && !g.refresh_pending);
 
     // Interior-only structures do not reload an unrelated main map.
     reset_engine(); current_map = 38;

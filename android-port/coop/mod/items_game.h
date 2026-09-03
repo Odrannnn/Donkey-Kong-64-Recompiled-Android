@@ -19,9 +19,11 @@ static inline unsigned coop_items_snapshot_map(void) {
     // bonuses and other overlays are absent from coop_combat_map().
     // Galleon, Fungi and Caves lobbies have no supported enemy, so they are
     // absent from the combat allowlist despite using the same stable inventory.
+    // Galleon's treasure chest and Mermaid room are admitted specifically for
+    // their reviewed per-pearl prop/actor refresh; other grants stay deferred.
     return coop_items_safe_map() || current_map == 176 || coop_combat_map(current_map)
         || current_map == 174 || current_map == 178 || current_map == 187
-        || current_map == 194;
+        || current_map == 194 || current_map == 44 || current_map == 45;
 }
 static inline unsigned coop_training_ground_apply_id(unsigned id) {
     return (id >= COOP_TRAINING_SPAWNED && id <= COOP_FIRST_SLAM)

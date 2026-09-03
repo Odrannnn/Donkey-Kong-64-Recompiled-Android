@@ -85,6 +85,9 @@ _Static_assert(PERMFLAG_PROGRESS_LLAMA_FREE == 0x32 && PERMFLAG_PROGRESS_LLAMA_T
     "Vanilla world unlock contract");
 _Static_assert(PERMFLAG_PROGRESS_JAPES_FIRST_GATE_OPENED == 0
     && PERMFLAG_ITEM_PEARL_1 == 0xBA && PERMFLAG_ITEM_PEARL_5 == 0xBE
+    && PERMFLAG_ITEM_GB_GALLEON_MERMAID == 0xBF
+    && MAP_GALLEON_TREASURE_CHEST == 44 && MAP_GALLEON_MERMAID == 45
+    && ACTOR_MERMAID == 193
     && PERMFLAG_PROGRESS_RAREWARE_ROOM_OPEN == 0x189 && COOP_CAMERA_SHOCKWAVE == 2198
     && PERMFLAG_PROGRESS_HELM_SHUTDOWN == 0x302 && PERMFLAG_PROGRESS_CROWN_DOOR_OPENED == 0x304
     && COOP_WORLD_TRAINING_EXIT == 2375
@@ -290,6 +293,47 @@ static unsigned coop_live_world_reveal_object(unsigned object) {
         return 1;
     }
     return 0;
+}
+
+// The Mermaid is an actor rather than an instance-script prop. Her vanilla
+// initializer selects state 30 (no pearls), 31 (partial set), 39 (all five),
+// or 32 (reward already owned). Re-selecting one of those entry states after a
+// remote pearl arrives lets the original actor handler own dialogue, cutscene,
+// and reward delivery without synthesizing a pearl pickup or Golden Banana.
+static Actor* coop_live_world_mermaid_actor(void) {
+    for (unsigned i = 0; i < D_global_asm_807FBB34; ++i) {
+        Actor* actor = D_global_asm_807FB930[i].actor;
+        if (actor && actor->unk58 == ACTOR_MERMAID
+                && (actor->object_properties_bitfield & 0x10)) return actor;
+    }
+    return 0;
+}
+
+static unsigned coop_live_world_mermaid_ready(void) {
+    Actor* mermaid = coop_live_world_mermaid_actor();
+    if (!mermaid) return 0;
+    return mermaid->control_state == 30 || mermaid->control_state == 31
+        || mermaid->control_state == 32 || mermaid->control_state == 39;
+}
+
+static unsigned coop_live_world_mermaid_refresh(void) {
+    Actor* mermaid = coop_live_world_mermaid_actor();
+    if (!mermaid) return 0;
+    unsigned state = (unsigned)mermaid->control_state;
+    if (state != 30 && state != 31 && state != 32 && state != 39) return 0;
+    // Never rewind an active final-reward sequence or its completed state.
+    if (state == 39 || state == 32) return 1;
+
+    if (isFlagSet(PERMFLAG_ITEM_GB_GALLEON_MERMAID, FLAG_TYPE_PERMANENT)) {
+        mermaid->control_state = 32;
+    } else {
+        unsigned pearls = 0;
+        for (s16 flag = PERMFLAG_ITEM_PEARL_1; flag <= PERMFLAG_ITEM_PEARL_5; ++flag)
+            pearls += isFlagSet(flag, FLAG_TYPE_PERMANENT) != 0;
+        mermaid->control_state = pearls == 5 ? 39 : (pearls ? 31 : 30);
+    }
+    mermaid->control_state_progress = 0;
+    return 1;
 }
 
 #include "world_live_game.h"

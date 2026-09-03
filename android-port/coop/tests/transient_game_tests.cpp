@@ -339,6 +339,8 @@ static unsigned coop_live_world_reveal_object(unsigned object) {
     if (prop < 0 || !D_global_asm_807F6000[prop].unk7C) return 0;
     return 1;
 }
+static unsigned coop_live_world_mermaid_ready(void) { return 0; }
+static unsigned coop_live_world_mermaid_refresh(void) { return 0; }
 static void func_global_asm_8063DA40(s16 slot, s16 state) {
     CHECK(slot >= 0 && slot < 600);
     unsigned object = static_cast<unsigned short>(D_global_asm_807F6240[slot]);
