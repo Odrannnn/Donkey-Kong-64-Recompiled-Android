@@ -1065,6 +1065,14 @@ static void capture_checks() {
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0, 1, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 4, 2, 2));
     CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 0x14, 2, 2));
+    for (unsigned state : {2u, 40u, 20u, 30u, 3u, 4u}) {
+        scripts[4].unk48[0] = state; transient_page = 0; coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 4, 2, 2));
+    }
+    for (unsigned state : {1u, 5u, 19u, 21u, 39u, 41u}) {
+        scripts[4].unk48[0] = state; transient_page = 0; coop_transient_capture(1);
+        CHECK(contains_value(COOP_TRANSIENT_TRIGGER, 4, 1, 2));
+    }
 
     reset(); current_map = 16;
     load(0, 0x0C, 1); load(1, 0x0D, 1); load(2, 0x0E, 10); load(3, 0x0F, 22);

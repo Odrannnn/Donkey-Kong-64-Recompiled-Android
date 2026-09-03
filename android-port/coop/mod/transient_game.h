@@ -1049,6 +1049,13 @@ static unsigned coop_transient_trigger_fired(unsigned map, unsigned object,
         unsigned raw, unsigned activation) {
     if (map == 4 && (object == 0x0A || object == 0x0B))
         return raw >= 2 && raw <= 5;
+    // Tiny Temple's Diddy guitar activation immediately crosses several
+    // non-monotonic states while its vanilla script opens the linked route.
+    // Keep advertising the reviewed activation throughout that whole path so
+    // a peer cannot miss it merely because a 20 Hz sample saw state 40/20/30.
+    if (map == 16 && object == 0x04)
+        return raw == 2 || raw == 40 || raw == 20 || raw == 30
+            || raw == 3 || raw == 4;
     if (map == 38 && object >= 0x0D && object <= 0x0F)
         return raw >= 2 && raw <= 6;
     return raw >= activation && raw < 20;

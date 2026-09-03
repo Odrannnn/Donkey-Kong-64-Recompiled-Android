@@ -3096,3 +3096,12 @@ progress and all guest raw script, timer, platform, actor-cycle, board and
 cutscene state remain filtered. Existing room, file, epoch, session, freshness
 and active-play boundaries clear requests instead of carrying them between room
 instances. This changes no packet or bridge structure.
+
+## Tiny Temple guitar late-arrival coverage (post-0.77 development)
+
+Tiny Temple object `0x04` does not keep a monotonic fired state after Diddy's
+guitar activation. Its vanilla opening route is `2 -> 40 -> 20 -> 30 -> 3 -> 4`.
+All six exact states now publish the same bounded trigger activation. A receiver
+still enters only at reviewed state `2` from local ready state `1`, so its own
+script owns every linked object, timer and presentation step. Unrelated states
+remain ready observations and cannot be selected by a packet.
