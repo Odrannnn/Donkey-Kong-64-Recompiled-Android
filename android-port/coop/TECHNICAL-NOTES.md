@@ -3182,3 +3182,26 @@ before registering the text-overlay renderer, so selecting `Hide` removes all
 connection, item, world and same-area status lines immediately without restarting
 the network session. Capture, apply, recovery, trace reporting and remote-player
 rendering continue unchanged. The setting is local and need not match the peer.
+
+## Completed temporary-blocker audit (0.79.0)
+
+Thirty-six additional leaf switches and break targets use the existing typed
+trigger channel. Exact ready/activation pairs are enforced per object, with
+special `11 -> 12`, `10 -> 11`, and `12 -> 13` gates where vanilla differs from
+the common `1 -> 2` path. Castle Lower Cave's five gun switches and the five
+Japes-lobby Wrinkly doors join the room-epoch passage latch, retaining only one
+accepted activation until a real map lifecycle change.
+
+Japes object `0x117` uses an ordered sequence adapter. Raw states `2/3`, `4/5`
+and `6` represent logical progress one, two and three; only locally ready states
+`1`, `3`, and `5` may enter hit states `2`, `4`, and `6`. States `20`, `30`,
+`50`, resets and arbitrary values map to zero and cannot be selected remotely.
+
+The ROM instance-script audit also classified the remaining compound
+controllers. Fungi-lobby gun order, Caves rotating room, Factory's continuous
+rotator, Aztec-lobby encounter/Wrinkly controllers and the linked Castle/Caves
+reward controllers retain local ownership. Their blocks combine presentation,
+timers, transitions, rewards or continuous motion; copying a controller index
+would bypass the side effects that make the state valid. Existing permanent
+world consumers converge every saved result, while the new leaf adapters feed
+the local controller where a discrete remote action is safe.

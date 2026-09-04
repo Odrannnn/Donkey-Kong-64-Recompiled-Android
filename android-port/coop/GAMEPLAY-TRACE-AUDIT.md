@@ -1,8 +1,8 @@
 # Gameplay blocker audit
 
-Audit date: 2026-09-03  
-Co-op version audited: 0.78.1
-Protocol version: 78
+Audit date: 2026-09-04
+Co-op version audited: 0.79.0
+Protocol version: 79
 
 ## Runtime evidence
 
@@ -33,7 +33,25 @@ The query tool scans the supported private-LAN trace ports. Start each capture
 before operating the mechanism and keep it running until both clients have
 either passed the object or observed the permanent result.
 
-## Highest-priority candidates
+## Resolution in 0.79.0
+
+All five highest-priority groups and all eleven conventional rows below now use
+typed trigger adapters. Castle Lower Cave and the Japes-lobby Wrinkly doors keep
+one accepted leaf activation for the current room epoch so a late peer can run
+its own timed opening exactly once. Controllers, linked doors, timers, cutscenes
+and rewards are never copied.
+
+The Japes breakable X panel now has a dedicated three-step sequence adapter. It
+maps only `1 -> 2`, `3 -> 4`, and `5 -> 6` to logical progress and rejects the
+unrelated `20`, `30`, and `50` availability states. Each receiver advances only
+its next locally ready step.
+
+The game-adapter regression exercises every new map/object/state tuple, rejects
+wrong readiness, checks replay idempotence and verifies the two room-epoch
+latches. These checks validate the boundary but do not replace two-device game
+testing.
+
+## Implemented highest-priority mechanisms
 
 These use narrow, locally valid activation edges. They do not require driving a
 room controller or copying an arbitrary object state.
@@ -46,11 +64,10 @@ room controller or copying an arbitrary object state.
 | Caves Diddy Upper Cabin | 200 | thin flames `0x06` through `0x08` | exact state `1 -> 2` | Never drive controller `0x05`; it owns completion, reward, and flag 293. |
 | Japes Lobby | 169 | Wrinkly doors `0x00`, `0x02` through `0x05` | exact state `1 -> 2` | Keep availability and character checks local; reject raw states `0` and `20`. |
 
-Castle Lower Cave may need a room-epoch latch so a late-arriving peer receives
-the current 400-frame opening without repeatedly restarting the local scripts.
-The trace must establish that behaviour before implementation.
+Castle Lower Cave uses a room-epoch latch so a late-arriving peer receives the
+current 400-frame opening without repeatedly restarting the local scripts.
 
-## Secondary conventional candidates
+## Implemented conventional mechanisms
 
 These appear to expose a self-contained switch or break activation but have not
 yet been observed in a gameplay capture:
@@ -69,34 +86,46 @@ yet been observed in a gameplay capture:
 | 194 | `0x00`, `0x01`, ice walls | `1 -> 2` |
 | 193 | `0x00`, iron bars | `1 -> 2`; lower confidence because persistence is unclear |
 
-## Bespoke candidate
+## Implemented bespoke mechanism
 
 The Japes map 7 breakable X panel, object `0x117`, exposes several logical
 progress edges: `1 -> 2`, `3 -> 4`, and `5 -> 6`. States `20`, `30`, and `50`
-are availability waits rather than network progress. This object needs a
-purpose-built monotonic adapter; treating its largest numeric state as the most
-advanced state would be incorrect.
+are availability waits rather than network progress. Its purpose-built
+monotonic adapter never treats the largest numeric state as the most advanced
+state.
 
-## Unsafe controllers and exclusions
+## Compound controllers kept local
 
-The following objects remain local until their scripts and side effects have a
-complete audit:
+The following objects remain local after auditing their vanilla instance-script
+blocks. They are not missing leaf adapters:
 
-- Aztec Lobby map 173 object `0x04`, the special Wrinkly door with unresolved
-  `50/51` and `60/61` state meanings.
-- Fungi Lobby map 178 object `0x09`, the gun-order controller.
-- Caves map 72 object `0x32`, the rotating-room/minigame controller.
-- Factory map 26 object `0x0C`, the continuous rotating controller.
-- Aztec Lobby map 173 objects `0x13` and `0x14`, duplicate flag-402
-  controllers.
+- Aztec Lobby map 173 object `0x04` combines Wrinkly presentation, collision,
+  availability, timed resets and two distinct `50/51` and `60/61` routes. It has
+  no safe network-owned progress value.
+- Fungi Lobby map 178 object `0x09` owns the five-gun order, texture updates,
+  cutscene, 300-frame timer and permanent flag `0x195`. The permanent result is
+  already applied live; copying a numeric state would skip the block that owns
+  those side effects.
+- Caves map 72 object `0x32` owns a rotating-room transition, camera, timer,
+  player action and minigame dispatch. It remains a local simulation.
+- Factory map 26 object `0x0C` continuously alternates platform motion states
+  `12/13`; network correction would fight the vanilla oscillator every frame.
+- Aztec Lobby map 173 objects `0x13` and `0x14` duplicate the encounter sequence
+  that writes flag `0x192`. The permanent platform/result already converges via
+  the audited live-world consumer.
 - Castle Tree map 164 controller `0x04`, Caves Upper Cabin map 200 controller
   `0x05`, and Castle Lower Cave map 183 doors `0x03` and `0x04`; only their
-  audited leaf triggers may ever be synchronized.
+  audited leaf triggers are synchronized. Their local controllers now observe
+  those triggers and retain ownership of sequencing, timers and rewards.
+
+No remaining statically identified object both blocks the peer and lacks either
+a typed leaf adapter or a live permanent-result consumer. A new concrete trace
+may still reveal a setup variant that this static audit could not observe.
 
 ## Acceptance rule
 
-Add an adapter only when a two-client capture shows that the peer is physically
-blocked or misses the permanent result. Replay the smallest exact vanilla
+For future reports, add an adapter only when a two-client capture shows that the
+peer is physically blocked or misses the permanent result. Replay the smallest exact vanilla
 activation edge on the receiving client, preserve room ownership of timers and
 rewards, and reject unrelated readiness, availability, and controller states.
 Each mechanism should land as a separate feature commit with a game-adapter

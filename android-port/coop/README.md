@@ -1,6 +1,14 @@
 # DK64 LAN co-op prototype
 
 Independent, AI-assisted mod for DK64 Recompiled 1.0.2 and the vanilla US ROM.
+Version **0.79.0** completes the retained temporary-blocker audit with typed
+leaf adapters for 36 Castle, Caves, Japes, Aztec, Factory, Galleon and lobby
+mechanisms. Timed Castle Lower Cave and Japes-lobby openings retain one accepted
+activation per room visit. Japes' breakable X panel uses a dedicated three-step
+logical sequence that rejects its unrelated availability states. Compound
+controllers remain local where copying state would skip vanilla cutscene,
+timer, reward, transition or continuous-motion side effects; their permanent
+outcomes already converge through the item/world channels.
 Version **0.78.2** adds a live local setting to hide the connection, item, world
 and same-area event status text without stopping synchronization, recovery,
 traces or remote-player rendering. The overlay remains visible by default.
@@ -265,8 +273,10 @@ Android-to-Android sessions. The existing runtime mod loader is unchanged. Each
 platform ZIP contains `dk64_lan_coop.nrm` and one native companion (`.so` on
 Android, `.dll` on Windows). No ROM or game assets are included.
 
-**This is experimental, not complete campaign co-op. Version 0.78.2 retains the ten
-original Aztec/Galleon/Fungi unlocks audited live consumers, and retains the 0.76.0
+**This is experimental campaign co-op. Version 0.79.0 completes the retained
+static temporary-blocker list with typed leaf and ordered-sequence adapters. It
+retains the audited live consumers for the ten original Aztec/Galleon/Fungi
+unlocks, and retains the 0.76.0
 deferred retry policy for missing or unrecognized loaded units. All 82 expansion
 permanent-world flags are covered live through 90 unique flags and 263 audited
 rows, including the lobby, Fairy Island, Caves, Castle, Aztec and Helm structures;
@@ -312,7 +322,8 @@ from a cached snapshot, so pausing emulation does not make diagnostics
 disappear and the worker never accesses game memory itself.
 
 See [GAMEPLAY-TRACE-AUDIT.md](GAMEPLAY-TRACE-AUDIT.md) for the retained-capture
-result, static candidate list, safety exclusions and acceptance rule.
+result, completed static candidate list, compound-controller boundaries and
+future trace acceptance rule.
 
 ## Install and connect
 
