@@ -694,11 +694,12 @@ static void capture_checks() {
     load(3, 0x30, 1); load(4, 0x31, 2); load(5, 0x32, 3);
     load(6, 0x34, 1); load(7, 0x35, 2);
     load(8, 0x28, 1); load(9, 0x29, 2); load(10, 0x2A, 3); load(11, 0x123, 2);
-    bool saw_japes_30 = false, saw_japes_31 = false, saw_japes_32 = false;
+    bool saw_japes_1a = false, saw_japes_30 = false, saw_japes_31 = false, saw_japes_32 = false;
     bool saw_japes_34 = false, saw_japes_35 = false;
     bool saw_japes_28 = false, saw_japes_29 = false, saw_japes_2a = false, saw_japes_123 = false;
     for (unsigned page = 0; page < 8; ++page) {
         coop_transient_capture(1);
+        saw_japes_1a |= contains_value(COOP_TRANSIENT_TRIGGER, 0x1A, 2, 2);
         saw_japes_30 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x30, 1, 2);
         saw_japes_31 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x31, 2, 2);
         saw_japes_32 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x32, 2, 2);
@@ -709,7 +710,7 @@ static void capture_checks() {
         saw_japes_2a |= contains_value(COOP_TRANSIENT_TRIGGER, 0x2A, 2, 2);
         saw_japes_123 |= contains_value(COOP_TRANSIENT_TRIGGER, 0x123, 2, 2);
     }
-    CHECK(saw_japes_30 && saw_japes_31 && saw_japes_32);
+    CHECK(saw_japes_1a && saw_japes_30 && saw_japes_31 && saw_japes_32);
     CHECK(saw_japes_34 && saw_japes_35);
     CHECK(saw_japes_28 && saw_japes_29 && saw_japes_2a && saw_japes_123);
 
@@ -1953,6 +1954,56 @@ static void lobby_instrument_pad_checks() {
     }
 }
 
+static void remaining_leaf_trigger_checks() {
+    struct Trigger { unsigned map, object, ready, activation; } triggers[] = {
+        {164, 0x05, 11, 12}, {164, 0x06, 11, 12}, {164, 0x07, 11, 12},
+        {183, 0x05, 1, 2}, {183, 0x06, 1, 2}, {183, 0x07, 1, 2},
+        {183, 0x08, 1, 2}, {183, 0x09, 1, 2}, {166, 0x05, 10, 11},
+        {200, 0x06, 1, 2}, {200, 0x07, 1, 2}, {200, 0x08, 1, 2},
+        {169, 0x00, 1, 2}, {169, 0x02, 1, 2}, {169, 0x03, 1, 2},
+        {169, 0x04, 1, 2}, {169, 0x05, 1, 2},
+        {7, 0x1A, 1, 2}, {12, 0x02, 1, 2}, {12, 0x03, 1, 2},
+        {13, 0x02, 1, 2}, {13, 0x03, 1, 2}, {16, 0x1A, 1, 2},
+        {16, 0x7C, 1, 2}, {20, 0x0E, 1, 2}, {20, 0x0F, 1, 2},
+        {20, 0x10, 1, 2}, {20, 0x15, 1, 2}, {114, 0x04, 12, 13},
+        {114, 0x06, 1, 2}, {163, 0x0C, 1, 2}, {174, 0x0A, 1, 2},
+        {175, 0x0E, 10, 11}, {194, 0x00, 1, 2}, {194, 0x01, 1, 2},
+        {193, 0x00, 1, 2},
+    };
+    for (const auto& trigger : triggers) {
+        reset(); role = ROLE_JOIN; current_map = trigger.map;
+        load(0, trigger.object, trigger.ready);
+        transient_result = {COOP_TRANSIENT_APPLYING, trigger.map, epoch, 1,
+            {{COOP_TRANSIENT_TRIGGER, trigger.object, 2, trigger.activation}}};
+        coop_transient_apply();
+        CHECK(script_calls == 1 && last_object == trigger.object
+            && last_state == trigger.activation);
+        coop_transient_apply(); CHECK(script_calls == 1);
+
+        reset(); role = ROLE_JOIN; current_map = trigger.map;
+        load(0, trigger.object, trigger.ready - (trigger.ready != 0));
+        transient_result = {COOP_TRANSIENT_APPLYING, trigger.map, epoch, 1,
+            {{COOP_TRANSIENT_TRIGGER, trigger.object, 2, trigger.activation}}};
+        coop_transient_apply(); CHECK(!script_calls);
+    }
+
+    // Timed passages retain one accepted activation per room epoch, then may
+    // be used again after a real room lifecycle boundary.
+    reset(); role = ROLE_JOIN; current_map = 183; load(0, 0x05, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 183, epoch, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x05, 2, 2}}};
+    coop_transient_apply(); CHECK(script_calls == 1);
+    scripts[0x05].unk48[0] = 1; coop_transient_apply(); CHECK(script_calls == 1);
+    ++epoch; transient_result.epoch = epoch;
+    coop_transient_apply(); CHECK(script_calls == 2);
+
+    reset(); role = ROLE_JOIN; current_map = 169; load(0, 0x02, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 169, epoch, 1,
+        {{COOP_TRANSIENT_TRIGGER, 0x02, 2, 2}}};
+    coop_transient_apply(); CHECK(script_calls == 1);
+    scripts[0x02].unk48[0] = 1; coop_transient_apply(); CHECK(script_calls == 1);
+}
+
 static void kosh_checks() {
     for (unsigned key = 1; key <= 4; ++key) {
         reset(); load_kosh(key);
@@ -2749,6 +2800,7 @@ static void owl_checks() {
 
 int main() {
     capture_checks(); object_apply_checks(); cutscene_checks(); lobby_instrument_pad_checks();
+    remaining_leaf_trigger_checks();
     kosh_checks(); minecart_checks(); rabbit_checks(); batty_checks(); owl_checks();
     std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }

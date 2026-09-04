@@ -20,6 +20,14 @@ static const CoopTransientPassage coop_transient_passages[] = {
     {112, 0x0D}, {112, 0x0E}, {112, 0x0F},
     {163, 0x04}, {163, 0x05}, {163, 0x06},
     {164, 0x01}, {164, 0x09},
+    // Castle Lower Cave's five gun switches each reopen one of the two timed
+    // doors through their own stock state-2 block. Retain only the leaf hit;
+    // the door scripts and their 400-frame timers remain local.
+    {183, 0x05}, {183, 0x06}, {183, 0x07}, {183, 0x08}, {183, 0x09},
+    // Japes lobby Wrinkly doors return to their local wait state after use.
+    // A room-epoch latch lets a peer reproduce the opening once without ever
+    // copying door state 0/20 or bypassing the local availability checks.
+    {169, 0x00}, {169, 0x02}, {169, 0x03}, {169, 0x04}, {169, 0x05},
 };
 static unsigned coop_transient_passage_map, coop_transient_passage_epoch;
 static unsigned coop_transient_passage_bits;
@@ -253,6 +261,32 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Castle tree grape and Chunky-punch switches. The second has a distinct
     // state-5 activation edge; each local script owns its door and reset.
     {164, 0x01, COOP_TRANSIENT_TRIGGER, 2}, {164, 0x09, COOP_TRANSIENT_TRIGGER, 5},
+    // Remaining audited leaf mechanisms. These mirror only their exact input
+    // edge; controllers, linked doors, timers, cutscenes and rewards stay local.
+    {164, 0x05, COOP_TRANSIENT_TRIGGER, 12}, {164, 0x06, COOP_TRANSIENT_TRIGGER, 12},
+    {164, 0x07, COOP_TRANSIENT_TRIGGER, 12},
+    {183, 0x05, COOP_TRANSIENT_TRIGGER, 2}, {183, 0x06, COOP_TRANSIENT_TRIGGER, 2},
+    {183, 0x07, COOP_TRANSIENT_TRIGGER, 2}, {183, 0x08, COOP_TRANSIENT_TRIGGER, 2},
+    {183, 0x09, COOP_TRANSIENT_TRIGGER, 2},
+    {166, 0x05, COOP_TRANSIENT_TRIGGER, 11},
+    {200, 0x06, COOP_TRANSIENT_TRIGGER, 2}, {200, 0x07, COOP_TRANSIENT_TRIGGER, 2},
+    {200, 0x08, COOP_TRANSIENT_TRIGGER, 2},
+    {169, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {169, 0x02, COOP_TRANSIENT_TRIGGER, 2},
+    {169, 0x03, COOP_TRANSIENT_TRIGGER, 2}, {169, 0x04, COOP_TRANSIENT_TRIGGER, 2},
+    {169, 0x05, COOP_TRANSIENT_TRIGGER, 2},
+    // Conventional self-contained switches and break targets found by the
+    // remaining static setup audit.
+    {7, 0x1A, COOP_TRANSIENT_TRIGGER, 2},
+    {12, 0x02, COOP_TRANSIENT_TRIGGER, 2}, {12, 0x03, COOP_TRANSIENT_TRIGGER, 2},
+    {13, 0x02, COOP_TRANSIENT_TRIGGER, 2}, {13, 0x03, COOP_TRANSIENT_TRIGGER, 2},
+    {16, 0x1A, COOP_TRANSIENT_TRIGGER, 2}, {16, 0x7C, COOP_TRANSIENT_TRIGGER, 2},
+    {20, 0x0E, COOP_TRANSIENT_TRIGGER, 2}, {20, 0x0F, COOP_TRANSIENT_TRIGGER, 2},
+    {20, 0x10, COOP_TRANSIENT_TRIGGER, 2}, {20, 0x15, COOP_TRANSIENT_TRIGGER, 2},
+    {114, 0x04, COOP_TRANSIENT_TRIGGER, 13}, {114, 0x06, COOP_TRANSIENT_TRIGGER, 2},
+    {163, 0x0C, COOP_TRANSIENT_TRIGGER, 2}, {174, 0x0A, COOP_TRANSIENT_TRIGGER, 2},
+    {175, 0x0E, COOP_TRANSIENT_TRIGGER, 11},
+    {194, 0x00, COOP_TRANSIENT_TRIGGER, 2}, {194, 0x01, COOP_TRANSIENT_TRIGGER, 2},
+    {193, 0x00, COOP_TRANSIENT_TRIGGER, 2},
     {194, 6, COOP_TRANSIENT_PLATFORM, 0},
     // Factory Snatch Room grate. Unlike ordinary triggers, its reviewed punch
     // edge enters state 1 directly from ready state 0.
@@ -1090,6 +1124,15 @@ static unsigned coop_transient_object_kind(unsigned map, unsigned object) {
     return COOP_TRANSIENT_NONE;
 }
 
+// Japes' green-slam object has two independently reviewed responsibilities:
+// its exact state-1 input edge is a bidirectional room action, while the
+// existing host-authoritative live-world row still carries its later saved
+// completion states. Keep both typed records instead of allowing the trigger
+// entry to hide the already-supported permanent presentation path.
+static unsigned coop_transient_dual_script(unsigned map, unsigned object) {
+    return map == 7 && object == 0x1A;
+}
+
 static unsigned coop_transient_trigger_fired(unsigned map, unsigned object,
         unsigned raw, unsigned activation) {
     if (map == 4 && (object == 0x0A || object == 0x0B))
@@ -1140,6 +1183,12 @@ static unsigned coop_transient_trigger_ready(unsigned map, unsigned object,
         return activation == 10 && raw == 1;
     if (map == 164 && object == 0x09)
         return activation == 5 && raw == 1;
+    if (map == 164 && object >= 0x05 && object <= 0x07)
+        return activation == 12 && raw == 11;
+    if ((map == 166 && object == 0x05) || (map == 175 && object == 0x0E))
+        return activation == 11 && raw == 10;
+    if (map == 114 && object == 0x04)
+        return activation == 13 && raw == 12;
     if (map == 7 && (object == 0x1F || object == 0x20))
         return activation == 11 && raw == 1;
     if (map == 30 && object >= 0x2F && object <= 0x31)
@@ -1390,7 +1439,8 @@ static void coop_transient_capture(unsigned present) {
             duplicate |= coop_live_world_states[earlier].map == state->map
                 && coop_live_world_states[earlier].object == state->object;
         if (!duplicate && coop_live_world_transient_eligible(state)
-                && coop_transient_object_kind(state->map, state->object) == COOP_TRANSIENT_SCRIPT)
+                && (coop_transient_object_kind(state->map, state->object) == COOP_TRANSIENT_SCRIPT
+                    || coop_transient_dual_script(state->map, state->object)))
             coop_transient_add_object(state->object, COOP_TRANSIENT_SCRIPT,
                 transient_page, &ordinal, &transient_input);
     }
@@ -1496,7 +1546,11 @@ static void coop_transient_apply(void) {
             continue;
         }
         unsigned kind = coop_transient_object_kind(current_map, record.key);
-        if (kind != record.kind || record.state > 0xFF) continue;
+        if ((kind != record.kind
+                && !(record.kind == COOP_TRANSIENT_SCRIPT
+                    && coop_transient_dual_script(current_map, record.key)))
+                || record.state > 0xFF) continue;
+        kind = record.kind;
         Prop_ScriptData* script = coop_transient_script(record.key);
         if (!script) continue;
         if (kind == COOP_TRANSIENT_TRIGGER) {
