@@ -237,7 +237,7 @@ struct TraceWorker {
     std::atomic<bool> stopping{false};
     std::atomic<uint64_t> queries{0}, rejected{0};
     std::mutex response_mutex;
-    std::string response = "{\"schema\":2,\"mod\":\"0.78.2\",\"status\":\"starting\"}";
+    std::string response = "{\"schema\":2,\"mod\":\"0.79.0\",\"status\":\"starting\"}";
     std::thread thread;
 
     ~TraceWorker() { stop(); }
@@ -420,7 +420,7 @@ struct Session::Impl {
         char destination_address[INET_ADDRSTRLEN] = "";
         if (config.role == Role::join)
             inet_ntop(AF_INET, &destination.sin_addr, destination_address, sizeof(destination_address));
-        result << "{\"schema\":2,\"mod\":\"0.78.2\",\"protocol\":" << protocol_version
+        result << "{\"schema\":2,\"mod\":\"0.79.0\",\"protocol\":" << protocol_version
             << ",\"role\":\"" << role_name(config.role) << "\",\"status\":\"" << status_name(status)
             << "\",\"room_fingerprint\":" << room_fingerprint
             << ",\"local_ip\":\"" << local_address << "\",\"coop_port\":" << bound_port

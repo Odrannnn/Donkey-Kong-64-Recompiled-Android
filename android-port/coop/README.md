@@ -327,7 +327,7 @@ future trace acceptance rule.
 
 ## Install and connect
 
-1. Close both games. Install the complete matching **0.78.2** ZIP on each device;
+1. Close both games. Install the complete matching **0.79.0** ZIP on each device;
    do not mix an older NRM, native companion or peer with this build.
    Both games must provide the upstream 1.0.2 map-load and EEPROM-load events.
 2. Android: use the Android port's native-mods-capable dev5 APK or later.
@@ -905,7 +905,7 @@ result is written by the transition channel.
 
 - Two participants, nonblocking 20 Hz UDP, bounded receives, checked packets and
   emulated-memory spans. Stale presence hides after 750 ms; sessions time out
-  after three seconds and can reconnect. Protocol/native ABI v78 rejects old peers.
+  after three seconds and can reconnect. Protocol/native ABI v79 rejects old peers.
 - Remote Kong position/facing, main skeletal pose and frame interpolation for
   all five Kongs. Proxies are inert: no second engine-controlled local player.
 - Optional gun/orange projectile visuals and hand/weapon visibility. Locally owned

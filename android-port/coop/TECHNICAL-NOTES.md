@@ -1,4 +1,4 @@
-> Current source: 0.78.2, protocol/native ABI v78. The complete Linux
+> Current source: 0.79.0, protocol/native ABI v79. The complete Linux
 > ASan/UBSan suite, maintained MIPS compile, Android ARM64 and Windows x64
 > builds, artifact checks and Android importer smoke pass. Gameplay and device
 > validation remain pending.
