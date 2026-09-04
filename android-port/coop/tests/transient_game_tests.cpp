@@ -2004,6 +2004,42 @@ static void remaining_leaf_trigger_checks() {
     scripts[0x02].unk48[0] = 1; coop_transient_apply(); CHECK(script_calls == 1);
 }
 
+static void japes_x_panel_checks() {
+    // The sender exposes only a bounded logical count across the three exact
+    // hit/pause pairs. Availability and reset states never become progress.
+    for (const auto& sample : std::array<std::pair<unsigned, unsigned>, 9>{{
+            {1, 0}, {2, 1}, {3, 1}, {4, 2}, {5, 2}, {6, 3},
+            {20, 0}, {30, 0}, {50, 0}}}) {
+        reset(); current_map = 7; load(0, 0x117, sample.first);
+        for (unsigned page = 0; page < 8; ++page) {
+            coop_transient_capture(1);
+            if (contains_value(COOP_TRANSIENT_SEQUENCE, 0x117, sample.second, 0))
+                break;
+        }
+        CHECK(contains_value(COOP_TRANSIENT_SEQUENCE, 0x117, sample.second, 0));
+    }
+
+    reset(); role = ROLE_JOIN; current_map = 7; load(0, 0x117, 1);
+    transient_result = {COOP_TRANSIENT_APPLYING, 7, epoch, 1,
+        {{COOP_TRANSIENT_SEQUENCE, 0x117, 3, 0}}};
+    coop_transient_apply();
+    CHECK(script_calls == 1 && last_object == 0x117 && last_state == 2);
+    coop_transient_apply(); CHECK(script_calls == 1); // Local script owns its pause.
+    scripts[0x117].unk48[0] = 3; coop_transient_apply();
+    CHECK(script_calls == 2 && last_state == 4);
+    scripts[0x117].unk48[0] = 5; coop_transient_apply();
+    CHECK(script_calls == 3 && last_state == 6);
+    scripts[0x117].unk48[0] = 6; coop_transient_apply();
+    CHECK(script_calls == 3); // Terminal progress is idempotent.
+
+    for (unsigned unsafe : {0u, 2u, 4u, 20u, 30u, 50u}) {
+        reset(); role = ROLE_JOIN; current_map = 7; load(0, 0x117, unsafe);
+        transient_result = {COOP_TRANSIENT_APPLYING, 7, epoch, 1,
+            {{COOP_TRANSIENT_SEQUENCE, 0x117, 3, 0}}};
+        coop_transient_apply(); CHECK(!script_calls);
+    }
+}
+
 static void kosh_checks() {
     for (unsigned key = 1; key <= 4; ++key) {
         reset(); load_kosh(key);
@@ -2801,6 +2837,7 @@ static void owl_checks() {
 int main() {
     capture_checks(); object_apply_checks(); cutscene_checks(); lobby_instrument_pad_checks();
     remaining_leaf_trigger_checks();
+    japes_x_panel_checks();
     kosh_checks(); minecart_checks(); rabbit_checks(); batty_checks(); owl_checks();
     std::printf("PASS: %u reviewed script/cutscene adapter checks\n", checks);
 }

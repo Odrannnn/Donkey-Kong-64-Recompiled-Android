@@ -277,6 +277,10 @@ static const CoopTransientObject coop_transient_extra_objects[] = {
     // Conventional self-contained switches and break targets found by the
     // remaining static setup audit.
     {7, 0x1A, COOP_TRANSIENT_TRIGGER, 2},
+    // Japes' breakable X panel has three non-contiguous hit edges. Carry a
+    // logical count so readiness states 20/30/50 can never be mistaken for
+    // forward progress or copied as raw controller state.
+    {7, 0x117, COOP_TRANSIENT_SEQUENCE, 0},
     {12, 0x02, COOP_TRANSIENT_TRIGGER, 2}, {12, 0x03, COOP_TRANSIENT_TRIGGER, 2},
     {13, 0x02, COOP_TRANSIENT_TRIGGER, 2}, {13, 0x03, COOP_TRANSIENT_TRIGGER, 2},
     {16, 0x1A, COOP_TRANSIENT_TRIGGER, 2}, {16, 0x7C, COOP_TRANSIENT_TRIGGER, 2},
@@ -1092,6 +1096,16 @@ static unsigned coop_tiny_igloo_progress(unsigned raw) {
     return 0; // Vanilla failure/restart states remain local.
 }
 
+static const unsigned char coop_japes_x_wait_states[3] = {1, 3, 5};
+static const unsigned char coop_japes_x_hit_states[3] = {2, 4, 6};
+
+static unsigned coop_japes_x_progress(unsigned raw) {
+    if (raw == 2 || raw == 3) return 1;
+    if (raw == 4 || raw == 5) return 2;
+    if (raw == 6) return 3;
+    return 0; // Availability waits 20/30/50 and every other state stay local.
+}
+
 static unsigned coop_tiny_temple_kong_progress(void) {
     Prop_ScriptData* letter_c = coop_transient_script(0x0C);
     Prop_ScriptData* letter_d = coop_transient_script(0x0D);
@@ -1231,7 +1245,9 @@ static void coop_transient_add_object(unsigned object, unsigned kind,
         if (fired) coop_transient_passage_latched(current_map, object, 1);
         state = fired || coop_transient_passage_latched(current_map, object, 0) ? 2 : 1;
     } else if (kind == COOP_TRANSIENT_SEQUENCE) {
-        if ((unsigned)current_map == 26 && object == 0x14)
+        if ((unsigned)current_map == 7 && object == 0x117)
+            state = coop_japes_x_progress(state);
+        else if ((unsigned)current_map == 26 && object == 0x14)
             state = coop_piano_progress(state);
         else if ((unsigned)current_map == 26 && object == 0x7F)
             state = coop_dartboard_progress(state);
@@ -1599,6 +1615,14 @@ static void coop_transient_apply(void) {
         }
         if (kind == COOP_TRANSIENT_SEQUENCE) {
             if (record.value) continue;
+            if ((unsigned)current_map == 7 && record.key == 0x117) {
+                unsigned progress = coop_japes_x_progress(script->unk48[0]);
+                if (record.state <= 3 && record.state > progress && progress < 3
+                        && script->unk48[0] == coop_japes_x_wait_states[progress])
+                    coop_live_world_set_object(record.key,
+                        coop_japes_x_hit_states[progress]);
+                continue;
+            }
             if ((unsigned)current_map == 16 && record.key == 0x0C) {
                 static const unsigned char letters[4] = {0x0F, 0x0E, 0x0D, 0x0C};
                 unsigned progress = coop_tiny_temple_kong_progress();
